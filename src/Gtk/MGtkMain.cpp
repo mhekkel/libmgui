@@ -11,7 +11,6 @@
 #include <iostream>
 
 #include <boost/algorithm/string.hpp>
-#include <mcfp/mcfp.hpp>
 
 #include "MApplication.hpp"
 #include "MError.hpp"
