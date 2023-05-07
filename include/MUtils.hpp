@@ -184,7 +184,6 @@ uint32_t StringToNum(std::string inString);
 std::string	GetUserName(bool inShortName = false);
 std::string GetHomeDirectory();
 std::string GetPrefsDirectory();
-std::string	GetDateTime();
 double GetLocalTime();
 void delay(double inSeconds);
 double GetDblClickTime();

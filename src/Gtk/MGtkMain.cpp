@@ -10,15 +10,15 @@
 #include <fstream>
 #include <iostream>
 
-#include <boost/algorithm/string.hpp>
-
 #include "MApplication.hpp"
 #include "MError.hpp"
+
 #include "Gtk/MGtkApplicationImpl.hpp"
+
+#include <cassert>
 
 using namespace std;
 namespace fs = std::filesystem;
-namespace ba = boost::algorithm;
 
 #define MGDBUS_SERVER_NAME "com.hekkelman.GDBus.SaltServer"
 #define MGDBUS_SERVER_OBJECT_NAME "/com/hekkelman/GDBus/SaltObject"

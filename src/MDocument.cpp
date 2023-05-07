@@ -6,7 +6,6 @@
 #include "MLib.hpp"
 
 #include <cstring>
-#include <boost/algorithm/string.hpp>
 
 #include "MDocument.hpp"
 #include "MController.hpp"
@@ -19,7 +18,6 @@
 #include "MAlerts.hpp"
 
 using namespace std;
-namespace ba = boost::algorithm;
 
 MDocument* MDocument::sFirst;
 

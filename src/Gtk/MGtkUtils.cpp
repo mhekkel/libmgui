@@ -11,8 +11,6 @@
 #include <sys/time.h>
 #include <sys/types.h>
 
-#include <boost/date_time/gregorian/gregorian.hpp>
-
 #include <cmath>
 #include <sstream>
 #include <stack>
@@ -70,41 +68,6 @@ string GetUserName(bool inShortName)
 	}
 
 	return result;
-}
-
-string GetDateTime()
-{
-	// had to remove this, because it depends on wchar_t in libstdc++...
-	using namespace boost::gregorian;
-
-	date today = day_clock::local_day();
-
-	date::ymd_type ymd = today.year_month_day();
-	greg_weekday wd = today.day_of_week();
-
-	stringstream s;
-
-	s << wd.as_long_string() << " "
-	  << ymd.month.as_long_string() << " "
-	  << ymd.day << ", " << ymd.year;
-
-	return s.str();
-	//
-	//	string result;
-	//
-	//	GDate* date = g_date_new();
-	//	if (date != nullptr)
-	//	{
-	//		g_date_set_time_t(date, time(nullptr));
-	//
-	//		char buffer[1024] = "";
-	//		uint32_t size = g_date_strftime(buffer, sizeof(buffer),
-	//			"%A %d %B, %Y", date);
-	//
-	//		result.assign(buffer, buffer + size);
-	//	}
-	//
-	//	return result;
 }
 
 bool IsModifierDown(int inModifierMask)
@@ -195,7 +158,11 @@ void OpenURI(const string &inURI)
 	}
 
 	if (not opened)
-		(void)system((string("gnome-open ") + inURI).c_str());
+	{
+		int err = system((string("gnome-open ") + inURI).c_str());
+		if (err < 0)
+			std::cerr << "Failed to open " << inURI << std::endl;
+	}
 }
 
 string GetHomeDirectory()

@@ -5,7 +5,6 @@
 
 #include "Gtk/MGtkLib.hpp"
 
-#include <boost/algorithm/string.hpp>
 #include <zeep/xml/document.hpp>
 
 #include "MAlerts.hpp"
@@ -16,7 +15,6 @@
 
 using namespace std;
 namespace xml = zeep::xml;
-namespace ba = boost::algorithm;
 
 GtkWidget *CreateAlertWithArgs(const char *inResourceName, std::initializer_list<std::string> inArgs)
 {
@@ -73,7 +71,7 @@ GtkWidget *CreateAlertWithArgs(const char *inResourceName, std::initializer_list
 
 			for (auto a : inArgs)
 			{
-				ba::replace_all(text, s, a);
+				zeep::replace_all(text, s, a);
 				++s[1];
 			}
 

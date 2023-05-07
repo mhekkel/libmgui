@@ -5,14 +5,11 @@
 
 #include "Gtk/MGtkLib.hpp"
 
-#include <boost/algorithm/string.hpp>
-
 #include "MClipboardImpl.hpp"
 #include "Gtk/MGtkWidgetMixin.hpp"
 #include "MUtils.hpp"
 
 using namespace std;
-namespace ba = boost::algorithm;
 
 class MGtkClipboardImpl : public MClipboardImpl
 {

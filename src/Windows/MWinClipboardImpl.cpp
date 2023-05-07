@@ -5,14 +5,11 @@
 
 #include "MWinLib.hpp"
 
-#include <boost/algorithm/string.hpp>
-
 #include "MClipboardImpl.hpp"
 #include "MWinProcMixin.hpp"
 #include "MWinUtils.hpp"
 
 using namespace std;
-namespace ba = boost::algorithm;
 
 class MWinClipboardImpl : public MClipboardImpl, public MWinProcMixin
 {
@@ -69,7 +66,7 @@ bool MWinClipboardImpl::WMRenderClipboard(HWND inHWnd, UINT inUMsg, WPARAM inWPa
 		bool block;
 
 		mClipboard->GetData(text, block);
-		ba::replace_all(text, "\n", "\r\n");
+		zeep::replace_all(text, "\n", "\r\n");
 		
 		if (format == CF_UNICODETEXT)
 		{
@@ -104,7 +101,7 @@ void MWinClipboardImpl::LoadClipboardIfNeeded()
 			try
 			{
 				wstring text(data);
-				ba::replace_all(text, L"\r\n", L"\n");
+				zeep::replace_all(text, L"\r\n", L"\n");
 				mClipboard->SetData(w2c(text), false);
 			
 				::GlobalUnlock(hMem);

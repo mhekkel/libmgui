@@ -5,8 +5,6 @@
 
 #include "MWinLib.hpp"
 
-#include <boost/algorithm/string.hpp>
-
 #include "MWinWindowImpl.hpp"
 #include "MWinControlsImpl.hpp"
 #include "MWinCanvasImpl.hpp"
@@ -19,7 +17,6 @@
 #pragma comment (linker,"\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 using namespace std;
-namespace ba = boost::algorithm;
 
 const int kScrollbarWidth = ::GetThemeSysSize(nullptr, SM_CXVSCROLL);
 
@@ -1174,7 +1171,7 @@ string MWinEdittextImpl::GetText() const
 	l = ::SendMessage(GetHandle(), WM_GETTEXT, (WPARAM)(l + 1), (LPARAM)&buffer[0]);
 
 	string text(w2c(&buffer[0]));
-	ba::replace_all(text, "\r\n", "\n");
+	zeep::replace_all(text, "\r\n", "\n");
 	return text;
 }
 
@@ -1183,7 +1180,7 @@ void MWinEdittextImpl::SetText(const std::string& inText)
 	if (inText != GetText())
 	{
 		wstring text(c2w(inText));
-		ba::replace_all(text, L"\n", L"\r\n");
+		zeep::replace_all(text, L"\n", L"\r\n");
 		::SendMessage(GetHandle(), WM_SETTEXT, 0, (LPARAM)text.c_str());
 		::UpdateWindow(GetHandle());
 	}

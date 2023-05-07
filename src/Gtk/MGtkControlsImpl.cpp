@@ -5,8 +5,6 @@
 
 #include "Gtk/MGtkLib.hpp"
 
-#include <boost/algorithm/string.hpp>
-
 #include "MColorPicker.hpp"
 #include "Gtk/MGtkCanvasImpl.hpp"
 #include "Gtk/MGtkControlsImpl.hpp"
@@ -16,7 +14,6 @@
 #include "Gtk/MGtkControlsImpl.inl"
 
 using namespace std;
-namespace ba = boost::algorithm;
 
 const int kScrollbarWidth = 16; //::GetThemeSysSize(nullptr, SM_CXVSCROLL);
 

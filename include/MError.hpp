@@ -7,7 +7,6 @@
 
 #include <exception>
 #include <iostream>
-#include <boost/current_function.hpp>
 
 class MException : public std::exception
 {

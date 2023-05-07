@@ -7,8 +7,6 @@
 
 #include <map>
 
-#include <boost/algorithm/string.hpp>
-#include <boost/serialization/serialization.hpp>
 #include <zeep/xml/document.hpp>
 #include <zeep/xml/node.hpp>
 #include <zeep/xml/serialize.hpp>
@@ -18,7 +16,6 @@
 #include "mrsrc.hpp"
 
 using namespace std;
-namespace ba = boost::algorithm;
 namespace xml = zeep::xml;
 
 struct ls
@@ -77,13 +74,13 @@ MLocalisedStringTable::MLocalisedStringTable(int)
 
 			for (auto &s: mLocalStrings)
 			{
-				ba::replace_all(s.key, "\\r", "\r");
-				ba::replace_all(s.key, "\\n", "\n");
-				ba::replace_all(s.key, "\\t", "\t");
+				zeep::replace_all(s.key, "\\r", "\r");
+				zeep::replace_all(s.key, "\\n", "\n");
+				zeep::replace_all(s.key, "\\t", "\t");
 
-				ba::replace_all(s.value, "\\r", "\r");
-				ba::replace_all(s.value, "\\n", "\n");
-				ba::replace_all(s.value, "\\t", "\t");
+				zeep::replace_all(s.value, "\\r", "\r");
+				zeep::replace_all(s.value, "\\n", "\n");
+				zeep::replace_all(s.value, "\\t", "\t");
 			
 				mMappedStrings[s.key] = s.value;
 			}

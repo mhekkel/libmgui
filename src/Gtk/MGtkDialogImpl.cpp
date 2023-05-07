@@ -7,7 +7,6 @@
 
 #include <charconv>
 
-#include <boost/algorithm/string.hpp>
 #include <zeep/xml/document.hpp>
 
 #include "MAcceleratorTable.hpp"
@@ -24,7 +23,6 @@
 
 using namespace std;
 using namespace zeep;
-namespace ba = boost::algorithm;
 
 namespace
 {
@@ -189,9 +187,9 @@ void MGtkDialogImpl::Finish()
 
 	mFlags = kMFixedSize;
 	string flags = dialog->get_attribute("flags");
-	if (ba::contains(flags, "flexible"))
+	if (flags.find( "flexible") != std::string::npos)
 		mFlags = MWindowFlags(mFlags & ~kMFixedSize);
-	if (ba::contains(flags, "nosizebox"))
+	if (flags.find( "nosizebox") != std::string::npos)
 		mFlags = MWindowFlags(mFlags | kMNoSizeBox);
 
 	uint32_t minWidth = 40;
@@ -443,13 +441,13 @@ MView *MGtkDialogImpl::CreateEdittext(xml::element *inTemplate, int32_t inX, int
 	string id = inTemplate->get_attribute("id");
 
 	uint32_t flags = eMEditTextNoFlags;
-	if (ba::contains(inTemplate->get_attribute("style"), "right"))
+	if (inTemplate->get_attribute("style").find("right") != std::string::npos)
 		flags |= eMEditTextAlignRight;
-	if (ba::contains(inTemplate->get_attribute("style"), "number"))
+	if (inTemplate->get_attribute("style").find("number") != std::string::npos)
 		flags |= eMEditTextNumbers;
-	if (ba::contains(inTemplate->get_attribute("style"), "multiline"))
+	if (inTemplate->get_attribute("style").find("multiline") != std::string::npos)
 		flags |= eMEditTextMultiLine;
-	if (ba::contains(inTemplate->get_attribute("style"), "readonly"))
+	if (inTemplate->get_attribute("style").find("readonly") != std::string::npos)
 		flags |= eMEditTextReadOnly;
 
 	MRect bounds; //(inX, inY, static_cast<int32_t>(5 * mDLUX), static_cast<int32_t>(14 * mDLUY));

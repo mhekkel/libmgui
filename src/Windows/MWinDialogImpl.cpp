@@ -9,7 +9,6 @@
 
 #include "zeep/xml/document.hpp"
 
-#include <boost/algorithm/string.hpp>
 
 #include "MWinWindowImpl.hpp"
 #include "MWindow.hpp"
@@ -28,7 +27,6 @@
 
 using namespace std;
 using namespace zeep;
-namespace ba = boost::algorithm;
 
 class MWinDialogImpl : public MWinWindowImpl
 {

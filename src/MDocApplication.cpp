@@ -9,8 +9,6 @@
 
 #include <iostream>
 
-#include <boost/algorithm/string/replace.hpp>
-
 #include "MDocApplication.hpp"
 #include "MApplicationImpl.hpp"
 #include "MCommands.hpp"
@@ -25,7 +23,6 @@
 #include "MControls.hpp"
 
 using namespace std;
-namespace ba = boost::algorithm;
 namespace fs = std::filesystem;
 
 // --------------------------------------------------------------------

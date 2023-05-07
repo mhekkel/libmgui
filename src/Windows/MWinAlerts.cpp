@@ -5,8 +5,6 @@
 
 #include "MWinLib.hpp"
 
-#include <boost/algorithm/string.hpp>
-
 #include <zeep/xml/document.hpp>
 
 #include "MAlerts.hpp"
@@ -20,7 +18,6 @@
 
 using namespace std;
 namespace xml = zeep::xml;
-namespace ba = boost::algorithm;
 
 string localise(const string& inResourceName, const string& inText)
 {
@@ -97,7 +94,7 @@ int32_t DisplayAlert(
 	
 			for (string a: inArguments)
 			{
-				ba::replace_all(text, s, a);
+				zeep::replace_all(text, s, a);
 				++s[1];
 			}
 

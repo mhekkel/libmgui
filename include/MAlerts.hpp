@@ -14,8 +14,6 @@
 #include <sstream>
 #include <vector>
 
-#include <boost/system/error_code.hpp>
-
 class MWindow;
 
 void DisplayError(const std::exception &inException);
