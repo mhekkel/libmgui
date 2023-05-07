@@ -370,8 +370,13 @@ MView *MGtkDialogImpl::CreateExpander(xml::element *inTemplate, int32_t inX, int
 	MExpander *expander = new MExpander(id, bounds, title);
 	AddRoute(expander->eClicked, static_cast<MDialog *>(mWindow)->eButtonClicked);
 
-	for (auto b : *inTemplate)
+	for (auto &b : *inTemplate)
+	{
+		if (b.get_attribute("if") == "WINDOWS")
+			continue;
+
 		expander->AddChild(CreateControls(&b, 0, 0));
+	}
 
 	return expander;
 }
@@ -496,6 +501,9 @@ MView *MGtkDialogImpl::CreateNotebook(xml::element *inTemplate, int32_t inX, int
 
 	for (xml::element *page : inTemplate->find("./page"))
 	{
+		if (page->get_attribute("if") == "WINDOWS")
+			continue;
+
 		string title = l(page->get_attribute("title"));
 
 		MView *control = CreateControls(page, 0, 0);
@@ -550,6 +558,9 @@ MView *MGtkDialogImpl::CreatePager(xml::element *inTemplate, int32_t inX, int32_
 
 	for (xml::element *page : inTemplate->find("./page"))
 	{
+		if (page->get_attribute("if") == "WINDOWS")
+			continue;
+
 		MView *control = CreateControls(page, 0, 0);
 		control->SetBindings(true, true, true, true);
 		result->AddPage(control);
@@ -653,8 +664,15 @@ MView *MGtkDialogImpl::CreateBox(xml::element *inTemplate, int32_t inX, int32_t 
 	MRect r(inX, inY, 0, 0);
 	MView *result = new MBoxControl(id, r, inHorizontal, homogeneous, expand, fill, spacing, padding);
 
-	for (auto b : *inTemplate)
-		result->AddChild(CreateControls(&b, 0, 0));
+	for (auto &b : *inTemplate)
+	{
+		if (b.get_attribute("if") == "WINDOWS")
+			continue;
+
+		auto view = CreateControls(&b, 0, 0);
+		if (view != nullptr)
+			result->AddChild(view);
+	}
 
 	return result;
 }
@@ -670,8 +688,11 @@ MView *MGtkDialogImpl::CreateTable(xml::element *inTemplate, int32_t inX, int32_
 	{
 		uint32_t cn = 0;
 
-		for (auto col : *row)
+		for (auto &col : *row)
 		{
+			if (col.get_attribute("if") == "WINDOWS")
+				continue;
+
 			++cn;
 			if (colCount < cn)
 				colCount = cn;
