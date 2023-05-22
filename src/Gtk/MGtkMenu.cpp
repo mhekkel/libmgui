@@ -149,20 +149,26 @@ void MMenuItem::ItemCallback()
 				process = mChecked;
 			}
 
-			GdkModifierType gdkModifiers;
+			uint32_t modifiers = 0;
+			// GdkModifierType gdkModifiers = 0;
+			uint32_t gdkModifiers = 0;
 			// gdk_window_get_pointer(gtk_widget_get_window(mGtkMenuItem), nullptr, nullptr, &gdkModifiers);
 
-#if GTK_CHECK_VERSION(3, 20, 0)
-			auto seat = gdk_display_get_default_seat(gdk_display_get_default());
-			auto mouse_device = gdk_seat_get_pointer(seat);
-#else
-			auto devman = gdk_display_get_device_manager(gdk_display_get_default());
-			auto mouse_device = gdk_device_manager_get_client_pointer(devman);
-#endif
-			auto w = gdk_display_get_default_group(gdk_display_get_default());
-			gdk_window_get_device_position(w, mouse_device, nullptr, nullptr, &gdkModifiers);
+// #if GTK_CHECK_VERSION(3, 20, 0)
+// 			auto seat = gdk_display_get_default_seat(gdk_display_get_default());
+// 			auto mouse_device = gdk_seat_get_pointer(seat);
+// #else
+// 			auto devman = gdk_display_get_device_manager(gdk_display_get_default());
+// 			auto mouse_device = gdk_device_manager_get_client_pointer(devman);
+// #endif
 
-			uint32_t modifiers = 0;
+// 			auto w = gdk_display_get_default_group(gdk_display_get_default());
+// 			gdk_window_get_device_position(w, mouse_device, nullptr, nullptr, &gdkModifiers);
+
+			auto keyMap = gdk_keymap_get_for_display(gdk_display_get_default());
+			if (GDK_IS_KEYMAP(keyMap))
+				gdkModifiers = gdk_keymap_get_modifier_state(keyMap);
+
 			if (gdkModifiers & GDK_SHIFT_MASK)
 				modifiers |= kShiftKey;
 			if (gdkModifiers & GDK_CONTROL_MASK)
