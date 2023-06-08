@@ -6,10 +6,10 @@
 # modification, are permitted provided that the following conditions are met:
 
 # 1. Redistributions of source code must retain the above copyright notice, this
-#    list of conditions and the following disclaimer
+# list of conditions and the following disclaimer
 # 2. Redistributions in binary form must reproduce the above copyright notice,
-#    this list of conditions and the following disclaimer in the documentation
-#    and/or other materials provided with the distribution.
+# this list of conditions and the following disclaimer in the documentation
+# and/or other materials provided with the distribution.
 
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -39,6 +39,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${pinch_compile_flags}")
+
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-unused-parameter -Wno-multichar")
 elseif(MSVC)
@@ -46,15 +47,26 @@ elseif(MSVC)
 endif()
 
 if(MSVC)
-    # make msvc standards compliant...
-    add_compile_options(/permissive-)
+	# make msvc standards compliant...
+	add_compile_options(/permissive-)
 
 	macro(get_WIN32_WINNT version)
-		if (WIN32 AND CMAKE_SYSTEM_VERSION)
+		if(CMAKE_SYSTEM_VERSION)
 			set(ver ${CMAKE_SYSTEM_VERSION})
-			string(REPLACE "." "" ver ${ver})
-			string(REGEX REPLACE "([0-9])" "0\\1" ver ${ver})
+			string(REGEX MATCH "^([0-9]+).([0-9])" ver ${ver})
+			string(REGEX MATCH "^([0-9]+)" verMajor ${ver})
 
+			# Check for Windows 10, b/c we'll need to convert to hex 'A'.
+			if("${verMajor}" MATCHES "10")
+				set(verMajor "A")
+				string(REGEX REPLACE "^([0-9]+)" ${verMajor} ver ${ver})
+			endif()
+
+			# Remove all remaining '.' characters.
+			string(REPLACE "." "" ver ${ver})
+
+			# Prepend each digit with a zero.
+			string(REGEX REPLACE "([0-9A-Z])" "0\\1" ver ${ver})
 			set(${version} "0x${ver}")
 		endif()
 	endmacro()
@@ -76,11 +88,9 @@ find_package(zeep 5.1.6 REQUIRED)
 
 # find_library(DL dl REQUIRED)
 # find_library(UTIL util REQUIRED)
-
 pkg_check_modules(GTK3 libcanberra-gtk3 REQUIRED IMPORTED_TARGET)
 
 # The salt executable
-
 list(APPEND headers
 	${PROJECT_SOURCE_DIR}/include/Gtk/MGtkCanvasImpl.hpp
 	${PROJECT_SOURCE_DIR}/include/Gtk/MGtkControlsImpl.hpp
@@ -108,16 +118,18 @@ list(APPEND headers
 	${PROJECT_SOURCE_DIR}/include/MView.hpp
 	${PROJECT_SOURCE_DIR}/include/MDevice.hpp
 	${PROJECT_SOURCE_DIR}/include/MDialog.hpp
+
 	# ${PROJECT_SOURCE_DIR}/include/MDocApplication.hpp
 	# ${PROJECT_SOURCE_DIR}/include/MDocClosedNotifier.hpp
 	# ${PROJECT_SOURCE_DIR}/include/MDocWindow.hpp
 	${PROJECT_SOURCE_DIR}/include/MError.hpp
+
 	# ${PROJECT_SOURCE_DIR}/include/MExploreBrowserView.hpp
 	${PROJECT_SOURCE_DIR}/include/MFile.hpp
-	${PROJECT_SOURCE_DIR}/include/MFileImpl.hpp
 	${PROJECT_SOURCE_DIR}/include/MGfxDevice.hpp
 	${PROJECT_SOURCE_DIR}/include/MLib.hpp
 	${PROJECT_SOURCE_DIR}/include/MWindowImpl.hpp
+
 	# ${PROJECT_SOURCE_DIR}/include/MListViewImpl.hpp
 	${PROJECT_SOURCE_DIR}/include/MMenu.hpp
 	${PROJECT_SOURCE_DIR}/include/MP2PEvents.hpp
@@ -139,17 +151,16 @@ list(APPEND headers
 	${PROJECT_SOURCE_DIR}/include/MDocument.hpp
 	${PROJECT_SOURCE_DIR}/include/MMenuImpl.hpp)
 
-
 list(APPEND sources
 	${PROJECT_SOURCE_DIR}/src/bsd-closefrom.c
 
 	${PROJECT_SOURCE_DIR}/src/Gtk/MGtkAlerts.cpp
 	${PROJECT_SOURCE_DIR}/src/Gtk/MGtkAnimationImpl.cpp
 	${PROJECT_SOURCE_DIR}/src/Gtk/MGtkClipboardImpl.cpp
+
 	# ${PROJECT_SOURCE_DIR}/src/Gtk/MGtkDocClosedNotifier.cpp
 	${PROJECT_SOURCE_DIR}/src/Gtk/MGtkError.cpp
 	${PROJECT_SOURCE_DIR}/src/Gtk/MGtkFile.cpp
-	${PROJECT_SOURCE_DIR}/src/Gtk/MGtkList.cpp
 	${PROJECT_SOURCE_DIR}/src/Gtk/MGtkMenu.cpp
 	${PROJECT_SOURCE_DIR}/src/Gtk/MGtkSound.cpp
 	${PROJECT_SOURCE_DIR}/src/Gtk/MGtkUtils.cpp
@@ -168,9 +179,11 @@ list(APPEND sources
 	${PROJECT_SOURCE_DIR}/src/MCanvas.cpp
 	${PROJECT_SOURCE_DIR}/src/MClipboard.cpp
 	${PROJECT_SOURCE_DIR}/src/MColorPicker.cpp
+
 	# ${PROJECT_SOURCE_DIR}/src/MFile.cpp
 	${PROJECT_SOURCE_DIR}/src/MDevice.cpp
 	${PROJECT_SOURCE_DIR}/src/MDialog.cpp
+
 	# ${PROJECT_SOURCE_DIR}/src/MDocApplication.cpp
 	# ${PROJECT_SOURCE_DIR}/src/MDocClosedNotifier.cpp
 	${PROJECT_SOURCE_DIR}/src/MWindow.cpp
@@ -179,6 +192,7 @@ list(APPEND sources
 	${PROJECT_SOURCE_DIR}/src/MApplication.cpp
 	${PROJECT_SOURCE_DIR}/src/MLib.cpp
 	${PROJECT_SOURCE_DIR}/src/MPreferences.cpp
+
 	# ${PROJECT_SOURCE_DIR}/src/MPrinter.cpp
 	${PROJECT_SOURCE_DIR}/src/MStrings.cpp
 	${PROJECT_SOURCE_DIR}/src/MTypes.cpp
@@ -190,11 +204,13 @@ list(APPEND sources
 	${PROJECT_SOURCE_DIR}/src/MAlerts.cpp
 	${PROJECT_SOURCE_DIR}/src/MAnimationImpl.cpp
 	${PROJECT_SOURCE_DIR}/src/MColor.cpp
+
 	# ${PROJECT_SOURCE_DIR}/src/MController.cpp
 	${PROJECT_SOURCE_DIR}/src/MControls.cpp
+
 	# ${PROJECT_SOURCE_DIR}/src/MDocWindow.cpp
 	# ${PROJECT_SOURCE_DIR}/src/MDocument.cpp
-	)
+)
 
 add_library(mgui ${sources} ${headers})
 add_library(mgui::mgui ALIAS mgui)
@@ -204,5 +220,5 @@ target_include_directories(mgui PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_link_libraries(mgui libmcfp::libmcfp Threads::Threads PkgConfig::GTK3 zeep::zeep)
 
 # install(TARGETS salt
-#     RUNTIME DESTINATION ${BIN_INSTALL_DIR}
+# RUNTIME DESTINATION ${BIN_INSTALL_DIR}
 # )

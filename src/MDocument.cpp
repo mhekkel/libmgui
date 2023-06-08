@@ -1,30 +1,48 @@
-//          Copyright Maarten L. Hekkelman 2006-2008
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
-
-#include "MLib.hpp"
+/*-
+ * SPDX-License-Identifier: BSD-2-Clause
+ *
+ * Copyright (c) 2023 Maarten L. Hekkelman
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+#include "MDocument.hpp"
+#include "MAlerts.hpp"
+#include "MController.hpp"
+#include "MDocApplication.hpp"
+#include "MDocClosedNotifier.hpp"
+#include "MError.hpp"
+#include "MMenu.hpp"
+#include "MPreferences.hpp"
+#include "MUtils.hpp"
 
 #include <cstring>
 
-#include "MDocument.hpp"
-#include "MController.hpp"
-#include "MUtils.hpp"
-#include "MMenu.hpp"
-#include "MError.hpp"
-#include "MPreferences.hpp"
-#include "MDocClosedNotifier.hpp"
-#include "MDocApplication.hpp"
-#include "MAlerts.hpp"
-
 using namespace std;
 
-MDocument* MDocument::sFirst;
+MDocument *MDocument::sFirst;
 
 // ---------------------------------------------------------------------------
 //	MDocument
 
-MDocument::MDocument(MHandler* inSuper)
+MDocument::MDocument(MHandler *inSuper)
 	: MHandler(inSuper)
 	, mWarnedReadOnly(false)
 	, mDirty(false)
@@ -34,7 +52,7 @@ MDocument::MDocument(MHandler* inSuper)
 	sFirst = this;
 }
 
-MDocument::MDocument(MHandler* inSuper, const std::string& inURL)
+MDocument::MDocument(MHandler *inSuper, const std::string &inURL)
 	: MHandler(inSuper)
 	, mFile(inURL)
 	, mWarnedReadOnly(false)
@@ -52,15 +70,15 @@ MDocument::~MDocument()
 {
 	if (mFile.IsIOActive())
 		mFile.CancelIO();
-	
+
 	if (sFirst == this)
 		sFirst = mNext;
 	else
 	{
-		MDocument* doc = sFirst;
+		MDocument *doc = sFirst;
 		while (doc != nullptr)
 		{
-			MDocument* next = doc->mNext;
+			MDocument *next = doc->mNext;
 			if (next == this)
 			{
 				doc->mNext = mNext;
@@ -69,14 +87,14 @@ MDocument::~MDocument()
 			doc = next;
 		}
 	}
-	
+
 	eDocumentClosed(this);
 }
 
 // ---------------------------------------------------------------------------
 //	SetFile
 
-void MDocument::SetFile(const string& inURL)
+void MDocument::SetFile(const string &inURL)
 {
 	mFile.SetURL(inURL);
 	eFileSpecChanged(this);
@@ -97,25 +115,25 @@ bool MDocument::DoSave()
 {
 	mFile.Save(this);
 
-	static_cast<MDocApplication*>(gApp)->AddToRecentMenu(mFile.GetURL());
-		
+	static_cast<MDocApplication *>(gApp)->AddToRecentMenu(mFile.GetURL());
+
 	return true;
 }
 
 // ---------------------------------------------------------------------------
 //	DoSaveAs
 
-bool MDocument::DoSaveAs(const fs::path& inPath)
+bool MDocument::DoSaveAs(const fs::path &inPath)
 {
 	string url = "file://";
 	url += inPath.string();
 	return DoSaveAs(url);
 }
 
-bool MDocument::DoSaveAs(const string& inURL)
+bool MDocument::DoSaveAs(const string &inURL)
 {
 	bool result = false;
-	
+
 	string savedURL = mFile.GetURL();
 	mFile.SetURL(inURL);
 
@@ -127,7 +145,7 @@ bool MDocument::DoSaveAs(const string& inURL)
 	}
 	else
 		mFile.SetURL(savedURL);
-	
+
 	return result;
 }
 
@@ -143,18 +161,18 @@ void MDocument::RevertDocument()
 // ---------------------------------------------------------------------------
 //	UsesFile
 
-bool MDocument::UsesFile(const string& inURL) const
+bool MDocument::UsesFile(const string &inURL) const
 {
 	return mFile.IsValid() and mFile == MFile(inURL);
 }
 
-MDocument* MDocument::GetDocumentForFile(const string& inURL)
+MDocument *MDocument::GetDocumentForFile(const string &inURL)
 {
-	MDocument* doc = sFirst;
+	MDocument *doc = sFirst;
 
 	while (doc != nullptr and not doc->UsesFile(inURL))
 		doc = doc->mNext;
-	
+
 	return doc;
 }
 
@@ -162,8 +180,8 @@ MDocument* MDocument::GetDocumentForFile(const string& inURL)
 //	AddNotifier
 
 void MDocument::AddNotifier(
-	MDocClosedNotifier&		inNotifier,
-	bool					inRead)
+	MDocClosedNotifier &inNotifier,
+	bool inRead)
 {
 	mNotifiers.push_back(inNotifier);
 }
@@ -171,7 +189,7 @@ void MDocument::AddNotifier(
 // ---------------------------------------------------------------------------
 //	AddController
 
-void MDocument::AddController(MController* inController)
+void MDocument::AddController(MController *inController)
 {
 	if (find(mControllers.begin(), mControllers.end(), inController) == mControllers.end())
 		mControllers.push_back(inController);
@@ -180,10 +198,10 @@ void MDocument::AddController(MController* inController)
 // ---------------------------------------------------------------------------
 //	RemoveController
 
-void MDocument::RemoveController(MController* inController)
+void MDocument::RemoveController(MController *inController)
 {
 	assert(find(mControllers.begin(), mControllers.end(), inController) != mControllers.end());
-	
+
 	mControllers.erase(
 		remove(mControllers.begin(), mControllers.end(), inController),
 		mControllers.end());
@@ -195,9 +213,9 @@ void MDocument::RemoveController(MController* inController)
 // ---------------------------------------------------------------------------
 //	GetFirstController
 
-MController* MDocument::GetFirstController() const
+MController *MDocument::GetFirstController() const
 {
-	MController* controller = nullptr;
+	MController *controller = nullptr;
 	if (mControllers.size() > 0)
 		controller = mControllers.front();
 	return controller;
@@ -206,14 +224,14 @@ MController* MDocument::GetFirstController() const
 // ---------------------------------------------------------------------------
 //	GetWindow
 
-MWindow* MDocument::GetWindow() const
+MWindow *MDocument::GetWindow() const
 {
-	MWindow* result = nullptr;
-	MController* controller = GetFirstController();
-	
+	MWindow *result = nullptr;
+	MController *controller = GetFirstController();
+
 	if (controller != nullptr)
 		result = controller->GetWindow();
-	
+
 	return result;
 }
 
@@ -222,13 +240,13 @@ MWindow* MDocument::GetWindow() const
 
 void MDocument::MakeFirstDocument()
 {
-	MDocument* d = sFirst;
-	
+	MDocument *d = sFirst;
+
 	if (d != this)
 	{
 		while (d != nullptr and d->mNext != this)
 			d = d->mNext;
-		
+
 		assert(d->mNext == this);
 		d->mNext = mNext;
 		mNext = sFirst;
@@ -251,11 +269,11 @@ void MDocument::SetModified(bool inModified)
 // ---------------------------------------------------------------------------
 //	CheckIfModifiedOnDisk
 
-void MDocument::CheckIfModifiedOnDisk(MWindow* inDocWindow)
+void MDocument::CheckIfModifiedOnDisk(MWindow *inDocWindow)
 {
 	if (mFile.IsModifiedOnDisk() and DisplayAlert(inDocWindow, "reload-modified-file", { mFile.GetPath().string() }) == 2)
 		RevertDocument();
-	//else
+	// else
 	//	mFile.ResetFileInfo();
 }
 
@@ -268,8 +286,10 @@ void MDocument::CloseDocument()
 	{
 		eDocumentClosed(this);
 	}
-	catch (...) {}
-	
+	catch (...)
+	{
+	}
+
 	delete this;
 }
 
@@ -277,11 +297,11 @@ void MDocument::CloseDocument()
 //	UpdateCommandStatus
 
 bool MDocument::UpdateCommandStatus(
-	uint32_t			inCommand,
-	MMenu*			inMenu,
-	uint32_t			inItemIndex,
-	bool&			outEnabled,
-	bool&			outChecked)
+	uint32_t inCommand,
+	MMenu *inMenu,
+	uint32_t inItemIndex,
+	bool &outEnabled,
+	bool &outChecked)
 {
 	return false;
 }
@@ -290,10 +310,10 @@ bool MDocument::UpdateCommandStatus(
 //	ProcessCommand
 
 bool MDocument::ProcessCommand(
-	uint32_t			inCommand,
-	const MMenu*	inMenu,
-	uint32_t			inItemIndex,
-	uint32_t			inModifiers)
+	uint32_t inCommand,
+	const MMenu *inMenu,
+	uint32_t inItemIndex,
+	uint32_t inModifiers)
 {
 	return false;
 }
@@ -302,9 +322,9 @@ bool MDocument::ProcessCommand(
 //	HandleKeyDown
 
 bool MDocument::HandleKeyDown(
-	uint32_t			inKeyCode,
-	uint32_t			inModifiers,
-	bool			inRepeat)
+	uint32_t inKeyCode,
+	uint32_t inModifiers,
+	bool inRepeat)
 {
 	return false;
 }
@@ -313,8 +333,8 @@ bool MDocument::HandleKeyDown(
 //	HandleCharacter
 
 bool MDocument::HandleCharacter(
-	const string&	inText,
-	bool			inRepeat)
+	const string &inText,
+	bool inRepeat)
 {
 	return false;
 }
@@ -329,10 +349,10 @@ string MDocument::GetWindowTitle() const
 	if (mFile.IsLocal())
 	{
 		fs::path file = fs::canonical(mFile.GetPath());
-		
+
 		NormalizePath(file);
 		result = file.string();
-		
+
 		// strip off HOME, if any
 		string home = GetHomeDirectory();
 		if (not home.empty() and ba::istarts_with(result, home))
@@ -343,7 +363,7 @@ string MDocument::GetWindowTitle() const
 	}
 	else
 		result = mFile.GetURL();
-	
+
 	return result;
 }
 
@@ -358,7 +378,7 @@ string MDocument::GetDocumentName() const
 // ---------------------------------------------------------------------------
 //	IOProgress
 
-void MDocument::IOProgress(float inProgress, const string& inMessage)
+void MDocument::IOProgress(float inProgress, const string &inMessage)
 {
 	if (inProgress == 1.0f)
 		SetModified(false);
@@ -367,7 +387,7 @@ void MDocument::IOProgress(float inProgress, const string& inMessage)
 // ---------------------------------------------------------------------------
 //	IOError
 
-void MDocument::IOError(const std::string& inError)
+void MDocument::IOError(const std::string &inError)
 {
 	DisplayError(inError);
 }
@@ -380,4 +400,3 @@ bool MDocument::IOAskOverwriteNewer()
 	fs::path path = mFile.GetPath();
 	return DisplayAlert(nullptr, "ask-overwrite-newer", { path.filename().string() }) == 2;
 }
-

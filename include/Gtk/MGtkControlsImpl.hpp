@@ -1,12 +1,35 @@
-//          Copyright Maarten L. Hekkelman 2006-2014
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
+/*-
+ * SPDX-License-Identifier: BSD-2-Clause
+ *
+ * Copyright (c) 2023 Maarten L. Hekkelman
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #pragma once
 
 #include "MControlsImpl.hpp"
 #include "MGtkWidgetMixin.hpp"
+
+#include <vector>
 
 template <class CONTROL>
 class MGtkControlImpl : public CONTROL::MImpl, public MGtkWidgetMixin
@@ -61,7 +84,7 @@ class MGtkButtonImpl : public MGtkControlImpl<MButton>
 {
   public:
 	MGtkButtonImpl(MButton *inButton, const std::string &inLabel,
-	               MButtonFlags inFlags);
+		MButtonFlags inFlags);
 
 	virtual void SimulateClick();
 	virtual void MakeDefault(bool inDefault);
@@ -81,9 +104,9 @@ class MGtkButtonImpl : public MGtkControlImpl<MButton>
 	bool mDefault;
 };
 
-//class MGtkImageButtonImpl : public MGtkControlImpl<MImageButton>
+// class MGtkImageButtonImpl : public MGtkControlImpl<MImageButton>
 //{
-//  public:
+//   public:
 //					MGtkImageButtonImpl(MImageButton* inButton, const std::string& inImageResource);
 //
 //	virtual void	CreateWidget();
@@ -92,7 +115,7 @@ class MGtkButtonImpl : public MGtkControlImpl<MButton>
 //	void			Clicked();
 //
 //	MBitmap			mBitmaps[3];
-//};
+// };
 
 class MGtkExpanderImpl : public MGtkControlImpl<MExpander>
 {
@@ -107,7 +130,7 @@ class MGtkExpanderImpl : public MGtkControlImpl<MExpander>
 	virtual void AddedToWindow();
 
 	virtual void Append(MGtkWidgetMixin *inChild, MControlPacking inPacking,
-	                    bool inExpand, bool inFill, uint32_t inPadding);
+		bool inExpand, bool inFill, uint32_t inPadding);
 
   private:
 	bool mIsOpen;
@@ -133,7 +156,7 @@ class MGtkScrollbarImpl : public MGtkControlImpl<MScrollbar>
 	virtual int32_t GetTrackValue() const;
 
 	virtual void SetAdjustmentValues(int32_t inMinValue, int32_t inMaxValue,
-	                                 int32_t inScrollUnit, int32_t inPageSize, int32_t inValue);
+		int32_t inScrollUnit, int32_t inPageSize, int32_t inValue);
 
 	virtual int32_t GetMinValue() const;
 	//	virtual void	SetMinValue(int32_t inValue);
@@ -377,13 +400,13 @@ class MGtkBoxControlImpl : public MGtkControlImpl<MBoxControl>
 {
   public:
 	MGtkBoxControlImpl(MBoxControl *inControl,
-	                   bool inHorizontal, bool inHomogeneous, bool inExpand, bool inFill,
-	                   uint32_t inSpacing, uint32_t inPadding);
+		bool inHorizontal, bool inHomogeneous, bool inExpand, bool inFill,
+		uint32_t inSpacing, uint32_t inPadding);
 
 	virtual void CreateWidget();
 
 	virtual void Append(MGtkWidgetMixin *inChild, MControlPacking inPacking,
-	                    bool inExpand, bool inFill, uint32_t inPadding);
+		bool inExpand, bool inFill, uint32_t inPadding);
 
 	bool mHorizontal, mHomogeneous, mExpand, mFill;
 	uint32_t mSpacing, mPadding;

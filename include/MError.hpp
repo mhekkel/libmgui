@@ -1,7 +1,28 @@
-//          Copyright Maarten L. Hekkelman 2006-2008
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
+/*-
+ * SPDX-License-Identifier: BSD-2-Clause
+ *
+ * Copyright (c) 2023 Maarten L. Hekkelman
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #pragma once
 
@@ -11,22 +32,22 @@
 class MException : public std::exception
 {
   public:
-				MException(const char* inErrMsg, ...);
+	MException(const char *inErrMsg, ...);
 
-	virtual const char*	what() const throw();
+	virtual const char *what() const throw();
 
   protected:
-				MException() {}
+	MException() {}
 
-	char		mMessage[1024];
+	char mMessage[1024];
 };
 
 #ifdef _MSC_VER
 class MWinException : public MException
 {
   public:
-				MWinException(const char* inErrMsg, ...);
-				MWinException(int32_t inHResult, const char* inErrMsg, ...);
+	MWinException(const char *inErrMsg, ...);
+	MWinException(int32_t inHResult, const char *inErrMsg, ...);
 };
 #endif
 
@@ -41,65 +62,138 @@ class StOKToThrow
 
 #define SIGNAL_THROW(a)
 
-#define PRINT(x) {}
+#define PRINT(x) \
+	{            \
+	}
 
 #else
 
 class StOKToThrow
 {
   public:
-	StOKToThrow()	{ ++sOkToThrow; }
-	~StOKToThrow()	{ --sOkToThrow; }
-	
-	static bool		IsOK()				{ return sOkToThrow != 0; }
-	
+	StOKToThrow() { ++sOkToThrow; }
+	~StOKToThrow() { --sOkToThrow; }
+
+	static bool IsOK() { return sOkToThrow != 0; }
+
   private:
-	static int		sOkToThrow;
+	static int sOkToThrow;
 };
 
-void __signal_throw(const char* inCode, const char* inFunction, const char* inFile, int inLine);
+void __signal_throw(const char *inCode, const char *inFunction, const char *inFile, int inLine);
 
-extern const char*	__S_FILE;
-extern int			__S_LINE;
-void __debug_printf(const char* inMsg, ...);
-//void __report_mach_error(const char* func, mach_error_t e);
+extern const char *__S_FILE;
+extern int __S_LINE;
+void __debug_printf(const char *inMsg, ...);
+// void __report_mach_error(const char* func, mach_error_t e);
 
-#define PRINT(x)		do { __S_FILE = __FILE__; __S_LINE = __LINE__; __debug_printf x; } while (false)
-#define	SIGNAL_THROW(a)	__signal_throw(a, BOOST_CURRENT_FUNCTION, __FILE__, __LINE__);
+#define PRINT(x)             \
+	do                       \
+	{                        \
+		__S_FILE = __FILE__; \
+		__S_LINE = __LINE__; \
+		__debug_printf x;    \
+	} while (false)
+#define SIGNAL_THROW(a) __signal_throw(a, __FUNCTION__, __FILE__, __LINE__);
 
 #endif
 
-#define THROW_IF_OSERROR(x) \
-	do { OSStatus __err = (x); if (__err != noErr) { SIGNAL_THROW(#x) throw MException(x); } } while (false)
+#define THROW_IF_OSERROR(x)      \
+	do                           \
+	{                            \
+		OSStatus __err = (x);    \
+		if (__err != noErr)      \
+		{                        \
+			SIGNAL_THROW(#x)     \
+			throw MException(x); \
+		}                        \
+	} while (false)
 
-#define THROW_IF_CFCREATE_FAILED(x) \
-	do { if ((x) == nullptr) { SIGNAL_THROW(#x) throw MException("CFCreate failed for variable %s", #x); } } while (false)
+#define THROW_IF_CFCREATE_FAILED(x)                                  \
+	do                                                               \
+	{                                                                \
+		if ((x) == nullptr)                                          \
+		{                                                            \
+			SIGNAL_THROW(#x)                                         \
+			throw MException("CFCreate failed for variable %s", #x); \
+		}                                                            \
+	} while (false)
 
-#define THROW_IF_POSIX_ERROR(x) \
-	do { if ((int)(x) == -1) { SIGNAL_THROW(#x) throw MException("POSIX error %d: '%s'", errno, strerror(errno)); } } while (false)
+#define THROW_IF_POSIX_ERROR(x)                                               \
+	do                                                                        \
+	{                                                                         \
+		if ((int)(x) == -1)                                                   \
+		{                                                                     \
+			SIGNAL_THROW(#x)                                                  \
+			throw MException("POSIX error %d: '%s'", errno, strerror(errno)); \
+		}                                                                     \
+	} while (false)
 
-#define THROW(x) \
-	do { SIGNAL_THROW(#x) throw MException x; } while (false)
+#define THROW(x)            \
+	do                      \
+	{                       \
+		SIGNAL_THROW(#x)    \
+		throw MException x; \
+	} while (false)
 
-#define THROW_IF_NIL(x) \
-	do { if ((x) == nullptr) { SIGNAL_THROW(#x) throw MException("Nil pointer %s", #x); } } while (false)
+#define THROW_IF_NIL(x)                             \
+	do                                              \
+	{                                               \
+		if ((x) == nullptr)                         \
+		{                                           \
+			SIGNAL_THROW(#x)                        \
+			throw MException("Nil pointer %s", #x); \
+		}                                           \
+	} while (false)
 
-#define THROW_ON_MACH_ERR(x)		\
-	do { kern_return_t err = (x); if (err != KERN_SUCCESS) { SIGNAL_THROW(#x) throw MException("mach error %d: ('%s') calling %s", err, mach_error_string(err), #x); } } while (false)
+#define THROW_ON_MACH_ERR(x)                                                                       \
+	do                                                                                             \
+	{                                                                                              \
+		kern_return_t err = (x);                                                                   \
+		if (err != KERN_SUCCESS)                                                                   \
+		{                                                                                          \
+			SIGNAL_THROW(#x)                                                                       \
+			throw MException("mach error %d: ('%s') calling %s", err, mach_error_string(err), #x); \
+		}                                                                                          \
+	} while (false)
 
-#define THROW_EXCEPTION(e) \
-	do { exception _e(e); SIGNAL_THROW(_e.what()) throw _e; } while (false)
+#define THROW_EXCEPTION(e)      \
+	do                          \
+	{                           \
+		exception _e(e);        \
+		SIGNAL_THROW(_e.what()) \
+		throw _e;               \
+	} while (false)
 
 #ifdef _MSC_VER
-#define THROW_WIN_ERROR(e) \
-	do { MWinException _e(e); SIGNAL_THROW(_e.what()); throw _e; } while (false)
+#define THROW_WIN_ERROR(e)       \
+	do                           \
+	{                            \
+		MWinException _e(e);     \
+		SIGNAL_THROW(_e.what()); \
+		throw _e;                \
+	} while (false)
 
-#define THROW_IF_WIN_ERROR(e) \
-	do { if ((e) == FALSE) THROW_WIN_ERROR("Windows error returned for " #e); } while (false)
+#define THROW_IF_WIN_ERROR(e)                                  \
+	do                                                         \
+	{                                                          \
+		if ((e) == FALSE)                                      \
+			THROW_WIN_ERROR("Windows error returned for " #e); \
+	} while (false)
 
-#define THROW_IF_HRESULT_ERROR(e) \
-	do { HRESULT _hr = (e); if (_hr != S_OK) throw MWinException(_hr, "Error in calling COM code '%s'", #e); } while (false)
+#define THROW_IF_HRESULT_ERROR(e)                                           \
+	do                                                                      \
+	{                                                                       \
+		HRESULT _hr = (e);                                                  \
+		if (_hr != S_OK)                                                    \
+			throw MWinException(_hr, "Error in calling COM code '%s'", #e); \
+	} while (false)
 
 #endif
 
-#define ASSERT(x, m)		if (not (x)) { SIGNAL_THROW(#x " => " #m); throw MException m; }
+#define ASSERT(x, m)                \
+	if (not(x))                     \
+	{                               \
+		SIGNAL_THROW(#x " => " #m); \
+		throw MException m;         \
+	}

@@ -1,28 +1,47 @@
-//          Copyright Maarten L. Hekkelman 2006-2010
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
-
-#include "Gtk/MGtkLib.hpp"
-
-#include <cstring>
-
-#include "MUtils.hpp"
+/*-
+ * SPDX-License-Identifier: BSD-2-Clause
+ *
+ * Copyright (c) 2023 Maarten L. Hekkelman
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #include "MAcceleratorTable.hpp"
 #include "MAlerts.hpp"
 #include "MApplication.hpp"
 #include "MDialog.hpp"
 #include "MError.hpp"
+#include "MUtils.hpp"
+
 #include "Gtk/MGtkApplicationImpl.hpp"
 #include "Gtk/MGtkWindowImpl.hpp"
+
 #include "mrsrc.hpp"
+
+#include <cstring>
 
 using namespace std;
 
 MGtkApplicationImpl::MGtkApplicationImpl()
 {
-
 	sInstance = this;
 }
 
@@ -76,9 +95,8 @@ int MGtkApplicationImpl::RunEventLoop()
 
 	// Start processing async tasks
 
-	mAsyncTaskThread = std::thread([this, context = g_main_context_get_thread_default()]() {
-		ProcessAsyncTasks(context);
-	});
+	mAsyncTaskThread = std::thread([this, context = g_main_context_get_thread_default()]()
+		{ ProcessAsyncTasks(context); });
 
 	gtk_main();
 
@@ -105,7 +123,8 @@ void MGtkApplicationImpl::ProcessAsyncTasks(GMainContext *context)
 
 	while (not done)
 	{
-		mCV.wait(lock, [this]() { return not mHandlerQueue.empty(); });
+		mCV.wait(lock, [this]()
+			{ return not mHandlerQueue.empty(); });
 
 		while (not mHandlerQueue.empty())
 		{
@@ -119,15 +138,15 @@ void MGtkApplicationImpl::ProcessAsyncTasks(GMainContext *context)
 			}
 
 			g_main_context_invoke_full(context, G_PRIORITY_DEFAULT,
-			                           &MGtkApplicationImpl::HandleAsyncCallback, ah,
-			                           (GDestroyNotify)&MGtkApplicationImpl::DeleteAsyncHandler);
+				&MGtkApplicationImpl::HandleAsyncCallback, ah,
+				(GDestroyNotify)&MGtkApplicationImpl::DeleteAsyncHandler);
 		}
 	}
 }
 
 gboolean MGtkApplicationImpl::HandleAsyncCallback(gpointer inData)
 {
-PRINT(("Handle Async Task in Thread ID = %p", std::this_thread::get_id()));
+	PRINT(("Handle Async Task in Thread ID = %p", std::this_thread::get_id()));
 
 	MAsyncHandlerBase *handler = reinterpret_cast<MAsyncHandlerBase *>(inData);
 	handler->execute();

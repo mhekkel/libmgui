@@ -1,24 +1,42 @@
-//          Copyright Maarten L. Hekkelman 2006-2008
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
+/*-
+ * SPDX-License-Identifier: BSD-2-Clause
+ *
+ * Copyright (c) 2023 Maarten L. Hekkelman
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
-#include "MLib.hpp"
-
-#include <string>
-#include <sstream>
-#include <string>
-#include <stack>
-#include <cmath>
-
-#include "MError.hpp"
 #include "MUtils.hpp"
+#include "MError.hpp"
+
+#include <cmath>
+#include <sstream>
+#include <stack>
+#include <string>
 
 using namespace std;
 
-uint16_t CalculateCRC(const void* inData, uint32_t inLength, uint16_t inCRC)
+uint16_t CalculateCRC(const void *inData, uint32_t inLength, uint16_t inCRC)
 {
-	const uint8_t* p = reinterpret_cast<const uint8_t*>(inData);
+	const uint8_t *p = reinterpret_cast<const uint8_t *>(inData);
 
 	while (inLength-- > 0)
 	{
@@ -38,7 +56,7 @@ uint16_t CalculateCRC(const void* inData, uint32_t inLength, uint16_t inCRC)
 string Escape(string inString)
 {
 	string result;
-	
+
 	for (string::iterator c = inString.begin(); c != inString.end(); ++c)
 	{
 		if (*c == '\n')
@@ -59,14 +77,14 @@ string Escape(string inString)
 		else
 			result += *c;
 	}
-	
+
 	return result;
 }
 
 string Unescape(string inString)
 {
 	string result;
-	
+
 	for (string::iterator c = inString.begin(); c != inString.end(); ++c)
 	{
 		if (*c == '\\')
@@ -79,11 +97,11 @@ string Unescape(string inString)
 					case 'n':
 						result += '\n';
 						break;
-					
+
 					case 't':
 						result += '\t';
 						break;
-					
+
 					default:
 						result += *c;
 						break;
@@ -95,38 +113,38 @@ string Unescape(string inString)
 		else
 			result += *c;
 	}
-	
+
 	return result;
 }
 
 void HexDump(
-	const void*		inBuffer,
-	uint32_t			inLength,
-	ostream&		outStream)
+	const void *inBuffer,
+	uint32_t inLength,
+	ostream &outStream)
 {
 	const char kHex[] = "0123456789abcdef";
 	char s[] = "xxxxxxxx  cccc cccc cccc cccc  cccc cccc cccc cccc  |................|";
 	const int kHexOffset[] = { 10, 12, 15, 17, 20, 22, 25, 27, 31, 33, 36, 38, 41, 43, 46, 48 };
 	const int kAsciiOffset = 53;
-	
-	const unsigned char* data = reinterpret_cast<const unsigned char*>(inBuffer);
+
+	const unsigned char *data = reinterpret_cast<const unsigned char *>(inBuffer);
 	uint32_t offset = 0;
-	
+
 	while (offset < inLength)
 	{
 		int rr = inLength - offset;
 		if (rr > 16)
 			rr = 16;
-		
-		char* t = s + 7;
+
+		char *t = s + 7;
 		long o = offset;
-		
+
 		while (t >= s)
 		{
 			*t-- = kHex[o % 16];
 			o /= 16;
 		}
-		
+
 		for (int i = 0; i < rr; ++i)
 		{
 			s[kHexOffset[i] + 0] = kHex[data[i] >> 4];
@@ -136,16 +154,16 @@ void HexDump(
 			else
 				s[kAsciiOffset + i] = '.';
 		}
-		
+
 		for (int i = rr; i < 16; ++i)
 		{
 			s[kHexOffset[i] + 0] = ' ';
 			s[kHexOffset[i] + 1] = ' ';
 			s[kAsciiOffset + i] = ' ';
 		}
-		
+
 		outStream << s << endl;
-		
+
 		offset += rr;
 		data += rr;
 	}

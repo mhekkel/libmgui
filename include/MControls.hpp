@@ -1,7 +1,28 @@
-//          Copyright Maarten L. Hekkelman 2006-2010
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
+/*-
+ * SPDX-License-Identifier: BSD-2-Clause
+ *
+ * Copyright (c) 2023 Maarten L. Hekkelman
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #pragma once
 
@@ -133,7 +154,7 @@ class MButton : public MControl<MButtonImpl>
 	typedef MButtonImpl MImpl;
 
 	MButton(const std::string &inID, MRect inBounds, const std::string &inLabel,
-	        MButtonFlags = eBF_None);
+		MButtonFlags = eBF_None);
 
 	void SimulateClick();
 	void MakeDefault(bool inDefault = true);
@@ -148,7 +169,7 @@ class MButton : public MControl<MButtonImpl>
 
 //// --------------------------------------------------------------------
 //
-//class MImageButton : public MControl<MImageButtonImpl>
+// class MImageButton : public MControl<MImageButtonImpl>
 //{
 //  public:
 //	typedef MImageButtonImpl MImpl;
@@ -197,7 +218,7 @@ class MScrollbar : public MControl<MScrollbarImpl>
 	virtual int32_t GetMaxValue() const;
 
 	virtual void SetAdjustmentValues(int32_t inMinValue, int32_t inMaxValue,
-	                                 int32_t inScrollUnit, int32_t inPageSize, int32_t inValue);
+		int32_t inScrollUnit, int32_t inPageSize, int32_t inValue);
 
 	MEventOut<void(MScrollMessage)> eScroll;
 };
@@ -221,7 +242,7 @@ class MStatusbar : public MControl<MStatusbarImpl>
 	typedef MStatusbarImpl MImpl;
 
 	MStatusbar(const std::string &inID, MRect inBounds,
-	           uint32_t inPartCount, MStatusBarElement inParts[]);
+		uint32_t inPartCount, MStatusBarElement inParts[]);
 
 	virtual void SetStatusText(uint32_t inPartNr, const std::string &inText, bool inBorder);
 
@@ -283,7 +304,7 @@ class MCaption : public MControl<MCaptionImpl>
 	typedef MCaptionImpl MImpl;
 
 	MCaption(const std::string &inID, MRect inBounds,
-	         const std::string &inText);
+		const std::string &inText);
 
 	virtual void SetText(const std::string &inText);
 };
@@ -307,7 +328,7 @@ class MEdittext : public MControl<MEdittextImpl>
 	typedef MEdittextImpl MImpl;
 
 	MEdittext(const std::string &inID, MRect inBounds,
-	          uint32_t inFlags = eMEditTextNoFlags);
+		uint32_t inFlags = eMEditTextNoFlags);
 
 	MEventOut<void(const std::string &, const std::string &)> eValueChanged;
 
@@ -342,7 +363,7 @@ class MCheckbox : public MControl<MCheckboxImpl>
 	typedef MCheckboxImpl MImpl;
 
 	MCheckbox(const std::string &inID, MRect inBounds,
-	          const std::string &inTitle);
+		const std::string &inTitle);
 
 	bool IsChecked() const;
 	void SetChecked(bool inChecked);
@@ -361,7 +382,7 @@ class MRadiobutton : public MControl<MRadiobuttonImpl>
 	typedef MRadiobuttonImpl MImpl;
 
 	MRadiobutton(const std::string &inID, MRect inBounds,
-	             const std::string &inTitle);
+		const std::string &inTitle);
 
 	bool IsChecked() const;
 	void SetChecked(bool inChecked);
@@ -417,7 +438,7 @@ class MColorSwatch : public MControl<MColorSwatchImpl>
 	typedef MColorSwatchImpl MImpl;
 
 	MColorSwatch(const std::string &inID, MRect inBounds,
-	             MColor inColor);
+		MColor inColor);
 
 	virtual MColor GetColor() const;
 	virtual void SetColor(MColor inColor);
@@ -472,6 +493,6 @@ class MBoxControl : public MControl<MBoxControlImpl>
 	typedef MBoxControlImpl MImpl;
 
 	MBoxControl(const std::string &inID, MRect inBounds, bool inHorizontal,
-	            bool inHomogeneous = false, bool inExpand = false, bool inFill = false,
-	            uint32_t inSpacing = 0, uint32_t inPadding = 0);
+		bool inHomogeneous = false, bool inExpand = false, bool inFill = false,
+		uint32_t inSpacing = 0, uint32_t inPadding = 0);
 };

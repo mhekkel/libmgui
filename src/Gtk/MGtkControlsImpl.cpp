@@ -1,17 +1,36 @@
-//          Copyright Maarten L. Hekkelman 2006-2014
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
+/*-
+ * SPDX-License-Identifier: BSD-2-Clause
+ *
+ * Copyright (c) 2023 Maarten L. Hekkelman
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
-#include "Gtk/MGtkLib.hpp"
+#include "Gtk/MGtkControlsImpl.hpp"
+#include "Gtk/MGtkCanvasImpl.hpp"
+#include "Gtk/MGtkControlsImpl.inl"
+#include "Gtk/MGtkWindowImpl.hpp"
 
 #include "MColorPicker.hpp"
-#include "Gtk/MGtkCanvasImpl.hpp"
-#include "Gtk/MGtkControlsImpl.hpp"
-#include "Gtk/MGtkWindowImpl.hpp"
 #include "MUtils.hpp"
-
-#include "Gtk/MGtkControlsImpl.inl"
 
 using namespace std;
 
@@ -37,7 +56,7 @@ MSimpleControlImpl *MSimpleControlImpl::Create(MSimpleControl *inControl)
 // --------------------------------------------------------------------
 
 MGtkButtonImpl::MGtkButtonImpl(MButton *inButton, const string &inLabel,
-                               MButtonFlags inFlags)
+	MButtonFlags inFlags)
 	: MGtkControlImpl(inButton, inLabel)
 	, mClicked(this, &MGtkButtonImpl::Clicked)
 	, mDefault(false)
@@ -108,7 +127,7 @@ void MGtkButtonImpl::GetIdealSize(int32_t &outWidth, int32_t &outHeight)
 }
 
 MButtonImpl *MButtonImpl::Create(MButton *inButton, const string &inLabel,
-                                 MButtonFlags inFlags)
+	MButtonFlags inFlags)
 {
 	return new MGtkButtonImpl(inButton, inLabel, inFlags);
 }
@@ -133,7 +152,7 @@ void MGtkExpanderImpl::CreateWidget()
 }
 
 void MGtkExpanderImpl::Append(MGtkWidgetMixin *inChild, MControlPacking inPacking,
-                              bool inExpand, bool inFill, uint32_t inPadding)
+	bool inExpand, bool inFill, uint32_t inPadding)
 {
 	assert(GTK_IS_CONTAINER(GetWidget()));
 	gtk_container_add(GTK_CONTAINER(GetWidget()), inChild->GetWidget());
@@ -157,13 +176,13 @@ bool MGtkExpanderImpl::IsOpen() const
 	return mIsOpen;
 }
 
-//bool MGtkExpanderImpl::WMActivate(HWND /*inHWnd*/, UINT /*inUMsg*/, WPARAM inWParam, LPARAM /*inLParam*/, LRESULT& /*outResult*/)
+// bool MGtkExpanderImpl::WMActivate(HWND /*inHWnd*/, UINT /*inUMsg*/, WPARAM inWParam, LPARAM /*inLParam*/, LRESULT& /*outResult*/)
 //{
 //	mControl->Invalidate();
 //	return false;
-//}
+// }
 //
-//bool MGtkExpanderImpl::WMPaint(HWND inHWnd, UINT inMsg, WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)
+// bool MGtkExpanderImpl::WMPaint(HWND inHWnd, UINT inMsg, WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)
 //{
 //	bool result = false;
 //
@@ -233,7 +252,7 @@ bool MGtkExpanderImpl::IsOpen() const
 //	return result;
 //}
 //
-//bool MGtkExpanderImpl::WMMouseDown(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)
+// bool MGtkExpanderImpl::WMMouseDown(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)
 //{
 //	::SetFocus(inHWnd);
 //	::SetCapture(inHWnd);
@@ -246,7 +265,7 @@ bool MGtkExpanderImpl::IsOpen() const
 //	return true;
 //}
 //
-//bool MGtkExpanderImpl::WMMouseMove(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)
+// bool MGtkExpanderImpl::WMMouseMove(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)
 //{
 //	if (not mMouseTracking)
 //	{
@@ -280,7 +299,7 @@ bool MGtkExpanderImpl::IsOpen() const
 //	return true;
 //}
 //
-//bool MGtkExpanderImpl::WMMouseExit(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)
+// bool MGtkExpanderImpl::WMMouseExit(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)
 //{
 //	mMouseInside = false;
 //	mMouseTracking = false;
@@ -292,7 +311,7 @@ bool MGtkExpanderImpl::IsOpen() const
 //	return true;
 //}
 //
-//bool MGtkExpanderImpl::WMMouseUp(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)
+// bool MGtkExpanderImpl::WMMouseUp(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)
 //{
 //	::ReleaseCapture();
 //
@@ -408,7 +427,7 @@ int32_t MGtkScrollbarImpl::GetTrackValue() const
 }
 
 void MGtkScrollbarImpl::SetAdjustmentValues(int32_t inMinValue, int32_t inMaxValue,
-                                            int32_t inScrollUnit, int32_t inPageSize, int32_t inValue)
+	int32_t inScrollUnit, int32_t inPageSize, int32_t inValue)
 {
 	GtkAdjustment *adj = gtk_range_get_adjustment(GTK_RANGE(GetWidget()));
 
@@ -603,7 +622,7 @@ void MGtkComboboxImpl::SetChoices(const std::vector<std::string> &inChoices)
 	if (wdgt != nullptr)
 	{
 		mChanged.Disconnect(wdgt);
-	
+
 		if (not GTK_IS_COMBO_BOX(wdgt))
 			THROW(("Item is not a combo box"));
 
@@ -618,8 +637,8 @@ void MGtkComboboxImpl::SetChoices(const std::vector<std::string> &inChoices)
 
 			gtk_list_store_append(model, &iter);
 			gtk_list_store_set(model, &iter,
-			                   0, s.c_str(),
-			                   -1);
+				0, s.c_str(),
+				-1);
 		}
 
 		gtk_combo_box_set_active(GTK_COMBO_BOX(wdgt), 0);
@@ -642,10 +661,10 @@ bool MGtkComboboxImpl::DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers,
 	bool result = false;
 
 	if (inKeyCode == kReturnKeyCode or
-	    inKeyCode == kEnterKeyCode or
-	    inKeyCode == kTabKeyCode or
-	    inKeyCode == kEscapeKeyCode or
-	    (inModifiers & ~kShiftKey) != 0)
+		inKeyCode == kEnterKeyCode or
+		inKeyCode == kTabKeyCode or
+		inKeyCode == kEscapeKeyCode or
+		(inModifiers & ~kShiftKey) != 0)
 	{
 		//		result = MGtkControlImpl::DispatchKeyDown(inKeyCode, inModifiers, inRepeat);
 	}
@@ -727,10 +746,10 @@ bool MGtkPopupImpl::DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bo
 	bool result = false;
 
 	if (inKeyCode == kReturnKeyCode or
-	    inKeyCode == kEnterKeyCode or
-	    inKeyCode == kTabKeyCode or
-	    inKeyCode == kEscapeKeyCode or
-	    (inModifiers & ~kShiftKey) != 0)
+		inKeyCode == kEnterKeyCode or
+		inKeyCode == kTabKeyCode or
+		inKeyCode == kEscapeKeyCode or
+		(inModifiers & ~kShiftKey) != 0)
 	{
 		//		result = MGtkControlImpl::DispatchKeyDown(inKeyCode, inModifiers, inRepeat);
 	}
@@ -794,10 +813,10 @@ bool MGtkEdittextImpl::DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers,
 	bool result = false;
 
 	if (inKeyCode == kReturnKeyCode or
-	    inKeyCode == kEnterKeyCode or
-	    inKeyCode == kTabKeyCode or
-	    inKeyCode == kEscapeKeyCode or
-	    (inModifiers & ~kShiftKey) != 0)
+		inKeyCode == kEnterKeyCode or
+		inKeyCode == kTabKeyCode or
+		inKeyCode == kEscapeKeyCode or
+		(inModifiers & ~kShiftKey) != 0)
 	{
 		//		result = MGtkControlImpl::DispatchKeyDown(inKeyCode, inModifiers, inRepeat);
 	}
@@ -920,7 +939,7 @@ void MGtkRadiobuttonImpl::SetGroup(const list<MRadiobutton *> &inButtons)
 	mGroup = inButtons;
 }
 
-//bool MGtkRadiobuttonImpl::WMCommand(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)
+// bool MGtkRadiobuttonImpl::WMCommand(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)
 //{
 //	bool result = false;
 //
@@ -936,7 +955,7 @@ void MGtkRadiobuttonImpl::SetGroup(const list<MRadiobutton *> &inButtons)
 //	}
 //
 //	return result;
-//}
+// }
 //
 MRadiobuttonImpl *MRadiobuttonImpl::Create(MRadiobutton *inRadiobutton, const std::string &inText)
 {
@@ -1044,7 +1063,7 @@ void MGtkNotebookImpl::FrameResized()
 
 void MGtkNotebookImpl::AddPage(const string &inLabel, MView *inPage)
 {
-	MPage page = {inLabel, inPage};
+	MPage page = { inLabel, inPage };
 	mPages.push_back(page);
 
 	//	if (GetWidget())
@@ -1175,7 +1194,7 @@ void MGtkColorSwatchImpl::SetColor(MColor inColor)
 		gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(GetWidget()), &color);
 }
 
-//void MGtkColorSwatchImpl::GetIdealSize(int32_t& outWidth, int32_t& outHeight)
+// void MGtkColorSwatchImpl::GetIdealSize(int32_t& outWidth, int32_t& outHeight)
 //{
 //	outWidth = 30;
 //	outHeight = 23;
@@ -1189,7 +1208,7 @@ void MGtkColorSwatchImpl::SetColor(MColor inColor)
 //		if (outHeight < size.cy + 2)
 //			outHeight = size.cy + 2;
 //	}
-//}
+// }
 
 MColorSwatchImpl *MColorSwatchImpl::Create(MColorSwatch *inColorSwatch, MColor inColor)
 {
@@ -1216,9 +1235,9 @@ void MGtkListBoxImpl::CreateWidget()
 
 	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
 	GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes("Author",
-	                                                                     renderer,
-	                                                                     "text", 0,
-	                                                                     NULL);
+		renderer,
+		"text", 0,
+		NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(GetWidget()), column);
 
 	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(GetWidget()));
@@ -1226,7 +1245,7 @@ void MGtkListBoxImpl::CreateWidget()
 	mSelectionChanged.Connect(G_OBJECT(selection), "changed");
 }
 
-//void MGtkListBoxImpl::CreateParams(DWORD& outStyle, DWORD& outExStyle,
+// void MGtkListBoxImpl::CreateParams(DWORD& outStyle, DWORD& outExStyle,
 //	wstring& outClassName, HMENU& outMenu)
 //{
 //	MGtkControlImpl::CreateParams(outStyle, outExStyle, outClassName, outMenu);
@@ -1235,7 +1254,7 @@ void MGtkListBoxImpl::CreateWidget()
 //	outExStyle |= WS_EX_CLIENTEDGE;
 //
 //	outClassName = WC_LISTBOX;
-//}
+// }
 
 void MGtkListBoxImpl::AddedToWindow()
 {
@@ -1259,7 +1278,7 @@ void MGtkListBoxImpl::AddItem(const string &inText)
 
 		gtk_list_store_append(mStore, &iter);
 		gtk_list_store_set(mStore, &iter,
-		                   0, inText.c_str(), 1, mNr++, -1);
+			0, inText.c_str(), 1, mNr++, -1);
 	}
 }
 
@@ -1297,7 +1316,7 @@ void MGtkListBoxImpl::OnSelectionChanged()
 	}
 }
 
-//bool MGtkListBoxImpl::WMCommand(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)
+// bool MGtkListBoxImpl::WMCommand(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)
 //{
 //	switch (inUMsg)
 //	{
@@ -1308,7 +1327,7 @@ void MGtkListBoxImpl::OnSelectionChanged()
 //	}
 //
 //	return true;
-//}
+// }
 //
 MListBoxImpl *MListBoxImpl::Create(MListBox *inListBox)
 {
@@ -1351,7 +1370,7 @@ MListBoxImpl *MListBoxImpl::Create(MListBox *inListBox)
 // 	gtk_tree_view_append_column(GTK_TREE_VIEW(GetWidget()), column);
 // }
 
-//void MGtkListViewImpl::CreateParams(DWORD& outStyle, DWORD& outExStyle,
+// void MGtkListViewImpl::CreateParams(DWORD& outStyle, DWORD& outExStyle,
 //	wstring& outClassName, HMENU& outMenu)
 //{
 //	MGtkControlImpl::CreateParams(outStyle, outExStyle, outClassName, outMenu);
@@ -1360,16 +1379,16 @@ MListBoxImpl *MListBoxImpl::Create(MListBox *inListBox)
 //	outExStyle |= WS_EX_STATICEDGE;
 //
 //	outClassName = WC_LISTVIEW;
-//}
+// }
 //
-//void MGtkListViewImpl::CreateHandle(MGtkProcMixin* inParent, MRect inBounds, const wstring& inTitle)
+// void MGtkListViewImpl::CreateHandle(MGtkProcMixin* inParent, MRect inBounds, const wstring& inTitle)
 //{
 //	MGtkControlImpl::CreateHandle(inParent, inBounds, inTitle);
 //
 //	// add a single column
-//    LVCOLUMN lvc = {};
+//     LVCOLUMN lvc = {};
 //
-//    lvc.mask = LVCF_FMT | LVCF_SUBITEM;
+//     lvc.mask = LVCF_FMT | LVCF_SUBITEM;
 //	lvc.cx = inBounds.width - 10;
 //	lvc.fmt = LVCFMT_LEFT;
 //	::SendMessage(GetWidget(), LVM_INSERTCOLUMN, 0, (LPARAM)&lvc);
@@ -1381,11 +1400,11 @@ MListBoxImpl *MListBoxImpl::Create(MListBox *inListBox)
 //		inParent->AddNotify(LVN_GETDISPINFO, GetWidget(),
 //			std::bind(&MGtkListViewImpl::LVMGetDispInfo, this, _1, _2, _3));
 //	}
-//}
+// }
 //
-// void MGtkListViewImpl::AddedToWindow()
-// {
-// 	MGtkControlImpl::AddedToWindow();
+//  void MGtkListViewImpl::AddedToWindow()
+//  {
+//  	MGtkControlImpl::AddedToWindow();
 
 // 	for (string &item : mItems)
 // 		AddItem(item);
@@ -1408,32 +1427,32 @@ MListBoxImpl *MListBoxImpl::Create(MListBox *inListBox)
 // 	}
 // }
 
-//bool MGtkListViewImpl::LVMItemActivate(WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)
+// bool MGtkListViewImpl::LVMItemActivate(WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)
 //{
 //	NMITEMACTIVATE* nmItemActivate = reinterpret_cast<NMITEMACTIVATE*>(inLParam);
 //
 //	mControl->eValueChanged(mControl->GetID(), nmItemActivate->iItem);
 //
 //	return true;
-//}
+// }
 //
-//bool MGtkListViewImpl::LVMGetDispInfo(WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)
+// bool MGtkListViewImpl::LVMGetDispInfo(WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)
 //{
 //	NMLVDISPINFO* plvdi = reinterpret_cast<NMLVDISPINFO*>(inLParam);
 //
 //
 //	return true;
-//}
-//
-// MListViewImpl *MListViewImpl::Create(MListView *inListView)
-// {
-// 	return new MGtkListViewImpl(inListView);
 // }
+//
+//  MListViewImpl *MListViewImpl::Create(MListView *inListView)
+//  {
+//  	return new MGtkListViewImpl(inListView);
+//  }
 
 // --------------------------------------------------------------------
 
 MGtkBoxControlImpl::MGtkBoxControlImpl(MBoxControl *inControl, bool inHorizontal,
-                                       bool inHomogeneous, bool inExpand, bool inFill, uint32_t inSpacing, uint32_t inPadding)
+	bool inHomogeneous, bool inExpand, bool inFill, uint32_t inSpacing, uint32_t inPadding)
 	: MGtkControlImpl(inControl, "")
 	, mHorizontal(inHorizontal)
 	, mHomogeneous(inHomogeneous)
@@ -1450,13 +1469,13 @@ void MGtkBoxControlImpl::CreateWidget()
 }
 
 MBoxControlImpl *MBoxControlImpl::Create(MBoxControl *inControl, bool inHorizontal,
-                                         bool inHomogeneous, bool inExpand, bool inFill, uint32_t inSpacing, uint32_t inPadding)
+	bool inHomogeneous, bool inExpand, bool inFill, uint32_t inSpacing, uint32_t inPadding)
 {
 	return new MGtkBoxControlImpl(inControl, inHorizontal, inHomogeneous, inExpand, inFill, inSpacing, inPadding);
 }
 
 void MGtkBoxControlImpl::Append(MGtkWidgetMixin *inChild, MControlPacking inPacking,
-                                bool inExpand, bool inFill, uint32_t inPadding)
+	bool inExpand, bool inFill, uint32_t inPadding)
 {
 	assert(GTK_IS_BOX(GetWidget()));
 

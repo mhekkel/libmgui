@@ -1,20 +1,40 @@
-//          Copyright Maarten L. Hekkelman 2006-2008
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
+/*-
+ * SPDX-License-Identifier: BSD-2-Clause
+ *
+ * Copyright (c) 2023 Maarten L. Hekkelman
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
-#include "Gtk/MGtkLib.hpp"
+#include "Gtk/MGtkDeviceImpl.hpp"
+#include "Gtk/MGtkCanvasImpl.hpp"
+
+#include "MError.hpp"
+#include "MUnicode.hpp"
+#include "MView.hpp"
+#include "MWindow.hpp"
 
 #include <cassert>
 #include <cmath>
 #include <cstring>
-
-#include "MError.hpp"
-#include "Gtk/MGtkCanvasImpl.hpp"
-#include "Gtk/MGtkDeviceImpl.hpp"
-#include "MUnicode.hpp"
-#include "MView.hpp"
-#include "MWindow.hpp"
 
 using namespace std;
 
@@ -99,7 +119,7 @@ void MGtkDeviceImpl::SetFont(
 	PangoFontDescription *newFontDesc = pango_font_description_from_string(inFont.c_str());
 
 	if (mFont == nullptr or newFontDesc == nullptr or
-	    not pango_font_description_equal(mFont, newFontDesc))
+		not pango_font_description_equal(mFont, newFontDesc))
 	{
 		if (mMetrics != nullptr)
 			pango_font_metrics_unref(mMetrics);
@@ -146,10 +166,10 @@ void MGtkDeviceImpl::ClipRect(
 {
 }
 
-//void MGtkDeviceImpl::ClipRegion(
+// void MGtkDeviceImpl::ClipRegion(
 //	MRegion				inRegion)
 //{
-//}
+// }
 
 void MGtkDeviceImpl::EraseRect(
 	MRect inRect)
@@ -408,7 +428,7 @@ bool MGtkDeviceImpl::PositionToIndex(
 	int index, trailing;
 
 	bool result = pango_layout_xy_to_index(mPangoLayout,
-	                                       inPosition * mPangoScale, 0, &index, &trailing);
+		inPosition * mPangoScale, 0, &index, &trailing);
 
 	MEncodingTraits<kEncodingUTF8> enc;
 	const char *text = pango_layout_get_text(mPangoLayout);
@@ -583,8 +603,8 @@ MCairoDeviceImp::MCairoDeviceImp(MView *inView)
 	mForeColor = kBlack;
 	mBackColor = kWhite;
 
-	MCanvas* canvas = dynamic_cast<MCanvas*>(inView);
-	MGtkCanvasImpl* target = static_cast<MGtkCanvasImpl*>(canvas->GetImpl());
+	MCanvas *canvas = dynamic_cast<MCanvas *>(inView);
+	MGtkCanvasImpl *target = static_cast<MGtkCanvasImpl *>(canvas->GetImpl());
 	mContext = target->GetCairo();
 
 	// cairo_rectangle(mContext, mRect.x, mRect.y, mRect.width, mRect.height);
@@ -618,9 +638,9 @@ void MCairoDeviceImp::SetForeColor(
 	mForeColor = inColor;
 
 	cairo_set_source_rgb(mContext,
-	                     mForeColor.red / 255.0,
-	                     mForeColor.green / 255.0,
-	                     mForeColor.blue / 255.0);
+		mForeColor.red / 255.0,
+		mForeColor.green / 255.0,
+		mForeColor.blue / 255.0);
 }
 
 MColor MCairoDeviceImp::GetForeColor() const
@@ -646,13 +666,13 @@ void MCairoDeviceImp::ClipRect(
 	cairo_clip(mContext);
 }
 
-//void MCairoDeviceImp::ClipRegion(
+// void MCairoDeviceImp::ClipRegion(
 //	MRegion				inRegion)
 //{
 //	GdkRegion* gdkRegion = const_cast<GdkRegion*>(inRegion.operator const GdkRegion*());
 //	gdk_cairo_region(mContext, gdkRegion);
 //	cairo_clip(mContext);
-//}
+// }
 
 void MCairoDeviceImp::EraseRect(
 	MRect inRect)
@@ -662,9 +682,9 @@ void MCairoDeviceImp::EraseRect(
 	cairo_rectangle(mContext, inRect.x, inRect.y, inRect.width, inRect.height);
 
 	cairo_set_source_rgb(mContext,
-	                     mBackColor.red / 255.0,
-	                     mBackColor.green / 255.0,
-	                     mBackColor.blue / 255.0);
+		mBackColor.red / 255.0,
+		mBackColor.green / 255.0,
+		mBackColor.blue / 255.0);
 
 	//	if (mOffscreenPixmap != nullptr)
 	//		cairo_set_operator(mContext, CAIRO_OPERATOR_CLEAR);
@@ -846,9 +866,9 @@ void MCairoDeviceImp::DrawWhiteSpace(
 	PangoLayoutLine *line = pango_layout_get_line(mPangoLayout, 0);
 
 	cairo_set_source_rgb(mContext,
-	                     mWhiteSpaceColor.red / 255.0,
-	                     mWhiteSpaceColor.green / 255.0,
-	                     mWhiteSpaceColor.blue / 255.0);
+		mWhiteSpaceColor.red / 255.0,
+		mWhiteSpaceColor.green / 255.0,
+		mWhiteSpaceColor.blue / 255.0);
 
 	// we're using one font anyway
 	PangoFontMap *fontMap = pango_cairo_font_map_get_default();
@@ -873,8 +893,8 @@ void MCairoDeviceImp::DrawWhiteSpace(
 		const char *text = pango_layout_get_text(mPangoLayout);
 
 		for (bool more = pango_glyph_item_iter_init_start(&iter, glyphItem, text);
-		     more;
-		     more = pango_glyph_item_iter_next_cluster(&iter))
+			 more;
+			 more = pango_glyph_item_iter_next_cluster(&iter))
 		{
 			PangoGlyphString *gs = iter.glyph_item->glyphs;
 			char ch = text[iter.start_index];
@@ -966,11 +986,11 @@ void MCairoDeviceImp::MakeTransparent(
 	cairo_paint(mContext);
 }
 
-//GdkPixmap* MCairoDeviceImp::GetPixmap() const
+// GdkPixmap* MCairoDeviceImp::GetPixmap() const
 //{
 //	g_object_ref(mOffscreenPixmap);
 //	return mOffscreenPixmap;
-//}
+// }
 //
 void MCairoDeviceImp::SetDrawWhiteSpace(
 	bool inDrawWhiteSpace,

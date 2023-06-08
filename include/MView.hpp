@@ -1,20 +1,41 @@
-//          Copyright Maarten L. Hekkelman 2006-2010
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
+/*-
+ * SPDX-License-Identifier: BSD-2-Clause
+ *
+ * Copyright (c) 2023 Maarten L. Hekkelman
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 /*	$Id$
-	Copyright Maarten L. Hekkelman
-	Created 28-09-07 11:15:18
+    Copyright Maarten L. Hekkelman
+    Created 28-09-07 11:15:18
 */
 
 #pragma once
 
+#include "MP2PEvents.hpp"
+#include "MTypes.hpp"
+
 #include <list>
 #include <vector>
-
-#include "MTypes.hpp"
-#include "MP2PEvents.hpp"
 
 class MWindow;
 class MDevice;
@@ -52,7 +73,7 @@ enum MControlPacking
  * MViewScroller scrolls a MView by making the bounds's dimension
  * the same as the visible area inside the scroller. The bounds
  * are then moved inside the frame.
-*/
+ */
 
 class MView
 {
@@ -231,9 +252,9 @@ class MTable : public MView
 {
   public:
 	MTable(const std::string &inID, MRect inBounds,
-	       MView *inChildren[],
-	       uint32_t inColumns, uint32_t inRows,
-	       int32_t inHSpacing, int32_t inVSpacing);
+		MView *inChildren[],
+		uint32_t inColumns, uint32_t inRows,
+		int32_t inHSpacing, int32_t inVSpacing);
 
 	virtual void ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta);
 
@@ -253,7 +274,7 @@ class MViewScroller : public MView
 {
   public:
 	MViewScroller(const std::string &inID, MView *inTarget,
-	              bool inHScrollbar, bool inVScrollbar);
+		bool inHScrollbar, bool inVScrollbar);
 
 	virtual void AdjustScrollbars();
 

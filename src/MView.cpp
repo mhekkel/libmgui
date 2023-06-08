@@ -1,17 +1,33 @@
-//          Copyright Maarten L. Hekkelman 2006-2008
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
+/*-
+ * SPDX-License-Identifier: BSD-2-Clause
+ *
+ * Copyright (c) 2023 Maarten L. Hekkelman
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 /*	$Id$
-	Copyright Drs M.L. Hekkelman
-	Created 28-09-07 11:18:30
+    Copyright Drs M.L. Hekkelman
+    Created 28-09-07 11:18:30
 */
-
-#include "MLib.hpp"
-
-#include <cassert>
-#include <iostream>
 
 #include "MControls.hpp"
 #include "MDevice.hpp"
@@ -19,6 +35,9 @@
 #include "MHandler.hpp"
 #include "MUtils.hpp"
 #include "MWindow.hpp"
+
+#include <cassert>
+#include <iostream>
 
 using namespace std;
 
@@ -316,8 +335,8 @@ void MView::SetMargins(
 	int32_t dx = inLeftMargin - mLeftMargin;
 	int32_t dy = inTopMargin - mTopMargin;
 
-	//int32_t dw = (mLeftMargin + mRightMargin) - (inLeftMargin + inRightMargin);
-	//int32_t dh = (mTopMargin + mBottomMargin) - (inTopMargin + inBottomMargin);
+	// int32_t dw = (mLeftMargin + mRightMargin) - (inLeftMargin + inRightMargin);
+	// int32_t dh = (mTopMargin + mBottomMargin) - (inTopMargin + inBottomMargin);
 
 	mLeftMargin = inLeftMargin;
 	mTopMargin = inTopMargin;
@@ -333,7 +352,7 @@ void MView::SetMargins(
 	for (MView *child : mChildren)
 		child->MoveFrame(dx, dy);
 
-	//for (MView* child: mChildren)
+	// for (MView* child: mChildren)
 	//	child->ResizeFrame(dw, dh);
 }
 
@@ -692,7 +711,7 @@ void MView::Disable()
 
 	// bool wasEnabled = (mEnabled != eTriStateOff);
 	mEnabled = eTriStateOff;
-	//if (wasEnabled)
+	// if (wasEnabled)
 	DisableSelf();
 }
 
@@ -1187,7 +1206,7 @@ void MVBox::ResizeFrame(
 }
 
 MTable::MTable(const std::string &inID, MRect inBounds, MView *inChildren[],
-               uint32_t inColumns, uint32_t inRows, int32_t inHSpacing, int32_t inVSpacing)
+	uint32_t inColumns, uint32_t inRows, int32_t inHSpacing, int32_t inVSpacing)
 	: MView(inID, inBounds)
 	, mColumns(inColumns)
 	, mRows(inRows)
@@ -1204,7 +1223,7 @@ MTable::MTable(const std::string &inID, MRect inBounds, MView *inChildren[],
 		{
 			int ix = r * mColumns + c;
 
-			//if (inChildren[ix] == nullptr or not inChildren[ix]->IsVisible())
+			// if (inChildren[ix] == nullptr or not inChildren[ix]->IsVisible())
 			//	continue;
 
 			mGrid[ix] = inChildren[ix];
@@ -1448,7 +1467,7 @@ void MTable::AddChild(
 // --------------------------------------------------------------------
 
 MViewScroller::MViewScroller(const string &inID,
-                             MView *inTarget, bool inHScrollbar, bool inVScrollbar)
+	MView *inTarget, bool inHScrollbar, bool inVScrollbar)
 	: MView(inID, MRect(0, 0, 0, 0))
 	, mTarget(inTarget)
 	, mHScrollbar(nullptr)
@@ -1469,7 +1488,7 @@ MViewScroller::MViewScroller(const string &inID,
 	if (inVScrollbar)
 	{
 		MRect r(mBounds.x + mBounds.width - kScrollbarWidth, mBounds.y,
-		        kScrollbarWidth, mBounds.height);
+			kScrollbarWidth, mBounds.height);
 		if (inHScrollbar)
 			r.height -= kScrollbarWidth;
 
@@ -1485,7 +1504,7 @@ MViewScroller::MViewScroller(const string &inID,
 	if (inHScrollbar)
 	{
 		MRect r(mBounds.x, mBounds.y + mBounds.height - kScrollbarWidth,
-		        mBounds.width, kScrollbarWidth);
+			mBounds.width, kScrollbarWidth);
 
 		if (inVScrollbar)
 			r.width -= kScrollbarWidth;
@@ -1567,14 +1586,14 @@ void MViewScroller::AdjustScrollbars()
 	if (mHScrollbar != nullptr)
 	{
 		mHScrollbar->SetAdjustmentValues(0, targetFrame.width, mScrollUnitX,
-		                                 targetBounds.width, targetBounds.x);
+			targetBounds.width, targetBounds.x);
 		dx = mHScrollbar->GetValue() - targetBounds.x;
 	}
 
 	if (mVScrollbar != nullptr)
 	{
 		mVScrollbar->SetAdjustmentValues(0, targetFrame.height, mScrollUnitY,
-		                                 targetBounds.height, targetBounds.y);
+			targetBounds.height, targetBounds.y);
 		dy = mVScrollbar->GetValue() - targetBounds.y;
 	}
 

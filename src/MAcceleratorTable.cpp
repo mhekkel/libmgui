@@ -1,73 +1,95 @@
-//          Copyright Maarten L. Hekkelman 2006-2008
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
+/*-
+ * SPDX-License-Identifier: BSD-2-Clause
+ *
+ * Copyright (c) 2023 Maarten L. Hekkelman
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
-#include "MLib.hpp"
-
-#include <set>
-#include <memory>
-#include <cstring>
-
-#include "MCommands.hpp"
 #include "MAcceleratorTable.hpp"
+#include "MCommands.hpp"
+#include "MTypes.hpp"
+
+#include <cstring>
+#include <memory>
+#include <set>
 
 using namespace std;
 
 const uint32_t
 	kValidModifiersMask = kControlKey | kShiftKey | kOptionKey;
 
-namespace {
+namespace
+{
 
 struct MCommandToString
 {
 	char mCommandString[10];
-	
+
 	MCommandToString(uint32_t inCommand)
 	{
 		strcpy(mCommandString, "MCmd_xxxx");
-		
+
 		mCommandString[5] = ((inCommand & 0xff000000) >> 24) & 0x000000ff;
 		mCommandString[6] = ((inCommand & 0x00ff0000) >> 16) & 0x000000ff;
-		mCommandString[7] = ((inCommand & 0x0000ff00) >>  8) & 0x000000ff;
-		mCommandString[8] = ((inCommand & 0x000000ff) >>  0) & 0x000000ff;
+		mCommandString[7] = ((inCommand & 0x0000ff00) >> 8) & 0x000000ff;
+		mCommandString[8] = ((inCommand & 0x000000ff) >> 0) & 0x000000ff;
 	}
-	
-	operator const char*() const	{ return mCommandString; }
+
+	operator const char *() const { return mCommandString; }
 };
 
-}
+} // namespace
 
 struct MAccelCombo
 {
-	int64_t		key;
-	uint32_t		keyval;
-	uint32_t		modifiers;
-	uint32_t		command;
-	
-	bool		operator<(const MAccelCombo& rhs) const
-					{ return key < rhs.key; }
-};
+	int64_t key;
+	uint32_t keyval;
+	uint32_t modifiers;
+	uint32_t command;
 
+	bool operator<(const MAccelCombo &rhs) const
+	{
+		return key < rhs.key;
+	}
+};
 
 struct MAcceleratorTableImp
 {
-	set<MAccelCombo>	mTable;
+	set<MAccelCombo> mTable;
 };
 
 // -------------------------------------
 
-MAcceleratorTable& MAcceleratorTable::Instance()
+MAcceleratorTable &MAcceleratorTable::Instance()
 {
 	static MAcceleratorTable sInstance;
 	return sInstance;
 }
 
-MAcceleratorTable&
+MAcceleratorTable &
 MAcceleratorTable::EditKeysInstance()
 {
-	static unique_ptr<MAcceleratorTable>	sInstance;
-	
+	static unique_ptr<MAcceleratorTable> sInstance;
+
 	if (sInstance.get() == nullptr)
 	{
 		sInstance.reset(new MAcceleratorTable);
@@ -113,13 +135,13 @@ MAcceleratorTable::EditKeysInstance()
 		sInstance->RegisterAcceleratorKey(kcmd_ScrollOneLineDown, kUpArrowKeyCode, kControlKey);
 		sInstance->RegisterAcceleratorKey(kcmd_ScrollPageUp, kPageUpKeyCode, kControlKey);
 		sInstance->RegisterAcceleratorKey(kcmd_ScrollPageDown, kPageDownKeyCode, kControlKey);
-//		sInstance->RegisterAcceleratorKey(kcmd_ScrollToStartOfFile, GDK_Home, kControlKey);
-//		sInstance->RegisterAcceleratorKey(kcmd_ScrollToEndOfFile, GDK_End, kControlKey);
+		//		sInstance->RegisterAcceleratorKey(kcmd_ScrollToStartOfFile, GDK_Home, kControlKey);
+		//		sInstance->RegisterAcceleratorKey(kcmd_ScrollToEndOfFile, GDK_End, kControlKey);
 
 		sInstance->RegisterAcceleratorKey(kcmd_MoveLineUp, kUpArrowKeyCode, kControlKey | kShiftKey);
 		sInstance->RegisterAcceleratorKey(kcmd_MoveLineDown, kDownArrowKeyCode, kControlKey | kShiftKey);
 	}
-	
+
 	return *sInstance.get();
 }
 
@@ -134,9 +156,9 @@ MAcceleratorTable::~MAcceleratorTable()
 }
 
 void MAcceleratorTable::RegisterAcceleratorKey(
-	uint32_t			inCommand,
-	uint32_t			inKeyValue,
-	uint32_t			inModifiers)
+	uint32_t inCommand,
+	uint32_t inKeyValue,
+	uint32_t inModifiers)
 {
 	int64_t key = (int64_t(inKeyValue) << 32) | inModifiers;
 	MAccelCombo kc = {
@@ -145,30 +167,30 @@ void MAcceleratorTable::RegisterAcceleratorKey(
 
 	mImpl->mTable.insert(kc);
 
-	//gint nkeys;
-	//GdkKeymapKey* keys;
+	// gint nkeys;
+	// GdkKeymapKey* keys;
 	//
-	//if (gdk_keymap_get_entries_for_keyval(gdk_keymap_get_default(),
+	// if (gdk_keymap_get_entries_for_keyval(gdk_keymap_get_default(),
 	//	inKeyValue, &keys, &nkeys))
 	//{
 	//	for (int32_t k = 0; k < nkeys; ++k)
 	//	{
 	//		guint keyval;
 	//		GdkModifierType consumed;
-	//		
+	//
 	//		if (gdk_keymap_translate_keyboard_state(nullptr,
 	//			keys[k].keycode, GdkModifierType(inModifiers), 0, &keyval, nullptr, nullptr, &consumed))
 	//		{
 	//			uint32_t modifiers = inModifiers & ~consumed;
 	//			if (inModifiers & kShiftKey)
-	//				modifiers |= kShiftKey;				
-	//			
+	//				modifiers |= kShiftKey;
+	//
 	//			int64_t key = (int64_t(keyval) << 32) | modifiers;
-	//			
+	//
 	//			MAccelCombo kc = {
 	//				key, inKeyValue, inModifiers, inCommand
 	//			};
-	//			
+	//
 	//			mImpl->mTable.insert(kc);
 	//		}
 
@@ -177,14 +199,14 @@ void MAcceleratorTable::RegisterAcceleratorKey(
 	//		{
 	//			uint32_t modifiers = inModifiers & ~consumed;
 	//			if (inModifiers & kShiftKey)
-	//				modifiers |= kShiftKey;				
-	//			
+	//				modifiers |= kShiftKey;
+	//
 	//			int64_t key = (int64_t(keyval) << 32) | modifiers;
-	//			
+	//
 	//			MAccelCombo kc = {
 	//				key, inKeyValue, inModifiers, inCommand
 	//			};
-	//			
+	//
 	//			mImpl->mTable.insert(kc);
 	//		}
 	//	}
@@ -194,12 +216,12 @@ void MAcceleratorTable::RegisterAcceleratorKey(
 }
 
 bool MAcceleratorTable::GetAcceleratorKeyForCommand(
-	uint32_t			inCommand,
-	uint32_t&			outKeyValue,
-	uint32_t&			outModifiers)
+	uint32_t inCommand,
+	uint32_t &outKeyValue,
+	uint32_t &outModifiers)
 {
 	bool result = false;
-	
+
 	for (set<MAccelCombo>::iterator a = mImpl->mTable.begin(); a != mImpl->mTable.end(); ++a)
 	{
 		if (a->command == inCommand)
@@ -210,24 +232,24 @@ bool MAcceleratorTable::GetAcceleratorKeyForCommand(
 			break;
 		}
 	}
-	
+
 	return result;
 }
 
 bool MAcceleratorTable::IsAcceleratorKey(
-	uint32_t			inKeyCode,
-	uint32_t			inModifiers,
-	uint32_t&			outCommand)
+	uint32_t inKeyCode,
+	uint32_t inModifiers,
+	uint32_t &outCommand)
 {
 	bool result = false;
 
-//	PRINT(("IsAcceleratorKey for %10.10s %c-%c-%c-%c (%x - %x)",
-//		gdk_keyval_name(keyval),
-//		inEvent->state & kControlKey ? 'C' : '_',
-//		inEvent->state & kShiftKey ? 'S' : '_',
-//		inEvent->state & kOptionKey ? '1' : '_',
-//		inEvent->state & GDK_MOD2_MASK ? '2' : '_',
-//		inEvent->state, modifiers));
+	//	PRINT(("IsAcceleratorKey for %10.10s %c-%c-%c-%c (%x - %x)",
+	//		gdk_keyval_name(keyval),
+	//		inEvent->state & kControlKey ? 'C' : '_',
+	//		inEvent->state & kShiftKey ? 'S' : '_',
+	//		inEvent->state & kOptionKey ? '1' : '_',
+	//		inEvent->state & GDK_MOD2_MASK ? '2' : '_',
+	//		inEvent->state, modifiers));
 
 	inModifiers &= kValidModifiersMask;
 	int64_t key = (int64_t(inKeyCode) << 32) | inModifiers;
@@ -235,50 +257,48 @@ bool MAcceleratorTable::IsAcceleratorKey(
 	MAccelCombo kc;
 	kc.key = key;
 
-	set<MAccelCombo>::iterator a = mImpl->mTable.find(kc);	
+	set<MAccelCombo>::iterator a = mImpl->mTable.find(kc);
 	if (a != mImpl->mTable.end())
 	{
 		outCommand = a->command;
 		result = true;
 	}
-	
-//	if (result)
-//		PRINT(("cmd is %s", (const char*)MCommandToString(outCommand)));
-	
+
+	//	if (result)
+	//		PRINT(("cmd is %s", (const char*)MCommandToString(outCommand)));
+
 	return result;
 }
 
 bool MAcceleratorTable::IsNavigationKey(
-	uint32_t			inKeyValue,
-	uint32_t			inModifiers,
-	MKeyCommand&	outCommand)
+	uint32_t inKeyValue,
+	uint32_t inModifiers,
+	MKeyCommand &outCommand)
 {
 	bool result = false;
-	
-//	PRINT(("IsNavigationKey for %10.10s %c-%c-%c-%c (%x - %x)",
-//		gdk_keyval_name(inKeyValue),
-//		inModifiers & kControlKey ? 'C' : '_',
-//		inModifiers & kShiftKey ? 'S' : '_',
-//		inModifiers & kOptionKey ? '1' : '_',
-//		inModifiers & GDK_MOD2_MASK ? '2' : '_',
-//		inModifiers, inModifiers & kValidModifiersMask));
+
+	//	PRINT(("IsNavigationKey for %10.10s %c-%c-%c-%c (%x - %x)",
+	//		gdk_keyval_name(inKeyValue),
+	//		inModifiers & kControlKey ? 'C' : '_',
+	//		inModifiers & kShiftKey ? 'S' : '_',
+	//		inModifiers & kOptionKey ? '1' : '_',
+	//		inModifiers & GDK_MOD2_MASK ? '2' : '_',
+	//		inModifiers, inModifiers & kValidModifiersMask));
 
 	inModifiers &= kValidModifiersMask;
 
 	MAccelCombo kc;
 	kc.key = (int64_t(inKeyValue) << 32) | inModifiers;
 
-	set<MAccelCombo>::iterator a = mImpl->mTable.find(kc);	
+	set<MAccelCombo>::iterator a = mImpl->mTable.find(kc);
 	if (a != mImpl->mTable.end())
 	{
 		outCommand = MKeyCommand(a->command);
 		result = true;
 	}
 
-//	if (result)
-//		PRINT(("cmd is %s", (const char*)MCommandToString(outCommand)));
-//	
+	//	if (result)
+	//		PRINT(("cmd is %s", (const char*)MCommandToString(outCommand)));
+	//
 	return result;
 }
-
-

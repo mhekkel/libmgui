@@ -3,25 +3,24 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#include "Gtk/MGtkLib.hpp"
+#include "Gtk/MGtkWidgetMixin.hpp"
+#include "Gtk/MGtkWindowImpl.hpp"
+
+#include "MAcceleratorTable.hpp"
+#include "MError.hpp"
+#include "MFile.hpp"
+#include "MMenuImpl.hpp"
+#include "MStrings.hpp"
+#include "MUtils.hpp"
+#include "MWindow.hpp"
+
+#include <zeep/xml/document.hpp>
 
 #include <gdk/gdkkeysyms.h>
 
 #include <algorithm>
 #include <cstring>
 #include <iostream>
-
-#include <zeep/xml/document.hpp>
-
-#include "MAcceleratorTable.hpp"
-#include "MError.hpp"
-#include "MFile.hpp"
-#include "Gtk/MGtkWidgetMixin.hpp"
-#include "Gtk/MGtkWindowImpl.hpp"
-#include "MMenuImpl.hpp"
-#include "MStrings.hpp"
-#include "MUtils.hpp"
-#include "MWindow.hpp"
 
 using namespace std;
 namespace xml = zeep::xml;

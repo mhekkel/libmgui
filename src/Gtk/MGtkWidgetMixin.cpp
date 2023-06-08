@@ -1,13 +1,32 @@
-//          Copyright Maarten L. Hekkelman 2006-2014
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
-
-#include "Gtk/MGtkLib.hpp"
-
-#include <cassert>
+/*-
+ * SPDX-License-Identifier: BSD-2-Clause
+ *
+ * Copyright (c) 2023 Maarten L. Hekkelman
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #include "Gtk/MGtkWidgetMixin.hpp"
+
+#include <cassert>
 
 using namespace std;
 
@@ -129,7 +148,7 @@ void MGtkWidgetMixin::SetWidget(GtkWidget *inWidget)
 }
 
 void MGtkWidgetMixin::Append(MGtkWidgetMixin *inChild, MControlPacking inPacking,
-                             bool inExpand, bool inFill, uint32_t inPadding)
+	bool inExpand, bool inFill, uint32_t inPadding)
 {
 	assert(false);
 }
@@ -155,9 +174,9 @@ bool MGtkWidgetMixin::OnRealize()
 	int m = gdk_window_get_events(gtk_widget_get_window(mWidget));
 
 	m |= GDK_FOCUS_CHANGE_MASK | GDK_STRUCTURE_MASK |
-		 GDK_KEY_PRESS_MASK |
-		 GDK_BUTTON_PRESS_MASK | GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK |
-		 GDK_LEAVE_NOTIFY_MASK | GDK_SCROLL_MASK
+	     GDK_KEY_PRESS_MASK |
+	     GDK_BUTTON_PRESS_MASK | GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK |
+	     GDK_LEAVE_NOTIFY_MASK | GDK_SCROLL_MASK
 		//		 | GDK_SMOOTH_SCROLL_MASK
 		;
 	gdk_window_set_events(gtk_widget_get_window(mWidget), (GdkEventMask)m);
@@ -297,7 +316,7 @@ bool MGtkWidgetMixin::OnButtonReleaseEvent(GdkEventButton *inEvent)
 
 bool MGtkWidgetMixin::OnGrabBroken(GdkEvent *inEvent)
 {
-//	PRINT(("!!! MGtkWidgetMixin::OnGrabBroken (%s)", G_OBJECT_TYPE_NAME(mWidget)));
+	//	PRINT(("!!! MGtkWidgetMixin::OnGrabBroken (%s)", G_OBJECT_TYPE_NAME(mWidget)));
 	gtk_grab_remove(GetWidget());
 	return false;
 }
@@ -383,8 +402,8 @@ bool MGtkWidgetMixin::OnDrawEvent(cairo_t *inCairo)
 void MGtkWidgetMixin::SetupDragAndDrop(const GtkTargetEntry inTargets[], uint32_t inTargetCount)
 {
 	gtk_drag_dest_set(mWidget, GTK_DEST_DEFAULT_ALL,
-	                  inTargets, inTargetCount,
-	                  GdkDragAction(GDK_ACTION_COPY | GDK_ACTION_MOVE));
+		inTargets, inTargetCount,
+		GdkDragAction(GDK_ACTION_COPY | GDK_ACTION_MOVE));
 
 	mDragDataReceived.Connect(mWidget, "drag-data-received");
 	mDragMotion.Connect(mWidget, "drag-motion");
@@ -580,47 +599,47 @@ uint32_t MGtkWidgetMixin::GetModifiers() const
 
 void MGtkWidgetMixin::OnPopupMenu()
 {
-//	PRINT(("Show Popup Menu"));
+	//	PRINT(("Show Popup Menu"));
 }
 
 bool MGtkWidgetMixin::OnCommit(gchar *inText)
 {
-//	PRINT(("MGtkWidgetMixin::OnCommit('%s')", inText));
+	//	PRINT(("MGtkWidgetMixin::OnCommit('%s')", inText));
 
 	return false;
 }
 
 bool MGtkWidgetMixin::OnDeleteSurrounding(gint inStart, gint inLength)
 {
-//	PRINT(("MGtkWidgetMixin::OnDeleteSurrounding"));
+	//	PRINT(("MGtkWidgetMixin::OnDeleteSurrounding"));
 	return false;
 }
 
 bool MGtkWidgetMixin::OnPreeditChanged()
 {
-//	PRINT(("MGtkWidgetMixin::OnPreeditChanged"));
+	//	PRINT(("MGtkWidgetMixin::OnPreeditChanged"));
 	return false;
 }
 
 bool MGtkWidgetMixin::OnPreeditEnd()
 {
-//	PRINT(("MGtkWidgetMixin::OnPreeditEnd"));
+	//	PRINT(("MGtkWidgetMixin::OnPreeditEnd"));
 	return false;
 }
 
 bool MGtkWidgetMixin::OnPreeditStart()
 {
-//	PRINT(("MGtkWidgetMixin::OnPreeditStart"));
+	//	PRINT(("MGtkWidgetMixin::OnPreeditStart"));
 	return false;
 }
 
 bool MGtkWidgetMixin::OnRetrieveSurrounding()
 {
-//	PRINT(("MGtkWidgetMixin::OnRetrieveSurrounding"));
+	//	PRINT(("MGtkWidgetMixin::OnRetrieveSurrounding"));
 	return false;
 }
 
-//bool MView::OnRealize()
+// bool MView::OnRealize()
 //{
 //	int m = gdk_window_get_events(gtk_widget_get_window(mWidget));
 //
@@ -630,26 +649,26 @@ bool MGtkWidgetMixin::OnRetrieveSurrounding()
 //	gdk_window_set_events(gtk_widget_get_window(mWidget), (GdkEventMask)m);
 //
 //	return false;
-//}
+// }
 //
-//bool MView::OnFocusInEvent(
+// bool MView::OnFocusInEvent(
 //	GdkEventFocus* inEvent)
 //{
 //	return false;
-//}
+// }
 //
-//bool MView::OnFocusOutEvent(
+// bool MView::OnFocusOutEvent(
 //	GdkEventFocus* inEvent)
 //{
 //	return false;
-//}
+// }
 //
-//bool MView::IsActive() const
+// bool MView::IsActive() const
 //{
 //	return GTK_WIDGET_HAS_FOCUS(mWidget);
-//}
+// }
 //
-//bool MView::OnButtonPressEvent(
+// bool MView::OnButtonPressEvent(
 //	GdkEventButton* inEvent)
 //{
 //	bool result = false;
@@ -661,39 +680,39 @@ bool MGtkWidgetMixin::OnRetrieveSurrounding()
 //	}
 //
 //	return result;
-//}
+// }
 //
-//bool MView::OnMotionNotifyEvent(
+// bool MView::OnMotionNotifyEvent(
 //	GdkEventMotion* inEvent)
 //{
 //	return false;
-//}
+// }
 //
-//bool MView::OnKeyPressEvent(
+// bool MView::OnKeyPressEvent(
 //	GdkEventKey* inEvent)
 //{
 //	return false;
-//}
+// }
 //
-//bool MView::OnButtonReleaseEvent(
+// bool MView::OnButtonReleaseEvent(
 //	GdkEventButton* inEvent)
 //{
 //	return false;
-//}
+// }
 //
-//bool MView::OnConfigureEvent(
+// bool MView::OnConfigureEvent(
 //	GdkEventConfigure* inEvent)
 //{
 //	return false;
-//}
+// }
 //
-//bool MView::OnScrollEvent(
+// bool MView::OnScrollEvent(
 //	GdkEventScroll* inEvent)
 //{
 //	return false;
-//}
+// }
 //
-//bool MView::OnExposeEvent(
+// bool MView::OnExposeEvent(
 //	GdkEventExpose* inEvent)
 //{
 //	MRect bounds;
@@ -705,11 +724,11 @@ bool MGtkWidgetMixin::OnRetrieveSurrounding()
 //	Draw(dev, update);
 //
 //	return true;
-//}
+// }
 
 // Drag and Drop support
 
-//void MView::SetupDragAndDrop(
+// void MView::SetupDragAndDrop(
 //	const GtkTargetEntry inTargets[],
 //	uint32_t inTargetCount)
 //{
@@ -725,9 +744,9 @@ bool MGtkWidgetMixin::OnRetrieveSurrounding()
 //	mDragDataDelete.Connect(mWidget, "drag-data-delete");
 //
 //	mDragWithin = false;
-//}
+// }
 //
-//void MView::OnDragDataReceived(
+// void MView::OnDragDataReceived(
 //	GdkDragContext* inDragContext,
 //	gint inX,
 //	gint inY,
@@ -750,9 +769,9 @@ bool MGtkWidgetMixin::OnRetrieveSurrounding()
 //	}
 //
 //	gtk_drag_finish(inDragContext, ok, del, inTime);
-//}
+// }
 //
-//bool MView::OnDragMotion(
+// bool MView::OnDragMotion(
 //	GdkDragContext* inDragContext,
 //	gint inX,
 //	gint inY,
@@ -775,23 +794,23 @@ bool MGtkWidgetMixin::OnRetrieveSurrounding()
 //		gdk_drag_status(inDragContext, GdkDragAction(0), inTime);
 //
 //	return false;
-//}
+// }
 //
-//void MView::OnDragLeave(
+// void MView::OnDragLeave(
 //	GdkDragContext* inDragContext,
 //	guint inTime)
 //{
 //	mDragWithin = false;
 //	DragLeave();
-//}
+// }
 //
-//void MView::OnDragDataDelete(
+// void MView::OnDragDataDelete(
 //	GdkDragContext* inDragContext)
 //{
 //	DragDeleteData();
-//}
+// }
 //
-//void MView::OnDragDataGet(
+// void MView::OnDragDataGet(
 //	GdkDragContext* inDragContext,
 //	GtkSelectionData* inData,
 //	guint inInfo,
@@ -802,24 +821,24 @@ bool MGtkWidgetMixin::OnRetrieveSurrounding()
 //	DragSendData(data);
 //
 //	gtk_selection_data_set_text(inData, data.c_str(), data.length());
-//}
+// }
 //
-//void MView::DragEnter()
+// void MView::DragEnter()
 //{
-//}
+// }
 //
-//bool MView::DragWithin(
+// bool MView::DragWithin(
 //	int32_t inX,
 //	int32_t inY)
 //{
 //	return false;
-//}
+// }
 //
-//void MView::DragLeave()
+// void MView::DragLeave()
 //{
-//}
+// }
 //
-//bool MView::DragAccept(
+// bool MView::DragAccept(
 //	bool inMove,
 //	int32_t inX,
 //	int32_t inY,
@@ -828,9 +847,9 @@ bool MGtkWidgetMixin::OnRetrieveSurrounding()
 //	uint32_t inType)
 //{
 //	return false;
-//}
+// }
 //
-//void MView::DragBegin(
+// void MView::DragBegin(
 //	const GtkTargetEntry inTargets[],
 //	uint32_t inTargetCount,
 //	GdkEventMotion* inEvent)
@@ -888,11 +907,11 @@ bool MGtkWidgetMixin::OnRetrieveSurrounding()
 //	gtk_target_list_unref(lst);
 //}
 //
-//void MView::DragSendData(
+// void MView::DragSendData(
 //	string& outData)
 //{
 //}
 //
-//void MView::DragDeleteData()
+// void MView::DragDeleteData()
 //{
 //}

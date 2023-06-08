@@ -1,25 +1,46 @@
-//          Copyright Maarten L. Hekkelman 2006-2014
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
+/*-
+ * SPDX-License-Identifier: BSD-2-Clause
+ *
+ * Copyright (c) 2023 Maarten L. Hekkelman
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
-#include "Gtk/MGtkLib.hpp"
-
-#include <charconv>
-
-#include <zeep/xml/document.hpp>
+#include "Gtk/MGtkApplicationImpl.hpp"
+#include "Gtk/MGtkControlsImpl.hpp"
+#include "Gtk/MGtkWindowImpl.hpp"
 
 #include "MAcceleratorTable.hpp"
 #include "MControls.hpp"
 #include "MDevice.hpp"
 #include "MDialog.hpp"
 #include "MError.hpp"
-#include "Gtk/MGtkApplicationImpl.hpp"
-#include "Gtk/MGtkControlsImpl.hpp"
-#include "Gtk/MGtkWindowImpl.hpp"
 #include "MStrings.hpp"
 #include "MUtils.hpp"
+
 #include "mrsrc.hpp"
+
+#include <charconv>
+
+#include <zeep/xml/document.hpp>
 
 using namespace std;
 using namespace zeep;
@@ -36,7 +57,7 @@ int get_attribute_int(const zeep::xml::element *e, const char *name)
 	return r.ec != std::errc() ? 0 : result;
 }
 
-}
+} // namespace
 
 class MGtkDialogImpl : public MGtkWindowImpl
 {
@@ -57,10 +78,10 @@ class MGtkDialogImpl : public MGtkWindowImpl
 	virtual bool OnKeyPressEvent(GdkEventKey *inEvent);
 
 	virtual void Append(MGtkWidgetMixin *inChild, MControlPacking inPacking,
-	                    bool inExpand, bool inFill, uint32_t inPadding);
+		bool inExpand, bool inFill, uint32_t inPadding);
 
 	void GetMargins(xml::element *inTemplate,
-	                int32_t &outLeftMargin, int32_t &outTopMargin, int32_t &outRightMargin, int32_t &outBottomMargin);
+		int32_t &outLeftMargin, int32_t &outTopMargin, int32_t &outRightMargin, int32_t &outBottomMargin);
 
 	MView *CreateControls(xml::element *inTemplate, int32_t inX, int32_t inY);
 
@@ -187,9 +208,9 @@ void MGtkDialogImpl::Finish()
 
 	mFlags = kMFixedSize;
 	string flags = dialog->get_attribute("flags");
-	if (flags.find( "flexible") != std::string::npos)
+	if (flags.find("flexible") != std::string::npos)
 		mFlags = MWindowFlags(mFlags & ~kMFixedSize);
-	if (flags.find( "nosizebox") != std::string::npos)
+	if (flags.find("nosizebox") != std::string::npos)
 		mFlags = MWindowFlags(mFlags | kMNoSizeBox);
 
 	uint32_t minWidth = 40;
@@ -260,7 +281,7 @@ void MGtkDialogImpl::Finish()
 				response = GTK_RESPONSE_CANCEL;
 
 			GtkWidget *wdgt = gtk_dialog_add_button(GTK_DIALOG(GetWidget()),
-			                                        l(button.get_attribute("title")).c_str(), response);
+				l(button.get_attribute("title")).c_str(), response);
 
 			if (button.get_attribute("default") == "true")
 			{
@@ -273,7 +294,7 @@ void MGtkDialogImpl::Finish()
 }
 
 void MGtkDialogImpl::Append(MGtkWidgetMixin *inChild, MControlPacking inPacking,
-                            bool inExpand, bool inFill, uint32_t inPadding)
+	bool inExpand, bool inFill, uint32_t inPadding)
 {
 	GtkWidget *box =
 		gtk_dialog_get_content_area(GTK_DIALOG(GetWidget()));
@@ -291,7 +312,7 @@ void MGtkDialogImpl::Append(MGtkWidgetMixin *inChild, MControlPacking inPacking,
 }
 
 void MGtkDialogImpl::GetMargins(xml::element *inTemplate,
-                                int32_t &outLeftMargin, int32_t &outTopMargin, int32_t &outRightMargin, int32_t &outBottomMargin)
+	int32_t &outLeftMargin, int32_t &outTopMargin, int32_t &outRightMargin, int32_t &outBottomMargin)
 {
 	outLeftMargin = outTopMargin = outRightMargin = outBottomMargin = 0;
 
@@ -361,9 +382,9 @@ MView *MGtkDialogImpl::CreateExpander(xml::element *inTemplate, int32_t inX, int
 	string title = l(inTemplate->get_attribute("title"));
 
 	MRect bounds; //(inX, inY,
-				  //		static_cast<int32_t>((13 + 3) * mDLUX) +
-				  //			GetTextWidth(title, VSCLASS_TEXTSTYLE, TEXT_LABEL, 0),
-				  //		static_cast<int32_t>(12 * mDLUY));
+	              //		static_cast<int32_t>((13 + 3) * mDLUX) +
+	              //			GetTextWidth(title, VSCLASS_TEXTSTYLE, TEXT_LABEL, 0),
+	              //		static_cast<int32_t>(12 * mDLUY));
 
 	MExpander *expander = new MExpander(id, bounds, title);
 	AddRoute(expander->eClicked, static_cast<MDialog *>(mWindow)->eButtonClicked);
@@ -387,7 +408,7 @@ MView *MGtkDialogImpl::CreateCaption(xml::element *inTemplate, int32_t inX, int3
 	string text = l(inTemplate->get_attribute("text"));
 
 	MRect bounds; //(inX, static_cast<int32_t>(inY), 0, static_cast<int32_t>(10 * mDLUY));
-				  //	bounds.width = GetTextWidth(text, VSCLASS_TEXTSTYLE, TEXT_BODYTEXT, 0);
+	              //	bounds.width = GetTextWidth(text, VSCLASS_TEXTSTYLE, TEXT_BODYTEXT, 0);
 	return new MCaption(id, bounds, text);
 }
 
@@ -397,13 +418,13 @@ MView *MGtkDialogImpl::CreateCheckbox(xml::element *inTemplate, int32_t inX, int
 	string title = l(inTemplate->get_attribute("title"));
 
 	MRect bounds; //(inX, inY, 0, static_cast<int32_t>(10 * mDLUY));
-				  //	bounds.width = static_cast<int32_t>(14 * mDLUX) +
-				  //		GetTextWidth(title, VSCLASS_TEXTSTYLE, TEXT_BODYTEXT, 0);
-				  //		//GetTextWidth(title, VSCLASS_BUTTON, BP_CHECKBOX, PBS_NORMAL);
+	              //	bounds.width = static_cast<int32_t>(14 * mDLUX) +
+	              //		GetTextWidth(title, VSCLASS_TEXTSTYLE, TEXT_BODYTEXT, 0);
+	              //		//GetTextWidth(title, VSCLASS_BUTTON, BP_CHECKBOX, PBS_NORMAL);
 
 	MCheckbox *checkbox = new MCheckbox(id, bounds, title);
 	AddRoute(checkbox->eValueChanged,
-	         static_cast<MDialog *>(mWindow)->eCheckboxClicked);
+		static_cast<MDialog *>(mWindow)->eCheckboxClicked);
 	return checkbox;
 }
 
@@ -413,12 +434,12 @@ MView *MGtkDialogImpl::CreateRadiobutton(xml::element *inTemplate, int32_t inX, 
 	string title = l(inTemplate->get_attribute("title"));
 
 	MRect bounds; //(inX, inY, 0, static_cast<int32_t>(10 * mDLUY));
-				  //	bounds.width = static_cast<int32_t>(14 * mDLUX) +
-				  //		GetTextWidth(title, VSCLASS_TEXTSTYLE, TEXT_BODYTEXT, 0);
-				  //		GetTextWidth(title, VSCLASS_BUTTON, BP_RADIOBUTTON, PBS_NORMAL);
+	              //	bounds.width = static_cast<int32_t>(14 * mDLUX) +
+	              //		GetTextWidth(title, VSCLASS_TEXTSTYLE, TEXT_BODYTEXT, 0);
+	              //		GetTextWidth(title, VSCLASS_BUTTON, BP_RADIOBUTTON, PBS_NORMAL);
 	MRadiobutton *radiobutton = new MRadiobutton(id, bounds, title);
 	AddRoute(radiobutton->eValueChanged,
-	         static_cast<MDialog *>(mWindow)->eRadiobuttonClicked);
+		static_cast<MDialog *>(mWindow)->eRadiobuttonClicked);
 
 	mRadioGroup.push_back(radiobutton);
 
@@ -432,7 +453,7 @@ MView *MGtkDialogImpl::CreateCombobox(xml::element *inTemplate, int32_t inX, int
 	MRect bounds; //(inX, inY, static_cast<int32_t>(50 * mDLUX), static_cast<int32_t>(14 * mDLUY));
 	MCombobox *combobox = new MCombobox(id, bounds);
 	AddRoute(combobox->eValueChanged,
-	         static_cast<MDialog *>(mWindow)->eTextChanged);
+		static_cast<MDialog *>(mWindow)->eTextChanged);
 	return combobox;
 }
 
@@ -457,7 +478,7 @@ MView *MGtkDialogImpl::CreateEdittext(xml::element *inTemplate, int32_t inX, int
 		edittext->SetPasswordChar();
 
 	AddRoute(edittext->eValueChanged,
-	         static_cast<MDialog *>(mWindow)->eTextChanged);
+		static_cast<MDialog *>(mWindow)->eTextChanged);
 	return edittext;
 }
 
@@ -483,7 +504,7 @@ MView *MGtkDialogImpl::CreatePopup(xml::element *inTemplate, int32_t inX, int32_
 
 	popup->SetChoices(choices);
 	AddRoute(popup->eValueChanged,
-	         static_cast<MDialog *>(mWindow)->eValueChanged);
+		static_cast<MDialog *>(mWindow)->eValueChanged);
 
 	return popup;
 }
@@ -706,8 +727,8 @@ MView *MGtkDialogImpl::CreateTable(xml::element *inTemplate, int32_t inX, int32_
 
 	MRect r(inX, inY, 0, 0);
 	MTable *result = new MTable(id, r,
-	                            //		&views[0], colCount, rowCount, static_cast<int32_t>(4 * mDLUX), static_cast<int32_t>(4 * mDLUY));
-	                            &views[0], colCount, rowCount, 4, 4);
+		//		&views[0], colCount, rowCount, static_cast<int32_t>(4 * mDLUX), static_cast<int32_t>(4 * mDLUY));
+		&views[0], colCount, rowCount, 4, 4);
 
 	return result;
 }
@@ -809,7 +830,7 @@ MView *MGtkDialogImpl::CreateControls(xml::element *inTemplate, int32_t inX, int
 }
 
 uint32_t MGtkDialogImpl::GetTextWidth(const string &inText,
-                                      const wchar_t *inClass, int inPartID, int inStateID)
+	const wchar_t *inClass, int inPartID, int inStateID)
 {
 	uint32_t result = 0;
 	//	wstring text(c2w(inText));

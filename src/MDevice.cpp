@@ -1,26 +1,44 @@
-//          Copyright Maarten L. Hekkelman 2006-2008
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
+/*-
+ * SPDX-License-Identifier: BSD-2-Clause
+ *
+ * Copyright (c) 2023 Maarten L. Hekkelman
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
-#include "MLib.hpp"
+#include "MDevice.hpp"
+#include "MDeviceImpl.hpp"
+#include "MError.hpp"
+#include "MUnicode.hpp"
+#include "MView.hpp"
+#include "MWindow.hpp"
 
 #include <cmath>
 #include <cstring>
-
-#include "MDevice.hpp"
-#include "MView.hpp"
-#include "MWindow.hpp"
-#include "MError.hpp"
-#include "MUnicode.hpp"
-
-#include "MDeviceImpl.hpp"
 
 using namespace std;
 
 // -------------------------------------------------------------------
 
-MGeometry::MGeometry(MDevice& inDevice, MGeometryFillMode inMode)
+MGeometry::MGeometry(MDevice &inDevice, MGeometryFillMode inMode)
 	: mImpl(MGeometryImpl::Create(inDevice, inMode))
 {
 }
@@ -53,28 +71,40 @@ void MGeometry::End(bool inClose)
 // -------------------------------------------------------------------
 
 MBitmap::MBitmap()
-	: mData(nullptr), mWidth(0), mHeight(0), mStride(0), mUseAlpha(false)
+	: mData(nullptr)
+	, mWidth(0)
+	, mHeight(0)
+	, mStride(0)
+	, mUseAlpha(false)
 {
 }
 
-MBitmap::MBitmap(MBitmap&& inBitmap)
+MBitmap::MBitmap(MBitmap &&inBitmap)
 {
-	mData = inBitmap.mData;		inBitmap.mData = nullptr;
-	mWidth = inBitmap.mWidth;	inBitmap.mWidth = 0;
-	mHeight = inBitmap.mHeight;	inBitmap.mHeight = 0;
-	mStride = inBitmap.mStride;	inBitmap.mStride = 0;
+	mData = inBitmap.mData;
+	inBitmap.mData = nullptr;
+	mWidth = inBitmap.mWidth;
+	inBitmap.mWidth = 0;
+	mHeight = inBitmap.mHeight;
+	inBitmap.mHeight = 0;
+	mStride = inBitmap.mStride;
+	inBitmap.mStride = 0;
 	mUseAlpha = inBitmap.mUseAlpha;
-								inBitmap.mUseAlpha = false;
+	inBitmap.mUseAlpha = false;
 }
 
-MBitmap& MBitmap::operator=(MBitmap&& inBitmap)
+MBitmap &MBitmap::operator=(MBitmap &&inBitmap)
 {
-	mData = inBitmap.mData;		inBitmap.mData = nullptr;
-	mWidth = inBitmap.mWidth;	inBitmap.mWidth = 0;
-	mHeight = inBitmap.mHeight;	inBitmap.mHeight = 0;
-	mStride = inBitmap.mStride;	inBitmap.mStride = 0;
+	mData = inBitmap.mData;
+	inBitmap.mData = nullptr;
+	mWidth = inBitmap.mWidth;
+	inBitmap.mWidth = 0;
+	mHeight = inBitmap.mHeight;
+	inBitmap.mHeight = 0;
+	mStride = inBitmap.mStride;
+	inBitmap.mStride = 0;
 	mUseAlpha = inBitmap.mUseAlpha;
-								inBitmap.mUseAlpha = false;
+	inBitmap.mUseAlpha = false;
 	return *this;
 }
 
@@ -88,7 +118,7 @@ MBitmap::MBitmap(uint32_t inWidth, uint32_t inHeight, bool inUseAlpha)
 	mData = new uint32_t[inWidth * inHeight];
 }
 
-MBitmap::MBitmap(const MBitmap& inSource, MRect inCopyRect)
+MBitmap::MBitmap(const MBitmap &inSource, MRect inCopyRect)
 	: mData(nullptr)
 	, mWidth(inCopyRect.width)
 	, mHeight(inCopyRect.height)
@@ -132,7 +162,7 @@ MDevice::MDevice()
 // {
 // }
 
-MDevice::MDevice(MView* inView)
+MDevice::MDevice(MView *inView)
 	: mImpl(MDeviceImpl::Create(inView))
 {
 }
@@ -172,13 +202,13 @@ MRect MDevice::GetBounds() const
 }
 
 void MDevice::SetFont(
-	const string&	inFont)
+	const string &inFont)
 {
 	mImpl->SetFont(inFont);
 }
 
 void MDevice::SetForeColor(
-	MColor		inColor)
+	MColor inColor)
 {
 	mImpl->SetForeColor(inColor);
 }
@@ -189,7 +219,7 @@ MColor MDevice::GetForeColor() const
 }
 
 void MDevice::SetBackColor(
-	MColor		inColor)
+	MColor inColor)
 {
 	mImpl->SetBackColor(inColor);
 }
@@ -200,69 +230,69 @@ MColor MDevice::GetBackColor() const
 }
 
 void MDevice::ClipRect(
-	MRect		inRect)
+	MRect inRect)
 {
 	mImpl->ClipRect(inRect);
 }
 
-//void MDevice::ClipRegion(
+// void MDevice::ClipRegion(
 //	MRegion		inRegion)
 //{
 //	mImpl->ClipRegion(inRegion);
-//}
+// }
 
 void MDevice::EraseRect(
-	MRect		inRect)
+	MRect inRect)
 {
 	mImpl->EraseRect(inRect);
 }
 
 void MDevice::FillRect(
-	MRect		inRect)
+	MRect inRect)
 {
 	mImpl->FillRect(inRect);
 }
 
 void MDevice::StrokeRect(
-	MRect		inRect,
-	uint32_t		inLineWidth)
+	MRect inRect,
+	uint32_t inLineWidth)
 {
 	mImpl->StrokeRect(inRect, inLineWidth);
 }
 
 void MDevice::StrokeLine(
-	float				inFromX,
-	float				inFromY,
-	float				inToX,
-	float				inToY,
-	uint32_t				inLineWidth)
+	float inFromX,
+	float inFromY,
+	float inToX,
+	float inToY,
+	uint32_t inLineWidth)
 {
-	mImpl->StrokeLine(inFromX, inFromY, inToX, inToY, inLineWidth);	
+	mImpl->StrokeLine(inFromX, inFromY, inToX, inToY, inLineWidth);
 }
 
 void MDevice::StrokeGeometry(
-	MGeometry&			inGeometry,
-	float				inLineWidth)
+	MGeometry &inGeometry,
+	float inLineWidth)
 {
 	mImpl->StrokeGeometry(*inGeometry.mImpl, inLineWidth);
 }
 
 void MDevice::FillGeometry(
-	MGeometry&			inGeometry)
+	MGeometry &inGeometry)
 {
 	mImpl->FillGeometry(*inGeometry.mImpl);
 }
 
 void MDevice::FillEllipse(
-	MRect		inRect)
+	MRect inRect)
 {
 	mImpl->FillEllipse(inRect);
 }
 
 void MDevice::DrawBitmap(
-	const MBitmap&	inBitmap,
-	float			inX,
-	float			inY)
+	const MBitmap &inBitmap,
+	float inX,
+	float inY)
 {
 	mImpl->DrawBitmap(inBitmap, inX, inY);
 }
@@ -302,88 +332,88 @@ float MDevice::GetXWidth() const
 }
 
 void MDevice::DrawString(
-	const string&	inText,
-	float 			inX,
-	float 			inY,
-	uint32_t			inTruncateWidth,
-	MAlignment		inAlign)
+	const string &inText,
+	float inX,
+	float inY,
+	uint32_t inTruncateWidth,
+	MAlignment inAlign)
 {
 	mImpl->DrawString(inText, inX, inY, inTruncateWidth, inAlign);
 }
 
 void MDevice::DrawString(
-	const string&	inText,
-	MRect 			inBounds,
-	MAlignment		inAlign)
+	const string &inText,
+	MRect inBounds,
+	MAlignment inAlign)
 {
 	mImpl->DrawString(inText, inBounds, inAlign);
 }
 
 void MDevice::SetText(
-	const string&	inText)
+	const string &inText)
 {
 	mImpl->SetText(inText);
 }
 
 void MDevice::SetTabStops(
-	float			inTabWidth)
+	float inTabWidth)
 {
 	mImpl->SetTabStops(inTabWidth);
 }
 
 void MDevice::SetTextColors(
-	uint32_t				inColorCount,
-	uint32_t				inColorIndices[],
-	uint32_t				inOffsets[],
-	MColor				inColors[])
+	uint32_t inColorCount,
+	uint32_t inColorIndices[],
+	uint32_t inOffsets[],
+	MColor inColors[])
 {
 	mImpl->SetTextColors(inColorCount, inColorIndices, inOffsets, inColors);
 }
 
 void MDevice::SetTextStyles(
-	uint32_t				inStyleCount,
-	uint32_t				inStyles[],
-	uint32_t				inOffsets[])
+	uint32_t inStyleCount,
+	uint32_t inStyles[],
+	uint32_t inOffsets[])
 {
 	mImpl->SetTextStyles(inStyleCount, inStyles, inOffsets);
 }
 
 void MDevice::RenderTextBackground(
-	float				inX,
-	float				inY,
-	uint32_t				inStart,
-	uint32_t				inLength,
-	MColor				inColor)
+	float inX,
+	float inY,
+	uint32_t inStart,
+	uint32_t inLength,
+	MColor inColor)
 {
 	mImpl->RenderTextBackground(inX, inY, inStart, inLength, inColor);
 }
 
 void MDevice::SetTextSelection(
-	uint32_t			inStart,
-	uint32_t			inLength,
-	MColor			inSelectionColor)
+	uint32_t inStart,
+	uint32_t inLength,
+	MColor inSelectionColor)
 {
 	mImpl->SetTextSelection(inStart, inLength, inSelectionColor);
 }
 
 void MDevice::IndexToPosition(
-	uint32_t			inIndex,
-	bool			inTrailing,
-	int32_t&			outPosition)
+	uint32_t inIndex,
+	bool inTrailing,
+	int32_t &outPosition)
 {
 	mImpl->IndexToPosition(inIndex, inTrailing, outPosition);
 }
 
 bool MDevice::PositionToIndex(
-	int32_t			inPosition,
-	uint32_t&			outIndex)
+	int32_t inPosition,
+	uint32_t &outIndex)
 {
 	return mImpl->PositionToIndex(inPosition, outIndex);
 }
 
 void MDevice::RenderText(
-	float			inX,
-	float			inY)
+	float inX,
+	float inY)
 {
 	mImpl->RenderText(inX, inY);
 }
@@ -394,65 +424,52 @@ float MDevice::GetTextWidth() const
 }
 
 void MDevice::BreakLines(
-	uint32_t				inWidth,
-	vector<uint32_t>&		outBreaks)
+	uint32_t inWidth,
+	vector<uint32_t> &outBreaks)
 {
 	mImpl->BreakLines(inWidth, outBreaks);
 }
 
-void MDevice::DrawCaret(
-	float				inX,
-	float				inY,
-	uint32_t				inOffset)
+void MDevice::DrawCaret(float inX, float inY, uint32_t inOffset)
 {
 	mImpl->DrawCaret(inX, inY, inOffset);
 }
 
-void MDevice::MakeTransparent(
-	float				inOpacity)
+void MDevice::MakeTransparent(float inOpacity)
 {
 	mImpl->MakeTransparent(inOpacity);
 }
 
-//GdkPixmap* MDevice::GetPixmap() const
+// GdkPixmap* MDevice::GetPixmap() const
 //{
 //	return mImpl->GetPixmap();
-//}
+// }
 //
-void MDevice::SetDrawWhiteSpace(
-	bool				inDrawWhiteSpace,
-	MColor				inWhiteSpaceColor)
+void MDevice::SetDrawWhiteSpace(bool inDrawWhiteSpace, MColor inWhiteSpaceColor)
 {
 	mImpl->SetDrawWhiteSpace(inDrawWhiteSpace, inWhiteSpaceColor);
 }
 
-void MDevice::SetReplaceUnknownCharacters(
-	bool				inReplaceUnknownCharacters)
+void MDevice::SetReplaceUnknownCharacters(bool inReplaceUnknownCharacters)
 {
 	mImpl->SetReplaceUnknownCharacters(inReplaceUnknownCharacters);
 }
 
-void MDevice::SetScale(
-	float				inScaleX,
-	float				inScaleY,
-	float				inCenterX,
-	float				inCenterY)
+void MDevice::SetScale(float inScaleX, float inScaleY, float inCenterX, float inCenterY)
 {
 	mImpl->SetScale(inScaleX, inScaleY, inCenterX, inCenterY);
 }
 
-void MDevice::DrawListItemBackground(
-	MRect				inBounds,
-	MListItemState		inState)
+void MDevice::DrawListItemBackground(MRect inBounds, MListItemState inState)
 {
 	mImpl->DrawListItemBackground(inBounds, inState);
 }
 
-//void MDevice::DrawImage(
+// void MDevice::DrawImage(
 //	cairo_surface_t*	inImage,
 //	float				inX,
 //	float				inY,
 //	float				inShear)
 //{
 //	mImpl->DrawImage(inImage, inX, inY, inShear);
-//}
+// }

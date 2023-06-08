@@ -1,18 +1,37 @@
-//          Copyright Maarten L. Hekkelman 2006-2008
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
-
-#include "MLib.hpp"
-
-#include <regex>
+/*-
+ * SPDX-License-Identifier: BSD-2-Clause
+ *
+ * Copyright (c) 2023 Maarten L. Hekkelman
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #include "MColorPicker.hpp"
 #include "MCanvas.hpp"
+#include "MControls.hpp"
 #include "MDevice.hpp"
 #include "MPreferences.hpp"
-#include "MControls.hpp"
 #include "MUtils.hpp"
+
+#include <regex>
 
 using namespace std;
 
@@ -21,28 +40,28 @@ using namespace std;
 class MColorSquare : public MCanvas
 {
   public:
-					MColorSquare(const string& inID, MRect inBounds, MColorPicker& inPicker);
+	MColorSquare(const string &inID, MRect inBounds, MColorPicker &inPicker);
 
 	// virtual void	Draw(MRect inUpdate);
-	virtual void	Draw();
-	
-	void			SetColor(MColor inColor);
-	void			SetMode(MPickerMode inMode);
-	
-	MEventIn<void(MColor)>		eChangedColor;
-	MEventIn<void(MPickerMode)>	eChangedMode;
+	virtual void Draw();
 
-	virtual void	MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, uint32_t inModifiers);
-	virtual void	MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers);
-	virtual void	MouseExit();
-	virtual void	MouseUp(int32_t inX, int32_t inY, uint32_t inModifiers);
+	void SetColor(MColor inColor);
+	void SetMode(MPickerMode inMode);
+
+	MEventIn<void(MColor)> eChangedColor;
+	MEventIn<void(MPickerMode)> eChangedMode;
+
+	virtual void MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, uint32_t inModifiers);
+	virtual void MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers);
+	virtual void MouseExit();
+	virtual void MouseUp(int32_t inX, int32_t inY, uint32_t inModifiers);
 
   private:
-	bool			mMouseDown;
-	MColorPicker&	mPicker;
+	bool mMouseDown;
+	MColorPicker &mPicker;
 };
 
-MColorSquare::MColorSquare(const string& inID, MRect inBounds, MColorPicker& inPicker)
+MColorSquare::MColorSquare(const string &inID, MRect inBounds, MColorPicker &inPicker)
 	: MCanvas(inID, inBounds, false, false)
 	, eChangedColor(this, &MColorSquare::SetColor)
 	, eChangedMode(this, &MColorSquare::SetMode)
@@ -54,28 +73,52 @@ MColorSquare::MColorSquare(const string& inID, MRect inBounds, MColorPicker& inP
 void MColorSquare::Draw()
 {
 	MDevice dev(this);
-	
+
 	MRect bounds;
 	GetBounds(bounds);
 
 	dev.EraseRect(bounds);
-	
+
 	MBitmap bitmap(bounds.width, bounds.height);
 
-	char* data = reinterpret_cast<char*>(bitmap.Data());
-	
+	char *data = reinterpret_cast<char *>(bitmap.Data());
+
 	MPickerMode mode = mPicker.GetMode();
-	
+
 	float r = 0, g = 0, b = 0, h = 0, s = 0, v = 0, sfx = 0, sfy = 0;
 
 	switch (mode)
 	{
-		case ePickRGB:	mPicker.GetRGB(r, g, b); sfx = r; sfy = 1.f - g; break;
-		case ePickBGR:	mPicker.GetRGB(r, g, b); sfx = b; sfy = 1.f - g; break;
-		case ePickBRG:	mPicker.GetRGB(r, g, b); sfx = b; sfy = 1.f - r; break;
-		case ePickSVH:	mPicker.GetHSV(h, s, v); sfx = s; sfy = 1.f - v; break;
-		case ePickHVS:	mPicker.GetHSV(h, s, v); sfx = h; sfy = 1.f - v; break;
-		case ePickHSV:	mPicker.GetHSV(h, s, v); sfx = h; sfy = 1.f - s; break;
+		case ePickRGB:
+			mPicker.GetRGB(r, g, b);
+			sfx = r;
+			sfy = 1.f - g;
+			break;
+		case ePickBGR:
+			mPicker.GetRGB(r, g, b);
+			sfx = b;
+			sfy = 1.f - g;
+			break;
+		case ePickBRG:
+			mPicker.GetRGB(r, g, b);
+			sfx = b;
+			sfy = 1.f - r;
+			break;
+		case ePickSVH:
+			mPicker.GetHSV(h, s, v);
+			sfx = s;
+			sfy = 1.f - v;
+			break;
+		case ePickHVS:
+			mPicker.GetHSV(h, s, v);
+			sfx = h;
+			sfy = 1.f - v;
+			break;
+		case ePickHSV:
+			mPicker.GetHSV(h, s, v);
+			sfx = h;
+			sfy = 1.f - s;
+			break;
 	}
 
 	int32_t sx = static_cast<int32_t>(sfx * bounds.width);
@@ -83,30 +126,36 @@ void MColorSquare::Draw()
 
 	for (int32_t y = 0; y < bounds.height; ++y)
 	{
-		uint8_t* row = reinterpret_cast<uint8_t*>(data + y * bitmap.Stride());
-		
+		uint8_t *row = reinterpret_cast<uint8_t *>(data + y * bitmap.Stride());
+
 		switch (mode)
 		{
 			case ePickRGB:
-			case ePickBGR:	g = 1.f - (float(y) / bounds.height); break;
-			case ePickBRG:	r = 1.f - (float(y) / bounds.height); break;
+			case ePickBGR: g = 1.f - (float(y) / bounds.height); break;
+			case ePickBRG: r = 1.f - (float(y) / bounds.height); break;
 			case ePickSVH:
-			case ePickHVS:	v = 1.f - (float(y) / bounds.height); break;
-			case ePickHSV:	s = 1.f - (float(y) / bounds.height); break;
+			case ePickHVS: v = 1.f - (float(y) / bounds.height); break;
+			case ePickHSV: s = 1.f - (float(y) / bounds.height); break;
 		}
-		
+
 		for (int32_t x = 0; x < bounds.width; ++x)
 		{
 			switch (mode)
 			{
-				case ePickRGB:	r = float(x) / bounds.width; break;
+				case ePickRGB: r = float(x) / bounds.width; break;
 				case ePickBGR:
-				case ePickBRG:	b = float(x) / bounds.width; break;
-				case ePickSVH:	s = float(x) / bounds.width; hsv2rgb(h, s, v, r, g, b); break;
+				case ePickBRG: b = float(x) / bounds.width; break;
+				case ePickSVH:
+					s = float(x) / bounds.width;
+					hsv2rgb(h, s, v, r, g, b);
+					break;
 				case ePickHVS:
-				case ePickHSV:	h = float(x) / bounds.width; hsv2rgb(h, s, v, r, g, b); break;
+				case ePickHSV:
+					h = float(x) / bounds.width;
+					hsv2rgb(h, s, v, r, g, b);
+					break;
 			}
-			
+
 			MColor c(r, g, b);
 			if ((x == sx and abs(y - sy) < 3) or
 				(y == sy and abs(x - sx) < 3))
@@ -117,9 +166,9 @@ void MColorSquare::Draw()
 					c = kWhite.Distinct(c);
 			}
 
-			*row++ = c.blue; 
-			*row++ = c.green; 
-			*row++ = c.red; 
+			*row++ = c.blue;
+			*row++ = c.green;
+			*row++ = c.red;
 			*row++ = 255;
 		}
 	}
@@ -139,7 +188,7 @@ void MColorSquare::MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers)
 	{
 		MRect bounds;
 		GetBounds(bounds);
-		
+
 		bounds.PinPoint(inX, inY);
 
 		float r, g, b, h, s, v;
@@ -151,12 +200,12 @@ void MColorSquare::MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers)
 
 		switch (mPicker.GetMode())
 		{
-			case ePickSVH:	mPicker.SetHSV(h, x, y); break;
-			case ePickHVS:	mPicker.SetHSV(x, s, y); break;
-			case ePickHSV:	mPicker.SetHSV(x, y, v); break;
-			case ePickBGR:	mPicker.SetRGB(r, y, x); break;
-			case ePickBRG:	mPicker.SetRGB(y, g, x); break;
-			case ePickRGB:	mPicker.SetRGB(x, y, b); break;
+			case ePickSVH: mPicker.SetHSV(h, x, y); break;
+			case ePickHVS: mPicker.SetHSV(x, s, y); break;
+			case ePickHSV: mPicker.SetHSV(x, y, v); break;
+			case ePickBGR: mPicker.SetRGB(r, y, x); break;
+			case ePickBRG: mPicker.SetRGB(y, g, x); break;
+			case ePickRGB: mPicker.SetRGB(x, y, b); break;
 		}
 	}
 }
@@ -186,28 +235,28 @@ void MColorSquare::SetColor(MColor inColor)
 class MColorSlider : public MCanvas
 {
   public:
-					MColorSlider(const string& inID, MRect inBounds, MColorPicker& inPicker);
+	MColorSlider(const string &inID, MRect inBounds, MColorPicker &inPicker);
 
 	// virtual void	Draw(MRect inUpdate);
-	virtual void	Draw();
-	
-	void			SetColor(MColor inColor);
-	void			SetMode(MPickerMode inMode);
-	
-	MEventIn<void(MColor)>		eChangedColor;
-	MEventIn<void(MPickerMode)>	eChangedMode;
+	virtual void Draw();
 
-	virtual void	MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, uint32_t inModifiers);
-	virtual void	MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers);
-	virtual void	MouseExit();
-	virtual void	MouseUp(int32_t inX, int32_t inY, uint32_t inModifiers);
+	void SetColor(MColor inColor);
+	void SetMode(MPickerMode inMode);
+
+	MEventIn<void(MColor)> eChangedColor;
+	MEventIn<void(MPickerMode)> eChangedMode;
+
+	virtual void MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, uint32_t inModifiers);
+	virtual void MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers);
+	virtual void MouseExit();
+	virtual void MouseUp(int32_t inX, int32_t inY, uint32_t inModifiers);
 
   private:
-	bool			mMouseDown;
-	MColorPicker&	mPicker;
+	bool mMouseDown;
+	MColorPicker &mPicker;
 };
 
-MColorSlider::MColorSlider(const string& inID, MRect inBounds, MColorPicker& inPicker)
+MColorSlider::MColorSlider(const string &inID, MRect inBounds, MColorPicker &inPicker)
 	: MCanvas(inID, inBounds, false, false)
 	, eChangedColor(this, &MColorSlider::SetColor)
 	, eChangedMode(this, &MColorSlider::SetMode)
@@ -219,16 +268,16 @@ MColorSlider::MColorSlider(const string& inID, MRect inBounds, MColorPicker& inP
 void MColorSlider::Draw()
 {
 	MDevice dev(this);
-	
+
 	MRect bounds;
 	GetBounds(bounds);
 
 	dev.EraseRect(bounds);
-	
+
 	MBitmap bitmap(bounds.width, bounds.height);
 
-	uint8_t* data = reinterpret_cast<uint8_t*>(bitmap.Data());
-	
+	uint8_t *data = reinterpret_cast<uint8_t *>(bitmap.Data());
+
 	MPickerMode mode = mPicker.GetMode();
 
 	float r = 0, g = 0, b = 0, h = 0, s = 0, v = 0;
@@ -236,32 +285,59 @@ void MColorSlider::Draw()
 
 	switch (mode)
 	{
-		case ePickRGB:	mPicker.GetRGB(r, g, b); sy = static_cast<int32_t>((1.f - b) * bounds.height); break;
-		case ePickBGR:	mPicker.GetRGB(r, g, b); sy = static_cast<int32_t>((1.f - r) * bounds.height); break;
-		case ePickBRG:	mPicker.GetRGB(r, g, b); sy = static_cast<int32_t>((1.f - g) * bounds.height); break;
-		case ePickSVH:	mPicker.GetHSV(h, s, v); sy = static_cast<int32_t>(h * bounds.height); break;
-		case ePickHVS:	mPicker.GetHSV(h, s, v); sy = static_cast<int32_t>((1.f - s) * bounds.height); break;
-		case ePickHSV:	mPicker.GetHSV(h, s, v); sy = static_cast<int32_t>((1.f - v) * bounds.height); break;
+		case ePickRGB:
+			mPicker.GetRGB(r, g, b);
+			sy = static_cast<int32_t>((1.f - b) * bounds.height);
+			break;
+		case ePickBGR:
+			mPicker.GetRGB(r, g, b);
+			sy = static_cast<int32_t>((1.f - r) * bounds.height);
+			break;
+		case ePickBRG:
+			mPicker.GetRGB(r, g, b);
+			sy = static_cast<int32_t>((1.f - g) * bounds.height);
+			break;
+		case ePickSVH:
+			mPicker.GetHSV(h, s, v);
+			sy = static_cast<int32_t>(h * bounds.height);
+			break;
+		case ePickHVS:
+			mPicker.GetHSV(h, s, v);
+			sy = static_cast<int32_t>((1.f - s) * bounds.height);
+			break;
+		case ePickHSV:
+			mPicker.GetHSV(h, s, v);
+			sy = static_cast<int32_t>((1.f - v) * bounds.height);
+			break;
 	}
 
 	for (int32_t y = 0; y < bounds.height; ++y)
 	{
-		uint8_t* row = reinterpret_cast<uint8_t*>(data + y * bitmap.Stride());
-		
+		uint8_t *row = reinterpret_cast<uint8_t *>(data + y * bitmap.Stride());
+
 		switch (mode)
 		{
-			case ePickRGB:	b = 1.f - float(y) / bounds.height; break;
-			case ePickBGR:	r = 1.f - float(y) / bounds.height; break;
-			case ePickBRG:	g = 1.f - float(y) / bounds.height; break;
-			case ePickSVH:	h = float(y) / bounds.height; 		hsv2rgb(h, s, v, r, g, b); break;
-			case ePickHVS:	s = 1.f - float(y) / bounds.height; hsv2rgb(h, s, v, r, g, b); break;
-			case ePickHSV:	v = 1.f - float(y) / bounds.height; hsv2rgb(h, s, v, r, g, b); break;
+			case ePickRGB: b = 1.f - float(y) / bounds.height; break;
+			case ePickBGR: r = 1.f - float(y) / bounds.height; break;
+			case ePickBRG: g = 1.f - float(y) / bounds.height; break;
+			case ePickSVH:
+				h = float(y) / bounds.height;
+				hsv2rgb(h, s, v, r, g, b);
+				break;
+			case ePickHVS:
+				s = 1.f - float(y) / bounds.height;
+				hsv2rgb(h, s, v, r, g, b);
+				break;
+			case ePickHSV:
+				v = 1.f - float(y) / bounds.height;
+				hsv2rgb(h, s, v, r, g, b);
+				break;
 		}
-		
+
 		for (int32_t x = 0; x < bounds.width; ++x)
-		{		
+		{
 			MColor c(r, g, b);
-		
+
 			if (y == sy)
 			{
 				if (x & 1)
@@ -270,9 +346,9 @@ void MColorSlider::Draw()
 					c = kWhite.Distinct(c);
 			}
 
-			*row++ = c.blue; 
-			*row++ = c.green; 
-			*row++ = c.red; 
+			*row++ = c.blue;
+			*row++ = c.green;
+			*row++ = c.red;
 			*row++ = 255;
 		}
 	}
@@ -294,7 +370,7 @@ void MColorSlider::MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers)
 		GetBounds(bounds);
 
 		bounds.PinPoint(inX, inY);
-		
+
 		float r, g, b, h, s, v;
 		mPicker.GetRGB(r, g, b);
 		mPicker.GetHSV(h, s, v);
@@ -303,12 +379,12 @@ void MColorSlider::MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers)
 
 		switch (mPicker.GetMode())
 		{
-			case ePickSVH:	mPicker.SetHSV(1.0f - y, s, v); break;
-			case ePickHVS:	mPicker.SetHSV(h, y, v); break;
-			case ePickHSV:	mPicker.SetHSV(h, s, y); break;
-			case ePickBGR:	mPicker.SetRGB(y, g, b); break;
-			case ePickBRG:	mPicker.SetRGB(r, y, b); break;
-			case ePickRGB:	mPicker.SetRGB(r, g, y); break;
+			case ePickSVH: mPicker.SetHSV(1.0f - y, s, v); break;
+			case ePickHVS: mPicker.SetHSV(h, y, v); break;
+			case ePickHSV: mPicker.SetHSV(h, s, y); break;
+			case ePickBGR: mPicker.SetRGB(y, g, b); break;
+			case ePickBRG: mPicker.SetRGB(r, y, b); break;
+			case ePickRGB: mPicker.SetRGB(r, g, y); break;
 		}
 	}
 }
@@ -338,25 +414,25 @@ void MColorSlider::SetColor(MColor inColor)
 class MColorSample : public MCanvas
 {
   public:
-					MColorSample(const string& inID, MRect inBounds, MColorPicker& inPicker, MColor& inColor);
+	MColorSample(const string &inID, MRect inBounds, MColorPicker &inPicker, MColor &inColor);
 
 	// virtual void	Draw(MRect inUpdate);
-	virtual void	Draw();
+	virtual void Draw();
 
-	virtual void	MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, uint32_t inModifiers);
-	virtual void	MouseUp(int32_t inX, int32_t inY, uint32_t inModifiers);
+	virtual void MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, uint32_t inModifiers);
+	virtual void MouseUp(int32_t inX, int32_t inY, uint32_t inModifiers);
 
-	void			SetColor(MColor inColor);
-	
-	MEventIn<void(MColor)>		eChangedColor;
+	void SetColor(MColor inColor);
+
+	MEventIn<void(MColor)> eChangedColor;
 
   private:
-	MColorPicker&	mPicker;
-	MColor			mColor;
-	bool			mMouseDown;
+	MColorPicker &mPicker;
+	MColor mColor;
+	bool mMouseDown;
 };
 
-MColorSample::MColorSample(const string& inID, MRect inBounds, MColorPicker& inPicker, MColor& inColor)
+MColorSample::MColorSample(const string &inID, MRect inBounds, MColorPicker &inPicker, MColor &inColor)
 	: MCanvas(inID, inBounds, false, false)
 	, eChangedColor(this, &MColorSample::SetColor)
 	, mPicker(inPicker)
@@ -369,7 +445,7 @@ void MColorSample::Draw()
 	MDevice dev(this);
 
 	dev.SetForeColor(mColor);
-	
+
 	MRect bounds;
 	GetBounds(bounds);
 
@@ -386,7 +462,7 @@ void MColorSample::MouseUp(int32_t inX, int32_t inY, uint32_t inModifiers)
 {
 	if (mMouseDown and mBounds.ContainsPoint(inX, inY))
 		mPicker.SetColor(mColor);
-	
+
 	mMouseDown = false;
 }
 
@@ -399,8 +475,8 @@ void MColorSample::SetColor(MColor inColor)
 // --------------------------------------------------------------------
 
 MColorPicker::MColorPicker(
-	MWindow*		inWindow,
-	MColor			inColor)
+	MWindow *inWindow,
+	MColor inColor)
 	: MDialog("color-picker")
 	, mMode(ePickHSV)
 	, mSettingText(false)
@@ -413,75 +489,81 @@ MColorPicker::MColorPicker(
 	rgb2hsv(mRed, mGreen, mBlue, mHue, mSaturation, mValue);
 
 	// build dialog
-	
-	MView* placeholder = FindSubViewByID("square");
+
+	MView *placeholder = FindSubViewByID("square");
 	MRect bounds;
 	placeholder->GetBounds(bounds);
-	
+
 	// correct the size
 	int32_t dx = 256 - bounds.width;
 	int32_t dy = 256 - bounds.height;
 	ResizeWindow(dx, dy);
 
 	placeholder->GetBounds(bounds);
-	MColorSquare* square = new MColorSquare("square-control", bounds, *this);
+	MColorSquare *square = new MColorSquare("square-control", bounds, *this);
 	placeholder->AddChild(square);
 
 	placeholder = FindSubViewByID("slider");
 	placeholder->GetBounds(bounds);
-	MColorSlider* slider = new MColorSlider("slider-control", bounds, *this);
+	MColorSlider *slider = new MColorSlider("slider-control", bounds, *this);
 	placeholder->AddChild(slider);
 
 	placeholder = FindSubViewByID("sample-before");
 	placeholder->GetBounds(bounds);
-	MColorSample* sample = new MColorSample("sample-control", bounds, *this, inColor);
+	MColorSample *sample = new MColorSample("sample-control", bounds, *this, inColor);
 	placeholder->AddChild(sample);
 
 	placeholder = FindSubViewByID("sample-after");
 	placeholder->GetBounds(bounds);
 	sample = new MColorSample("sample-control", bounds, *this, inColor);
 	placeholder->AddChild(sample);
-	
+
 	AddRoute(eChangedMode, square->eChangedMode);
 	AddRoute(eChangedMode, slider->eChangedMode);
 
 	AddRoute(eChangedColor, square->eChangedColor);
 	AddRoute(eChangedColor, slider->eChangedColor);
 	AddRoute(eChangedColor, sample->eChangedColor);
-	
+
 	UpdateColor();
-	
+
 	Show(inWindow);
 
 	string mode = Preferences::GetString("color-picker-mode", "hue");
-	MRadiobutton* button = dynamic_cast<MRadiobutton*>(FindSubViewByID(mode));
+	MRadiobutton *button = dynamic_cast<MRadiobutton *>(FindSubViewByID(mode));
 	if (button != nullptr)
 	{
 		button->SetChecked(true);
 		RadiobuttonChanged(mode, true);
 	}
-	
+
 	Select();
 }
 
-void MColorPicker::RadiobuttonChanged(const string& inID, bool inValue)
+void MColorPicker::RadiobuttonChanged(const string &inID, bool inValue)
 {
 	if (inValue)
 	{
-		if (inID == "hue")				SetMode(ePickSVH);
-		else if (inID == "saturation")	SetMode(ePickHVS);
-		else if (inID == "value")		SetMode(ePickHSV);
-		else if (inID == "red")			SetMode(ePickBGR);
-		else if (inID == "green")		SetMode(ePickBRG);
-		else if (inID == "blue")		SetMode(ePickRGB);
+		if (inID == "hue")
+			SetMode(ePickSVH);
+		else if (inID == "saturation")
+			SetMode(ePickHVS);
+		else if (inID == "value")
+			SetMode(ePickHSV);
+		else if (inID == "red")
+			SetMode(ePickBGR);
+		else if (inID == "green")
+			SetMode(ePickBRG);
+		else if (inID == "blue")
+			SetMode(ePickRGB);
 	}
 }
 
-void MColorPicker::TextChanged(const string& inID, const string& inText)
+void MColorPicker::TextChanged(const string &inID, const string &inText)
 {
 	if (mSettingText)
 		return;
-	
+
 	if (inID == "hex")
 	{
 		const std::regex re("([[:xdigit:]]{2})([[:xdigit:]]{2})([[:xdigit:]]{2})");
@@ -502,17 +584,22 @@ void MColorPicker::TextChanged(const string& inID, const string& inText)
 		try
 		{
 			v = std::stoi(inText);
-			
-			if (inID == "red-text")				SetRGB(v / 255.f, mGreen, mBlue);
-			else if (inID == "green-text")		SetRGB(mRed, v / 255.f, mBlue);
-			else if (inID == "blue-text")		SetRGB(mRed, mGreen, v / 255.f);
-			else if (inID == "hue-text")		SetHSV(v / 360.f, mSaturation, mValue);
-			else if (inID == "saturation-text")	SetHSV(mHue, v / 100.f, mValue);
-			else if (inID == "value-text")		SetHSV(mHue, mSaturation, v / 100.f);
+
+			if (inID == "red-text")
+				SetRGB(v / 255.f, mGreen, mBlue);
+			else if (inID == "green-text")
+				SetRGB(mRed, v / 255.f, mBlue);
+			else if (inID == "blue-text")
+				SetRGB(mRed, mGreen, v / 255.f);
+			else if (inID == "hue-text")
+				SetHSV(v / 360.f, mSaturation, mValue);
+			else if (inID == "saturation-text")
+				SetHSV(mHue, v / 100.f, mValue);
+			else if (inID == "value-text")
+				SetHSV(mHue, mSaturation, v / 100.f);
 		}
-		catch (std::invalid_argument&)
+		catch (std::invalid_argument &)
 		{
-			
 		}
 	}
 }
@@ -541,7 +628,7 @@ MPickerMode MColorPicker::GetMode() const
 void MColorPicker::UpdateColor()
 {
 	MValueChanger<bool> save(mSettingText, true);
-	
+
 	uint32_t red = static_cast<uint32_t>(mRed * 255);
 	uint32_t green = static_cast<uint32_t>(mGreen * 255);
 	uint32_t blue = static_cast<uint32_t>(mBlue * 255);
@@ -565,12 +652,12 @@ void MColorPicker::UpdateColor()
 	hex[3] = kHexChars[green & 0x0f];
 	hex[4] = kHexChars[blue >> 4];
 	hex[5] = kHexChars[blue & 0x0f];
-	
+
 	SetText("hex", hex);
 
 	MColor color(mRed, mGreen, mBlue);
 	eChangedColor(color);
-	
+
 	UpdateNow();
 }
 
@@ -586,59 +673,71 @@ void MColorPicker::SetColor(MColor inColor)
 
 void MColorPicker::SetRGB(float inRed, float inGreen, float inBlue)
 {
-	if (inRed > 1.f)		inRed = 1.f;
-	else if (inRed < 0.f)	inRed = 0;
-	if (inGreen > 1.f)		inGreen = 1.f;
-	else if (inGreen < 0.f)	inGreen = 0;
-	if (inBlue > 1.f)		inBlue = 1.f;
-	else if (inBlue < 0.f)	inBlue = 0;
-	
+	if (inRed > 1.f)
+		inRed = 1.f;
+	else if (inRed < 0.f)
+		inRed = 0;
+	if (inGreen > 1.f)
+		inGreen = 1.f;
+	else if (inGreen < 0.f)
+		inGreen = 0;
+	if (inBlue > 1.f)
+		inBlue = 1.f;
+	else if (inBlue < 0.f)
+		inBlue = 0;
+
 	if (mRed != inRed or mGreen != inGreen or mBlue != inBlue)
 	{
 		mRed = inRed;
 		mGreen = inGreen;
 		mBlue = inBlue;
 		rgb2hsv(mRed, mGreen, mBlue, mHue, mSaturation, mValue);
-	
+
 		UpdateColor();
 	}
 }
 
 void MColorPicker::SetHSV(float inHue, float inSaturation, float inValue)
 {
-	if (inHue > 1.f)				inHue = 1.f;
-	else if (inHue < 0.f)			inHue = 0;
-	if (inSaturation > 1.f)			inSaturation = 1.f;
-	else if (inSaturation < 0.f)	inSaturation = 0;
-	if (inValue > 1.f)				inValue = 1.f;
-	else if (inValue < 0.f)			inValue = 0;
-	
+	if (inHue > 1.f)
+		inHue = 1.f;
+	else if (inHue < 0.f)
+		inHue = 0;
+	if (inSaturation > 1.f)
+		inSaturation = 1.f;
+	else if (inSaturation < 0.f)
+		inSaturation = 0;
+	if (inValue > 1.f)
+		inValue = 1.f;
+	else if (inValue < 0.f)
+		inValue = 0;
+
 	if (mHue != inHue or mSaturation != inSaturation or mValue != inValue)
 	{
 		mHue = inHue;
 		mSaturation = inSaturation;
 		mValue = inValue;
 		hsv2rgb(mHue, mSaturation, mValue, mRed, mGreen, mBlue);
-	
+
 		UpdateColor();
 	}
 }
 
-void MColorPicker::GetColor(MColor& outColor) const
+void MColorPicker::GetColor(MColor &outColor) const
 {
 	outColor.red = static_cast<uint8_t>(mRed * 255);
 	outColor.green = static_cast<uint8_t>(mGreen * 255);
 	outColor.blue = static_cast<uint8_t>(mBlue * 255);
 }
 
-void MColorPicker::GetRGB(float& outRed, float& outGreen, float& outBlue) const
+void MColorPicker::GetRGB(float &outRed, float &outGreen, float &outBlue) const
 {
 	outRed = mRed;
 	outGreen = mGreen;
 	outBlue = mBlue;
 }
 
-void MColorPicker::GetHSV(float& outHue, float& outSaturation, float& outValue) const
+void MColorPicker::GetHSV(float &outHue, float &outSaturation, float &outValue) const
 {
 	outHue = mHue;
 	outSaturation = mSaturation;
