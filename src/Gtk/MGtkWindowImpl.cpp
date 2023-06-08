@@ -956,7 +956,9 @@ void MWindow::GetMainScreenBounds(MRect &outRect)
 	auto monitor = gdk_display_get_primary_monitor(display);
 
 	GdkRectangle r{ 0, 0, 1024, 768 };
-	gdk_monitor_get_workarea(monitor, &r);
+
+	if (GDK_IS_MONITOR(monitor))
+		gdk_monitor_get_workarea(monitor, &r);
 
 	outRect = MRect(r.x, r.y, r.width, r.height);
 }
