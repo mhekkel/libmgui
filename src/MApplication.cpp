@@ -211,14 +211,14 @@ void MApplication::DoQuit()
 
 void MApplication::Pulse()
 {
-	// if there are no visible windows left, we quit
-	MWindow *front = MWindow::GetFirstWindow();
-	while (front != nullptr and not front->IsVisible())
-		front = front->GetNextWindow();
+	// // if there are no visible windows left, we quit
+	// MWindow *front = MWindow::GetFirstWindow();
+	// while (front != nullptr and not front->IsVisible())
+	// 	front = front->GetNextWindow();
 
-	if (front == nullptr)
-		DoQuit();
-	else
+	// if (front == nullptr)
+	// 	DoQuit();
+	// else
 		eIdle(GetLocalTime());
 
 	Preferences::SaveIfDirty();
