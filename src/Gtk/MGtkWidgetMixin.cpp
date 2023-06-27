@@ -343,9 +343,9 @@ bool MGtkWidgetMixin::OnMouseExit()
 
 bool MGtkWidgetMixin::OnKeyPressEvent(GdkEventKey *inEvent)
 {
-	PRINT(("OnKeyPressEvent(kv=0x%x,m=0x%x,t=0x%x)", inEvent->keyval, inEvent->state, inEvent->time));
+	// PRINT(("OnKeyPressEvent(kv=0x%x,m=0x%x,t=0x%x)", inEvent->keyval, inEvent->state, inEvent->time));
 
-	PRINT(("This is in %s", G_OBJECT_TYPE_NAME(mWidget)));
+	// PRINT(("This is in %s", G_OBJECT_TYPE_NAME(mWidget)));
 
 	bool result = false;
 
@@ -357,7 +357,7 @@ bool MGtkWidgetMixin::OnKeyPressEvent(GdkEventKey *inEvent)
 	if (mIMContext and gtk_im_context_filter_keypress(mIMContext, inEvent))
 		result = true;
 
-	PRINT(("result is %s", result ? "true" : "false"));
+	// PRINT(("result is %s", result ? "true" : "false"));
 
 	return result;
 }

@@ -147,7 +147,7 @@ class MGtkDialogImpl : public MGtkWindowImpl
 
 bool MGtkDialogImpl::OnKeyPressEvent(GdkEventKey *inEvent)
 {
-	PRINT(("MGtkDialogImpl::OnKeyPressEvent"));
+	// PRINT(("MGtkDialogImpl::OnKeyPressEvent"));
 
 	bool result = MGtkWidgetMixin::OnKeyPressEvent(inEvent);
 
@@ -163,7 +163,7 @@ bool MGtkDialogImpl::OnKeyPressEvent(GdkEventKey *inEvent)
 		}
 	}
 
-	PRINT(("MGtkDialogImpl::OnKeyPressEvent => %d", result));
+	// PRINT(("MGtkDialogImpl::OnKeyPressEvent => %d", result));
 
 	return result;
 }
