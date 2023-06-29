@@ -159,8 +159,7 @@ class MView
 	MView *FindSubView(int32_t inX, int32_t inY) const;
 	virtual MView *FindSubViewByID(const std::string &inID) const;
 
-	virtual MHandler *
-	FindFocus();
+	virtual MHandler *FindFocus();
 
 	virtual void ConvertToParent(int32_t &ioX, int32_t &ioY) const;
 	virtual void ConvertFromParent(int32_t &ioX, int32_t &ioY) const;

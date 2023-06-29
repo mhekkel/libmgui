@@ -50,8 +50,7 @@ class MControlBase : public MView, public MHandler
 
 	virtual bool IsFocus() const = 0;
 	virtual void SetFocus() = 0;
-	virtual MHandler *
-	FindFocus() { return IsFocus() ? this : MView::FindFocus(); }
+	virtual MHandler *FindFocus() { return IsFocus() ? this : MView::FindFocus(); }
 
 	// for auto layout of controls
 	MControlPacking GetPacking() const { return mPacking; }

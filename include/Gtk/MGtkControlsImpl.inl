@@ -255,7 +255,7 @@ void MGtkControlImpl<CONTROL>::OnChanged()
 template <class CONTROL>
 bool MGtkControlImpl<CONTROL>::OnKeyPressEvent(GdkEventKey *inEvent)
 {
-	PRINT(("OnKeyPressEvent for %s", this->mControl->GetID().c_str()));
+	// PRINT(("OnKeyPressEvent for %s", this->mControl->GetID().c_str()));
 
 	bool result = MGtkWidgetMixin::OnKeyPressEvent(inEvent);
 
@@ -275,7 +275,7 @@ bool MGtkControlImpl<CONTROL>::OnKeyPressEvent(GdkEventKey *inEvent)
 		}
 	}
 
-	PRINT(("OnKeyPressEvent returns %d", result));
+	// PRINT(("OnKeyPressEvent returns %d", result));
 	return result;
 }
 
@@ -295,6 +295,10 @@ void MGtkControlImpl<CONTROL>::OnPopupMenu()
 #endif
 
 	auto window = gdk_display_get_default_group(gdk_display_get_default());
+
+	if (window == nullptr)
+		window = gtk_widget_get_window(GetWidget());
+
 	gdk_window_get_device_position(window, mouse_device, &x, &y, NULL);
 	// g_message ("pointer: %i %i", x, y);
 

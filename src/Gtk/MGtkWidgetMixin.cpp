@@ -222,7 +222,7 @@ bool MGtkWidgetMixin::OnButtonPressEvent(GdkEventButton *inEvent)
 
 	if (std::chrono::steady_clock::now() - mGainedFocusAt < std::chrono::milliseconds(100))
 	{
-		PRINT(("Ignoring click, since it was too soon after a focus in event"));
+		// PRINT(("Ignoring click, since it was too soon after a focus in event"));
 		return false;
 	}
 

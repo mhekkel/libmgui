@@ -178,7 +178,11 @@ void MMenuItem::ItemCallback()
 			MHandler *target = mMenu->GetTarget();
 			MWindow *window = dynamic_cast<MWindow *>(target);
 			if (window != nullptr)
-				target = window->FindFocus();
+			{
+				auto focus = window->FindFocus();
+				if (focus != nullptr)
+					target = focus;
+			}
 
 			if (process and target != nullptr and not target->ProcessCommand(mCommand, mMenu, mIndex, modifiers))
 				PRINT(("Unhandled command: %s", (const char *)MCommandToString(mCommand)));

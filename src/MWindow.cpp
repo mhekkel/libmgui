@@ -96,10 +96,7 @@ MWindow::MWindow(MWindowImpl *inImpl)
 MWindow::~MWindow()
 {
 	delete mImpl;
-
-	sWindowList.erase(
-		remove(sWindowList.begin(), sWindowList.end(), this),
-		sWindowList.end());
+	RemoveWindowFromWindowList(this);
 }
 
 void MWindow::SetImpl(
@@ -148,6 +145,13 @@ MWindow *MWindow::GetNextWindow() const
 	}
 
 	return result;
+}
+
+void MWindow::RemoveWindowFromWindowList(MWindow *window)
+{
+	sWindowList.erase(
+		remove(sWindowList.begin(), sWindowList.end(), window),
+		sWindowList.end());
 }
 
 MWindow *MWindow::GetWindow() const

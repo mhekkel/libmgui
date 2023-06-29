@@ -342,11 +342,16 @@ void MGtkWindowImpl::Select()
 
 	auto gdkWindow = gtk_widget_get_window(GetWidget());
 
-	auto d = gdk_x11_display_get_xdisplay(gdk_display_get_default());
-	auto w = gdk_x11_window_get_xid(gdkWindow);
+	if (getenv("WAYLAND_DISPLAY") == nullptr)
+	{
+		auto d = gdk_x11_display_get_xdisplay(gdk_display_get_default());
+		auto w = gdk_x11_window_get_xid(gdkWindow);
 
-	if (d and w)
-		ActivateWindow(d, w);
+		if (d and w)
+			ActivateWindow(d, w);
+		else
+			gdk_window_focus(gdkWindow, GDK_CURRENT_TIME);
+	}
 	else
 		gdk_window_focus(gdkWindow, GDK_CURRENT_TIME);
 
@@ -423,6 +428,8 @@ bool MGtkWindowImpl::OnDelete(GdkEvent *inEvent)
 bool MGtkWindowImpl::OnMapEvent(GdkEvent *inEvent)
 {
 	//	PRINT(("MGtkWindowImpl::OnMapEvent"));
+
+	DoForEach(GetWidget());
 
 	mWindow->BeFocus();
 

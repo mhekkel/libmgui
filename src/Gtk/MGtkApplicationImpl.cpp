@@ -146,7 +146,7 @@ void MGtkApplicationImpl::ProcessAsyncTasks(GMainContext *context)
 
 gboolean MGtkApplicationImpl::HandleAsyncCallback(gpointer inData)
 {
-	PRINT(("Handle Async Task in Thread ID = %p", std::this_thread::get_id()));
+	// PRINT(("Handle Async Task in Thread ID = %p", std::this_thread::get_id()));
 
 	MAsyncHandlerBase *handler = reinterpret_cast<MAsyncHandlerBase *>(inData);
 	handler->execute();
