@@ -358,7 +358,7 @@ void MGtkWindowImpl::Select()
 	if (Visible())
 	{
 		gdk_window_raise(gdkWindow);
-		gtk_window_present(GTK_WINDOW(GetWidget()));
+		gtk_window_present_with_time(GTK_WINDOW(GetWidget()), gtk_get_current_event_time());
 	}
 	else
 		Show();
