@@ -77,7 +77,7 @@ set(CMAKE_THREAD_PREFER_PTHREAD)
 set(THREADS_PREFER_PTHREAD_FLAG)
 find_package(Threads REQUIRED)
 
-find_package(zeep 5.1.6 REQUIRED)
+# find_package(zeep 5.1.6 REQUIRED)
 
 pkg_check_modules(GTK3 libcanberra-gtk3 REQUIRED IMPORTED_TARGET)
 
