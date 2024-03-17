@@ -442,6 +442,8 @@ class MColorSwatch : public MControl<MColorSwatchImpl>
 	virtual MColor GetColor() const;
 	virtual void SetColor(MColor inColor);
 
+	void SetPalette(const std::vector<MColor> &colors);
+
 	MEventOut<void(const std::string &, MColor)> eColorChanged;
 	MEventOut<void(const std::string &, MColor)> eColorPreview;
 };

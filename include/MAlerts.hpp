@@ -26,12 +26,6 @@
 
 #pragma once
 
-#if __has_include(<experimental/type_traits>)
-#include <experimental/type_traits>
-#elif __has_include(<zeep/type-traits.hpp>)
-#include <zeep/type-traits.hpp>
-#endif
-
 #include <exception>
 #include <sstream>
 #include <vector>
@@ -42,12 +36,5 @@ void DisplayError(const std::exception &inException);
 void DisplayError(const std::string &inError);
 void DisplayError(const std::error_code &inError);
 
-// the actual implementation
-
-template <typename T>
-using to_string_t = decltype(std::to_string(std::declval<const T &>()));
-
-template <typename T>
-constexpr bool inline has_to_string_v = std::experimental::is_detected_v<to_string_t, T>;
-
-int32_t DisplayAlert(MWindow *inParent, const std::string &inResourceName, std::initializer_list<std::string> inArguments);
+int32_t DisplayAlert(MWindow *inParent, const std::string &inResourceName,
+	std::initializer_list<std::string> inArguments);

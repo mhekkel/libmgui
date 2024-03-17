@@ -346,6 +346,11 @@ void MColorSwatch::SetColor(MColor inColor)
 	mImpl->SetColor(inColor);
 }
 
+void MColorSwatch::SetPalette(const std::vector<MColor> &colors)
+{
+	mImpl->SetPalette(colors);
+}
+
 // --------------------------------------------------------------------
 
 MListBox::MListBox(const string& inID, MRect inBounds)

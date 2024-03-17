@@ -328,6 +328,8 @@ class MColorSwatchImpl : public MControlImpl<MColorSwatch>
 	virtual MColor GetColor() const = 0;
 	virtual void SetColor(MColor inColor) = 0;
 
+	virtual void SetPalette(const std::vector<MColor> &colors) = 0;
+
 	static MColorSwatchImpl *
 	Create(MColorSwatch *inColorSwatch, MColor inColor);
 };

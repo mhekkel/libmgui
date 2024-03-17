@@ -345,6 +345,8 @@ class MGtkColorSwatchImpl : public MGtkControlImpl<MColorSwatch>
 	virtual MColor GetColor() const;
 	virtual void SetColor(MColor inColor);
 
+	virtual void SetPalette(const std::vector<MColor> &colors);
+
   private:
 	MEventIn<void(MColor)> eSelectedColor;
 	void SelectedColor(MColor inColor);
@@ -356,6 +358,7 @@ class MGtkColorSwatchImpl : public MGtkControlImpl<MColorSwatch>
 	void OnColorSet();
 
 	MColor mColor;
+	std::vector<MColor> mPalette;
 };
 
 class MGtkListBoxImpl : public MGtkControlImpl<MListBox>

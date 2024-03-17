@@ -73,6 +73,11 @@ class MGDbusServer
 			"      <annotation name='org.gtk.GDBus.Annotation' value='OnMethod'/>"
 			"      <arg type='s' name='result' direction='out'/>"
 			"    </method>"
+			"    <method name='Exec'>"
+			"      <annotation name='org.gtk.GDBus.Annotation' value='OnMethod'/>"
+			"      <arg type='s' name='command' direction='in'/>"
+			"      <arg type='s' name='result' direction='out'/>"
+			"    </method>"
 			"  </interface>"
 			"</node>";
 
@@ -118,6 +123,8 @@ class MGDbusServer
 			gApp->DoNew();
 		else if (mArguments.front() == "Connect")
 			gApp->ProcessCommand('Conn', nullptr, 0, 0);
+		else if (mArguments.front() == "Exec")
+			gApp->Open(mArguments.back());
 		else
 			gApp->Open(mArguments.back());
 	}
@@ -185,6 +192,14 @@ class MGDbusServer
 				gApp->ProcessCommand('Conn', nullptr, 0, 0);
 			else if (strcmp(method_name, "New") == 0)
 				gApp->DoNew();
+			else if (strcmp(method_name, "Exec") == 0)
+			{
+				const gchar *gcommand;
+				g_variant_get(parameters, "(&s)", &gcommand);
+				string command(gcommand ? gcommand : "");
+
+				gApp->Open(command);
+			}
 			else
 				throw runtime_error("unimplemented DBus Method");
 

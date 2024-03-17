@@ -1194,6 +1194,27 @@ void MGtkColorSwatchImpl::SetColor(MColor inColor)
 		gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(GetWidget()), &color);
 }
 
+void MGtkColorSwatchImpl::SetPalette(const std::vector<MColor> &colors)
+{
+	mPalette = colors;
+
+	std::vector<GdkRGBA> gtkColors(colors.size());
+	for (std::size_t i = 0; auto c : colors)
+	{
+		GdkRGBA &color = gtkColors[i];
+		color.red = c.red / 255.0;
+		color.green = c.green / 255.0;
+		color.blue = c.blue / 255.0;
+		color.alpha = 1.0;
+		++i;
+	}
+
+	if (GTK_IS_COLOR_BUTTON(GetWidget()))
+		gtk_color_chooser_add_palette(GTK_COLOR_CHOOSER(GetWidget()), GTK_ORIENTATION_HORIZONTAL,
+			9, gtkColors.size(), gtkColors.data());
+}
+
+
 // void MGtkColorSwatchImpl::GetIdealSize(int32_t& outWidth, int32_t& outHeight)
 //{
 //	outWidth = 30;
