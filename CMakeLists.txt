@@ -34,188 +34,188 @@ include(CheckLibraryExists)
 include(CMakePackageConfigHelpers)
 include(GenerateExportHeader)
 
-set(CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+if(WIN32)
+	if(${CMAKE_SYSTEM_VERSION} GREATER_EQUAL 10) # Windows 10
+		add_definitions(-D _WIN32_WINNT=0x0A00)
+	elseif(${CMAKE_SYSTEM_VERSION} EQUAL 6.3) # Windows 8.1
+		add_definitions(-D _WIN32_WINNT=0x0603)
+	elseif(${CMAKE_SYSTEM_VERSION} EQUAL 6.2) # Windows 8
+		add_definitions(-D _WIN32_WINNT=0x0602)
+	elseif(${CMAKE_SYSTEM_VERSION} EQUAL 6.1) # Windows 7
+		add_definitions(-D _WIN32_WINNT=0x0601)
+	elseif(${CMAKE_SYSTEM_VERSION} EQUAL 6.0) # Windows Vista
+		add_definitions(-D _WIN32_WINNT=0x0600)
+	else() # Windows XP (5.1)
+		add_definitions(-D _WIN32_WINNT=0x0501)
+	endif()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${pinch_compile_flags}")
+	# Man, this is 2024 we're living in... 
+	add_definitions(-DNOMINMAX)
 
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-unused-parameter -Wno-multichar")
-elseif(MSVC)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+	# We do not want to write an export file for all our symbols...
+	set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 endif()
 
 if(MSVC)
 	# make msvc standards compliant...
-	add_compile_options(/permissive-)
+	add_compile_options(/permissive- /bigobj)
+	add_link_options(/NODEFAULTLIB:library)
 
-	macro(get_WIN32_WINNT version)
-		if(CMAKE_SYSTEM_VERSION)
-			set(ver ${CMAKE_SYSTEM_VERSION})
-			string(REGEX MATCH "^([0-9]+).([0-9])" ver ${ver})
-			string(REGEX MATCH "^([0-9]+)" verMajor ${ver})
-
-			# Check for Windows 10, b/c we'll need to convert to hex 'A'.
-			if("${verMajor}" MATCHES "10")
-				set(verMajor "A")
-				string(REGEX REPLACE "^([0-9]+)" ${verMajor} ver ${ver})
-			endif()
-
-			# Remove all remaining '.' characters.
-			string(REPLACE "." "" ver ${ver})
-
-			# Prepend each digit with a zero.
-			string(REGEX REPLACE "([0-9A-Z])" "0\\1" ver ${ver})
-			set(${version} "0x${ver}")
-		endif()
-	endmacro()
-
-	get_WIN32_WINNT(ver)
-	add_definitions(-D_WIN32_WINNT=${ver})
+	# This is dubious...
+	if(BUILD_SHARED_LIBS)
+		set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+	else()
+		set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+	endif()
 endif()
 
 find_package(Mrc REQUIRED)
 message("Using resources compiled with ${MRC_EXECUTABLE}")
-mrc_write_header(${PROJECT_SOURCE_DIR}/include/mrsrc.hpp)
+mrc_write_header(${CMAKE_CURRENT_SOURCE_DIR}/include/mrsrc.hpp)
 
 set(CMAKE_THREAD_PREFER_PTHREAD)
 set(THREADS_PREFER_PTHREAD_FLAG)
 find_package(Threads REQUIRED)
 
-find_package(Filesystem REQUIRED)
 find_package(zeep 5.1.6 REQUIRED)
 
-# find_library(DL dl REQUIRED)
-# find_library(UTIL util REQUIRED)
 pkg_check_modules(GTK3 libcanberra-gtk3 REQUIRED IMPORTED_TARGET)
 
 # The salt executable
 list(APPEND headers
-	${PROJECT_SOURCE_DIR}/include/Gtk/MGtkCanvasImpl.hpp
-	${PROJECT_SOURCE_DIR}/include/Gtk/MGtkControlsImpl.hpp
-	${PROJECT_SOURCE_DIR}/include/Gtk/MGtkDeviceImpl.hpp
-	${PROJECT_SOURCE_DIR}/include/Gtk/MGtkLib.hpp
-	${PROJECT_SOURCE_DIR}/include/Gtk/MGtkList.hpp
-	${PROJECT_SOURCE_DIR}/include/Gtk/MGtkWidgetMixin.hpp
-	${PROJECT_SOURCE_DIR}/include/Gtk/MGtkWindowImpl.hpp
-	${PROJECT_SOURCE_DIR}/include/Gtk/MPrimary.hpp
-	${PROJECT_SOURCE_DIR}/include/Gtk/MGtkApplicationImpl.hpp
-	${PROJECT_SOURCE_DIR}/include/MAcceleratorTable.hpp
-	${PROJECT_SOURCE_DIR}/include/MAnimation.hpp
-	${PROJECT_SOURCE_DIR}/include/MTypes.hpp
-	${PROJECT_SOURCE_DIR}/include/MApplication.hpp
-	${PROJECT_SOURCE_DIR}/include/MApplicationImpl.hpp
-	${PROJECT_SOURCE_DIR}/include/mrsrc.hpp
-	${PROJECT_SOURCE_DIR}/include/MCanvas.hpp
-	${PROJECT_SOURCE_DIR}/include/MCanvasImpl.hpp
-	${PROJECT_SOURCE_DIR}/include/MClipboard.hpp
-	${PROJECT_SOURCE_DIR}/include/MClipboardImpl.hpp
-	${PROJECT_SOURCE_DIR}/include/MColorPicker.hpp
-	${PROJECT_SOURCE_DIR}/include/MCommands.hpp
-	${PROJECT_SOURCE_DIR}/include/MUnicode.hpp
-	${PROJECT_SOURCE_DIR}/include/MController.hpp
-	${PROJECT_SOURCE_DIR}/include/MView.hpp
-	${PROJECT_SOURCE_DIR}/include/MDevice.hpp
-	${PROJECT_SOURCE_DIR}/include/MDialog.hpp
+	include/Gtk/MGtkCanvasImpl.hpp
+	include/Gtk/MGtkControlsImpl.hpp
+	include/Gtk/MGtkDeviceImpl.hpp
+	include/Gtk/MGtkLib.hpp
+	include/Gtk/MGtkList.hpp
+	include/Gtk/MGtkWidgetMixin.hpp
+	include/Gtk/MGtkWindowImpl.hpp
+	include/Gtk/MPrimary.hpp
+	include/Gtk/MGtkApplicationImpl.hpp
 
-	# ${PROJECT_SOURCE_DIR}/include/MDocApplication.hpp
-	# ${PROJECT_SOURCE_DIR}/include/MDocClosedNotifier.hpp
-	# ${PROJECT_SOURCE_DIR}/include/MDocWindow.hpp
-	${PROJECT_SOURCE_DIR}/include/MError.hpp
+	include/MAcceleratorTable.hpp
+	include/MAnimation.hpp
+	include/MTypes.hpp
+	include/MApplication.hpp
+	include/MApplicationImpl.hpp
+	include/mrsrc.hpp
+	include/MCanvas.hpp
+	include/MCanvasImpl.hpp
+	include/MClipboard.hpp
+	include/MClipboardImpl.hpp
+	include/MColorPicker.hpp
+	include/MCommands.hpp
+	include/MUnicode.hpp
+	include/MController.hpp
+	include/MView.hpp
+	include/MDevice.hpp
+	include/MDialog.hpp
 
-	# ${PROJECT_SOURCE_DIR}/include/MExploreBrowserView.hpp
-	${PROJECT_SOURCE_DIR}/include/MFile.hpp
-	${PROJECT_SOURCE_DIR}/include/MGfxDevice.hpp
-	${PROJECT_SOURCE_DIR}/include/MLib.hpp
-	${PROJECT_SOURCE_DIR}/include/MWindowImpl.hpp
+	# include/MDocApplication.hpp
+	# include/MDocClosedNotifier.hpp
+	# include/MDocWindow.hpp
+	include/MError.hpp
 
-	# ${PROJECT_SOURCE_DIR}/include/MListViewImpl.hpp
-	${PROJECT_SOURCE_DIR}/include/MMenu.hpp
-	${PROJECT_SOURCE_DIR}/include/MP2PEvents.hpp
-	${PROJECT_SOURCE_DIR}/include/MPreferences.hpp
-	${PROJECT_SOURCE_DIR}/include/MPrinter.hpp
-	${PROJECT_SOURCE_DIR}/include/MSound.hpp
-	${PROJECT_SOURCE_DIR}/include/MStrings.hpp
-	${PROJECT_SOURCE_DIR}/include/MUnicodeTables.hpp
-	${PROJECT_SOURCE_DIR}/include/MUtils.hpp
-	${PROJECT_SOURCE_DIR}/include/MWindow.hpp
+	# include/MExploreBrowserView.hpp
+	include/MFile.hpp
+	include/MGfxDevice.hpp
+	include/MLib.hpp
+	include/MWindowImpl.hpp
 
-	${PROJECT_SOURCE_DIR}/include/MHandler.hpp
-	${PROJECT_SOURCE_DIR}/include/MAlerts.hpp
-	${PROJECT_SOURCE_DIR}/include/MAnimationImpl.hpp
-	${PROJECT_SOURCE_DIR}/include/MColor.hpp
-	${PROJECT_SOURCE_DIR}/include/MControls.hpp
-	${PROJECT_SOURCE_DIR}/include/MControlsImpl.hpp
-	${PROJECT_SOURCE_DIR}/include/MDeviceImpl.hpp
-	${PROJECT_SOURCE_DIR}/include/MDocument.hpp
-	${PROJECT_SOURCE_DIR}/include/MMenuImpl.hpp)
+	# include/MListViewImpl.hpp
+	include/MMenu.hpp
+	include/MP2PEvents.hpp
+	include/MPreferences.hpp
+	include/MPrinter.hpp
+	include/MSound.hpp
+	include/MStrings.hpp
+	include/MUnicodeTables.hpp
+	include/MUtils.hpp
+	include/MWindow.hpp
+
+	include/MHandler.hpp
+	include/MAlerts.hpp
+	include/MAnimationImpl.hpp
+	include/MColor.hpp
+	include/MControls.hpp
+	include/MControlsImpl.hpp
+	include/MDeviceImpl.hpp
+	include/MDocument.hpp
+	include/MMenuImpl.hpp)
 
 list(APPEND sources
-	${PROJECT_SOURCE_DIR}/src/bsd-closefrom.c
+	${CMAKE_CURRENT_SOURCE_DIR}/src/bsd-closefrom.c
 
-	${PROJECT_SOURCE_DIR}/src/Gtk/MGtkAlerts.cpp
-	${PROJECT_SOURCE_DIR}/src/Gtk/MGtkAnimationImpl.cpp
-	${PROJECT_SOURCE_DIR}/src/Gtk/MGtkClipboardImpl.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkAlerts.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkAnimationImpl.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkClipboardImpl.cpp
 
-	# ${PROJECT_SOURCE_DIR}/src/Gtk/MGtkDocClosedNotifier.cpp
-	${PROJECT_SOURCE_DIR}/src/Gtk/MGtkError.cpp
-	${PROJECT_SOURCE_DIR}/src/Gtk/MGtkFile.cpp
-	${PROJECT_SOURCE_DIR}/src/Gtk/MGtkMenu.cpp
-	${PROJECT_SOURCE_DIR}/src/Gtk/MGtkSound.cpp
-	${PROJECT_SOURCE_DIR}/src/Gtk/MGtkUtils.cpp
-	${PROJECT_SOURCE_DIR}/src/Gtk/MPrimary.cpp
-	${PROJECT_SOURCE_DIR}/src/Gtk/MGtkCanvasImpl.cpp
-	${PROJECT_SOURCE_DIR}/src/Gtk/MGtkControlsImpl.cpp
-	${PROJECT_SOURCE_DIR}/src/Gtk/MGtkDeviceImpl.cpp
-	${PROJECT_SOURCE_DIR}/src/Gtk/MGtkDialogImpl.cpp
-	${PROJECT_SOURCE_DIR}/src/Gtk/MGtkWidgetMixin.cpp
-	${PROJECT_SOURCE_DIR}/src/Gtk/MGtkApplicationImpl.cpp
-	${PROJECT_SOURCE_DIR}/src/Gtk/MGtkMain.cpp
-	${PROJECT_SOURCE_DIR}/src/Gtk/MGtkWindowImpl.cpp
-	${PROJECT_SOURCE_DIR}/src/MAcceleratorTable.cpp
-	${PROJECT_SOURCE_DIR}/src/MAnimation.cpp
-	${PROJECT_SOURCE_DIR}/src/MMenu.cpp
-	${PROJECT_SOURCE_DIR}/src/MCanvas.cpp
-	${PROJECT_SOURCE_DIR}/src/MClipboard.cpp
-	${PROJECT_SOURCE_DIR}/src/MColorPicker.cpp
+	# ${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkDocClosedNotifier.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkError.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkFile.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkMenu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkSound.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkUtils.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MPrimary.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkCanvasImpl.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkControlsImpl.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkDeviceImpl.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkDialogImpl.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkWidgetMixin.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkApplicationImpl.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkMain.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkWindowImpl.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MAcceleratorTable.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MAnimation.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MMenu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MCanvas.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MClipboard.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MColorPicker.cpp
 
-	# ${PROJECT_SOURCE_DIR}/src/MFile.cpp
-	${PROJECT_SOURCE_DIR}/src/MDevice.cpp
-	${PROJECT_SOURCE_DIR}/src/MDialog.cpp
+	# ${CMAKE_CURRENT_SOURCE_DIR}/src/MFile.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MDevice.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MDialog.cpp
 
-	# ${PROJECT_SOURCE_DIR}/src/MDocApplication.cpp
-	# ${PROJECT_SOURCE_DIR}/src/MDocClosedNotifier.cpp
-	${PROJECT_SOURCE_DIR}/src/MWindow.cpp
-	${PROJECT_SOURCE_DIR}/src/MError.cpp
-	${PROJECT_SOURCE_DIR}/src/MGfxDevice.cpp
-	${PROJECT_SOURCE_DIR}/src/MApplication.cpp
-	${PROJECT_SOURCE_DIR}/src/MLib.cpp
-	${PROJECT_SOURCE_DIR}/src/MPreferences.cpp
+	# ${CMAKE_CURRENT_SOURCE_DIR}/src/MDocApplication.cpp
+	# ${CMAKE_CURRENT_SOURCE_DIR}/src/MDocClosedNotifier.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MWindow.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MError.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MGfxDevice.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MApplication.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MLib.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MPreferences.cpp
 
-	# ${PROJECT_SOURCE_DIR}/src/MPrinter.cpp
-	${PROJECT_SOURCE_DIR}/src/MStrings.cpp
-	${PROJECT_SOURCE_DIR}/src/MTypes.cpp
-	${PROJECT_SOURCE_DIR}/src/MUnicode.cpp
-	${PROJECT_SOURCE_DIR}/src/MUtils.cpp
-	${PROJECT_SOURCE_DIR}/src/MView.cpp
+	# ${CMAKE_CURRENT_SOURCE_DIR}/src/MPrinter.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MStrings.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MTypes.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MUnicode.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MUtils.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MView.cpp
 
-	${PROJECT_SOURCE_DIR}/src/MHandler.cpp
-	${PROJECT_SOURCE_DIR}/src/MAlerts.cpp
-	${PROJECT_SOURCE_DIR}/src/MAnimationImpl.cpp
-	${PROJECT_SOURCE_DIR}/src/MColor.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MHandler.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MAlerts.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MAnimationImpl.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MColor.cpp
 
-	# ${PROJECT_SOURCE_DIR}/src/MController.cpp
-	${PROJECT_SOURCE_DIR}/src/MControls.cpp
+	# ${CMAKE_CURRENT_SOURCE_DIR}/src/MController.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MControls.cpp
 
-	# ${PROJECT_SOURCE_DIR}/src/MDocWindow.cpp
-	# ${PROJECT_SOURCE_DIR}/src/MDocument.cpp
+	# ${CMAKE_CURRENT_SOURCE_DIR}/src/MDocWindow.cpp
+	# ${CMAKE_CURRENT_SOURCE_DIR}/src/MDocument.cpp
 )
 
-add_library(mgui ${sources} ${headers})
+add_library(mgui STATIC)
 add_library(mgui::mgui ALIAS mgui)
 
-target_include_directories(mgui PUBLIC ${PROJECT_SOURCE_DIR}/include)
+target_sources(mgui
+	PRIVATE ${sources}
+	PUBLIC
+	FILE_SET headers TYPE HEADERS
+	BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include
+	FILES ${headers}
+)
+
+target_include_directories(mgui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 target_link_libraries(mgui libmcfp::libmcfp Threads::Threads PkgConfig::GTK3 zeep::zeep)
 
