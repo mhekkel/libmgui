@@ -144,7 +144,7 @@ IniFile::IniFile()
 	}
 	catch (const std::exception &ex)
 	{
-		std::cerr << "Exception reading preferences: " << ex.what() << std::endl;
+		std::cerr << "Exception reading preferences: " << ex.what() << '\n';
 	}
 }
 
@@ -233,7 +233,7 @@ std::string IniFile::GetString(const char *inName, const std::string &inDefault)
 	std::vector<std::string> &values = mPrefs[inName];
 	assert(values.size() == 1);
 	if (values.size() != 1)
-		std::cerr << "Inconsistent use of preference array/value" << std::endl;
+		std::cerr << "Inconsistent use of preference array/value\n";
 	return mPrefs[inName].front();
 }
 

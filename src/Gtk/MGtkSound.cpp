@@ -82,7 +82,7 @@ MAudioSocket &MAudioSocket::Instance()
 void MAudioSocket::CAFinishCallback(ca_context *inContext, uint32_t inID, int inErrorCode, void *inUserData)
 {
 	if (inErrorCode != CA_SUCCESS)
-		cerr << "Error playing sound using canberra: " << ca_strerror(inErrorCode) << endl;
+		cerr << "Error playing sound using canberra: " << ca_strerror(inErrorCode) << '\n';
 }
 
 void MAudioSocket::Play(const string &inFile)
@@ -107,7 +107,7 @@ void MAudioSocket::Play(const string &inFile)
 
 		int err = ca_context_play_full(mCAContext, 0, pl, &MAudioSocket::CAFinishCallback, this);
 		if (err != CA_SUCCESS)
-			cerr << "Error calling ca_context_play_full: " << ca_strerror(err) << endl;
+			cerr << "Error calling ca_context_play_full: " << ca_strerror(err) << '\n';
 
 		ca_proplist_destroy(pl);
 	}
@@ -140,7 +140,7 @@ void PlaySound(const string &inSoundName)
 		else
 		{
 			filename = "warning.wav";
-			cerr << "Unknown sound name " << inSoundName << endl;
+			cerr << "Unknown sound name " << inSoundName << '\n';
 		}
 
 		fs::path path = filename;
@@ -157,7 +157,7 @@ void PlaySound(const string &inSoundName)
 			MAudioSocket::Instance().Play(path.string());
 		else
 		{
-			cerr << "Sound does not exist: " << path.string() << endl;
+			cerr << "Sound does not exist: " << path.string() << '\n';
 			//			if (MWindow::GetFirstWindow() != nullptr)
 			//				MWindow::GetFirstWindow()->Beep();
 			//			else

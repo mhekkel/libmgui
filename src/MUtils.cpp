@@ -162,7 +162,7 @@ void HexDump(
 			s[kAsciiOffset + i] = ' ';
 		}
 
-		outStream << s << endl;
+		outStream << s << '\n';
 
 		offset += rr;
 		data += rr;

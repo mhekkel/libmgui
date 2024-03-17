@@ -77,7 +77,7 @@ void MGtkClipboardImpl::LoadClipboardIfNeeded()
 	{
 		mOwnerChanged = false;
 
-		// cout << "Reloading clipboard" << endl;
+		// cout << "Reloading clipboard\n";
 		gchar *text = gtk_clipboard_wait_for_text(mGtkClipboard);
 		if (text != nullptr)
 		{

@@ -57,7 +57,7 @@ void MAsyncHandlerBase::execute()
 	}
 	catch (const std::exception &ex)
 	{
-		std::cerr << ex.what() << std::endl;
+		std::cerr << ex.what() << '\n';
 	}
 }
 

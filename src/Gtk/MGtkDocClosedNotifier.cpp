@@ -39,7 +39,7 @@ using namespace std;
 
 //	int flags = fcntl(mDataFD, F_GETFL, 0);
 //	if (fcntl(mDataFD, F_SETFL, flags | O_NONBLOCK))
-//		cerr << _("Failed to set fd non blocking: ") << strerror(errno) << endl;
+//		cerr << _("Failed to set fd non blocking: ") << strerror(errno) << '\n';
 //}
 
 // if (mDataFD >= 0)

@@ -563,7 +563,7 @@ void MGtkWindowImpl::SetWindowPosition(MRect inPosition, bool inTransition)
 // void MGtkWindowImpl::Beep()
 //{
 ////	gdk_window_beep(gtk_widget_get_window(GetWidget()));
-//	cout << "beep!" << endl;
+//	cout << "beep!\n";
 //	gdk_beep();
 //}
 
@@ -877,7 +877,7 @@ MHandler *MGtkWindowImpl::GetFocus()
 //	uint32_t				inID)
 //{
 ////	char name[5];
-////	cout << "Value Changed for " << IDToName(inID, name) << endl;
+////	cout << "Value Changed for " << IDToName(inID, name) << '\n';
 //}
 
 // void MGtkWindowImpl::Changed()

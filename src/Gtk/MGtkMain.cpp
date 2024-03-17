@@ -156,7 +156,7 @@ class MGDbusServer
 		//		PRINT(("Ready, result is %s", result ? "not null" : "null"));
 		if (error)
 		{
-			cerr << error->message << endl;
+			cerr << error->message << '\n';
 			//			PRINT(("Error: '%s'", error->message));
 			g_error_free(error);
 		}
@@ -335,11 +335,11 @@ int MApplication::Main(std::initializer_list<std::string> argv)
 	}
 	catch (exception &e)
 	{
-		cerr << e.what() << endl;
+		cerr << e.what() << '\n';
 	}
 	catch (...)
 	{
-		cerr << "Exception caught" << endl;
+		cerr << "Exception caught\n";
 	}
 
 	return 0;

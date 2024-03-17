@@ -41,7 +41,7 @@ using namespace std;
 template <class charT>
 basic_ostream<charT> &operator<<(basic_ostream<charT> &lhs, MClipboard::Data &rhs)
 {
-	lhs << "Data block: '" << rhs.mText << '\'' << endl;
+	lhs << "Data block: '" << rhs.mText << "\'n";
 
 	return lhs;
 }
@@ -90,12 +90,12 @@ bool MClipboard::HasData()
 {
 	mImpl->LoadClipboardIfNeeded();
 
-	//	cout << "Clipboard now contains " << mCount << " data items:" << endl;
+	//	cout << "Clipboard now contains " << mCount << " data items:\n";
 	//
 	//	for (uint32_t i = 0; i < mCount; ++i)
 	//		cout << *mRing[i];
 	//
-	//	cout << endl;
+	//	cout << '\n';
 
 	return mCount > 0;
 }

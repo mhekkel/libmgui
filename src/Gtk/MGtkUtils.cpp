@@ -182,7 +182,7 @@ void OpenURI(const string &inURI)
 	{
 		int err = system((string("gnome-open ") + inURI).c_str());
 		if (err < 0)
-			std::cerr << "Failed to open " << inURI << std::endl;
+			std::cerr << "Failed to open " << inURI << '\n';
 	}
 }
 

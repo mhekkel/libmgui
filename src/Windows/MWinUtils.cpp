@@ -193,7 +193,7 @@ void __signal_throw(
 {
 	stringstream s;
 	s << "Throwing in file " << inFile << " line " << inLine
-	  << " \"" << inFunction << "\": " << endl << inCode << endl;
+	  << " \"" << inFunction << "\": \n" << inCode << '\n';
 
 	cerr << s.str();
 

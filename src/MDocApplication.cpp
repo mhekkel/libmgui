@@ -315,7 +315,7 @@ bool MDocApplication::CloseAll(MCloseReason inAction)
 					w->Close();
 			}
 			else
-				cerr << _("Weird, document without controller: ") << doc->GetFile().GetURL() << endl;
+				cerr << _("Weird, document without controller: ") << doc->GetFile().GetURL() << '\n';
 		}
 
 		doc = next;

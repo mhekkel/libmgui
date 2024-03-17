@@ -55,7 +55,7 @@ void __debug_printf(const char *inStr, ...)
 	vsnprintf(msg, sizeof(msg), inStr, vl);
 	va_end(vl);
 
-	cerr << msg << endl;
+	cerr << msg << '\n';
 }
 
 void __signal_throw(
@@ -65,8 +65,8 @@ void __signal_throw(
 	int inLine)
 {
 	cerr << "Throwing in file " << inFile << " line " << inLine
-		 << " \"" << inFunction << "\": " << endl
-		 << inCode << endl;
+		 << " \"" << inFunction << "\": \n"
+		 << inCode << '\n';
 
 	if (StOKToThrow::IsOK())
 		return;
