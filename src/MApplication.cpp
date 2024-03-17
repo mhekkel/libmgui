@@ -96,7 +96,12 @@ void MApplication::DoOpen()
 {
 }
 
-void MApplication::Open(const string &inURI)
+// void MApplication::Open(const string &inURI)
+// {
+// }
+
+void MApplication::Execute(const std::string &inCommand,
+		const std::vector<std::string> &inArguments)
 {
 }
 

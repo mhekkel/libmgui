@@ -54,7 +54,9 @@ class MApplication : public MHandler
 
 	virtual void DoNew();
 	virtual void DoOpen();
-	virtual void Open(const std::string &inURL);
+	// virtual void Open(const std::string &inURL);
+	virtual void Execute(const std::string &inCommand,
+		const std::vector<std::string> &inArguments);
 
 	virtual bool UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked);
 	virtual bool ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers);
@@ -73,7 +75,8 @@ class MApplication : public MHandler
 	bool IsQuitting() const { return mQuitPending; }
 	void CancelQuit() { mQuitPending = false; }
 
-	static int Main(std::initializer_list<std::string> argv);
+	static int Main(const std::string &command,
+		const std::vector<std::string> &argv);
 
   protected:
 	MApplication(MApplicationImpl *inImpl);

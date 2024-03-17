@@ -29,6 +29,8 @@
 #include "MApplication.hpp"
 #include "MError.hpp"
 
+#include <zeep/xml/document.hpp>
+
 #include <cassert>
 #include <cstring>
 #include <filesystem>
@@ -48,40 +50,42 @@ MGtkApplicationImpl *MGtkApplicationImpl::sInstance = nullptr;
 class MGDbusServer
 {
   public:
-	MGDbusServer(std::vector<std::string> &&argv)
+	MGDbusServer(const std::string &method, const std::vector<std::string> &arg)
 		: mIntrospectionData(nullptr)
 		, mOwnerId(0)
 		, mRegistrationID(0)
 		, mWatcherID(0)
-		, mArguments(argv)
+		, mMethod(method)
+		, mArguments(arg)
 	{
-		static const char my_server_xml[] =
-			"<node>"
-			"  <interface name='" MGDBUS_SERVER_NAME "'>"
-			"    <annotation name='org.gtk.GDBus.Annotation' value='OnInterface'/>"
-			"    <annotation name='org.gtk.GDBus.Annotation' value='AlsoOnInterface'/>"
-			"    <method name='New'>"
-			"      <annotation name='org.gtk.GDBus.Annotation' value='OnMethod'/>"
-			"      <arg type='s' name='result' direction='out'/>"
-			"    </method>"
-			"    <method name='Open'>"
-			"      <annotation name='org.gtk.GDBus.Annotation' value='OnMethod'/>"
-			"      <arg type='s' name='url' direction='in'/>"
-			"      <arg type='s' name='result' direction='out'/>"
-			"    </method>"
-			"    <method name='Connect'>"
-			"      <annotation name='org.gtk.GDBus.Annotation' value='OnMethod'/>"
-			"      <arg type='s' name='result' direction='out'/>"
-			"    </method>"
-			"    <method name='Exec'>"
-			"      <annotation name='org.gtk.GDBus.Annotation' value='OnMethod'/>"
-			"      <arg type='s' name='command' direction='in'/>"
-			"      <arg type='s' name='result' direction='out'/>"
-			"    </method>"
-			"  </interface>"
-			"</node>";
+		using namespace zeep::xml::literals;
 
-		mIntrospectionData = g_dbus_node_info_new_for_xml(my_server_xml, nullptr);
+		auto my_server = R"(
+<node>
+  <interface>
+    <annotation name='org.gtk.GDBus.Annotation' value='OnInterface'/>
+    <annotation name='org.gtk.GDBus.Annotation' value='AlsoOnInterface'/>
+    <method name='New'>
+      <annotation name='org.gtk.GDBus.Annotation' value='OnMethod'/>
+    </method>
+    <method name='Open'>
+      <annotation name='org.gtk.GDBus.Annotation' value='OnMethod'/>
+      <arg type='s' name='url' direction='in'/>
+    </method>
+    <method name='Connect'>
+      <annotation name='org.gtk.GDBus.Annotation' value='OnMethod'/>
+    </method>
+    <method name='Execute'>
+      <annotation name='org.gtk.GDBus.Annotation' value='OnMethod'/>
+      <arg type='as' name='argv' direction='in'/>
+    </method>
+  </interface>
+</node>)"_xml;
+
+		my_server.find_first("/node/interface")->set_attribute("name", MGDBUS_SERVER_NAME);
+		auto my_server_xml = (std::ostringstream() << my_server).str();
+
+		mIntrospectionData = g_dbus_node_info_new_for_xml(my_server_xml.c_str(), nullptr);
 		if (mIntrospectionData == nullptr)
 			throw runtime_error("failed to parse introspection data");
 
@@ -119,14 +123,7 @@ class MGDbusServer
 
 	void NameAcquired(GDBusConnection *connection, const char *name)
 	{
-		if (mArguments.empty() or mArguments.front() == "New")
-			gApp->DoNew();
-		else if (mArguments.front() == "Connect")
-			gApp->ProcessCommand('Conn', nullptr, 0, 0);
-		else if (mArguments.front() == "Exec")
-			gApp->Open(mArguments.back());
-		else
-			gApp->Open(mArguments.back());
+		gApp->Execute(mMethod, mArguments);
 	}
 
 	void NameLost(GDBusConnection *connection, const char *name)
@@ -138,11 +135,34 @@ class MGDbusServer
 
 	void NameAppeared(GDBusConnection *connection, const gchar *name, const char *name_owner)
 	{
+		GVariant *params = nullptr;
+
+		if (mMethod == "Open")
+		{
+			// GVariantDict d;
+			// g_variant_dict_init(&d, nullptr);
+			// g_variant_dict_insert(&d, "url", "(s)", mArguments.front().c_str());
+			// params = g_variant_dict_end(&d);
+			params = g_variant_new("(s)", mArguments.front().c_str());
+		}
+		else if (mMethod == "Execute")
+		{
+			GVariantBuilder builder;
+
+			g_variant_builder_init(&builder, G_VARIANT_TYPE_STRING_ARRAY);
+			for (auto &a : mArguments)
+				g_variant_builder_add(&builder, "s", a.c_str());
+
+			auto p = g_variant_builder_end(&builder);
+
+			params = g_variant_new("(@as)", p);
+		}
+
 		g_dbus_connection_call(
 			connection,
 			MGDBUS_SERVER_NAME, MGDBUS_SERVER_OBJECT_NAME, MGDBUS_SERVER_NAME,
-			mArguments.front().c_str(),
-			mArguments.size() > 1 ? g_variant_new("(s)", mArguments.back().c_str()) : nullptr,
+			mMethod.c_str(),
+			params,
 			nullptr,
 			G_DBUS_CALL_FLAGS_NONE,
 			-1,
@@ -184,21 +204,27 @@ class MGDbusServer
 			{
 				const gchar *gurl;
 				g_variant_get(parameters, "(&s)", &gurl);
-				string url(gurl ? gurl : "");
+				std::string url(gurl ? gurl : "");
 
-				gApp->Open(url);
+				gApp->Execute("Open", { url });
 			}
 			else if (strcmp(method_name, "Connect") == 0)
-				gApp->ProcessCommand('Conn', nullptr, 0, 0);
+				gApp->Execute("Connect", {});
 			else if (strcmp(method_name, "New") == 0)
-				gApp->DoNew();
-			else if (strcmp(method_name, "Exec") == 0)
+				gApp->Execute("New", {});
+			else if (strcmp(method_name, "Execute") == 0)
 			{
-				const gchar *gcommand;
-				g_variant_get(parameters, "(&s)", &gcommand);
-				string command(gcommand ? gcommand : "");
+				GVariantIter *iter;
+				gchar *str;
 
-				gApp->Open(command);
+				std::vector<std::string> args;
+
+				g_variant_get(parameters, "(as)", &iter);
+				while (g_variant_iter_loop(iter, "s", &str))
+					args.emplace_back(str);
+				g_variant_iter_free(iter);
+
+				gApp->Execute("Execute", args);
 			}
 			else
 				throw runtime_error("unimplemented DBus Method");
@@ -264,6 +290,7 @@ class MGDbusServer
 
 	GDBusNodeInfo *mIntrospectionData;
 	uint32_t mOwnerId, mRegistrationID, mWatcherID;
+	std::string mMethod;
 	std::vector<std::string> mArguments;
 };
 
@@ -296,7 +323,7 @@ void my_signal_handler(int inSignal)
 	}
 }
 
-int MApplication::Main(std::initializer_list<std::string> argv)
+int MApplication::Main(const std::string &cmd, const std::vector<std::string> &argv)
 {
 	setenv("UBUNTU_MENUPROXY", "0", true);
 
@@ -315,7 +342,7 @@ int MApplication::Main(std::initializer_list<std::string> argv)
 
 		gtk_init(0, nullptr);
 
-		MGDbusServer dBusServer(argv);
+		MGDbusServer dBusServer(cmd, argv);
 
 		unique_ptr<MApplication> app(MApplication::Create(
 			new MGtkApplicationImpl));
