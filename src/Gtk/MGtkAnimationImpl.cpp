@@ -1,17 +1,17 @@
 /*-
  * SPDX-License-Identifier: BSD-2-Clause
- * 
+ *
  * Copyright (c) 2023 Maarten L. Hekkelman
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -74,12 +74,23 @@ class MGtkStoryboardImpl : public MStoryboardImpl
   public:
 	MGtkStoryboardImpl() {}
 	virtual void AddTransition(MAnimationVariable *inVariable,
-	                           double inNewValue, double inDuration,
-	                           const char *inTransitionName);
+		double inNewValue, double inDuration,
+		const char *inTransitionName);
+
+	virtual void AddFinishedCallback(std::function<void()> cb)
+	{
+		mFinishedCB = cb;
+	}
 
 	// inTime is relative to the start of the story
 	bool Update(double inTime);
 	bool Done(double inTime);
+
+	void Finish()
+	{
+		if (mFinishedCB)
+			mFinishedCB();
+	}
 
 	struct MTransition
 	{
@@ -96,24 +107,26 @@ class MGtkStoryboardImpl : public MStoryboardImpl
 	};
 
 	list<MVariableStory> mVariableStories;
+	std::function<void()> mFinishedCB;
 };
 
 void MGtkStoryboardImpl::AddTransition(MAnimationVariable *inVariable,
-                                       double inNewValue, double inDuration, const char *inTransitionName)
+	double inNewValue, double inDuration, const char *inTransitionName)
 {
 	auto s = find_if(mVariableStories.begin(), mVariableStories.end(),
-	                 [inVariable](MVariableStory &st) -> bool { return st.mVariable == inVariable; });
+		[inVariable](MVariableStory &st) -> bool
+		{ return st.mVariable == inVariable; });
 
 	if (s == mVariableStories.end())
 	{
-		MVariableStory st = {inVariable, inVariable->GetValue(), {}};
+		MVariableStory st = { inVariable, inVariable->GetValue(), {} };
 		mVariableStories.push_back(st);
 		s = prev(mVariableStories.end());
 	}
 
 	assert(s != mVariableStories.end());
 
-	MTransition t = {inNewValue, inDuration, inTransitionName};
+	MTransition t = { inNewValue, inDuration, inTransitionName };
 	s->mTransistions.push_back(t);
 }
 
@@ -161,7 +174,8 @@ bool MGtkStoryboardImpl::Done(double inTime)
 	for (auto vs : mVariableStories)
 	{
 		double totalDuration = accumulate(vs.mTransistions.begin(), vs.mTransistions.end(), 0.0,
-		                                  [](double time, const MTransition &ts) -> double { return time + ts.mDuration; });
+			[](double time, const MTransition &ts) -> double
+			{ return time + ts.mDuration; });
 
 		if (totalDuration > inTime)
 		{
@@ -194,6 +208,9 @@ class MGtkAnimationManagerImpl : public MAnimationManagerImpl
 	virtual bool Update() { return false; }
 	virtual void Stop()
 	{
+		if (mDone)
+			return;
+
 		try
 		{
 			unique_lock<mutex> lock(mMutex);
@@ -235,7 +252,7 @@ class MGtkAnimationManagerImpl : public MAnimationManagerImpl
 			unique_lock<mutex> lock(mMutex);
 
 			shared_ptr<MStoryboard> sbptr(inStoryboard);
-			MScheduledStoryboard sb = {GetLocalTime(), sbptr};
+			MScheduledStoryboard sb = { GetLocalTime(), sbptr };
 			mStoryboards.push_back(sb);
 
 			mCondition.notify_one();
@@ -298,11 +315,18 @@ void MGtkAnimationManagerImpl::Run()
 			}
 
 			mStoryboards.erase(remove_if(mStoryboards.begin(), mStoryboards.end(),
-			                             [now](MScheduledStoryboard &storyboard) -> bool {
-											 MGtkStoryboardImpl *storyboardImpl = static_cast<MGtkStoryboardImpl *>(storyboard.mStoryboard->GetImpl());
-											 return storyboardImpl->Done(now - storyboard.mStartTime);
-										 }),
-			                   mStoryboards.end());
+								   [now](MScheduledStoryboard &storyboard) -> bool
+								   {
+									   MGtkStoryboardImpl *storyboardImpl = static_cast<MGtkStoryboardImpl *>(storyboard.mStoryboard->GetImpl());
+
+									   bool result = storyboardImpl->Done(now - storyboard.mStartTime);
+
+									   if (result)
+										   storyboardImpl->Finish();
+
+									   return result;
+								   }),
+				mStoryboards.end());
 		}
 		catch (...)
 		{

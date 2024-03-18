@@ -56,6 +56,8 @@ class MStoryboard
 		double inNewValue, double inDuration,
 		const char *inTransitionName);
 
+	void AddFinishedCallback(std::function<void()> cb);
+
 	MStoryboardImpl *GetImpl() { return mImpl; }
 
   private:

@@ -78,6 +78,7 @@ class MWindow : public MView, public MHandler
 	static MWindow *GetFirstWindow();
 	MWindow *GetNextWindow() const;
 	static void RemoveWindowFromWindowList(MWindow *window);
+	static bool WindowExists(MWindow *window);
 
 	virtual void SetTitle(const std::string &inTitle);
 	virtual std::string GetTitle() const;

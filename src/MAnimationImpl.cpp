@@ -75,6 +75,10 @@ class MFallBackStoryboardImpl : public MStoryboardImpl
 		double inNewValue, double inDuration,
 		const char *inTransitionName);
 
+	virtual void AddFinishedCallback(std::function<void()> cb)
+	{
+	}
+
 	// inTime is relative to the start of the story
 	bool Update(double inTime);
 	bool Done(double inTime);

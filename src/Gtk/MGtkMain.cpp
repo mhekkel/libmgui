@@ -32,13 +32,40 @@
 #include <zeep/xml/document.hpp>
 
 #include <cassert>
+#include <chrono>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
 
-using namespace std;
 namespace fs = std::filesystem;
+
+// ----------------------------------------------------------------------------
+//	Main routines
+
+void my_signal_handler(int inSignal)
+{
+	switch (inSignal)
+	{
+		case SIGPIPE:
+			break;
+
+		case SIGUSR1:
+			break;
+
+		case SIGINT:
+			//			gQuit = true;
+			gApp->DoQuit();
+			break;
+
+		case SIGTERM:
+			//			gQuit = true;
+			gApp->DoQuit();
+			break;
+	}
+}
+
+// --------------------------------------------------------------------
 
 #define MGDBUS_SERVER_NAME "com.hekkelman.GDBus.SaltServer"
 #define MGDBUS_SERVER_OBJECT_NAME "/com/hekkelman/GDBus/SaltObject"
@@ -67,17 +94,21 @@ class MGDbusServer
     <annotation name='org.gtk.GDBus.Annotation' value='AlsoOnInterface'/>
     <method name='New'>
       <annotation name='org.gtk.GDBus.Annotation' value='OnMethod'/>
+      <arg type='i' name='result' direction='out'/>
     </method>
     <method name='Open'>
       <annotation name='org.gtk.GDBus.Annotation' value='OnMethod'/>
       <arg type='s' name='url' direction='in'/>
+      <arg type='i' name='result' direction='out'/>
     </method>
     <method name='Connect'>
       <annotation name='org.gtk.GDBus.Annotation' value='OnMethod'/>
+      <arg type='i' name='result' direction='out'/>
     </method>
     <method name='Execute'>
       <annotation name='org.gtk.GDBus.Annotation' value='OnMethod'/>
       <arg type='as' name='argv' direction='in'/>
+      <arg type='i' name='result' direction='out'/>
     </method>
   </interface>
 </node>)"_xml;
@@ -87,11 +118,15 @@ class MGDbusServer
 
 		mIntrospectionData = g_dbus_node_info_new_for_xml(my_server_xml.c_str(), nullptr);
 		if (mIntrospectionData == nullptr)
-			throw runtime_error("failed to parse introspection data");
+			throw std::runtime_error("failed to parse introspection data");
 
 		mOwnerId = g_bus_own_name(G_BUS_TYPE_SESSION, MGDBUS_SERVER_NAME,
 			G_BUS_NAME_OWNER_FLAGS_NONE, HandleBusAcquired, HandleNameAcquired, HandleNameLost,
 			this, nullptr);
+
+		// start a loop to process events, handling is async
+		mLoop = g_main_loop_new(nullptr, false);
+		g_main_loop_run(mLoop);
 	}
 
 	~MGDbusServer()
@@ -104,6 +139,8 @@ class MGDbusServer
 
 		if (mIntrospectionData != nullptr)
 			g_dbus_node_info_unref(mIntrospectionData);
+
+		g_main_loop_unref(mLoop);
 	}
 
 	bool IsServer() const
@@ -123,7 +160,25 @@ class MGDbusServer
 
 	void NameAcquired(GDBusConnection *connection, const char *name)
 	{
-		gApp->Execute(mMethod, mArguments);
+		std::unique_ptr<MApplication> app(MApplication::Create(new MGtkApplicationImpl));
+
+		app->Initialise();
+
+		struct sigaction act, oact;
+		act.sa_handler = my_signal_handler;
+		sigemptyset(&act.sa_mask);
+		act.sa_flags = 0;
+		::sigaction(SIGTERM, &act, &oact);
+		::sigaction(SIGUSR1, &act, &oact);
+		::sigaction(SIGPIPE, &act, &oact);
+		::sigaction(SIGINT, &act, &oact);
+
+		app->Execute(mMethod, mArguments);
+
+		// exit the mloop since we're about to call gtk_main
+		g_main_loop_quit(mLoop);
+
+		app->RunEventLoop();
 	}
 
 	void NameLost(GDBusConnection *connection, const char *name)
@@ -138,13 +193,7 @@ class MGDbusServer
 		GVariant *params = nullptr;
 
 		if (mMethod == "Open")
-		{
-			// GVariantDict d;
-			// g_variant_dict_init(&d, nullptr);
-			// g_variant_dict_insert(&d, "url", "(s)", mArguments.front().c_str());
-			// params = g_variant_dict_end(&d);
 			params = g_variant_new("(s)", mArguments.front().c_str());
-		}
 		else if (mMethod == "Execute")
 		{
 			GVariantBuilder builder;
@@ -168,7 +217,7 @@ class MGDbusServer
 			-1,
 			nullptr,
 			&HandleAsyncReady,
-			nullptr);
+			this);
 	}
 
 	void AsyncReady(GDBusConnection *connection, GVariant *result, GError *error)
@@ -176,15 +225,16 @@ class MGDbusServer
 		//		PRINT(("Ready, result is %s", result ? "not null" : "null"));
 		if (error)
 		{
-			cerr << error->message << '\n';
+			std::cerr << error->message << '\n';
 			//			PRINT(("Error: '%s'", error->message));
 			g_error_free(error);
 		}
+
+		g_main_loop_quit(mLoop);
 	}
 
 	void NameVanished(GDBusConnection *connection, const gchar *name)
 	{
-		PRINT(("Name Vanished: %s", name));
 		// something fishy... just open
 		// if (mOpenParameter.empty())
 		// 	gApp->DoNew();
@@ -197,7 +247,6 @@ class MGDbusServer
 		const gchar *method_name, GVariant *parameters,
 		GDBusMethodInvocation *invocation)
 	{
-		PRINT(("MethodCall: %s", method_name));
 		try
 		{
 			if (strcmp(method_name, "Open") == 0)
@@ -226,15 +275,12 @@ class MGDbusServer
 
 				gApp->Execute("Execute", args);
 			}
-			else
-				throw runtime_error("unimplemented DBus Method");
 
-			g_dbus_method_invocation_return_value(invocation,
-				g_variant_new("(s)", "ok"));
+			g_dbus_method_invocation_return_value(invocation, g_variant_new("(i)", 0));
 		}
-		catch (const exception &e)
+		catch (const std::exception &e)
 		{
-			g_dbus_method_invocation_return_value(invocation, g_variant_new("(s)", e.what()));
+			g_dbus_method_invocation_return_error_literal(invocation, 0, 0, e.what());
 		}
 	}
 
@@ -292,36 +338,14 @@ class MGDbusServer
 	uint32_t mOwnerId, mRegistrationID, mWatcherID;
 	std::string mMethod;
 	std::vector<std::string> mArguments;
+	GMainLoop *mLoop = nullptr;
 };
 
 const GDBusInterfaceVTable MGDbusServer::sInterfaceVTable = {
 	MGDbusServer::HandleMethodCall, nullptr, nullptr, {}
 };
 
-// ----------------------------------------------------------------------------
-//	Main routines
-
-void my_signal_handler(int inSignal)
-{
-	switch (inSignal)
-	{
-		case SIGPIPE:
-			break;
-
-		case SIGUSR1:
-			break;
-
-		case SIGINT:
-			//			gQuit = true;
-			gApp->DoQuit();
-			break;
-
-		case SIGTERM:
-			//			gQuit = true;
-			gApp->DoQuit();
-			break;
-	}
-}
+// --------------------------------------------------------------------
 
 int MApplication::Main(const std::string &cmd, const std::vector<std::string> &argv)
 {
@@ -344,29 +368,15 @@ int MApplication::Main(const std::string &cmd, const std::vector<std::string> &a
 
 		MGDbusServer dBusServer(cmd, argv);
 
-		unique_ptr<MApplication> app(MApplication::Create(
-			new MGtkApplicationImpl));
-
-		app->Initialise();
-
-		struct sigaction act, oact;
-		act.sa_handler = my_signal_handler;
-		sigemptyset(&act.sa_mask);
-		act.sa_flags = 0;
-		::sigaction(SIGTERM, &act, &oact);
-		::sigaction(SIGUSR1, &act, &oact);
-		::sigaction(SIGPIPE, &act, &oact);
-		::sigaction(SIGINT, &act, &oact);
-
-		app->RunEventLoop();
+		PRINT(("This is it"));
 	}
-	catch (exception &e)
+	catch (std::exception &e)
 	{
-		cerr << e.what() << '\n';
+		std::cerr << e.what() << '\n';
 	}
 	catch (...)
 	{
-		cerr << "Exception caught\n";
+		std::cerr << "Exception caught\n";
 	}
 
 	return 0;

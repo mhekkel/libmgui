@@ -65,8 +65,7 @@ MMenuBar *MWindowImpl::CreateMenu(const std::string &inMenu)
 
 list<MWindow *> MWindow::sWindowList;
 
-MWindow::MWindow(const string &inTitle, const MRect &inBounds,
-	MWindowFlags inFlags, const string &inMenu)
+MWindow::MWindow(const string &inTitle, const MRect &inBounds, MWindowFlags inFlags, const string &inMenu)
 	: MView("window", inBounds)
 	, MHandler(gApp)
 	, mImpl(MWindowImpl::Create(inTitle, inBounds, inFlags, inMenu, this))
@@ -99,8 +98,7 @@ MWindow::~MWindow()
 	RemoveWindowFromWindowList(this);
 }
 
-void MWindow::SetImpl(
-	MWindowImpl *inImpl)
+void MWindow::SetImpl(MWindowImpl *inImpl)
 {
 	if (mImpl != nullptr)
 		delete mImpl;
@@ -149,9 +147,12 @@ MWindow *MWindow::GetNextWindow() const
 
 void MWindow::RemoveWindowFromWindowList(MWindow *window)
 {
-	sWindowList.erase(
-		remove(sWindowList.begin(), sWindowList.end(), window),
-		sWindowList.end());
+	sWindowList.erase(remove(sWindowList.begin(), sWindowList.end(), window), sWindowList.end());
+}
+
+bool MWindow::WindowExists(MWindow *window)
+{
+	return find(sWindowList.begin(), sWindowList.end(), window) != sWindowList.end();
 }
 
 MWindow *MWindow::GetWindow() const
@@ -226,8 +227,7 @@ void MWindow::Close()
 		mImpl->Close();
 }
 
-void MWindow::SetTitle(
-	const string &inTitle)
+void MWindow::SetTitle(const string &inTitle)
 {
 	mTitle = inTitle;
 
@@ -242,8 +242,7 @@ string MWindow::GetTitle() const
 	return mTitle;
 }
 
-void MWindow::SetModifiedMarkInTitle(
-	bool inModified)
+void MWindow::SetModifiedMarkInTitle(bool inModified)
 {
 	if (mModified != inModified)
 	{
@@ -252,14 +251,12 @@ void MWindow::SetModifiedMarkInTitle(
 	}
 }
 
-void MWindow::SetTransparency(
-	float inAlpha)
+void MWindow::SetTransparency(float inAlpha)
 {
 	mImpl->SetTransparency(inAlpha);
 }
 
-void MWindow::SetLatentFocus(
-	MHandler *inFocus)
+void MWindow::SetLatentFocus(MHandler *inFocus)
 {
 	mLatentFocus = inFocus;
 
@@ -273,12 +270,7 @@ void MWindow::BeFocus()
 		mLatentFocus->SetFocus();
 }
 
-bool MWindow::UpdateCommandStatus(
-	uint32_t inCommand,
-	MMenu *inMenu,
-	uint32_t inItemIndex,
-	bool &outEnabled,
-	bool &outChecked)
+bool MWindow::UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked)
 {
 	bool result = true;
 
@@ -289,18 +281,13 @@ bool MWindow::UpdateCommandStatus(
 			break;
 
 		default:
-			result = MHandler::UpdateCommandStatus(
-				inCommand, inMenu, inItemIndex, outEnabled, outChecked);
+			result = MHandler::UpdateCommandStatus(inCommand, inMenu, inItemIndex, outEnabled, outChecked);
 	}
 
 	return result;
 }
 
-bool MWindow::ProcessCommand(
-	uint32_t inCommand,
-	const MMenu *inMenu,
-	uint32_t inItemIndex,
-	uint32_t inModifiers)
+bool MWindow::ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers)
 {
 	bool result = true;
 
@@ -319,9 +306,7 @@ bool MWindow::ProcessCommand(
 	return result;
 }
 
-void MWindow::ResizeFrame(
-	int32_t inWidthDelta,
-	int32_t inHeightDelta)
+void MWindow::ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta)
 {
 	ResizeWindow(inWidthDelta, inHeightDelta);
 	// MView::ResizeFrame(0, 0);
@@ -332,22 +317,17 @@ void MWindow::ResizeFrame(
 	// mImpl->ResizeWindow(frame.width - mFrame.width, frame.height - mFrame.height);
 }
 
-void MWindow::ResizeWindow(
-	int32_t inWidthDelta,
-	int32_t inHeightDelta)
+void MWindow::ResizeWindow(int32_t inWidthDelta, int32_t inHeightDelta)
 {
 	mImpl->ResizeWindow(inWidthDelta, inHeightDelta);
 }
 
-void MWindow::GetWindowPosition(
-	MRect &outPosition)
+void MWindow::GetWindowPosition(MRect &outPosition)
 {
 	mImpl->GetWindowPosition(outPosition);
 }
 
-void MWindow::SetWindowPosition(
-	const MRect &inPosition,
-	bool inTransition)
+void MWindow::SetWindowPosition(const MRect &inPosition, bool inTransition)
 {
 	mImpl->SetWindowPosition(inPosition, inTransition);
 }
@@ -382,8 +362,7 @@ void MWindow::ScrollRect(MRect inRect, int32_t inX, int32_t inY)
 	mImpl->ScrollRect(inRect, inX, inY);
 }
 
-void MWindow::SetCursor(
-	MCursor inCursor)
+void MWindow::SetCursor(MCursor inCursor)
 {
 	mImpl->SetCursor(inCursor);
 }

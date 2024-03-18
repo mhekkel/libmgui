@@ -64,6 +64,11 @@ void MStoryboard::AddTransition(MAnimationVariable *inVariable,
 	mImpl->AddTransition(inVariable, inNewValue, inDuration, inTransitionName);
 }
 
+void MStoryboard::AddFinishedCallback(std::function<void()> cb)
+{
+	mImpl->AddFinishedCallback(cb);
+}
+
 // --------------------------------------------------------------------
 
 MAnimationManager::MAnimationManager()

@@ -72,6 +72,8 @@ class MStoryboardImpl
 		double inNewValue, double inDuration,
 		const char *inTransitionName) = 0;
 
+	virtual void AddFinishedCallback(std::function<void()> cb) = 0;
+
   protected:
 	MStoryboardImpl() {}
 };
