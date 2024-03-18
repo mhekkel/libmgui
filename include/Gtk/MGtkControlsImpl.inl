@@ -42,7 +42,7 @@ template <class CONTROL>
 MGtkControlImpl<CONTROL>::~MGtkControlImpl()
 {
 	if (GetWidget() != nullptr)
-		gtk_widget_destroy(GetWidget());
+		g_object_unref(GetWidget());
 }
 
 template <class CONTROL>

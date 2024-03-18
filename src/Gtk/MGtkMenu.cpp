@@ -374,7 +374,8 @@ void MGtkMenuImpl::RemoveItems(uint32_t inFirstIndex, uint32_t inCount)
 		advance(e, inCount);
 
 		for (MMenuItemList::iterator mi = b; mi != e; ++mi)
-			gtk_widget_destroy((*mi)->mGtkMenuItem);
+			gtk_container_remove(GTK_CONTAINER(mGtkMenu), (*mi)->mGtkMenuItem);
+			// gtk_widget_destroy((*mi)->mGtkMenuItem);
 
 		mItems.erase(b, e);
 	}
