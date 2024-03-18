@@ -27,8 +27,6 @@
 #include "MAnimation.hpp"
 #include "MAnimationImpl.hpp"
 
-using namespace std;
-
 // --------------------------------------------------------------------
 
 MAnimationVariable::MAnimationVariable(MAnimationVariableImpl *inImpl)

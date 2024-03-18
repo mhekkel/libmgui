@@ -38,8 +38,6 @@
 
 #include <cstring>
 
-using namespace std;
-
 MGtkApplicationImpl::MGtkApplicationImpl()
 {
 	sInstance = this;
@@ -167,7 +165,7 @@ gboolean MGtkApplicationImpl::Timeout(gpointer inData)
 
 		gApp->Pulse();
 	}
-	catch (exception &e)
+	catch (std::exception &e)
 	{
 		DisplayError(e);
 	}

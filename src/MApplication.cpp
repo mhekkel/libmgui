@@ -38,7 +38,6 @@
 #include <filesystem>
 #include <iostream>
 
-using namespace std;
 namespace fs = std::filesystem;
 
 #if DEBUG
@@ -158,7 +157,7 @@ bool MApplication::UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32
 	return result;
 }
 
-void MApplication::UpdateSpecialMenu(const string &inName, MMenu *inMenu)
+void MApplication::UpdateSpecialMenu(const std::string &inName, MMenu *inMenu)
 {
 	if (inName == "window")
 		UpdateWindowMenu(inMenu);

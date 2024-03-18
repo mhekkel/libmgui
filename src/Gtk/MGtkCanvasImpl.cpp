@@ -44,8 +44,6 @@
 #include <cassert>
 #include <iostream>
 
-using namespace std;
-
 MGtkCanvasImpl::MGtkCanvasImpl(MCanvas *inCanvas, uint32_t inWidth, uint32_t inHeight)
 	: MGtkControlImpl(inCanvas, "canvas")
 {
@@ -82,7 +80,7 @@ bool MGtkCanvasImpl::OnMouseDown(int32_t inX, int32_t inY, uint32_t inButtonNr, 
 		case 2:
 			if (MPrimary::Instance().HasText())
 			{
-				string text;
+				std::string text;
 				MPrimary::Instance().GetText(text);
 				result = mControl->PastePrimaryBuffer(text);
 			}
@@ -176,7 +174,7 @@ bool MGtkCanvasImpl::OnKeyPressEvent(GdkEventKey *inEvent)
 		if (keyValue >= 0x60 and keyValue <= 0x7f and modifiers == kControlKey)
 		{
 			char ch = static_cast<char>(keyValue) - 0x60;
-			string text(&ch, 1);
+			std::string text(&ch, 1);
 			result = mControl->HandleCharacter(text, mAutoRepeat);
 		}
 		else
@@ -192,7 +190,7 @@ bool MGtkCanvasImpl::OnKeyPressEvent(GdkEventKey *inEvent)
 				char *sp = s;
 				uint32_t length = MEncodingTraits<kEncodingUTF8>::WriteUnicode(sp, ch);
 
-				string text(s, length);
+				std::string text(s, length);
 				result = mControl->HandleCharacter(text, mAutoRepeat);
 			}
 		}
@@ -230,7 +228,7 @@ bool MGtkCanvasImpl::OnDrawEvent(cairo_t *inCairo)
 
 bool MGtkCanvasImpl::OnCommit(gchar *inText)
 {
-	string text(inText);
+	std::string text(inText);
 	return mControl->HandleCharacter(text, mAutoRepeat);
 }
 

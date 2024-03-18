@@ -29,18 +29,16 @@
 
 #include <cassert>
 
-using namespace std;
-
 // --------------------------------------------------------------------
 
-MSimpleControl::MSimpleControl(const string& inID, MRect inBounds)
+MSimpleControl::MSimpleControl(const std::string& inID, MRect inBounds)
 	: MControl<MSimpleControlImpl>(inID, inBounds, MSimpleControlImpl::Create(this))
 {
 }
 
 // --------------------------------------------------------------------
 
-MButton::MButton(const string& inID, MRect inBounds, const string& inLabel,
+MButton::MButton(const std::string& inID, MRect inBounds, const std::string& inLabel,
 	MButtonFlags inFlags)
 	: MControl<MButtonImpl>(inID, inBounds, MButtonImpl::Create(this, inLabel, inFlags))
 {
@@ -56,14 +54,14 @@ void MButton::MakeDefault(bool inDefault)
 	mImpl->MakeDefault(inDefault);
 }
 
-void MButton::SetText(const string& inText)
+void MButton::SetText(const std::string& inText)
 {
 	mImpl->SetText(inText);
 }
 
 // --------------------------------------------------------------------
 
-MExpander::MExpander(const string& inID, MRect inBounds, const string& inLabel)
+MExpander::MExpander(const std::string& inID, MRect inBounds, const std::string& inLabel)
 	: MControl<MExpanderImpl>(inID, inBounds, MExpanderImpl::Create(this, inLabel))
 {
 }
@@ -80,7 +78,7 @@ bool MExpander::IsOpen() const
 
 // --------------------------------------------------------------------
 
-MScrollbar::MScrollbar(const string& inID, MRect inBounds)
+MScrollbar::MScrollbar(const std::string& inID, MRect inBounds)
 	: MControl<MScrollbarImpl>(inID, inBounds, MScrollbarImpl::Create(this))
 {
 }
@@ -134,42 +132,42 @@ int32_t MScrollbar::GetMaxValue() const
 
 // --------------------------------------------------------------------
 
-MStatusbar::MStatusbar(const string& inID, MRect inBounds, uint32_t inPartCount, MStatusBarElement inParts[])
+MStatusbar::MStatusbar(const std::string& inID, MRect inBounds, uint32_t inPartCount, MStatusBarElement inParts[])
 	: MControl<MStatusbarImpl>(inID, inBounds, MStatusbarImpl::Create(this, inPartCount, inParts))
 {
 	SetBindings(true, false, true, true);
 }
 
-void MStatusbar::SetStatusText(uint32_t inPartNr, const string& inText, bool inBorder)
+void MStatusbar::SetStatusText(uint32_t inPartNr, const std::string& inText, bool inBorder)
 {
 	mImpl->SetStatusText(inPartNr, inText, inBorder);
 }
 
 // --------------------------------------------------------------------
 
-MCombobox::MCombobox(const string& inID, MRect inBounds)
+MCombobox::MCombobox(const std::string& inID, MRect inBounds)
 	: MControl<MComboboxImpl>(inID, inBounds, MComboboxImpl::Create(this))
 {
 }
 
-void MCombobox::SetText(const string& inText)
+void MCombobox::SetText(const std::string& inText)
 {
 	mImpl->SetText(inText);
 }
 
-string MCombobox::GetText() const
+std::string MCombobox::GetText() const
 {
 	return mImpl->GetText();
 }
 
-void MCombobox::SetChoices(const vector<string>& inChoices)
+void MCombobox::SetChoices(const std::vector<std::string>& inChoices)
 {
 	mImpl->SetChoices(inChoices);
 }
 
 // --------------------------------------------------------------------
 
-MPopup::MPopup(const string& inID, MRect inBounds)
+MPopup::MPopup(const std::string& inID, MRect inBounds)
 	: MControl<MPopupImpl>(inID, inBounds, MPopupImpl::Create(this))
 {
 }
@@ -184,34 +182,34 @@ int32_t MPopup::GetValue() const
 	return mImpl->GetValue();
 }
 
-void MPopup::SetText(const string& inText)
+void MPopup::SetText(const std::string& inText)
 {
 	mImpl->SetText(inText);
 }
 
-string MPopup::GetText() const
+std::string MPopup::GetText() const
 {
 	return mImpl->GetText();
 }
 
-void MPopup::SetChoices(const vector<string>& inChoices)
+void MPopup::SetChoices(const std::vector<std::string>& inChoices)
 {
 	mImpl->SetChoices(inChoices);
 }
 
 // --------------------------------------------------------------------
 
-MEdittext::MEdittext(const string& inID, MRect inBounds, uint32_t inFlags)
+MEdittext::MEdittext(const std::string& inID, MRect inBounds, uint32_t inFlags)
 	: MControl<MEdittextImpl>(inID, inBounds, MEdittextImpl::Create(this, inFlags))
 {
 }
 
-void MEdittext::SetText(const string& inText)
+void MEdittext::SetText(const std::string& inText)
 {
 	mImpl->SetText(inText);
 }
 
-string MEdittext::GetText() const
+std::string MEdittext::GetText() const
 {
 	return mImpl->GetText();
 }
@@ -228,26 +226,26 @@ void MEdittext::SetPasswordChar(uint32_t inUnicode)
 
 // --------------------------------------------------------------------
 
-MCaption::MCaption(const string& inID, MRect inBounds, const string& inText)
+MCaption::MCaption(const std::string& inID, MRect inBounds, const std::string& inText)
 	: MControl<MCaptionImpl>(inID, inBounds, MCaptionImpl::Create(this, inText))
 {
 }
 
-void MCaption::SetText(const string& inText)
+void MCaption::SetText(const std::string& inText)
 {
 	mImpl->SetText(inText);
 }
 
 // --------------------------------------------------------------------
 
-MSeparator::MSeparator(const string& inID, MRect inBounds)
+MSeparator::MSeparator(const std::string& inID, MRect inBounds)
 	: MControl<MSeparatorImpl>(inID, inBounds, MSeparatorImpl::Create(this))
 {
 }
 
 // --------------------------------------------------------------------
 
-MCheckbox::MCheckbox(const string& inID, MRect inBounds, const string& inTitle)
+MCheckbox::MCheckbox(const std::string& inID, MRect inBounds, const std::string& inTitle)
 	: MControl<MCheckboxImpl>(inID, inBounds, MCheckboxImpl::Create(this, inTitle))
 {
 }
@@ -264,7 +262,7 @@ void MCheckbox::SetChecked(bool inChecked)
 
 // --------------------------------------------------------------------
 
-MRadiobutton::MRadiobutton(const string& inID, MRect inBounds, const string& inTitle)
+MRadiobutton::MRadiobutton(const std::string& inID, MRect inBounds, const std::string& inTitle)
 	: MControl<MRadiobuttonImpl>(inID, inBounds, MRadiobuttonImpl::Create(this, inTitle))
 {
 }
@@ -291,19 +289,19 @@ MListHeader::MListHeader(const std::string& inID, MRect inBounds)
 {
 }
 
-void MListHeader::AppendColumn(const string& inLabel, int inWidth)
+void MListHeader::AppendColumn(const std::string& inLabel, int inWidth)
 {
 	mImpl->AppendColumn(inLabel, inWidth);
 }
 
 // --------------------------------------------------------------------
 
-MNotebook::MNotebook(const string& inID, MRect inBounds)
+MNotebook::MNotebook(const std::string& inID, MRect inBounds)
 	: MControl<MNotebookImpl>(inID, inBounds, MNotebookImpl::Create(this))
 {
 }
 
-void MNotebook::AddPage(const string& inLabel, MView* inPage)
+void MNotebook::AddPage(const std::string& inLabel, MView* inPage)
 {
 	mImpl->AddPage(inLabel, inPage);
 //	
@@ -331,7 +329,7 @@ uint32_t MNotebook::GetSelectedPage() const
 
 // --------------------------------------------------------------------
 
-MColorSwatch::MColorSwatch(const string& inID, MRect inBounds, MColor inColor)
+MColorSwatch::MColorSwatch(const std::string& inID, MRect inBounds, MColor inColor)
 	: MControl<MColorSwatchImpl>(inID, inBounds, MColorSwatchImpl::Create(this, inColor))
 {
 }
@@ -353,12 +351,12 @@ void MColorSwatch::SetPalette(const std::vector<MColor> &colors)
 
 // --------------------------------------------------------------------
 
-MListBox::MListBox(const string& inID, MRect inBounds)
+MListBox::MListBox(const std::string& inID, MRect inBounds)
 	: MControl<MListBoxImpl>(inID, inBounds, MListBoxImpl::Create(this))
 {
 }
 
-void MListBox::AddItem(const string& inLabel)
+void MListBox::AddItem(const std::string& inLabel)
 {
 	mImpl->AddItem(inLabel);
 }

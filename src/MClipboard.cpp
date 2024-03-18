@@ -36,29 +36,27 @@
 
 #include <list>
 
-using namespace std;
-
 template <class charT>
-basic_ostream<charT> &operator<<(basic_ostream<charT> &lhs, MClipboard::Data &rhs)
+std::basic_ostream<charT> &operator<<(std::basic_ostream<charT> &lhs, MClipboard::Data &rhs)
 {
 	lhs << "Data block: '" << rhs.mText << "\'n";
 
 	return lhs;
 }
 
-MClipboard::Data::Data(const string &inText, bool inBlock)
+MClipboard::Data::Data(const std::string &inText, bool inBlock)
 	: mText(inText)
 	, mBlock(inBlock)
 {
 }
 
-void MClipboard::Data::SetData(const string &inText, bool inBlock)
+void MClipboard::Data::SetData(const std::string &inText, bool inBlock)
 {
 	mText = inText;
 	mBlock = inBlock;
 }
 
-void MClipboard::Data::AddData(const string &inText)
+void MClipboard::Data::AddData(const std::string &inText)
 {
 	mText += inText;
 	mBlock = false;
@@ -126,7 +124,7 @@ void MClipboard::PreviousInRing()
 	mRing[0] = back;
 }
 
-void MClipboard::GetData(string &outText, bool &outIsBlock)
+void MClipboard::GetData(std::string &outText, bool &outIsBlock)
 {
 	if (mCount == 0)
 		THROW(("clipboard error"));
@@ -135,7 +133,7 @@ void MClipboard::GetData(string &outText, bool &outIsBlock)
 	outIsBlock = mRing[0]->mBlock;
 }
 
-void MClipboard::SetData(const string &inText, bool inBlock)
+void MClipboard::SetData(const std::string &inText, bool inBlock)
 {
 	if (mCount >= kClipboardRingSize)
 	{
@@ -156,7 +154,7 @@ void MClipboard::SetData(const string &inText, bool inBlock)
 	mImpl->Commit();
 }
 
-void MClipboard::AddData(const string &inText)
+void MClipboard::AddData(const std::string &inText)
 {
 	if (mCount == 0)
 		SetData(inText, false);

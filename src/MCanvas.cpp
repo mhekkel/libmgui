@@ -28,9 +28,7 @@
 #include "MCanvasImpl.hpp"
 #include "MControls.inl"
 
-using namespace std;
-
-MCanvas::MCanvas(const string &inID, MRect inBounds, bool inAcceptDropFiles, bool inAcceptDropText)
+MCanvas::MCanvas(const std::string &inID, MRect inBounds, bool inAcceptDropFiles, bool inAcceptDropText)
 	: MControl<MCanvasImpl>(inID, inBounds, MCanvasImpl::Create(this, inBounds.width, inBounds.height))
 	, mAcceptDropFiles(inAcceptDropFiles)
 	, mAcceptDropText(inAcceptDropText)
@@ -83,7 +81,7 @@ void MCanvas::DragLeave()
 {
 }
 
-bool MCanvas::Drop(bool inMove, int32_t inX, int32_t inY, const string &inText)
+bool MCanvas::Drop(bool inMove, int32_t inX, int32_t inY, const std::string &inText)
 {
 	return false;
 }

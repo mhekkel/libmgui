@@ -36,8 +36,6 @@
 #include <cmath>
 #include <cstring>
 
-using namespace std;
-
 struct MPangoContext
 {
 	MPangoContext()
@@ -110,7 +108,7 @@ void MGtkDeviceImpl::SetOrigin(int32_t inX, int32_t inY)
 {
 }
 
-void MGtkDeviceImpl::SetFont(const string &inFont)
+void MGtkDeviceImpl::SetFont(const std::string &inFont)
 {
 	PangoFontDescription *newFontDesc = pango_font_description_from_string(inFont.c_str());
 
@@ -244,11 +242,11 @@ float MGtkDeviceImpl::GetXWidth()
 	return GetStringWidth("xxxxxxxxxx") / 10.f;
 }
 
-void MGtkDeviceImpl::DrawString(const string &inText, float inX, float inY, uint32_t inTruncateWidth, MAlignment inAlign)
+void MGtkDeviceImpl::DrawString(const std::string &inText, float inX, float inY, uint32_t inTruncateWidth, MAlignment inAlign)
 {
 }
 
-uint32_t MGtkDeviceImpl::GetStringWidth(const string &inText)
+uint32_t MGtkDeviceImpl::GetStringWidth(const std::string &inText)
 {
 	// reset attributes first
 	PangoAttrList *attrs = pango_attr_list_new();
@@ -263,7 +261,7 @@ uint32_t MGtkDeviceImpl::GetStringWidth(const string &inText)
 	return r.width;
 }
 
-void MGtkDeviceImpl::SetText(const string &inText)
+void MGtkDeviceImpl::SetText(const std::string &inText)
 {
 	// reset attributes first
 	PangoAttrList *attrs = pango_attr_list_new();
@@ -420,7 +418,7 @@ void MGtkDeviceImpl::DrawCaret(float inX, float inY, uint32_t inOffset)
 {
 }
 
-void MGtkDeviceImpl::BreakLines(uint32_t inWidth, vector<uint32_t> &outBreaks)
+void MGtkDeviceImpl::BreakLines(uint32_t inWidth, std::vector<uint32_t> &outBreaks)
 {
 	pango_layout_set_width(mPangoLayout, inWidth * mPangoScale);
 	pango_layout_set_wrap(mPangoLayout, PANGO_WRAP_WORD_CHAR);
@@ -521,7 +519,7 @@ class MCairoDeviceImp : public MGtkDeviceImpl
 	virtual void DrawImage(cairo_surface_t *inImage, float inX, float inY, float inShear);
 	virtual void DrawBitmap(const MBitmap &inBitmap, float inX, float inY);
 	virtual void CreateAndUsePattern(MColor inColor1, MColor inColor2);
-	virtual void DrawString(const string &inText, float inX, float inY, uint32_t inTruncateWidth, MAlignment inAlign);
+	virtual void DrawString(const std::string &inText, float inX, float inY, uint32_t inTruncateWidth, MAlignment inAlign);
 	virtual void RenderText(float inX, float inY);
 	virtual void DrawCaret(float inX, float inY, uint32_t inOffset);
 	virtual void MakeTransparent(float inOpacity);
@@ -735,7 +733,7 @@ void MCairoDeviceImp::CreateAndUsePattern(MColor inColor1, MColor inColor2)
 	}
 }
 
-void MCairoDeviceImp::DrawString(const string &inText, float inX, float inY, uint32_t inTruncateWidth, MAlignment inAlign)
+void MCairoDeviceImp::DrawString(const std::string &inText, float inX, float inY, uint32_t inTruncateWidth, MAlignment inAlign)
 {
 	// reset attributes first
 	PangoAttrList *attrs = pango_attr_list_new();
@@ -795,7 +793,7 @@ void MCairoDeviceImp::DrawWhiteSpace(float inX, float inY)
 	cairo_set_scaled_font(mContext, scaledFont);
 
 	int x_position = 0;
-	vector<cairo_glyph_t> cairo_glyphs;
+	std::vector<cairo_glyph_t> cairo_glyphs;
 
 	for (GSList *run = line->runs; run != nullptr; run = run->next)
 	{
@@ -928,7 +926,7 @@ struct MPNGSurface
 	{
 		mSurface = cairo_image_surface_create_from_png_stream(&MPNGSurface::read_func, this);
 		if (mSurface == nullptr)
-			throw runtime_error("cannot decode PNG data");
+			throw std::runtime_error("cannot decode PNG data");
 	}
 
 	~MPNGSurface()
@@ -981,7 +979,7 @@ MBitmap::MBitmap(const void *inPNG, uint32_t inLength)
 		case CAIRO_FORMAT_RGB24: mUseAlpha = false; // fall through
 		case CAIRO_FORMAT_ARGB32: length *= 4; break;
 		case CAIRO_FORMAT_A8: mUseAlpha = false; break;
-		default: throw runtime_error("unsupported format"); break;
+		default: throw std::runtime_error("unsupported format"); break;
 	}
 
 	mData = new uint32_t[length / 4];
@@ -994,7 +992,7 @@ MGeometryImpl *MGeometryImpl::Create(MDevice &inDevice, MGeometryFillMode inMode
 	return nullptr;
 }
 
-void MDevice::ListFonts(bool inFixedWidthOnly, vector<string> &outFonts)
+void MDevice::ListFonts(bool inFixedWidthOnly, std::vector<std::string> &outFonts)
 {
 	PangoFontMap *fontMap = pango_cairo_font_map_get_default();
 	// PRINT(("DPI volgens pango/cairo: %g", pango_cairo_font_map_get_resolution((PangoCairoFontMap *)fontMap)));

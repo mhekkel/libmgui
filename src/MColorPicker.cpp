@@ -33,14 +33,12 @@
 
 #include <regex>
 
-using namespace std;
-
 // --------------------------------------------------------------------
 
 class MColorSquare : public MCanvas
 {
   public:
-	MColorSquare(const string &inID, MRect inBounds, MColorPicker &inPicker);
+	MColorSquare(const std::string &inID, MRect inBounds, MColorPicker &inPicker);
 
 	// virtual void	Draw(MRect inUpdate);
 	virtual void Draw();
@@ -61,7 +59,7 @@ class MColorSquare : public MCanvas
 	MColorPicker &mPicker;
 };
 
-MColorSquare::MColorSquare(const string &inID, MRect inBounds, MColorPicker &inPicker)
+MColorSquare::MColorSquare(const std::string &inID, MRect inBounds, MColorPicker &inPicker)
 	: MCanvas(inID, inBounds, false, false)
 	, eChangedColor(this, &MColorSquare::SetColor)
 	, eChangedMode(this, &MColorSquare::SetMode)
@@ -235,7 +233,7 @@ void MColorSquare::SetColor(MColor inColor)
 class MColorSlider : public MCanvas
 {
   public:
-	MColorSlider(const string &inID, MRect inBounds, MColorPicker &inPicker);
+	MColorSlider(const std::string &inID, MRect inBounds, MColorPicker &inPicker);
 
 	// virtual void	Draw(MRect inUpdate);
 	virtual void Draw();
@@ -256,7 +254,7 @@ class MColorSlider : public MCanvas
 	MColorPicker &mPicker;
 };
 
-MColorSlider::MColorSlider(const string &inID, MRect inBounds, MColorPicker &inPicker)
+MColorSlider::MColorSlider(const std::string &inID, MRect inBounds, MColorPicker &inPicker)
 	: MCanvas(inID, inBounds, false, false)
 	, eChangedColor(this, &MColorSlider::SetColor)
 	, eChangedMode(this, &MColorSlider::SetMode)
@@ -414,7 +412,7 @@ void MColorSlider::SetColor(MColor inColor)
 class MColorSample : public MCanvas
 {
   public:
-	MColorSample(const string &inID, MRect inBounds, MColorPicker &inPicker, MColor &inColor);
+	MColorSample(const std::string &inID, MRect inBounds, MColorPicker &inPicker, MColor &inColor);
 
 	// virtual void	Draw(MRect inUpdate);
 	virtual void Draw();
@@ -432,7 +430,7 @@ class MColorSample : public MCanvas
 	bool mMouseDown;
 };
 
-MColorSample::MColorSample(const string &inID, MRect inBounds, MColorPicker &inPicker, MColor &inColor)
+MColorSample::MColorSample(const std::string &inID, MRect inBounds, MColorPicker &inPicker, MColor &inColor)
 	: MCanvas(inID, inBounds, false, false)
 	, eChangedColor(this, &MColorSample::SetColor)
 	, mPicker(inPicker)
@@ -529,7 +527,7 @@ MColorPicker::MColorPicker(
 
 	Show(inWindow);
 
-	string mode = Preferences::GetString("color-picker-mode", "hue");
+	std::string mode = Preferences::GetString("color-picker-mode", "hue");
 	MRadiobutton *button = dynamic_cast<MRadiobutton *>(FindSubViewByID(mode));
 	if (button != nullptr)
 	{
@@ -540,7 +538,7 @@ MColorPicker::MColorPicker(
 	Select();
 }
 
-void MColorPicker::RadiobuttonChanged(const string &inID, bool inValue)
+void MColorPicker::RadiobuttonChanged(const std::string &inID, bool inValue)
 {
 	if (inValue)
 	{
@@ -559,7 +557,7 @@ void MColorPicker::RadiobuttonChanged(const string &inID, bool inValue)
 	}
 }
 
-void MColorPicker::TextChanged(const string &inID, const string &inText)
+void MColorPicker::TextChanged(const std::string &inID, const std::string &inText)
 {
 	if (mSettingText)
 		return;

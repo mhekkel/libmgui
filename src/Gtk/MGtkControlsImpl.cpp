@@ -32,8 +32,6 @@
 #include "MColorPicker.hpp"
 #include "MUtils.hpp"
 
-using namespace std;
-
 const int kScrollbarWidth = 16; //::GetThemeSysSize(nullptr, SM_CXVSCROLL);
 
 // --------------------------------------------------------------------
@@ -55,7 +53,7 @@ MSimpleControlImpl *MSimpleControlImpl::Create(MSimpleControl *inControl)
 
 // --------------------------------------------------------------------
 
-MGtkButtonImpl::MGtkButtonImpl(MButton *inButton, const string &inLabel,
+MGtkButtonImpl::MGtkButtonImpl(MButton *inButton, const std::string &inLabel,
 	MButtonFlags inFlags)
 	: MGtkControlImpl(inButton, inLabel)
 	, mClicked(this, &MGtkButtonImpl::Clicked)
@@ -126,7 +124,7 @@ void MGtkButtonImpl::GetIdealSize(int32_t &outWidth, int32_t &outHeight)
 	//	}
 }
 
-MButtonImpl *MButtonImpl::Create(MButton *inButton, const string &inLabel,
+MButtonImpl *MButtonImpl::Create(MButton *inButton, const std::string &inLabel,
 	MButtonFlags inFlags)
 {
 	return new MGtkButtonImpl(inButton, inLabel, inFlags);
@@ -134,7 +132,7 @@ MButtonImpl *MButtonImpl::Create(MButton *inButton, const string &inLabel,
 
 // --------------------------------------------------------------------
 
-MGtkExpanderImpl::MGtkExpanderImpl(MExpander *inExpander, const string &inLabel)
+MGtkExpanderImpl::MGtkExpanderImpl(MExpander *inExpander, const std::string &inLabel)
 	: MGtkControlImpl(inExpander, inLabel)
 	, mIsOpen(false)
 {
@@ -364,7 +362,7 @@ void MGtkExpanderImpl::AddedToWindow()
 	//	}
 }
 
-MExpanderImpl *MExpanderImpl::Create(MExpander *inExpander, const string &inLabel)
+MExpanderImpl *MExpanderImpl::Create(MExpander *inExpander, const std::string &inLabel)
 {
 	return new MGtkExpanderImpl(inExpander, inLabel);
 }
@@ -541,7 +539,7 @@ void MGtkStatusbarImpl::AddedToWindow()
 	impl->AddStatusbarWidget(this);
 }
 
-void MGtkStatusbarImpl::SetStatusText(uint32_t inPartNr, const string &inText, bool inBorder)
+void MGtkStatusbarImpl::SetStatusText(uint32_t inPartNr, const std::string &inText, bool inBorder)
 {
 	if (inPartNr < mPanels.size())
 		gtk_label_set_text(GTK_LABEL(mPanels[inPartNr]), inText.c_str());
@@ -581,9 +579,9 @@ void MGtkComboboxImpl::CreateWidget()
 	SetWidget(wdgt);
 }
 
-string MGtkComboboxImpl::GetText() const
+std::string MGtkComboboxImpl::GetText() const
 {
-	string result;
+	std::string result;
 
 	//	char* text = gtk_combo_box_get_active_text(GTK_COMBO_BOX(GetWidget()));
 	const char *text = gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(GetWidget()))));
@@ -728,14 +726,14 @@ void MGtkPopupImpl::SetValue(int32_t inValue)
 	gtk_combo_box_set_active(GTK_COMBO_BOX(GetWidget()), inValue);
 }
 
-void MGtkPopupImpl::SetText(const string &inText)
+void MGtkPopupImpl::SetText(const std::string &inText)
 {
 	auto i = find(mChoices.begin(), mChoices.end(), inText);
 	if (i != mChoices.end())
 		SetValue(i - mChoices.begin());
 }
 
-string MGtkPopupImpl::GetText() const
+std::string MGtkPopupImpl::GetText() const
 {
 	const char *s = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(GetWidget()));
 	return s ? s : "";
@@ -782,7 +780,7 @@ void MGtkEdittextImpl::SetFocus()
 	//	::SendMessage(GetWidget(), EM_SETSEL, 0, -1);
 }
 
-string MGtkEdittextImpl::GetText() const
+std::string MGtkEdittextImpl::GetText() const
 {
 	const char *result = nullptr;
 	if (GTK_IS_ENTRY(GetWidget()))
@@ -831,7 +829,7 @@ MEdittextImpl *MEdittextImpl::Create(MEdittext *inEdittext, uint32_t inFlags)
 
 // --------------------------------------------------------------------
 
-MGtkCaptionImpl::MGtkCaptionImpl(MCaption *inControl, const string &inText)
+MGtkCaptionImpl::MGtkCaptionImpl(MCaption *inControl, const std::string &inText)
 	: MGtkControlImpl(inControl, inText)
 {
 }
@@ -844,7 +842,7 @@ void MGtkCaptionImpl::CreateWidget()
 	SetWidget(widget);
 }
 
-void MGtkCaptionImpl::SetText(const string &inText)
+void MGtkCaptionImpl::SetText(const std::string &inText)
 {
 	mLabel = inText;
 	if (GTK_IS_LABEL(GetWidget()))
@@ -875,7 +873,7 @@ MSeparatorImpl *MSeparatorImpl::Create(MSeparator *inSeparator)
 
 // --------------------------------------------------------------------
 
-MGtkCheckboxImpl::MGtkCheckboxImpl(MCheckbox *inControl, const string &inText)
+MGtkCheckboxImpl::MGtkCheckboxImpl(MCheckbox *inControl, const std::string &inText)
 	: MGtkControlImpl(inControl, inText)
 	, mChecked(false)
 {
@@ -899,14 +897,14 @@ void MGtkCheckboxImpl::SetChecked(bool inChecked)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(GetWidget()), mChecked);
 }
 
-MCheckboxImpl *MCheckboxImpl::Create(MCheckbox *inCheckbox, const string &inText)
+MCheckboxImpl *MCheckboxImpl::Create(MCheckbox *inCheckbox, const std::string &inText)
 {
 	return new MGtkCheckboxImpl(inCheckbox, inText);
 }
 
 // --------------------------------------------------------------------
 
-MGtkRadiobuttonImpl::MGtkRadiobuttonImpl(MRadiobutton *inControl, const string &inText)
+MGtkRadiobuttonImpl::MGtkRadiobuttonImpl(MRadiobutton *inControl, const std::string &inText)
 	: MGtkControlImpl(inControl, inText)
 {
 }
@@ -934,7 +932,7 @@ void MGtkRadiobuttonImpl::SetChecked(bool inChecked)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(GetWidget()), inChecked);
 }
 
-void MGtkRadiobuttonImpl::SetGroup(const list<MRadiobutton *> &inButtons)
+void MGtkRadiobuttonImpl::SetGroup(const std::list<MRadiobutton *> &inButtons)
 {
 	mGroup = inButtons;
 }
@@ -974,7 +972,7 @@ void MGtkListHeaderImpl::CreateWidget()
 	assert(false);
 }
 
-void MGtkListHeaderImpl::AppendColumn(const string &inLabel, int inWidth)
+void MGtkListHeaderImpl::AppendColumn(const std::string &inLabel, int inWidth)
 {
 	//	HDITEM item = {};
 	//
@@ -1019,7 +1017,7 @@ void MGtkNotebookImpl::AddedToWindow()
 	// add pages
 	if (not mPages.empty())
 	{
-		vector<MPage> pages(mPages);
+		std::vector<MPage> pages(mPages);
 		mPages.clear();
 
 		for (MPage &page : pages)
@@ -1061,7 +1059,7 @@ void MGtkNotebookImpl::FrameResized()
 	//	}
 }
 
-void MGtkNotebookImpl::AddPage(const string &inLabel, MView *inPage)
+void MGtkNotebookImpl::AddPage(const std::string &inLabel, MView *inPage)
 {
 	MPage page = { inLabel, inPage };
 	mPages.push_back(page);
@@ -1281,7 +1279,7 @@ void MGtkListBoxImpl::AddedToWindow()
 {
 	MGtkControlImpl::AddedToWindow();
 
-	for (string &item : mItems)
+	for (std::string &item : mItems)
 		AddItem(item);
 
 	mItems.clear();
@@ -1289,7 +1287,7 @@ void MGtkListBoxImpl::AddedToWindow()
 	SetValue(0);
 }
 
-void MGtkListBoxImpl::AddItem(const string &inText)
+void MGtkListBoxImpl::AddItem(const std::string &inText)
 {
 	if (mStore == nullptr)
 		mItems.push_back(inText);

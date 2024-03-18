@@ -30,8 +30,6 @@
 
 #include "MUtils.hpp"
 
-using namespace std;
-
 class MGtkClipboardImpl : public MClipboardImpl
 {
   public:
@@ -121,7 +119,7 @@ void MGtkClipboardImpl::Commit()
 void MGtkClipboardImpl::GtkClipboardGet(GtkClipboard *inClipboard, GtkSelectionData *inSelectionData,
 	guint inInfo, gpointer inUserDataOrOwner)
 {
-	string text;
+	std::string text;
 	bool block;
 
 	MClipboard::Instance().GetData(text, block);

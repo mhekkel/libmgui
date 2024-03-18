@@ -32,8 +32,6 @@
 #include <memory>
 #include <set>
 
-using namespace std;
-
 const uint32_t
 	kValidModifiersMask = kControlKey | kShiftKey | kOptionKey;
 
@@ -74,7 +72,7 @@ struct MAccelCombo
 
 struct MAcceleratorTableImp
 {
-	set<MAccelCombo> mTable;
+	std::set<MAccelCombo> mTable;
 };
 
 // -------------------------------------
@@ -88,7 +86,7 @@ MAcceleratorTable &MAcceleratorTable::Instance()
 MAcceleratorTable &
 MAcceleratorTable::EditKeysInstance()
 {
-	static unique_ptr<MAcceleratorTable> sInstance;
+	static std::unique_ptr<MAcceleratorTable> sInstance;
 
 	if (sInstance.get() == nullptr)
 	{
@@ -222,7 +220,7 @@ bool MAcceleratorTable::GetAcceleratorKeyForCommand(
 {
 	bool result = false;
 
-	for (set<MAccelCombo>::iterator a = mImpl->mTable.begin(); a != mImpl->mTable.end(); ++a)
+	for (std::set<MAccelCombo>::iterator a = mImpl->mTable.begin(); a != mImpl->mTable.end(); ++a)
 	{
 		if (a->command == inCommand)
 		{
@@ -257,7 +255,7 @@ bool MAcceleratorTable::IsAcceleratorKey(
 	MAccelCombo kc;
 	kc.key = key;
 
-	set<MAccelCombo>::iterator a = mImpl->mTable.find(kc);
+	std::set<MAccelCombo>::iterator a = mImpl->mTable.find(kc);
 	if (a != mImpl->mTable.end())
 	{
 		outCommand = a->command;
@@ -290,7 +288,7 @@ bool MAcceleratorTable::IsNavigationKey(
 	MAccelCombo kc;
 	kc.key = (int64_t(inKeyValue) << 32) | inModifiers;
 
-	set<MAccelCombo>::iterator a = mImpl->mTable.find(kc);
+	std::set<MAccelCombo>::iterator a = mImpl->mTable.find(kc);
 	if (a != mImpl->mTable.end())
 	{
 		outCommand = MKeyCommand(a->command);

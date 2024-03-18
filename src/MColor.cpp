@@ -31,8 +31,6 @@
 #include <iomanip>
 #include <sstream>
 
-using namespace std;
-
 const MColor
 	kBlack("#000000"),
 	kWhite("#ffffff"),
@@ -72,7 +70,7 @@ MColor::MColor(const char *inHex)
 	hex(inHex);
 }
 
-MColor::MColor(const string &inHex)
+MColor::MColor(const std::string &inHex)
 {
 	hex(inHex);
 }
@@ -102,21 +100,21 @@ MColor &MColor::operator=(const MColor &inOther)
 	return *this;
 }
 
-string MColor::hex() const
+std::string MColor::hex() const
 {
-	stringstream s;
+	std::stringstream s;
 
-	s.setf(ios_base::hex, ios_base::basefield);
+	s.setf(std::ios_base::hex, std::ios_base::basefield);
 
 	s << '#'
-	  << setw(2) << setfill('0') << static_cast<uint32_t>(red)
-	  << setw(2) << setfill('0') << static_cast<uint32_t>(green)
-	  << setw(2) << setfill('0') << static_cast<uint32_t>(blue);
+	  << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(red)
+	  << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(green)
+	  << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(blue);
 
 	return s.str();
 }
 
-void MColor::hex(const string &inHex)
+void MColor::hex(const std::string &inHex)
 {
 	const char *h = inHex.c_str();
 	auto l = inHex.length();
@@ -235,14 +233,14 @@ std::string MColor::str() const
 	return hex();
 }
 
-ostream &operator<<(ostream &os, const MColor &inColor)
+std::ostream &operator<<(std::ostream &os, const MColor &inColor)
 {
-	ios_base::fmtflags flags = os.setf(ios_base::hex, ios_base::basefield);
+	std::ios_base::fmtflags flags = os.setf(std::ios_base::hex, std::ios_base::basefield);
 
 	os << '#'
-	   << setw(2) << setfill('0') << static_cast<uint32_t>(inColor.red)
-	   << setw(2) << setfill('0') << static_cast<uint32_t>(inColor.green)
-	   << setw(2) << setfill('0') << static_cast<uint32_t>(inColor.blue);
+	   << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(inColor.red)
+	   << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(inColor.green)
+	   << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(inColor.blue);
 
 	os.setf(flags);
 	return os;
@@ -254,8 +252,8 @@ void rgb2hsv(float r, float g, float b, float &h, float &s, float &v)
 {
 	float cmin, cmax, delta;
 
-	cmax = max(r, max(g, b));
-	cmin = min(r, min(g, b));
+	cmax = std::max(r, std::max(g, b));
+	cmin = std::min(r, std::min(g, b));
 	delta = cmax - cmin;
 
 	v = cmax;

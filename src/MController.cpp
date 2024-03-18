@@ -34,8 +34,6 @@
 
 #include <cassert>
 
-using namespace std;
-
 namespace
 {
 
