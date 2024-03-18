@@ -31,12 +31,11 @@
 #include "MUtils.hpp"
 
 #include <cassert>
+#include <chrono>
 #include <condition_variable>
 #include <mutex>
 #include <numeric>
 #include <thread>
-
-using namespace std;
 
 // --------------------------------------------------------------------
 
@@ -72,7 +71,7 @@ class MFallBackStoryboardImpl : public MStoryboardImpl
   public:
 	MFallBackStoryboardImpl() {}
 	virtual void AddTransition(MAnimationVariable *inVariable,
-		double inNewValue, double inDuration,
+		double inNewValue, std::chrono::system_clock::duration inDuration,
 		const char *inTransitionName);
 
 	virtual void AddFinishedCallback(std::function<void()> cb)
@@ -80,28 +79,28 @@ class MFallBackStoryboardImpl : public MStoryboardImpl
 	}
 
 	// inTime is relative to the start of the story
-	bool Update(double inTime);
-	bool Done(double inTime);
+	bool Update(std::chrono::system_clock::duration inTime);
+	bool Done(std::chrono::system_clock::duration inTime);
 
 	struct MTransition
 	{
 		double mNewValue;
-		double mDuration;
-		string mTransitionName;
+		std::chrono::system_clock::duration mDuration;
+		std::string mTransitionName;
 	};
 
 	struct MVariableStory
 	{
 		MAnimationVariable *mVariable;
 		double mStartValue;
-		list<MTransition> mTransistions;
+		std::list<MTransition> mTransistions;
 	};
 
-	list<MVariableStory> mVariableStories;
+	std::list<MVariableStory> mVariableStories;
 };
 
 void MFallBackStoryboardImpl::AddTransition(MAnimationVariable *inVariable,
-	double inNewValue, double inDuration, const char *inTransitionName)
+	double inNewValue, std::chrono::system_clock::duration inDuration, const char *inTransitionName)
 {
 	auto s = find_if(mVariableStories.begin(), mVariableStories.end(),
 		[inVariable](MVariableStory &st) -> bool
@@ -120,14 +119,14 @@ void MFallBackStoryboardImpl::AddTransition(MAnimationVariable *inVariable,
 	s->mTransistions.push_back(t);
 }
 
-bool MFallBackStoryboardImpl::Update(double inTime)
+bool MFallBackStoryboardImpl::Update(std::chrono::system_clock::duration inTime)
 {
 	bool result = false;
 
 	for (auto vs : mVariableStories)
 	{
 		double v = vs.mStartValue;
-		double time = inTime;
+		auto time = inTime;
 
 		for (auto t : vs.mTransistions)
 		{
@@ -140,9 +139,9 @@ bool MFallBackStoryboardImpl::Update(double inTime)
 
 			// alleen nog maar lineair
 			assert(t.mTransitionName == "acceleration-decelleration");
-			double dv = t.mNewValue - v;
-			if (t.mDuration > 0)
-				dv *= time / t.mDuration;
+			auto dv = t.mNewValue - v;
+			if (t.mDuration > std::chrono::system_clock::duration{})
+				dv = (dv * time) / t.mDuration;
 			v += dv;
 			break;
 		}
@@ -157,14 +156,14 @@ bool MFallBackStoryboardImpl::Update(double inTime)
 	return result;
 }
 
-bool MFallBackStoryboardImpl::Done(double inTime)
+bool MFallBackStoryboardImpl::Done(std::chrono::system_clock::duration inTime)
 {
 	bool result = true;
 
 	for (auto vs : mVariableStories)
 	{
-		double totalDuration = std::accumulate(vs.mTransistions.begin(), vs.mTransistions.end(), 0.0,
-			[](double time, const MTransition &ts) -> double
+		auto totalDuration = std::accumulate(vs.mTransistions.begin(), vs.mTransistions.end(), std::chrono::system_clock::duration{},
+			[](std::chrono::system_clock::duration time, const MTransition &ts) -> std::chrono::system_clock::duration
 			{ return time + ts.mDuration; });
 
 		if (totalDuration > inTime)
@@ -185,7 +184,7 @@ class MFallBackAnimationManagerImpl : public MAnimationManagerImpl
 	MFallBackAnimationManagerImpl(MAnimationManager *inManager)
 		: mAnimationManager(inManager)
 		, mDone(false)
-		, mThread(bind(&MFallBackAnimationManagerImpl::Run, this))
+		, mThread(std::bind(&MFallBackAnimationManagerImpl::Run, this))
 	{
 	}
 
@@ -200,7 +199,7 @@ class MFallBackAnimationManagerImpl : public MAnimationManagerImpl
 	{
 		try
 		{
-			unique_lock<mutex> lock(mMutex);
+			std::unique_lock<std::mutex> lock(mMutex);
 
 			mStoryboards.clear();
 			mDone = true;
@@ -230,10 +229,10 @@ class MFallBackAnimationManagerImpl : public MAnimationManagerImpl
 	{
 		try
 		{
-			unique_lock<mutex> lock(mMutex);
+			std::unique_lock<std::mutex> lock(mMutex);
 
-			shared_ptr<MStoryboard> sbptr(inStoryboard);
-			MScheduledStoryboard sb = { GetLocalTime(), sbptr };
+			std::shared_ptr<MStoryboard> sbptr(inStoryboard);
+			MScheduledStoryboard sb = { std::chrono::system_clock::now(), sbptr };
 			mStoryboards.push_back(sb);
 
 			mCondition.notify_one();
@@ -247,25 +246,27 @@ class MFallBackAnimationManagerImpl : public MAnimationManagerImpl
 
 	struct MScheduledStoryboard
 	{
-		double mStartTime;
-		shared_ptr<MStoryboard> mStoryboard;
+		std::chrono::system_clock::time_point mStartTime;
+		std::shared_ptr<MStoryboard> mStoryboard;
 	};
 
 	MAnimationManager *mAnimationManager;
-	list<MScheduledStoryboard> mStoryboards;
-	mutex mMutex;
-	condition_variable mCondition;
+	std::list<MScheduledStoryboard> mStoryboards;
+	std::mutex mMutex;
+	std::condition_variable mCondition;
 	bool mDone;
-	thread mThread;
+	std::thread mThread;
 };
 
 void MFallBackAnimationManagerImpl::Run()
 {
+	using namespace std::chrono_literals;
+
 	for (;;)
 	{
 		try
 		{
-			unique_lock<mutex> lock(mMutex);
+			std::unique_lock<std::mutex> lock(mMutex);
 
 			if (mDone)
 				break;
@@ -278,7 +279,7 @@ void MFallBackAnimationManagerImpl::Run()
 
 			bool update = false;
 
-			double now = GetLocalTime();
+			auto now = std::chrono::system_clock::now();
 
 			for (auto storyboard : mStoryboards)
 			{

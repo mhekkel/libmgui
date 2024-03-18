@@ -25,7 +25,7 @@
 cmake_minimum_required(VERSION 3.15)
 
 # set the project name
-project(libmgui VERSION 1.0.0 LANGUAGES C CXX)
+project(libmgui VERSION 1.0.0 LANGUAGES CXX)
 
 include(GNUInstallDirs)
 include(CheckFunctionExists)
@@ -77,7 +77,9 @@ set(CMAKE_THREAD_PREFER_PTHREAD)
 set(THREADS_PREFER_PTHREAD_FLAG)
 find_package(Threads REQUIRED)
 
-# find_package(zeep 5.1.6 REQUIRED)
+if(NOT TARGET zeep AND NOT zeep_FOUND)
+	find_package(zeep 5.1.6 REQUIRED)
+endif()
 
 pkg_check_modules(GTK3 libcanberra-gtk3 REQUIRED IMPORTED_TARGET)
 
@@ -118,7 +120,7 @@ list(APPEND headers
 
 	# include/MExploreBrowserView.hpp
 	include/MFile.hpp
-	include/MGfxDevice.hpp
+	# include/MGfxDevice.hpp
 	include/MLib.hpp
 	include/MWindowImpl.hpp
 
@@ -144,8 +146,6 @@ list(APPEND headers
 	include/MMenuImpl.hpp)
 
 list(APPEND sources
-	${CMAKE_CURRENT_SOURCE_DIR}/src/bsd-closefrom.c
-
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkAlerts.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkAnimationImpl.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkClipboardImpl.cpp
@@ -180,7 +180,7 @@ list(APPEND sources
 	# ${CMAKE_CURRENT_SOURCE_DIR}/src/MDocClosedNotifier.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MWindow.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MError.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/MGfxDevice.cpp
+	# ${CMAKE_CURRENT_SOURCE_DIR}/src/MGfxDevice.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MApplication.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MLib.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MPreferences.cpp

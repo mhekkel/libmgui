@@ -564,7 +564,7 @@ bool MWinExpanderImpl::WMMouseExit(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LP
 {
 	mMouseInside = false;
 	mMouseTracking = false;
-	mLastExit = GetLocalTime();
+	mLastExit = std::chrono::system_clock::now();
 	
 	mControl->Invalidate();
 	mControl->UpdateNow();

@@ -34,6 +34,7 @@
 #include "MUtils.hpp"
 #include "MWindow.hpp"
 
+#include <chrono>
 #include <filesystem>
 #include <iostream>
 
@@ -216,7 +217,7 @@ void MApplication::DoQuit()
 
 void MApplication::Pulse()
 {
-	eIdle(GetLocalTime());
+	eIdle();
 	Preferences::SaveIfDirty();
 }
 

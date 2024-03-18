@@ -31,6 +31,7 @@
 #include "MP2PEvents.hpp"
 #include "MTypes.hpp"
 
+#include <chrono>
 #include <filesystem>
 #include <list>
 #include <vector>
@@ -64,7 +65,7 @@ class MApplication : public MHandler
 	virtual void UpdateSpecialMenu(const std::string &inMenuKind, MMenu *inMenu);
 	virtual void UpdateWindowMenu(MMenu *inMenu);
 
-	MEventOut<void(double)> eIdle;
+	MEventOut<void()> eIdle;
 
 	virtual int RunEventLoop();
 	virtual void Pulse();

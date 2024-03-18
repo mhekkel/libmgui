@@ -41,26 +41,9 @@
 #include <stack>
 #include <string>
 
-using namespace std;
-
-double GetLocalTime()
+std::string GetUserName(bool inShortName)
 {
-	struct timeval tv;
-
-	gettimeofday(&tv, nullptr);
-
-	return tv.tv_sec + tv.tv_usec / 1e6;
-}
-
-double GetDoubleClickTime()
-{
-	//	return ::GetDblTime() / 60.0;
-	return 0.2;
-}
-
-string GetUserName(bool inShortName)
-{
-	string result;
+	std::string result;
 
 	int uid = getuid();
 	struct passwd *pw = getpwuid(uid);
@@ -75,14 +58,14 @@ string GetUserName(bool inShortName)
 
 			if (result.length() > 0)
 			{
-				string::size_type p = result.find(',');
+				std::string::size_type p = result.find(',');
 
-				if (p != string::npos)
+				if (p != std::string::npos)
 					result.erase(p, result.length() - p);
 
 				p = result.find('&');
 
-				if (p != string::npos)
+				if (p != std::string::npos)
 					result.replace(p, 1, pw->pw_name);
 			}
 		}
@@ -157,48 +140,40 @@ GdkPixbuf *CreateDot(MColor inColor, uint32_t inSize)
 	return result;
 }
 
-#include <dlfcn.h>
-
-void OpenURI(const string &inURI)
+void OpenURI(const std::string &inURI)
 {
 	bool opened = false;
 
-	void *libgnome = dlopen("libgnomevfs-2.so.0", RTLD_LAZY);
-	if (libgnome != nullptr)
+	GError *error = nullptr;
+	opened = g_app_info_launch_default_for_uri(inURI.c_str(), nullptr, &error);
+
+	if (error)
 	{
-		typedef gboolean (*gnome_vfs_url_show_func)(const char *);
-
-		gnome_vfs_url_show_func gnome_url_show =
-			(gnome_vfs_url_show_func)dlsym(libgnome, "gnome_vfs_url_show");
-
-		if (gnome_url_show != nullptr)
-		{
-			int r = (*gnome_url_show)(inURI.c_str());
-			opened = r == 0;
-		}
+		std::cerr << error->message << '\n';
+		g_error_free(error);
 	}
 
 	if (not opened)
 	{
-		int err = system((string("gnome-open ") + inURI).c_str());
+		int err = system((std::string("gnome-open ") + inURI).c_str());
 		if (err < 0)
 			std::cerr << "Failed to open " << inURI << '\n';
 	}
 }
 
-string GetHomeDirectory()
+std::string GetHomeDirectory()
 {
 	const char *home = getenv("HOME");
-	return home ? string(home) : "~";
+	return home ? std::string(home) : "~";
 }
 
-string GetPrefsDirectory()
+std::string GetPrefsDirectory()
 {
 	const char *user_config_dir = g_get_user_config_dir();
 	return user_config_dir ? (fs::path(user_config_dir) / kAppName).string() : (GetHomeDirectory() + '/' + kAppName);
 }
 
-string GetApplicationVersion()
+std::string GetApplicationVersion()
 {
 	// return PACKAGE_VERSION;
 	return "?.?";

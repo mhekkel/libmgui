@@ -59,7 +59,7 @@ MStoryboard::~MStoryboard()
 }
 
 void MStoryboard::AddTransition(MAnimationVariable *inVariable,
-	double inNewValue, double inDuration, const char *inTransitionName)
+	double inNewValue, std::chrono::system_clock::duration inDuration, const char *inTransitionName)
 {
 	mImpl->AddTransition(inVariable, inNewValue, inDuration, inTransitionName);
 }

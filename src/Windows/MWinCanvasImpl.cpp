@@ -801,14 +801,14 @@ bool MWinCanvasImpl::WMMouseDown(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPAR
 	int32_t x = static_cast<int16_t>(LOWORD(inLParam));
 	int32_t y = static_cast<int16_t>(HIWORD(inLParam));
 
-	if (mLastClickTime + GetDblClickTime() > GetLocalTime())
+	if (mLastClickTime + GetDblClickTime() > std::chrono::system_clock::now())
 		mClickCount = mClickCount % 3 + 1;
 	else
 		mClickCount = 1;
 
 	MapXY(x, y);
 
-	mLastClickTime = GetLocalTime();
+	mLastClickTime = std::chrono::system_clock::now();
 	mControl->ConvertFromWindow(x, y);
 	mControl->MouseDown(x, y, mClickCount, modifiers);
 

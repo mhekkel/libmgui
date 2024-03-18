@@ -303,7 +303,7 @@ bool MGtkExpanderImpl::IsOpen() const
 //{
 //	mMouseInside = false;
 //	mMouseTracking = false;
-//	mLastExit = GetLocalTime();
+//	mLastExit = std::chrono::system_clock::now();
 //
 //	mControl->Invalidate();
 //	mControl->UpdateNow();

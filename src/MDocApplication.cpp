@@ -90,31 +90,6 @@ bool MDocApplication::ProcessCommand(uint32_t inCommand, const MMenu *inMenu,
 
 	switch (inCommand)
 	{
-			// case cmd_About:
-			//{
-			//	MWindow* w = MWindow::GetFirstWindow();
-			//	GtkWidget* ww = nullptr;
-			//	if (w != nullptr)
-			//		ww = w->GetGtkWidget();
-			//
-			//	gtk_show_about_dialog(GTK_WINDOW(ww),
-			//		"program_name", kAppName,
-			//		"version", kVersionString,
-			//		"copyright", "Copyright © 2007-2009 Maarten L. Hekkelman",
-			//		"comments", _("A simple development environment"),
-			//		"website", "http://www.hekkelman.com/",
-			//		nullptr);
-			//	break;
-			// }
-
-			// case cmd_PageSetup:
-			//	MPrinter::DoPageSetup();
-			//	break;
-
-			// case cmd_Preferences:
-			//	MPrefsDialog::Create();
-			//	break;
-
 		case cmd_CloseAll:
 			CloseAll(kSaveChangesClosingAllDocuments);
 			break;

@@ -28,6 +28,8 @@
 
 #include "MP2PEvents.hpp"
 
+#include <chrono>
+
 class MAnimationManagerImpl;
 class MAnimationVariableImpl;
 class MStoryboardImpl;
@@ -53,7 +55,7 @@ class MStoryboard
 	~MStoryboard();
 
 	void AddTransition(MAnimationVariable *inVariable,
-		double inNewValue, double inDuration,
+		double inNewValue, std::chrono::system_clock::duration inDuration,
 		const char *inTransitionName);
 
 	void AddFinishedCallback(std::function<void()> cb);

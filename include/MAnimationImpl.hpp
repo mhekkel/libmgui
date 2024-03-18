@@ -28,6 +28,8 @@
 
 #include "MAnimation.hpp"
 
+#include <chrono>
+
 // --------------------------------------------------------------------
 
 class MAnimationManagerImpl
@@ -69,7 +71,7 @@ class MStoryboardImpl
 	virtual ~MStoryboardImpl() {}
 
 	virtual void AddTransition(MAnimationVariable *inVariable,
-		double inNewValue, double inDuration,
+		double inNewValue, std::chrono::system_clock::duration inDuration,
 		const char *inTransitionName) = 0;
 
 	virtual void AddFinishedCallback(std::function<void()> cb) = 0;

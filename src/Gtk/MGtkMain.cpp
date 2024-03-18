@@ -328,6 +328,12 @@ class MGDbusServer
 		GError *error = nullptr;
 		GVariant *var = g_dbus_connection_call_finish((GDBusConnection *)source_object, result, &error);
 
+		if (error)
+		{
+			std::cerr << error->message << '\n';
+			g_error_free(error);
+		}
+
 		MGDbusServer *server = reinterpret_cast<MGDbusServer *>(user_data);
 		server->AsyncReady((GDBusConnection *)source_object, var, error);
 	}
@@ -367,8 +373,6 @@ int MApplication::Main(const std::string &cmd, const std::vector<std::string> &a
 		gtk_init(0, nullptr);
 
 		MGDbusServer dBusServer(cmd, argv);
-
-		PRINT(("This is it"));
 	}
 	catch (std::exception &e)
 	{

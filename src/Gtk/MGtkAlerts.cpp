@@ -34,7 +34,6 @@
 
 #include <zeep/xml/document.hpp>
 
-using namespace std;
 namespace xml = zeep::xml;
 
 GtkWidget *CreateAlertWithArgs(const char *inResourceName, std::initializer_list<std::string> inArgs)
@@ -56,8 +55,8 @@ GtkWidget *CreateAlertWithArgs(const char *inResourceName, std::initializer_list
 	if (root->name() != "alert")
 		THROW(("Invalid resource for alert %s, first tag should be <alert>", inResourceName));
 
-	string instruction, content;
-	vector<pair<string, uint32_t>> btns;
+	std::string instruction, content;
+	std::vector<std::pair<std::string, uint32_t>> btns;
 	int32_t defaultButton = -1;
 	GtkMessageType type = GTK_MESSAGE_INFO;
 
@@ -72,12 +71,12 @@ GtkWidget *CreateAlertWithArgs(const char *inResourceName, std::initializer_list
 		{
 			// replace parameters
 			char s[] = "^0";
-			string text = GetLocalisedStringForContext(inResourceName, item.get_content());
+			std::string text = GetLocalisedStringForContext(inResourceName, item.get_content());
 
 			for (auto a : inArgs)
 			{
-				string::size_type p = text.find(s);
-				if (p != string::npos)
+				std::string::size_type p = text.find(s);
+				if (p != std::string::npos)
 					text.replace(p, 2, a);
 				++s[1];
 			}
@@ -88,7 +87,7 @@ GtkWidget *CreateAlertWithArgs(const char *inResourceName, std::initializer_list
 		{
 			// replace parameters
 			char s[] = "^0";
-			string text = GetLocalisedStringForContext(inResourceName, item.get_content());
+			std::string text = GetLocalisedStringForContext(inResourceName, item.get_content());
 
 			for (auto a : inArgs)
 			{
@@ -104,13 +103,13 @@ GtkWidget *CreateAlertWithArgs(const char *inResourceName, std::initializer_list
 			{
 				if (button.name() == "button")
 				{
-					string label = GetLocalisedStringForContext(inResourceName, button.get_attribute("title"));
+					std::string label = GetLocalisedStringForContext(inResourceName, button.get_attribute("title"));
 					uint32_t cmd = stoul(button.get_attribute("cmd"));
 
 					if (button.get_attribute("default") == "true")
 						defaultButton = cmd;
 
-					btns.push_back(make_pair(label, cmd));
+					btns.push_back(std::make_pair(label, cmd));
 				}
 			}
 		}
@@ -135,7 +134,7 @@ GtkWidget *CreateAlertWithArgs(const char *inResourceName, std::initializer_list
 	return dlg;
 }
 
-int32_t DisplayAlert(MWindow *inParent, const string &inResourceName, std::initializer_list<std::string> inArgs)
+int32_t DisplayAlert(MWindow *inParent, const std::string &inResourceName, std::initializer_list<std::string> inArgs)
 {
 	int32_t result = -1;
 
@@ -170,7 +169,7 @@ int32_t DisplayAlert(MWindow *inParent, const string &inResourceName, std::initi
 
 		gtk_widget_destroy(dlg);
 	}
-	catch (exception &e)
+	catch (std::exception &e)
 	{
 		DisplayError(e);
 	}

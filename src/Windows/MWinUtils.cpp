@@ -21,7 +21,7 @@ using namespace std;
 const char* __S_FILE = "";
 int __S_LINE;
 
-double GetLocalTime()
+double std::chrono::system_clock::now()
 {
 	static double sDiff = -1.0;
 
@@ -361,9 +361,9 @@ void GetModifierState(uint32_t& outModifiers, bool inAsync)
 	}
 }
 
-double GetDblClickTime()
+std::chrono::system_clock::duration GetDblClickTime()
 {
-	return ::GetDoubleClickTime() / 1000.0;
+	return std::chrono::milliseconds(::GetDoubleClickTime());
 }
 
 string GetApplicationVersion()

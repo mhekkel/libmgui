@@ -516,11 +516,11 @@ bool MWinWindowImpl::WaitMouseMoved(int32_t inX, int32_t inY)
 	}
 	else if (MWindow::GetFirstWindow() and MWindow::GetFirstWindow()->IsActive())
 	{
-		double test = GetLocalTime() + 0.5;
+		double test = std::chrono::system_clock::now() + 0.5;
 		
 		for (;;)
 		{
-			if (GetLocalTime() > test)
+			if (std::chrono::system_clock::now() > test)
 			{
 				result = true;
 				break;
@@ -1011,7 +1011,7 @@ bool MWinWindowImpl::WMMouseDown(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPAR
 	MView* mousedView = mWindow->FindSubView(x, y);
 	if (mousedView == mMousedView)
 	{
-		if (mLastClickTime + GetDblClickTime() > GetLocalTime())
+		if (mLastClickTime + GetDblClickTime() > std::chrono::system_clock::now())
 			mClickCount = mClickCount % 3 + 1;
 		else
 			mClickCount = 1;
@@ -1022,7 +1022,7 @@ bool MWinWindowImpl::WMMouseDown(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPAR
 		mMousedView = mousedView;
 	}
 
-	mLastClickTime = GetLocalTime();
+	mLastClickTime = std::chrono::system_clock::now();
 
 	if (mMousedView != nullptr)
 	{
