@@ -959,9 +959,17 @@ MWindowImpl *MWindowImpl::Create(const string &inTitle, MRect inBounds,
 
 void MWindow::GetMainScreenBounds(MRect &outRect)
 {
-	auto display = gdk_display_get_default();
-	auto monitor = gdk_display_get_primary_monitor(display);
+	// auto display = gdk_display_get_default();
 
+	GdkDisplay *display = gdk_display_get_default();
+	GdkDeviceManager *device_manager = gdk_display_get_device_manager(display);
+	GdkDevice *device = gdk_device_manager_get_client_pointer(device_manager);
+
+	GdkScreen *screen;
+	gint x, y;
+	gdk_device_get_position(device, &screen, &x, &y);
+
+	auto monitor = gdk_display_get_monitor_at_point(display, x, y);
 	GdkRectangle r{ 0, 0, 1024, 768 };
 
 	if (GDK_IS_MONITOR(monitor))
