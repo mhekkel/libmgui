@@ -453,7 +453,7 @@ MView *MGtkDialogImpl::CreateCombobox(xml::element *inTemplate, int32_t inX, int
 	MRect bounds; //(inX, inY, static_cast<int32_t>(50 * mDLUX), static_cast<int32_t>(14 * mDLUY));
 	MCombobox *combobox = new MCombobox(id, bounds);
 	AddRoute(combobox->eValueChanged,
-		static_cast<MDialog *>(mWindow)->eTextChanged);
+		static_cast<MDialog *>(mWindow)->eValueChanged);
 	return combobox;
 }
 

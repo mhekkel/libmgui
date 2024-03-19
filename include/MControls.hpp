@@ -259,7 +259,7 @@ class MCombobox : public MControl<MComboboxImpl>
 
 	MCombobox(const std::string &inID, MRect inBounds);
 
-	MEventOut<void(const std::string &, const std::string &)>
+	MEventOut<void(const std::string &, int)>
 		eValueChanged;
 
 	virtual void SetText(const std::string &inText);
@@ -267,6 +267,9 @@ class MCombobox : public MControl<MComboboxImpl>
 	GetText() const;
 
 	virtual void SetChoices(const std::vector<std::string> &inChoices);
+
+	int GetActive();
+	void SetActive(int inActive);
 };
 
 // --------------------------------------------------------------------

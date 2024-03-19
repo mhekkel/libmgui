@@ -188,9 +188,10 @@ void IniFile::Save()
 				});
 
 			xml::document doc;
-			doc.serialize("preferences", prefs);
+			doc.serialize("preferences", prefs);;
 
-			data << doc;
+			doc.set_write_xml_decl(true);
+			data << std::setw(2) << doc;
 
 			data.close();
 

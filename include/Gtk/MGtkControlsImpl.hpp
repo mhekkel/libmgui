@@ -199,6 +199,9 @@ class MGtkComboboxImpl : public MGtkControlImpl<MCombobox>
 
 	virtual void SetChoices(const std::vector<std::string> &inChoices);
 
+	virtual int GetActive();
+	virtual void SetActive(int inActive);
+
 	virtual bool DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat);
 	virtual void OnChanged();
 

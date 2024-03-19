@@ -183,6 +183,9 @@ class MComboboxImpl : public MControlImpl<MCombobox>
 
 	virtual void SetChoices(const std::vector<std::string> &inChoices) = 0;
 
+	virtual int GetActive() = 0;
+	virtual void SetActive(int inActive) = 0;
+
 	static MComboboxImpl *
 	Create(MCombobox *inCombobox);
 };

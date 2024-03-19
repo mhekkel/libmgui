@@ -646,6 +646,16 @@ void MGtkComboboxImpl::SetChoices(const std::vector<std::string> &inChoices)
 	}
 }
 
+void MGtkComboboxImpl::SetActive(int inActive)
+{
+	gtk_combo_box_set_active(GTK_COMBO_BOX(GetWidget()), inActive);
+}
+
+int MGtkComboboxImpl::GetActive()
+{
+	return gtk_combo_box_get_active(GTK_COMBO_BOX(GetWidget()));
+}
+
 void MGtkComboboxImpl::AddedToWindow()
 {
 	MGtkControlImpl::AddedToWindow();
@@ -672,7 +682,7 @@ bool MGtkComboboxImpl::DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers,
 
 void MGtkComboboxImpl::OnChanged()
 {
-	mControl->eValueChanged(mControl->GetID(), GetText());
+	mControl->eValueChanged(mControl->GetID(), GetActive());
 }
 
 MComboboxImpl *MComboboxImpl::Create(MCombobox *inCombobox)

@@ -165,6 +165,16 @@ void MCombobox::SetChoices(const std::vector<std::string>& inChoices)
 	mImpl->SetChoices(inChoices);
 }
 
+int MCombobox::GetActive()
+{
+	return mImpl->GetActive();
+}
+
+void MCombobox::SetActive(int inActive)
+{
+	mImpl->SetActive(inActive);
+}
+
 // --------------------------------------------------------------------
 
 MPopup::MPopup(const std::string& inID, MRect inBounds)
