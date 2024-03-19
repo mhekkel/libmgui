@@ -81,8 +81,6 @@ if(NOT TARGET zeep AND NOT zeep_FOUND)
 	find_package(zeep 5.1.6 REQUIRED)
 endif()
 
-pkg_check_modules(GTK3 libcanberra-gtk3 REQUIRED IMPORTED_TARGET)
-
 # The salt executable
 list(APPEND headers
 	include/Gtk/MGtkCanvasImpl.hpp
@@ -217,7 +215,17 @@ target_sources(mgui
 
 target_include_directories(mgui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-target_link_libraries(mgui libmcfp::libmcfp Threads::Threads PkgConfig::GTK3 zeep::zeep)
+target_link_libraries(mgui libmcfp::libmcfp Threads::Threads zeep::zeep)
+
+if(UNIX)
+	pkg_check_modules(GTK3 libcanberra-gtk3 REQUIRED IMPORTED_TARGET)
+
+	# The salt executable
+	add_compile_definitions(GDK_DISABLE_DEPRECATED GTK_DISABLE_DEPRECATED)
+
+	target_link_libraries(mgui PkgConfig::GTK3)
+endif()
+
 
 # install(TARGETS salt
 # RUNTIME DESTINATION ${BIN_INSTALL_DIR}
