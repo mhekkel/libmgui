@@ -97,99 +97,104 @@ MMenuItem::MMenuItem(MMenu *inMenu, const string &inLabel, uint32_t inCommand)
 
 void MMenuItem::CreateWidget()
 {
-	if (mLabel == "-")
-		mGtkMenuItem = gtk_separator_menu_item_new();
-	else
-	{
-		mGtkMenuItem = gtk_menu_item_new_with_label(_(mLabel.c_str()));
-		if (mCommand != 0)
-			mCallback.Connect(mGtkMenuItem, "activate");
-	}
+#warning FIXME
+	// if (mLabel == "-")
+	// 	mGtkMenuItem = gtk_separator_menu_item_new();
+	// else
+	// {
+	// 	mGtkMenuItem = gtk_menu_item_new_with_label(_(mLabel.c_str()));
+	// 	if (mCommand != 0)
+	// 		mCallback.Connect(mGtkMenuItem, "activate");
+	// }
 }
 
 void MMenuItem::CreateWidget(GSList *&ioRadioGroup)
 {
-	mGtkMenuItem = gtk_radio_menu_item_new_with_label(ioRadioGroup, _(mLabel.c_str()));
+#warning FIXME
+	// mGtkMenuItem = gtk_radio_menu_item_new_with_label(ioRadioGroup, _(mLabel.c_str()));
 
-	ioRadioGroup = gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(mGtkMenuItem));
+	// ioRadioGroup = gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(mGtkMenuItem));
 
-	if (mCommand != 0)
-		mCallback.Connect(mGtkMenuItem, "toggled");
+	// if (mCommand != 0)
+	// 	mCallback.Connect(mGtkMenuItem, "toggled");
 
-	mCanCheck = true;
+	// mCanCheck = true;
 }
 
 void MMenuItem::CreateCheckWidget()
 {
-	mGtkMenuItem = gtk_check_menu_item_new_with_label(_(mLabel.c_str()));
+#warning FIXME
+	// mGtkMenuItem = gtk_check_menu_item_new_with_label(_(mLabel.c_str()));
 
-	if (mCommand != 0)
-		mCallback.Connect(mGtkMenuItem, "toggled");
+	// if (mCommand != 0)
+	// 	mCallback.Connect(mGtkMenuItem, "toggled");
 
-	//	mCanCheck = true;
+	// //	mCanCheck = true;
 }
 
 void MMenuItem::ItemCallback()
 {
-	try
-	{
-		if (mMenu != nullptr and
-			mMenu->GetTarget() != nullptr and
-			not mInhibitCallBack)
-		{
-			bool process = true;
+#warning FIXME
+	// try
+	// {
+	// 	if (mMenu != nullptr and
+	// 		mMenu->GetTarget() != nullptr and
+	// 		not mInhibitCallBack)
+	// 	{
+	// 		bool process = true;
 
-			if (mCanCheck)
-			{
-				mChecked = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(mGtkMenuItem));
-				process = mChecked;
-			}
+	// 		if (mCanCheck)
+	// 		{
+	// 			mChecked = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(mGtkMenuItem));
+	// 			process = mChecked;
+	// 		}
 
-			uint32_t modifiers = 0;
-			uint32_t gdkModifiers = 0;
+	// 		uint32_t modifiers = 0;
+	// 		uint32_t gdkModifiers = 0;
 
-			auto keyMap = gdk_keymap_get_for_display(gdk_display_get_default());
-			if (GDK_IS_KEYMAP(keyMap))
-				gdkModifiers = gdk_keymap_get_modifier_state(keyMap);
+	// 		auto keyMap = gdk_keymap_get_for_display(gdk_display_get_default());
+	// 		if (GDK_IS_KEYMAP(keyMap))
+	// 			gdkModifiers = gdk_keymap_get_modifier_state(keyMap);
 
-			if (gdkModifiers & GDK_SHIFT_MASK)
-				modifiers |= kShiftKey;
-			if (gdkModifiers & GDK_CONTROL_MASK)
-				modifiers |= kControlKey;
-			if (gdkModifiers & GDK_MOD1_MASK)
-				modifiers |= kOptionKey;
+	// 		if (gdkModifiers & GDK_SHIFT_MASK)
+	// 			modifiers |= kShiftKey;
+	// 		if (gdkModifiers & GDK_CONTROL_MASK)
+	// 			modifiers |= kControlKey;
+	// 		if (gdkModifiers & GDK_MOD1_MASK)
+	// 			modifiers |= kOptionKey;
 
-			MHandler *target = mMenu->GetTarget();
-			MWindow *window = dynamic_cast<MWindow *>(target);
-			if (window != nullptr)
-			{
-				auto focus = window->FindFocus();
-				if (focus != nullptr)
-					target = focus;
-			}
+	// 		MHandler *target = mMenu->GetTarget();
+	// 		MWindow *window = dynamic_cast<MWindow *>(target);
+	// 		if (window != nullptr)
+	// 		{
+	// 			auto focus = window->FindFocus();
+	// 			if (focus != nullptr)
+	// 				target = focus;
+	// 		}
 
-			if (process and target != nullptr and not target->ProcessCommand(mCommand, mMenu, mIndex, modifiers))
-				PRINT(("Unhandled command: %s", (const char *)MCommandToString(mCommand)));
-		}
-	}
-	catch (const exception &e)
-	{
-		DisplayError(e);
-	}
-	catch (...)
-	{
-	}
+	// 		if (process and target != nullptr and not target->ProcessCommand(mCommand, mMenu, mIndex, modifiers))
+	// 			PRINT(("Unhandled command: %s", (const char *)MCommandToString(mCommand)));
+	// 	}
+	// }
+	// catch (const exception &e)
+	// {
+	// 	DisplayError(e);
+	// }
+	// catch (...)
+	// {
+	// }
 }
 
 void MMenuItem::SetChecked(bool inChecked)
 {
-	if (inChecked != mChecked and GTK_IS_CHECK_MENU_ITEM(mGtkMenuItem))
-	{
-		mInhibitCallBack = true;
-		mChecked = inChecked;
-		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(mGtkMenuItem), mChecked);
-		mInhibitCallBack = false;
-	}
+#warning FIXME
+	// if (inChecked != mChecked and GTK_IS_CHECK_MENU_ITEM(mGtkMenuItem))
+	// {
+	// 	mInhibitCallBack = true;
+	// 	mChecked = inChecked;
+	// 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(mGtkMenuItem), mChecked);
+	// 	mInhibitCallBack = false;
+	// }
 }
 
 // --------------------------------------------------------------------
@@ -217,7 +222,7 @@ class MGtkMenuImpl : public MMenuImpl
 	virtual void AddToWindow(MWindowImpl *inWindow);
 	virtual void MenuUpdated();
 
-	void SetAcceleratorGroup(GtkAccelGroup *inAcceleratorGroup);
+	// void SetAcceleratorGroup(GtkAccelGroup *inAcceleratorGroup);
 
 	virtual bool OnDestroy();
 	virtual void OnSelectionDone();
@@ -235,8 +240,8 @@ class MGtkMenuImpl : public MMenuImpl
 		mGtkMenu = inWidget;
 	}
 
-	GtkWidget *mGtkMenu;
-	GtkAccelGroup *mGtkAccel;
+	GtkWidget *mGtkMenu = nullptr;
+	// GtkAccelGroup *mGtkAccel;
 	std::string mLabel;
 	MMenuItemList mItems;
 	MHandler *mTarget;
@@ -248,8 +253,8 @@ MGtkMenuImpl::MGtkMenuImpl(MMenu *inMenu)
 	: MMenuImpl(inMenu)
 	, mOnDestroy(this, &MGtkMenuImpl::OnDestroy)
 	, mOnSelectionDone(this, &MGtkMenuImpl::OnSelectionDone)
-	, mGtkMenu(gtk_menu_new())
-	, mGtkAccel(nullptr)
+	// , mGtkMenu(gtk_menu_new())
+	// , mGtkAccel(nullptr)
 	, mTarget(nullptr)
 	, mRadioGroup(nullptr)
 {
@@ -300,7 +305,8 @@ MMenuItem *MGtkMenuImpl::CreateNewItem(const string &inLabel, uint32_t inCommand
 
 	item->mIndex = mItems.size();
 	mItems.push_back(item);
-	gtk_menu_shell_append(GTK_MENU_SHELL(mGtkMenu), item->mGtkMenuItem);
+#warning FIXME
+	// gtk_menu_shell_append(GTK_MENU_SHELL(mGtkMenu), item->mGtkMenuItem);
 
 	return item;
 }
@@ -320,10 +326,11 @@ void MGtkMenuImpl::AppendSubmenu(MMenu *inSubmenu)
 
 	MGtkMenuImpl *subImpl = dynamic_cast<MGtkMenuImpl *>(inSubmenu->impl());
 
-	gtk_menu_item_set_submenu(GTK_MENU_ITEM(item->mGtkMenuItem), subImpl->mGtkMenu);
+#warning FIXME
+	// gtk_menu_item_set_submenu(GTK_MENU_ITEM(item->mGtkMenuItem), subImpl->mGtkMenu);
 
-	if (mGtkAccel)
-		subImpl->SetAcceleratorGroup(mGtkAccel);
+	// if (mGtkAccel)
+	// 	subImpl->SetAcceleratorGroup(mGtkAccel);
 }
 
 void MGtkMenuImpl::AppendSeparator()
@@ -357,8 +364,9 @@ void MGtkMenuImpl::RemoveItems(uint32_t inFirstIndex, uint32_t inCount)
 		MMenuItemList::iterator e = b;
 		advance(e, inCount);
 
-		for (MMenuItemList::iterator mi = b; mi != e; ++mi)
-			gtk_container_remove(GTK_CONTAINER(mGtkMenu), (*mi)->mGtkMenuItem);
+#warning FIXME
+		// for (MMenuItemList::iterator mi = b; mi != e; ++mi)
+		// 	gtk_container_remove(GTK_CONTAINER(mGtkMenu), (*mi)->mGtkMenuItem);
 			// gtk_widget_destroy((*mi)->mGtkMenuItem);
 
 		mItems.erase(b, e);
@@ -421,7 +429,8 @@ void MGtkMenuImpl::AddToWindow(MWindowImpl *inWindowImpl)
 
 void MGtkMenuImpl::MenuUpdated()
 {
-	gtk_widget_show_all(mGtkMenu);
+#warning FIXME
+	// gtk_widget_show_all(mGtkMenu);
 }
 
 bool MGtkMenuImpl::OnDestroy()
@@ -433,46 +442,46 @@ void MGtkMenuImpl::OnSelectionDone()
 {
 }
 
-void MGtkMenuImpl::SetAcceleratorGroup(GtkAccelGroup *inAcceleratorGroup)
-{
-	MAcceleratorTable &at = MAcceleratorTable::Instance();
+// void MGtkMenuImpl::SetAcceleratorGroup(GtkAccelGroup *inAcceleratorGroup)
+// {
+// 	MAcceleratorTable &at = MAcceleratorTable::Instance();
 
-	gtk_menu_set_accel_group(GTK_MENU(mGtkMenu), inAcceleratorGroup);
+// 	gtk_menu_set_accel_group(GTK_MENU(mGtkMenu), inAcceleratorGroup);
 
-	for (auto &item : mItems)
-	{
-		uint32_t key, mod;
+// 	for (auto &item : mItems)
+// 	{
+// 		uint32_t key, mod;
 
-		if (at.GetAcceleratorKeyForCommand(item->mCommand, key, mod))
-		{
-			int m = 0;
+// 		if (at.GetAcceleratorKeyForCommand(item->mCommand, key, mod))
+// 		{
+// 			int m = 0;
 
-			if (mod & kShiftKey)
-				m |= GDK_SHIFT_MASK;
-			if (mod & kControlKey)
-				m |= GDK_CONTROL_MASK;
-			if (mod & kOptionKey)
-				m |= GDK_MOD1_MASK;
+// 			if (mod & kShiftKey)
+// 				m |= GDK_SHIFT_MASK;
+// 			if (mod & kControlKey)
+// 				m |= GDK_CONTROL_MASK;
+// 			if (mod & kOptionKey)
+// 				m |= GDK_MOD1_MASK;
 
-			switch (key)
-			{
-				case kTabKeyCode: key = GDK_KEY_Tab; break;
-				case kF3KeyCode: key = GDK_KEY_F3; break;
-				default: break;
-			}
+// 			switch (key)
+// 			{
+// 				case kTabKeyCode: key = GDK_KEY_Tab; break;
+// 				case kF3KeyCode: key = GDK_KEY_F3; break;
+// 				default: break;
+// 			}
 
-			gtk_widget_add_accelerator(item->mGtkMenuItem, "activate", inAcceleratorGroup,
-				key, GdkModifierType(m), GTK_ACCEL_VISIBLE);
-		}
+// 			gtk_widget_add_accelerator(item->mGtkMenuItem, "activate", inAcceleratorGroup,
+// 				key, GdkModifierType(m), GTK_ACCEL_VISIBLE);
+// 		}
 
-		if (item->mSubMenu != nullptr)
-		{
-			MGtkMenuImpl *impl = dynamic_cast<MGtkMenuImpl *>(item->mSubMenu->impl());
-			if (impl != nullptr)
-				impl->SetAcceleratorGroup(inAcceleratorGroup);
-		}
-	}
-}
+// 		if (item->mSubMenu != nullptr)
+// 		{
+// 			MGtkMenuImpl *impl = dynamic_cast<MGtkMenuImpl *>(item->mSubMenu->impl());
+// 			if (impl != nullptr)
+// 				impl->SetAcceleratorGroup(inAcceleratorGroup);
+// 		}
+// 	}
+// }
 
 MMenuImpl *MMenuImpl::Create(MMenu *inMenu, bool inPopup)
 {
@@ -481,31 +490,32 @@ MMenuImpl *MMenuImpl::Create(MMenu *inMenu, bool inPopup)
 
 // --------------------------------------------------------------------
 
-class MGtkMenuBarImpl : public MGtkMenuImpl
-{
-  public:
-	MGtkMenuBarImpl(MMenu *inMenu)
-		: MGtkMenuImpl(inMenu, gtk_menu_bar_new())
-		, mOnButtonPressEvent(this, &MGtkMenuBarImpl::OnButtonPress)
-	{
-		mGtkAccel = gtk_accel_group_new();
-		mOnButtonPressEvent.Connect(mGtkMenu, "button-press-event");
-	}
+// class MGtkMenuBarImpl : public MGtkMenuImpl
+// {
+//   public:
+// 	MGtkMenuBarImpl(MMenu *inMenu)
+// 		: MGtkMenuImpl(inMenu, gtk_menu_bar_new())
+// 		, mOnButtonPressEvent(this, &MGtkMenuBarImpl::OnButtonPress)
+// 	{
+// 		mGtkAccel = gtk_accel_group_new();
+// 		mOnButtonPressEvent.Connect(mGtkMenu, "button-press-event");
+// 	}
 
-	bool OnButtonPress(GdkEventButton *inEvent);
-	MSlot<bool(GdkEventButton *)> mOnButtonPressEvent;
-};
+// 	bool OnButtonPress(GdkEventButton *inEvent);
+// 	MSlot<bool(GdkEventButton *)> mOnButtonPressEvent;
+// };
 
 MMenuImpl *MMenuImpl::CreateBar(MMenu *inMenu)
 {
-	return new MGtkMenuBarImpl(inMenu);
+	// return new MGtkMenuBarImpl(inMenu);
+	return nullptr;
 }
 
-bool MGtkMenuBarImpl::OnButtonPress(GdkEventButton *inEvent)
-{
-	mMenu->UpdateCommandStatus();
+// bool MGtkMenuBarImpl::OnButtonPress(GdkEvent *inEvent)
+// {
+// 	mMenu->UpdateCommandStatus();
 
-	//	gtk_widget_show_all(mGtkMenu);
+// 	//	gtk_widget_show_all(mGtkMenu);
 
-	return false;
-}
+// 	return false;
+// }

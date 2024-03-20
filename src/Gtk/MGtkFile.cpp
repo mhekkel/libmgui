@@ -659,7 +659,8 @@ void SaveFileAs(MWindow *inParent, std::filesystem::path filename, std::function
 	else
 		gtk_file_chooser_set_current_name(chooser, _("Untitled document"));
 
-	gtk_file_chooser_set_do_overwrite_confirmation(chooser, true);
+#warning FIXME
+	// gtk_file_chooser_set_do_overwrite_confirmation(chooser, true);
 
 	new FileChooserResponder(chooser, std::move(callback));
 

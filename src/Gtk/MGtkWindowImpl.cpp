@@ -34,7 +34,7 @@
 
 #include "mrsrc.hpp"
 
-#include <gdk/gdkx.h>
+// #include <gdk/gdkx.h>
 
 #include <iostream>
 
@@ -69,7 +69,7 @@ MGtkWindowImpl::~MGtkWindowImpl()
 
 void MGtkWindowImpl::Create(MRect inBounds, const std::string &inTitle)
 {
-	GtkWidget *widget = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	GtkWidget *widget = gtk_window_new();
 	THROW_IF_NIL(widget);
 
 	gtk_window_set_default_size(GTK_WINDOW(widget), inBounds.width, inBounds.height);
@@ -102,8 +102,9 @@ void MGtkWindowImpl::Create(MRect inBounds, const std::string &inTitle)
 	if (error)
 		g_free(error);
 
-	if (iconList)
-		gtk_window_set_icon_list(GTK_WINDOW(widget), iconList);
+#warning FIXME
+	// if (iconList)
+	// 	gtk_window_set_icon_list(GTK_WINDOW(widget), iconList);
 
 	//	GList* defaulIconList = gtk_window_get_default_icon_list();
 	//	if (defaulIconList != nullptr)
@@ -128,12 +129,13 @@ void MGtkWindowImpl::AddMenubarWidget(GtkWidget *inWidget)
 	if (mMainVBox == nullptr)
 	{
 		mMainVBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-		gtk_container_add(GTK_CONTAINER(GetWidget()), mMainVBox);
+		gtk_box_append(GTK_BOX(GetWidget()), mMainVBox);
 		gtk_widget_show(mMainVBox);
 	}
 
-	gtk_box_pack_start(GTK_BOX(mMainVBox), inWidget, FALSE, FALSE, 0);
-	gtk_widget_show_all(inWidget);
+	// gtk_box_pack_start(GTK_BOX(mMainVBox), inWidget, FALSE, FALSE, 0);
+	gtk_box_append(GTK_BOX(mMainVBox), inWidget);
+	// gtk_widget_show_all(inWidget);
 }
 
 void MGtkWindowImpl::AddStatusbarWidget(MGtkWidgetMixin *inChild)
@@ -141,12 +143,12 @@ void MGtkWindowImpl::AddStatusbarWidget(MGtkWidgetMixin *inChild)
 	if (mMainVBox == nullptr)
 	{
 		mMainVBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-		gtk_container_add(GTK_CONTAINER(GetWidget()), mMainVBox);
+		gtk_box_append(GTK_BOX(GetWidget()), mMainVBox);
 		gtk_widget_show(mMainVBox);
 	}
 
-	gtk_box_pack_end(GTK_BOX(mMainVBox), inChild->GetWidget(), FALSE, FALSE, 0);
-	gtk_widget_show_all(inChild->GetWidget());
+	gtk_box_append(GTK_BOX(mMainVBox), inChild->GetWidget());
+	// gtk_widget_show_all(inChild->GetWidget());
 }
 
 void MGtkWindowImpl::Append(MGtkWidgetMixin *inChild, MControlPacking inPacking,
@@ -155,7 +157,7 @@ void MGtkWindowImpl::Append(MGtkWidgetMixin *inChild, MControlPacking inPacking,
 	if (mMainVBox == nullptr)
 	{
 		mMainVBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-		gtk_container_add(GTK_CONTAINER(GetWidget()), mMainVBox);
+		gtk_box_append(GTK_BOX(GetWidget()), mMainVBox);
 		gtk_widget_show(mMainVBox);
 	}
 
@@ -165,10 +167,12 @@ void MGtkWindowImpl::Append(MGtkWidgetMixin *inChild, MControlPacking inPacking,
 	gtk_widget_set_margin_start(childWidget, inPadding);
 	gtk_widget_set_margin_end(childWidget, inPadding);
 
-	if (inPacking == ePackStart)
-		gtk_box_pack_start(GTK_BOX(mMainVBox), childWidget, inExpand, inFill, 0);
-	else
-		gtk_box_pack_end(GTK_BOX(mMainVBox), childWidget, inExpand, inFill, 0);
+#warning FIXME
+	gtk_box_append(GTK_BOX(mMainVBox), childWidget);
+	// if (inPacking == ePackStart)
+	// 	gtk_box_pack_start(GTK_BOX(mMainVBox), childWidget, inExpand, inFill, 0);
+	// else
+	// 	gtk_box_pack_end(GTK_BOX(mMainVBox), childWidget, inExpand, inFill, 0);
 }
 
 void MGtkWindowImpl::SetTransientFor(MWindow *inWindow)
@@ -191,174 +195,177 @@ void MGtkWindowImpl::Hide()
 
 bool MGtkWindowImpl::Visible() const
 {
-	return gtk_widget_get_window(GetWidget()) != nullptr and gdk_window_is_visible(gtk_widget_get_window(GetWidget()));
+#warning FIXME
+	// return gtk_widget_get_window(GetWidget()) != nullptr and gdk_window_is_visible(gtk_widget_get_window(GetWidget()));
 }
 
-// Mijn eigen xdo implementatie... zucht
+// // Mijn eigen xdo implementatie... zucht
 
-bool GetProperty(Display *display, Window window, const string &name,
-	long maxLength, Atom &type, int &format, unsigned long &numItems, unsigned char *&prop)
-{
-	Atom propertyAtom = XInternAtom(display, name.c_str(), false);
-	unsigned long remainingBytes;
-	return XGetWindowProperty(display, window, propertyAtom, 0, maxLength, False,
-			   AnyPropertyType, &type, &format, &numItems, &remainingBytes, &prop) == Success;
-}
+// bool GetProperty(Display *display, Window window, const string &name,
+// 	long maxLength, Atom &type, int &format, unsigned long &numItems, unsigned char *&prop)
+// {
+// 	Atom propertyAtom = XInternAtom(display, name.c_str(), false);
+// 	unsigned long remainingBytes;
+// 	return XGetWindowProperty(display, window, propertyAtom, 0, maxLength, False,
+// 			   AnyPropertyType, &type, &format, &numItems, &remainingBytes, &prop) == Success;
+// }
 
-bool PropertyExists(Display *display, Window window, const string &name)
-{
-	Atom type = None;
-	int format = 0;
-	unsigned long numItems = 0;
-	unsigned char *property = nullptr;
+// bool PropertyExists(Display *display, Window window, const string &name)
+// {
+// 	Atom type = None;
+// 	int format = 0;
+// 	unsigned long numItems = 0;
+// 	unsigned char *property = nullptr;
 
-	bool result = GetProperty(display, window, name, 1024, type, format, numItems, property);
+// 	bool result = GetProperty(display, window, name, 1024, type, format, numItems, property);
 
-	if (property != nullptr)
-		XFree(property);
+// 	if (property != nullptr)
+// 		XFree(property);
 
-	return result and numItems > 0;
-}
+// 	return result and numItems > 0;
+// }
 
-bool GetXIDProperty(Display *display, Window window, const string &name, XID &xid)
-{
-	Atom type = None;
-	int format = 0;
-	unsigned long numItems = 0;
-	unsigned char *property = nullptr;
+// bool GetXIDProperty(Display *display, Window window, const string &name, XID &xid)
+// {
+// 	Atom type = None;
+// 	int format = 0;
+// 	unsigned long numItems = 0;
+// 	unsigned char *property = nullptr;
 
-	bool result = GetProperty(display, window, name, 1024, type, format, numItems, property);
+// 	bool result = GetProperty(display, window, name, 1024, type, format, numItems, property);
 
-	if (result and numItems > 0 and format == 32 and property != nullptr)
-		xid = *reinterpret_cast<XID *>(property);
-	else
-		result = false;
+// 	if (result and numItems > 0 and format == 32 and property != nullptr)
+// 		xid = *reinterpret_cast<XID *>(property);
+// 	else
+// 		result = false;
 
-	if (property != nullptr)
-		XFree(property);
+// 	if (property != nullptr)
+// 		XFree(property);
 
-	return result;
-}
+// 	return result;
+// }
 
-bool GetLongPropery(Display *display, Window window, const string &name, long &v)
-{
-	Atom type = None;
-	int format = 0;
-	unsigned long numItems = 0;
-	unsigned char *property = nullptr;
+// bool GetLongPropery(Display *display, Window window, const string &name, long &v)
+// {
+// 	Atom type = None;
+// 	int format = 0;
+// 	unsigned long numItems = 0;
+// 	unsigned char *property = nullptr;
 
-	bool result = GetProperty(display, window, name, 1024, type, format, numItems, property);
+// 	bool result = GetProperty(display, window, name, 1024, type, format, numItems, property);
 
-	if (result and numItems > 0 and format == 32 and property != nullptr)
-		v = *reinterpret_cast<long *>(property);
-	else
-		result = false;
+// 	if (result and numItems > 0 and format == 32 and property != nullptr)
+// 		v = *reinterpret_cast<long *>(property);
+// 	else
+// 		result = false;
 
-	if (property != nullptr)
-		XFree(property);
+// 	if (property != nullptr)
+// 		XFree(property);
 
-	return result;
-}
+// 	return result;
+// }
 
-long GetDesktopForWindow(Display *display, Window window)
-{
-	long desktop = -1;
+// long GetDesktopForWindow(Display *display, Window window)
+// {
+// 	long desktop = -1;
 
-	if (not GetLongPropery(display, window, "_NET_WM_DESKTOP", desktop) and
-		not GetLongPropery(display, window, "_WIN_WORKSPACE", desktop))
-	{
-		//	PRINT(("Error getting desktop for window"));
-	}
+// 	if (not GetLongPropery(display, window, "_NET_WM_DESKTOP", desktop) and
+// 		not GetLongPropery(display, window, "_WIN_WORKSPACE", desktop))
+// 	{
+// 		//	PRINT(("Error getting desktop for window"));
+// 	}
 
-	return desktop;
-}
+// 	return desktop;
+// }
 
-long GetCurrentDesktop(Display *display)
-{
-	long desktop = -1;
+// long GetCurrentDesktop(Display *display)
+// {
+// 	long desktop = -1;
 
-	Window root = DefaultRootWindow(display);
+// 	Window root = DefaultRootWindow(display);
 
-	if (not GetLongPropery(display, root, "_NET_CURRENT_DESKTOP", desktop) and
-		not GetLongPropery(display, root, "_WIN_WORKSPACE", desktop))
-	{
-		//	PRINT(("Failed to get current desktop"));
-	}
+// 	if (not GetLongPropery(display, root, "_NET_CURRENT_DESKTOP", desktop) and
+// 		not GetLongPropery(display, root, "_WIN_WORKSPACE", desktop))
+// 	{
+// 		//	PRINT(("Failed to get current desktop"));
+// 	}
 
-	return desktop;
-}
+// 	return desktop;
+// }
 
-void SetCurrentDesktop(Display *display, long desktop)
-{
-	Window root = DefaultRootWindow(display);
+// void SetCurrentDesktop(Display *display, long desktop)
+// {
+// 	Window root = DefaultRootWindow(display);
 
-	XEvent xev = {};
-	xev.type = ClientMessage;
-	xev.xclient.display = display;
-	xev.xclient.window = root;
-	xev.xclient.message_type = XInternAtom(display, "_NET_CURRENT_DESKTOP", False);
-	xev.xclient.format = 32;
-	xev.xclient.data.l[0] = desktop;
-	xev.xclient.data.l[1] = CurrentTime;
+// 	XEvent xev = {};
+// 	xev.type = ClientMessage;
+// 	xev.xclient.display = display;
+// 	xev.xclient.window = root;
+// 	xev.xclient.message_type = XInternAtom(display, "_NET_CURRENT_DESKTOP", False);
+// 	xev.xclient.format = 32;
+// 	xev.xclient.data.l[0] = desktop;
+// 	xev.xclient.data.l[1] = CurrentTime;
 
-	int ret = XSendEvent(display, root, False, SubstructureNotifyMask | SubstructureRedirectMask, &xev);
+// 	int ret = XSendEvent(display, root, False, SubstructureNotifyMask | SubstructureRedirectMask, &xev);
 
-	if (ret == 0)
-		PRINT(("_NET_CURRENT_DESKTOP failed"));
-}
+// 	if (ret == 0)
+// 		PRINT(("_NET_CURRENT_DESKTOP failed"));
+// }
 
-bool ActivateWindow(Display *display, Window window)
-{
-	// See: https://specifications.freedesktop.org/wm-spec/wm-spec-1.3.html#idm46463187634240
+// bool ActivateWindow(Display *display, Window window)
+// {
+// 	// See: https://specifications.freedesktop.org/wm-spec/wm-spec-1.3.html#idm46463187634240
 
-	long desktop = GetDesktopForWindow(display, window);
-	long current = GetCurrentDesktop(display);
+// 	long desktop = GetDesktopForWindow(display, window);
+// 	long current = GetCurrentDesktop(display);
 
-	if (desktop != current and desktop != -1)
-		SetCurrentDesktop(display, desktop);
+// 	if (desktop != current and desktop != -1)
+// 		SetCurrentDesktop(display, desktop);
 
-	XEvent xev = {};
-	xev.type = ClientMessage;
-	xev.xclient.display = display;
-	xev.xclient.window = window;
-	xev.xclient.message_type = XInternAtom(display, "_NET_ACTIVE_WINDOW", False);
-	xev.xclient.format = 32;
-	xev.xclient.data.l[0] = 1; // Comes from an application
-	xev.xclient.data.l[1] = CurrentTime;
+// 	XEvent xev = {};
+// 	xev.type = ClientMessage;
+// 	xev.xclient.display = display;
+// 	xev.xclient.window = window;
+// 	xev.xclient.message_type = XInternAtom(display, "_NET_ACTIVE_WINDOW", False);
+// 	xev.xclient.format = 32;
+// 	xev.xclient.data.l[0] = 1; // Comes from an application
+// 	xev.xclient.data.l[1] = CurrentTime;
 
-	XWindowAttributes attr;
-	XGetWindowAttributes(display, window, &attr);
-	int ret = XSendEvent(display, attr.screen->root, False, SubstructureRedirectMask | SubstructureNotifyMask, &xev);
+// 	XWindowAttributes attr;
+// 	XGetWindowAttributes(display, window, &attr);
+// 	int ret = XSendEvent(display, attr.screen->root, False, SubstructureRedirectMask | SubstructureNotifyMask, &xev);
 
-	if (ret == 0)
-		PRINT(("_NET_ACTIVE_WINDOW failed"));
+// 	if (ret == 0)
+// 		PRINT(("_NET_ACTIVE_WINDOW failed"));
 
-	return ret != 0;
-}
+// 	return ret != 0;
+// }
 
 void MGtkWindowImpl::Select()
 {
 	//	PRINT(("Select Window (%p)", std::this_thread::get_id()));
 
-	auto gdkWindow = gtk_widget_get_window(GetWidget());
+	// auto gdkWindow = gtk_widget_get_window(GetWidget());
 
-	if (getenv("WAYLAND_DISPLAY") == nullptr)
-	{
-		auto d = gdk_x11_display_get_xdisplay(gdk_display_get_default());
-		auto w = gdk_x11_window_get_xid(gdkWindow);
+	// if (getenv("WAYLAND_DISPLAY") == nullptr)
+	// {
+	// 	auto d = gdk_x11_display_get_xdisplay(gdk_display_get_default());
+	// 	auto w = gdk_x11_window_get_xid(gdkWindow);
 
-		if (d and w)
-			ActivateWindow(d, w);
-		else
-			gdk_window_focus(gdkWindow, GDK_CURRENT_TIME);
-	}
-	else
-		gdk_window_focus(gdkWindow, GDK_CURRENT_TIME);
+	// 	if (d and w)
+	// 		ActivateWindow(d, w);
+	// 	else
+	// 		gdk_window_focus(gdkWindow, GDK_CURRENT_TIME);
+	// }
+	// else
+	// 	gdk_window_focus(gdkWindow, GDK_CURRENT_TIME);
 
 	if (Visible())
 	{
-		gdk_window_raise(gdkWindow);
-		gtk_window_present_with_time(GTK_WINDOW(GetWidget()), gtk_get_current_event_time());
+		// gdk_window_raise(gdkWindow);
+		// gtk_window_present_with_time(GTK_WINDOW(GetWidget()), gtk_get_current_event_time());
+#warning FIXME
+		gtk_window_present_with_time(GTK_WINDOW(GetWidget()), 0);
 	}
 	else
 		Show();
@@ -369,7 +376,7 @@ void MGtkWindowImpl::Select()
 void MGtkWindowImpl::Close()
 {
 	if (mWindow->AllowClose(false))
-		gtk_widget_destroy(GetWidget());
+		g_object_unref(GetWidget());
 }
 
 void MGtkWindowImpl::SetTitle(string inTitle)
@@ -428,7 +435,7 @@ bool MGtkWindowImpl::OnMapEvent(GdkEvent *inEvent)
 	return false;
 }
 
-bool MGtkWindowImpl::OnConfigureEvent(GdkEventConfigure *inEvent)
+bool MGtkWindowImpl::OnConfigureEvent(GdkEvent *inEvent)
 {
 	if (not mConfigured)
 		mWindow->Mapped();
@@ -439,42 +446,45 @@ bool MGtkWindowImpl::OnConfigureEvent(GdkEventConfigure *inEvent)
 
 void MGtkWindowImpl::ResizeWindow(int32_t inWidthDelta, int32_t inHeightDelta)
 {
-	//	PRINT(("MGtkWindowImpl::ResizeWindow(%d,%d)", inWidthDelta, inHeightDelta));
-	int w, h;
-	gtk_window_get_size(GTK_WINDOW(GetWidget()), &w, &h);
-	gtk_window_resize(GTK_WINDOW(GetWidget()), w + inWidthDelta, h + inHeightDelta);
+#warning FIXME
+	// //	PRINT(("MGtkWindowImpl::ResizeWindow(%d,%d)", inWidthDelta, inHeightDelta));
+	// int w, h;
+	// gtk_window_get_size(GTK_WINDOW(GetWidget()), &w, &h);
+	// gtk_window_resize(GTK_WINDOW(GetWidget()), w + inWidthDelta, h + inHeightDelta);
 }
 
 void MGtkWindowImpl::GetWindowPosition(MRect &outPosition) const
 {
-	int x, y;
-	gtk_window_get_position(GTK_WINDOW(GetWidget()), &x, &y);
+#warning FIXME
+	// int x, y;
+	// gtk_window_get_position(GTK_WINDOW(GetWidget()), &x, &y);
 
-	int w, h;
-	gtk_window_get_size(GTK_WINDOW(GetWidget()), &w, &h);
+	// int w, h;
+	// gtk_window_get_size(GTK_WINDOW(GetWidget()), &w, &h);
 
-	outPosition = MRect(x, y, w, h);
+	// outPosition = MRect(x, y, w, h);
 }
 
 void MGtkWindowImpl::SetWindowPosition(MRect inPosition, bool inTransition)
 {
-	//	PRINT(("MGtkWindowImpl::SetWindowPosition"));
-	if (inTransition)
-	{
-		//		if (mTransitionThread != nullptr)
-		//			THROW(("SetWindowPosition called to fast"));
-		//
-		//		mTransitionThread =
-		//			new boost::thread(std::bind(&MGtkWindowImpl::TransitionTo, this, inPosition));
-	}
-	else
-	{
-		gtk_window_move(GTK_WINDOW(GetWidget()),
-			inPosition.x, inPosition.y);
+#warning FIXME
+	// //	PRINT(("MGtkWindowImpl::SetWindowPosition"));
+	// if (inTransition)
+	// {
+	// 	//		if (mTransitionThread != nullptr)
+	// 	//			THROW(("SetWindowPosition called to fast"));
+	// 	//
+	// 	//		mTransitionThread =
+	// 	//			new boost::thread(std::bind(&MGtkWindowImpl::TransitionTo, this, inPosition));
+	// }
+	// else
+	// {
+	// 	gtk_window_move(GTK_WINDOW(GetWidget()),
+	// 		inPosition.x, inPosition.y);
 
-		gtk_window_resize(GTK_WINDOW(GetWidget()),
-			inPosition.width, inPosition.height);
-	}
+	// 	gtk_window_resize(GTK_WINDOW(GetWidget()),
+	// 		inPosition.width, inPosition.height);
+	// }
 }
 
 void MGtkWindowImpl::DoForEachCallBack(GtkWidget *inWidget, gpointer inUserData)
@@ -492,11 +502,12 @@ void MGtkWindowImpl::DoForEach(GtkWidget *inWidget)
 	if (canFocus)
 		mChildFocus.Connect(inWidget, "focus-in-event");
 
-	if (GTK_IS_CONTAINER(inWidget))
-		gtk_container_foreach(GTK_CONTAINER(inWidget), &MGtkWindowImpl::DoForEachCallBack, this);
+#warning FIXME
+	// if (GTK_IS_CONTAINER(inWidget))
+	// 	gtk_container_foreach(GTK_CONTAINER(inWidget), &MGtkWindowImpl::DoForEachCallBack, this);
 }
 
-bool MGtkWindowImpl::ChildFocus(GdkEventFocus *inEvent)
+bool MGtkWindowImpl::ChildFocus(GdkEvent *inEvent)
 {
 	//	PRINT(("focus-in-event"));
 
@@ -542,11 +553,6 @@ void MGtkWindowImpl::ConvertFromScreen(int32_t &ioX, int32_t &ioY) const
 {
 }
 
-uint32_t MGtkWindowImpl::GetModifiers() const
-{
-	return 0;
-}
-
 // --------------------------------------------------------------------
 
 MWindowImpl *MWindowImpl::Create(const string &inTitle, MRect inBounds,
@@ -564,13 +570,14 @@ void MWindow::GetMainScreenBounds(MRect &outRect)
 	GdkDevice *device = gdk_seat_get_pointer(seat);
 
 	gint x, y;
-	gdk_device_get_position(device, nullptr, &x, &y);
+#warning FIXME
+	// gdk_device_get_position(device, nullptr, &x, &y);
 
-	auto monitor = gdk_display_get_monitor_at_point(display, x, y);
-	GdkRectangle r{ 0, 0, 1024, 768 };
+	// auto monitor = gdk_display_get_monitor_at_point(display, x, y);
+	// GdkRectangle r{ 0, 0, 1024, 768 };
 
-	if (GDK_IS_MONITOR(monitor))
-		gdk_monitor_get_workarea(monitor, &r);
+	// if (GDK_IS_MONITOR(monitor))
+	// 	gdk_monitor_get_workarea(monitor, &r);
 
-	outRect = MRect(r.x, r.y, r.width, r.height);
+	// outRect = MRect(r.x, r.y, r.width, r.height);
 }

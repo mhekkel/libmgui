@@ -75,7 +75,7 @@ class MGtkDialogImpl : public MGtkWindowImpl
 	virtual void Create(MRect inBounds, const std::string &inTitle);
 	virtual void Finish();
 
-	virtual bool OnKeyPressEvent(GdkEventKey *inEvent);
+	virtual bool OnKeyPressEvent(GdkEvent *inEvent);
 
 	virtual void Append(MGtkWidgetMixin *inChild, MControlPacking inPacking,
 		bool inExpand, bool inFill, uint32_t inPadding);
@@ -144,7 +144,7 @@ class MGtkDialogImpl : public MGtkWindowImpl
 	bool mResultIsOK;
 };
 
-bool MGtkDialogImpl::OnKeyPressEvent(GdkEventKey *inEvent)
+bool MGtkDialogImpl::OnKeyPressEvent(GdkEvent *inEvent)
 {
 	// PRINT(("MGtkDialogImpl::OnKeyPressEvent"));
 
@@ -152,8 +152,8 @@ bool MGtkDialogImpl::OnKeyPressEvent(GdkEventKey *inEvent)
 
 	if (not result)
 	{
-		uint32_t keyCode = MapKeyCode(inEvent->keyval);
-		uint32_t modifiers = MapModifier(inEvent->state);
+		uint32_t keyCode = MapKeyCode(gdk_key_event_get_keyval(inEvent));
+		uint32_t modifiers = MapModifier(gdk_event_get_modifier_state(inEvent));
 
 		if ((keyCode == kEnterKeyCode or keyCode == kReturnKeyCode) and modifiers == 0)
 		{
@@ -171,7 +171,7 @@ bool MGtkDialogImpl::ShowModal()
 {
 	MGtkWindowImpl::Select();
 
-	(void)gtk_dialog_run(GTK_DIALOG(GetWidget()));
+	// (void)gtk_dialog_run(GTK_DIALOG(GetWidget()));
 	return mResultIsOK;
 }
 
@@ -284,7 +284,8 @@ void MGtkDialogImpl::Finish()
 
 			if (button.get_attribute("default") == "true")
 			{
-				gtk_widget_grab_default(wdgt);
+#warning FIXME
+				// gtk_widget_grab_default(wdgt);
 				gtk_dialog_set_default_response(GTK_DIALOG(GetWidget()), response);
 				mDefaultResponse = response;
 			}
@@ -304,10 +305,13 @@ void MGtkDialogImpl::Append(MGtkWidgetMixin *inChild, MControlPacking inPacking,
 	gtk_widget_set_margin_start(childWidget, inPadding);
 	gtk_widget_set_margin_end(childWidget, inPadding);
 
-	if (inPacking == ePackStart)
-		gtk_box_pack_start(GTK_BOX(box), childWidget, inExpand, inFill, 0);
-	else
-		gtk_box_pack_end(GTK_BOX(box), childWidget, inExpand, inFill, 0);
+#warning FIXME
+	// if (inPacking == ePackStart)
+	// 	gtk_box_pack_start(GTK_BOX(box), childWidget, inExpand, inFill, 0);
+	// else
+	// 	gtk_box_pack_end(GTK_BOX(box), childWidget, inExpand, inFill, 0);
+
+	gtk_box_append(GTK_BOX(box), childWidget);
 }
 
 void MGtkDialogImpl::GetMargins(xml::element *inTemplate,

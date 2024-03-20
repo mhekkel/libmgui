@@ -48,11 +48,11 @@ MGtkWidgetMixin::MGtkWidgetMixin()
 	, mRealize(this, &MGtkWidgetMixin::OnRealize)
 	, mDrawEvent(this, &MGtkWidgetMixin::OnDrawEvent)
 	, mPopupMenu(this, &MGtkWidgetMixin::OnPopupMenu)
-	, mDragDataReceived(this, &MGtkWidgetMixin::OnDragDataReceived)
-	, mDragMotion(this, &MGtkWidgetMixin::OnDragMotion)
-	, mDragLeave(this, &MGtkWidgetMixin::OnDragLeave)
-	, mDragDataDelete(this, &MGtkWidgetMixin::OnDragDataDelete)
-	, mDragDataGet(this, &MGtkWidgetMixin::OnDragDataGet)
+	// , mDragDataReceived(this, &MGtkWidgetMixin::OnDragDataReceived)
+	// , mDragMotion(this, &MGtkWidgetMixin::OnDragMotion)
+	// , mDragLeave(this, &MGtkWidgetMixin::OnDragLeave)
+	// , mDragDataDelete(this, &MGtkWidgetMixin::OnDragDataDelete)
+	// , mDragDataGet(this, &MGtkWidgetMixin::OnDragDataGet)
 	, mOnCommit(this, &MGtkWidgetMixin::OnCommit)
 	, mOnDeleteSurrounding(this, &MGtkWidgetMixin::OnDeleteSurrounding)
 	, mOnPreeditChanged(this, &MGtkWidgetMixin::OnPreeditChanged)
@@ -171,23 +171,23 @@ bool MGtkWidgetMixin::IsFocus() const
 
 bool MGtkWidgetMixin::OnRealize()
 {
-	int m = gdk_window_get_events(gtk_widget_get_window(mWidget));
+	// int m = gdk_window_get_events(gtk_widget_get_window(mWidget));
 
-	m |= GDK_FOCUS_CHANGE_MASK | GDK_STRUCTURE_MASK |
-	     GDK_KEY_PRESS_MASK |
-	     GDK_BUTTON_PRESS_MASK | GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK |
-	     GDK_LEAVE_NOTIFY_MASK | GDK_SCROLL_MASK
-		//		 | GDK_SMOOTH_SCROLL_MASK
-		;
-	gdk_window_set_events(gtk_widget_get_window(mWidget), (GdkEventMask)m);
+	// m |= GDK_FOCUS_CHANGE_MASK | GDK_STRUCTURE_MASK |
+	//      GDK_KEY_PRESS_MASK |
+	//      GDK_BUTTON_PRESS_MASK | GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK |
+	//      GDK_LEAVE_NOTIFY_MASK | GDK_SCROLL_MASK
+	// 	//		 | GDK_SMOOTH_SCROLL_MASK
+	// 	;
+	// gdk_window_set_events(gtk_widget_get_window(mWidget), (GdkEvent)m);
 
 	if (mIMContext)
-		gtk_im_context_set_client_window(mIMContext, gtk_widget_get_window(mWidget));
+		gtk_im_context_set_client_widget(mIMContext, mWidget);
 
 	return false;
 }
 
-bool MGtkWidgetMixin::OnFocusInEvent(GdkEventFocus *inEvent)
+bool MGtkWidgetMixin::OnFocusInEvent(GdkEvent *inEvent)
 {
 	mGainedFocusAt = std::chrono::steady_clock::now();
 
@@ -197,7 +197,7 @@ bool MGtkWidgetMixin::OnFocusInEvent(GdkEventFocus *inEvent)
 	return false;
 }
 
-bool MGtkWidgetMixin::OnFocusOutEvent(GdkEventFocus *inEvent)
+bool MGtkWidgetMixin::OnFocusOutEvent(GdkEvent *inEvent)
 {
 	if (mIMContext)
 		gtk_im_context_focus_out(mIMContext);
@@ -210,7 +210,7 @@ bool MGtkWidgetMixin::IsActive() const
 	return gtk_widget_has_focus(mWidget);
 }
 
-bool MGtkWidgetMixin::OnButtonPressEvent(GdkEventButton *inEvent)
+bool MGtkWidgetMixin::OnButtonPressEvent(GdkEvent *inEvent)
 {
 	if (std::chrono::steady_clock::now() - mGainedFocusAt < std::chrono::milliseconds(100))
 	{
@@ -220,29 +220,30 @@ bool MGtkWidgetMixin::OnButtonPressEvent(GdkEventButton *inEvent)
 
 	bool result = true;
 
-	if (inEvent->button == 3)
+	if (gdk_button_event_get_button(inEvent) == 3)
 		OnPopupMenu();
 	else
 	{
 		result = false;
 
 		uint32_t clickCount;
-		switch (inEvent->type)
+		switch (gdk_button_event_get_button(inEvent))
 		{
 			case GDK_BUTTON_PRESS: clickCount = 1; break;
-			case GDK_2BUTTON_PRESS: clickCount = 2; break;
-			case GDK_3BUTTON_PRESS: clickCount = 3; break;
-			default: PRINT(("Unknown event type for button press: %x", inEvent->type)); return false;
+			// case GDK_2BUTTON_PRESS: clickCount = 2; break;
+			// case GDK_3BUTTON_PRESS: clickCount = 3; break;
+			default: PRINT(("Unknown event type for button press: %x", gdk_event_get_event_type(inEvent))); return false;
 		}
 
-		uint32_t modifiers = MapModifier(inEvent->state);
-		int32_t x = static_cast<int32_t>(inEvent->x);
-		int32_t y = static_cast<int32_t>(inEvent->y);
+		uint32_t modifiers = MapModifier(gdk_event_get_modifier_state(inEvent));
+		double x, y;
+		gdk_event_get_position(inEvent, &x, &y);
 
-		if (OnMouseDown(x, y, inEvent->button, clickCount, modifiers))
+		if (OnMouseDown(static_cast<int32_t>(x), static_cast<int32_t>(y),
+			gdk_button_event_get_button(inEvent), clickCount, modifiers))
 		{
-			if (gtk_grab_get_current() != GetWidget())
-				gtk_grab_add(GetWidget());
+			// if (gtk_grab_get_current() != GetWidget())
+			// 	gtk_grab_add(GetWidget());
 
 			result = true;
 		}
@@ -251,15 +252,16 @@ bool MGtkWidgetMixin::OnButtonPressEvent(GdkEventButton *inEvent)
 	return result;
 }
 
-bool MGtkWidgetMixin::OnMotionNotifyEvent(GdkEventMotion *inEvent)
+bool MGtkWidgetMixin::OnMotionNotifyEvent(GdkEvent *inEvent)
 {
 	//	PRINT(("MGtkWidgetMixin::OnMotionNotifyEvent (%s)", G_OBJECT_TYPE_NAME(mWidget)));
 
-	int32_t x, y;
-	GdkModifierType state;
+	uint32_t modifiers = MapModifier(gdk_event_get_modifier_state(inEvent));
+	double x, y;
+	gdk_event_get_position(inEvent, &x, &y);
 
-	if (inEvent->is_hint)
-	{
+	// if (gdk_event_get inEvent->is_hint)
+	// {
 #if GTK_CHECK_VERSION(3, 20, 0)
 		auto seat = gdk_display_get_default_seat(gdk_display_get_default());
 		auto mouse_device = gdk_seat_get_pointer(seat);
@@ -267,41 +269,43 @@ bool MGtkWidgetMixin::OnMotionNotifyEvent(GdkEventMotion *inEvent)
 		auto devman = gdk_display_get_device_manager(gdk_display_get_default());
 		auto mouse_device = gdk_device_manager_get_client_pointer(devman);
 #endif
-		gdk_window_get_device_position(inEvent->window, mouse_device, &x, &y, &state);
-	}
-	else
-	{
-		x = static_cast<int32_t>(inEvent->x);
-		y = static_cast<int32_t>(inEvent->y);
-		state = GdkModifierType(inEvent->state);
-	}
-
-	uint32_t modifiers = MapModifier(state);
+	// 	gdk_window_get_device_position(inEvent->window, mouse_device, &x, &y, &state);
+	// }
+	// else
+	// {
+	// 	x = static_cast<int32_t>(inEvent->x);
+	// 	y = static_cast<int32_t>(inEvent->y);
+	// 	state = GdkModifierType(inEvent->state);
+	// }
 
 	return OnMouseMove(x, y, modifiers);
 }
 
-bool MGtkWidgetMixin::OnLeaveNotifyEvent(GdkEventCrossing *inEvent)
+bool MGtkWidgetMixin::OnLeaveNotifyEvent(GdkEvent *inEvent)
 {
 	//	PRINT(("MGtkWidgetMixin::OnLeaveNotifyEvent (%s)", G_OBJECT_TYPE_NAME(mWidget)));
 
 	bool result = false;
 
-	if (gtk_grab_get_current() != GetWidget())
+	// if (gtk_grab_get_current() != GetWidget())
 		result = OnMouseExit();
 
 	return result;
 }
 
-bool MGtkWidgetMixin::OnButtonReleaseEvent(GdkEventButton *inEvent)
+bool MGtkWidgetMixin::OnButtonReleaseEvent(GdkEvent *inEvent)
 {
 	//	PRINT(("MGtkWidgetMixin::OnButtonReleaseEvent (%s)", G_OBJECT_TYPE_NAME(mWidget)));
 
-	gtk_grab_remove(GetWidget());
+	// gtk_grab_remove(GetWidget());
 
-	uint32_t modifiers = MapModifier(inEvent->state);
-	int32_t x = static_cast<int32_t>(inEvent->x);
-	int32_t y = static_cast<int32_t>(inEvent->y);
+	// uint32_t modifiers = MapModifier(inEvent->state);
+	// int32_t x = static_cast<int32_t>(inEvent->x);
+	// int32_t y = static_cast<int32_t>(inEvent->y);
+
+	uint32_t modifiers = MapModifier(gdk_event_get_modifier_state(inEvent));
+	double x, y;
+	gdk_event_get_position(inEvent, &x, &y);
 
 	return OnMouseUp(x, y, modifiers);
 }
@@ -309,7 +313,7 @@ bool MGtkWidgetMixin::OnButtonReleaseEvent(GdkEventButton *inEvent)
 bool MGtkWidgetMixin::OnGrabBroken(GdkEvent *inEvent)
 {
 	//	PRINT(("!!! MGtkWidgetMixin::OnGrabBroken (%s)", G_OBJECT_TYPE_NAME(mWidget)));
-	gtk_grab_remove(GetWidget());
+	// gtk_grab_remove(GetWidget());
 	return false;
 }
 
@@ -333,7 +337,7 @@ bool MGtkWidgetMixin::OnMouseExit()
 	return false;
 }
 
-bool MGtkWidgetMixin::OnKeyPressEvent(GdkEventKey *inEvent)
+bool MGtkWidgetMixin::OnKeyPressEvent(GdkEvent *inEvent)
 {
 	// PRINT(("OnKeyPressEvent(kv=0x%x,m=0x%x,t=0x%x)", inEvent->keyval, inEvent->state, inEvent->time));
 
@@ -354,7 +358,7 @@ bool MGtkWidgetMixin::OnKeyPressEvent(GdkEventKey *inEvent)
 	return result;
 }
 
-bool MGtkWidgetMixin::OnKeyReleaseEvent(GdkEventKey *inEvent)
+bool MGtkWidgetMixin::OnKeyReleaseEvent(GdkEvent *inEvent)
 {
 	bool result = false;
 
@@ -366,20 +370,20 @@ bool MGtkWidgetMixin::OnKeyReleaseEvent(GdkEventKey *inEvent)
 	return result;
 }
 
-bool MGtkWidgetMixin::OnConfigureEvent(GdkEventConfigure *inEvent)
+bool MGtkWidgetMixin::OnConfigureEvent(GdkEvent *inEvent)
 {
 	// PRINT(("MGtkWidgetMixin::OnConfigureEvent in %s", G_OBJECT_TYPE_NAME(mWidget)));
 
 	return false;
 }
 
-bool MGtkWidgetMixin::OnScrollEvent(GdkEventScroll *inEvent)
+bool MGtkWidgetMixin::OnScrollEvent(GdkEvent *inEvent)
 {
 	// PRINT(("MGtkWidgetMixin::OnScrollEvent"));
 	return false;
 }
 
-// bool MGtkWidgetMixin::OnExposeEvent(GdkEventExpose* inEvent)
+// bool MGtkWidgetMixin::OnExposeEvent(GdkEvent* inEvent)
 // {
 // 	return false;
 // }
@@ -389,189 +393,172 @@ bool MGtkWidgetMixin::OnDrawEvent(cairo_t *inCairo)
 	return false;
 }
 
-// Drag and Drop support
+// // Drag and Drop support
 
-void MGtkWidgetMixin::SetupDragAndDrop(const GtkTargetEntry inTargets[], uint32_t inTargetCount)
-{
-	gtk_drag_dest_set(mWidget, GTK_DEST_DEFAULT_ALL,
-		inTargets, inTargetCount,
-		GdkDragAction(GDK_ACTION_COPY | GDK_ACTION_MOVE));
+// void MGtkWidgetMixin::SetupDragAndDrop(const GtkTargetEntry inTargets[], uint32_t inTargetCount)
+// {
+// 	gtk_drag_dest_set(mWidget, GTK_DEST_DEFAULT_ALL,
+// 		inTargets, inTargetCount,
+// 		GdkDragAction(GDK_ACTION_COPY | GDK_ACTION_MOVE));
 
-	mDragDataReceived.Connect(mWidget, "drag-data-received");
-	mDragMotion.Connect(mWidget, "drag-motion");
-	mDragLeave.Connect(mWidget, "drag-leave");
+// 	mDragDataReceived.Connect(mWidget, "drag-data-received");
+// 	mDragMotion.Connect(mWidget, "drag-motion");
+// 	mDragLeave.Connect(mWidget, "drag-leave");
 
-	mDragDataGet.Connect(mWidget, "drag-data-get");
-	mDragDataDelete.Connect(mWidget, "drag-data-delete");
+// 	mDragDataGet.Connect(mWidget, "drag-data-get");
+// 	mDragDataDelete.Connect(mWidget, "drag-data-delete");
 
-	mDragWithin = false;
-}
+// 	mDragWithin = false;
+// }
 
-void MGtkWidgetMixin::OnDragDataReceived(GdkDragContext *inDragContext, gint inX, gint inY, GtkSelectionData *inData, guint inInfo, guint inTime)
-{
-	// PRINT(("MGtkWidgetMixin::OnDragDataReceived"));
-	bool ok = false;
-	bool del = false;
-	bool move = gdk_drag_context_get_selected_action(inDragContext) == GDK_ACTION_MOVE;
+// void MGtkWidgetMixin::OnDragDataReceived(GdkDragContext *inDragContext, gint inX, gint inY, GtkSelectionData *inData, guint inInfo, guint inTime)
+// {
+// 	// PRINT(("MGtkWidgetMixin::OnDragDataReceived"));
+// 	bool ok = false;
+// 	bool del = false;
+// 	bool move = gdk_drag_context_get_selected_action(inDragContext) == GDK_ACTION_MOVE;
 
-	if (gtk_selection_data_get_length(inData) >= 0)
-	{
-		ok = DragAccept(
-			move,
-			inX, inY,
-			reinterpret_cast<const char *>(gtk_selection_data_get_data(inData)), gtk_selection_data_get_length(inData),
-			inInfo);
-		del = ok and move and gtk_drag_get_source_widget(inDragContext) != mWidget;
-	}
+// 	if (gtk_selection_data_get_length(inData) >= 0)
+// 	{
+// 		ok = DragAccept(
+// 			move,
+// 			inX, inY,
+// 			reinterpret_cast<const char *>(gtk_selection_data_get_data(inData)), gtk_selection_data_get_length(inData),
+// 			inInfo);
+// 		del = ok and move and gtk_drag_get_source_widget(inDragContext) != mWidget;
+// 	}
 
-	gtk_drag_finish(inDragContext, ok, del, inTime);
-}
+// 	gtk_drag_finish(inDragContext, ok, del, inTime);
+// }
 
-bool MGtkWidgetMixin::OnDragMotion(GdkDragContext *inDragContext, gint inX, gint inY, guint inTime)
-{
-	// PRINT(("MGtkWidgetMixin::OnDragMotion"));
+// bool MGtkWidgetMixin::OnDragMotion(GdkDragContext *inDragContext, gint inX, gint inY, guint inTime)
+// {
+// 	// PRINT(("MGtkWidgetMixin::OnDragMotion"));
 
-	//	if (not mDragWithin)
-	//	{
-	//		DragEnter();
-	//		mDragWithin = true;
-	//	}
-	//
-	//	if (DragWithin(inX, inY))
-	//	{
-	//		bool copy =
-	//			IsModifierDown(GDK_SHIFT_MASK) or
-	//			mWidget != gtk_drag_get_source_widget(inDragContext);
-	//		gdk_drag_status(inDragContext, copy ? GDK_ACTION_COPY : GDK_ACTION_MOVE, inTime);
-	//	}
-	//	else
-	//		gdk_drag_status(inDragContext, GdkDragAction(0), inTime);
+// 	//	if (not mDragWithin)
+// 	//	{
+// 	//		DragEnter();
+// 	//		mDragWithin = true;
+// 	//	}
+// 	//
+// 	//	if (DragWithin(inX, inY))
+// 	//	{
+// 	//		bool copy =
+// 	//			IsModifierDown(GDK_SHIFT_MASK) or
+// 	//			mWidget != gtk_drag_get_source_widget(inDragContext);
+// 	//		gdk_drag_status(inDragContext, copy ? GDK_ACTION_COPY : GDK_ACTION_MOVE, inTime);
+// 	//	}
+// 	//	else
+// 	//		gdk_drag_status(inDragContext, GdkDragAction(0), inTime);
 
-	return false;
-}
+// 	return false;
+// }
 
-void MGtkWidgetMixin::OnDragLeave(GdkDragContext *inDragContext, guint inTime)
-{
-	// PRINT(("MGtkWidgetMixin::OnDragLeave"));
+// void MGtkWidgetMixin::OnDragLeave(GdkDragContext *inDragContext, guint inTime)
+// {
+// 	// PRINT(("MGtkWidgetMixin::OnDragLeave"));
 
-	mDragWithin = false;
-	DragLeave();
-}
+// 	mDragWithin = false;
+// 	DragLeave();
+// }
 
-void MGtkWidgetMixin::OnDragDataDelete(GdkDragContext *inDragContext)
-{
-	// PRINT(("MGtkWidgetMixin::OnDragDataDelete"));
-	DragDeleteData();
-}
+// void MGtkWidgetMixin::OnDragDataDelete(GdkDragContext *inDragContext)
+// {
+// 	// PRINT(("MGtkWidgetMixin::OnDragDataDelete"));
+// 	DragDeleteData();
+// }
 
-void MGtkWidgetMixin::OnDragDataGet(GdkDragContext *inDragContext, GtkSelectionData *inData, guint inInfo, guint inTime)
-{
-	// PRINT(("MGtkWidgetMixin::OnDragDataGet"));
+// void MGtkWidgetMixin::OnDragDataGet(GdkDragContext *inDragContext, GtkSelectionData *inData, guint inInfo, guint inTime)
+// {
+// 	// PRINT(("MGtkWidgetMixin::OnDragDataGet"));
 
-	string data;
+// 	string data;
 
-	DragSendData(data);
+// 	DragSendData(data);
 
-	gtk_selection_data_set_text(inData, data.c_str(), data.length());
-}
+// 	gtk_selection_data_set_text(inData, data.c_str(), data.length());
+// }
 
-void MGtkWidgetMixin::DragEnter()
-{
-}
+// void MGtkWidgetMixin::DragEnter()
+// {
+// }
 
-bool MGtkWidgetMixin::DragWithin(int32_t inX, int32_t inY)
-{
-	return false;
-}
+// bool MGtkWidgetMixin::DragWithin(int32_t inX, int32_t inY)
+// {
+// 	return false;
+// }
 
-void MGtkWidgetMixin::DragLeave()
-{
-}
+// void MGtkWidgetMixin::DragLeave()
+// {
+// }
 
-bool MGtkWidgetMixin::DragAccept(bool inMove, int32_t inX, int32_t inY, const char *inData, uint32_t inLength, uint32_t inType)
-{
-	return false;
-}
+// bool MGtkWidgetMixin::DragAccept(bool inMove, int32_t inX, int32_t inY, const char *inData, uint32_t inLength, uint32_t inType)
+// {
+// 	return false;
+// }
 
-void MGtkWidgetMixin::DragBegin(const GtkTargetEntry inTargets[], uint32_t inTargetCount, GdkEventMotion *inEvent)
-{
-	//	int button = 1;
-	//
-	//	GtkTargetList* lst = gtk_target_list_new(inTargets, inTargetCount);
-	//
-	////	GdkDragAction action = GDK_ACTION_MOVE;
-	////	if (inEvent->state & GDK_SHIFT_MASK)
-	////		action = GDK_ACTION_COPY;
-	////
-	//	GdkDragContext* context = gtk_drag_begin(
-	//		mWidget, lst, GdkDragAction(GDK_ACTION_MOVE|GDK_ACTION_COPY),
-	//		button, (GdkEvent*)inEvent);
-	//
-	////	gtk_drag_set_icon_default(context);
-	//	MRect bounds;
-	//	GetBounds(bounds);
-	//	MDevice dev(this, bounds, true);
-	//
-	//	GdkPixmap* pm = nullptr;
-	//	int32_t x, y;
-	//	GdkModifierType state;
-	//
-	//	if (inEvent->is_hint)
-	//		gdk_window_get_pointer(inEvent->window, &x, &y, &state);
-	//	else
-	//	{
-	//		x = static_cast<int32_t>(inEvent->x);
-	//		y = static_cast<int32_t>(inEvent->y);
-	//		state = GdkModifierType(inEvent->state);
-	//	}
-	//
-	//	// only draw a transparent bitmap to drag around
-	//	// if we're on a composited screen.
-	//
-	//	GdkScreen* screen = gtk_widget_get_screen(mWidget);
-	//	if (gdk_screen_is_composited(screen))
-	//		DrawDragImage(pm, x, y);
-	//
-	//	if (pm != nullptr)
-	//	{
-	//		int32_t w, h;
-	//		gdk_drawable_get_size(pm, &w, &h);
-	//
-	//		gtk_drag_set_icon_pixmap(context, gdk_drawable_get_colormap(pm),
-	//			pm, nullptr, x, y);
-	//
-	//		g_object_unref(pm);
-	//	}
-	//	else
-	//		gtk_drag_set_icon_default(context);
-	//
-	//	gtk_target_list_unref(lst);
-}
+// void MGtkWidgetMixin::DragBegin(const GtkTargetEntry inTargets[], uint32_t inTargetCount, GdkEvent *inEvent)
+// {
+// 	//	int button = 1;
+// 	//
+// 	//	GtkTargetList* lst = gtk_target_list_new(inTargets, inTargetCount);
+// 	//
+// 	////	GdkDragAction action = GDK_ACTION_MOVE;
+// 	////	if (inEvent->state & GDK_SHIFT_MASK)
+// 	////		action = GDK_ACTION_COPY;
+// 	////
+// 	//	GdkDragContext* context = gtk_drag_begin(
+// 	//		mWidget, lst, GdkDragAction(GDK_ACTION_MOVE|GDK_ACTION_COPY),
+// 	//		button, (GdkEvent*)inEvent);
+// 	//
+// 	////	gtk_drag_set_icon_default(context);
+// 	//	MRect bounds;
+// 	//	GetBounds(bounds);
+// 	//	MDevice dev(this, bounds, true);
+// 	//
+// 	//	GdkPixmap* pm = nullptr;
+// 	//	int32_t x, y;
+// 	//	GdkModifierType state;
+// 	//
+// 	//	if (inEvent->is_hint)
+// 	//		gdk_window_get_pointer(inEvent->window, &x, &y, &state);
+// 	//	else
+// 	//	{
+// 	//		x = static_cast<int32_t>(inEvent->x);
+// 	//		y = static_cast<int32_t>(inEvent->y);
+// 	//		state = GdkModifierType(inEvent->state);
+// 	//	}
+// 	//
+// 	//	// only draw a transparent bitmap to drag around
+// 	//	// if we're on a composited screen.
+// 	//
+// 	//	GdkScreen* screen = gtk_widget_get_screen(mWidget);
+// 	//	if (gdk_screen_is_composited(screen))
+// 	//		DrawDragImage(pm, x, y);
+// 	//
+// 	//	if (pm != nullptr)
+// 	//	{
+// 	//		int32_t w, h;
+// 	//		gdk_drawable_get_size(pm, &w, &h);
+// 	//
+// 	//		gtk_drag_set_icon_pixmap(context, gdk_drawable_get_colormap(pm),
+// 	//			pm, nullptr, x, y);
+// 	//
+// 	//		g_object_unref(pm);
+// 	//	}
+// 	//	else
+// 	//		gtk_drag_set_icon_default(context);
+// 	//
+// 	//	gtk_target_list_unref(lst);
+// }
 
-void MGtkWidgetMixin::DragSendData(string &outData)
-{
-}
+// void MGtkWidgetMixin::DragSendData(string &outData)
+// {
+// }
 
-void MGtkWidgetMixin::DragDeleteData()
-{
-}
-
-uint32_t MGtkWidgetMixin::GetModifiers() const
-{
-	GdkModifierType modifiers;
-	// gdk_window_get_pointer(gtk_widget_get_window(mWidget), nullptr, nullptr, &modifiers);
-
-#if GTK_CHECK_VERSION(3, 20, 0)
-	auto seat = gdk_display_get_default_seat(gdk_display_get_default());
-	auto mouse_device = gdk_seat_get_pointer(seat);
-#else
-	auto devman = gdk_display_get_device_manager(gdk_display_get_default());
-	auto mouse_device = gdk_device_manager_get_client_pointer(devman);
-#endif
-	gdk_window_get_device_position(gtk_widget_get_window(mWidget), mouse_device, nullptr, nullptr, &modifiers);
-
-	return modifiers & gtk_accelerator_get_default_mod_mask();
-}
+// void MGtkWidgetMixin::DragDeleteData()
+// {
+// }
 
 void MGtkWidgetMixin::OnPopupMenu()
 {
@@ -614,280 +601,3 @@ bool MGtkWidgetMixin::OnRetrieveSurrounding()
 	//	PRINT(("MGtkWidgetMixin::OnRetrieveSurrounding"));
 	return false;
 }
-
-// bool MView::OnRealize()
-//{
-//	int m = gdk_window_get_events(gtk_widget_get_window(mWidget));
-//
-//	m |= GDK_FOCUS_CHANGE_MASK | GDK_STRUCTURE_MASK |
-//		GDK_KEY_PRESS_MASK |
-//		GDK_BUTTON_PRESS_MASK | GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK;
-//	gdk_window_set_events(gtk_widget_get_window(mWidget), (GdkEventMask)m);
-//
-//	return false;
-// }
-//
-// bool MView::OnFocusInEvent(
-//	GdkEventFocus* inEvent)
-//{
-//	return false;
-// }
-//
-// bool MView::OnFocusOutEvent(
-//	GdkEventFocus* inEvent)
-//{
-//	return false;
-// }
-//
-// bool MView::IsActive() const
-//{
-//	return GTK_WIDGET_HAS_FOCUS(mWidget);
-// }
-//
-// bool MView::OnButtonPressEvent(
-//	GdkEventButton* inEvent)
-//{
-//	bool result = false;
-//
-//	if (inEvent->button == 3 and inEvent->type == GDK_BUTTON_PRESS)
-//	{
-//		OnPopupMenu(inEvent);
-//		result = true;
-//	}
-//
-//	return result;
-// }
-//
-// bool MView::OnMotionNotifyEvent(
-//	GdkEventMotion* inEvent)
-//{
-//	return false;
-// }
-//
-// bool MView::OnKeyPressEvent(
-//	GdkEventKey* inEvent)
-//{
-//	return false;
-// }
-//
-// bool MView::OnButtonReleaseEvent(
-//	GdkEventButton* inEvent)
-//{
-//	return false;
-// }
-//
-// bool MView::OnConfigureEvent(
-//	GdkEventConfigure* inEvent)
-//{
-//	return false;
-// }
-//
-// bool MView::OnScrollEvent(
-//	GdkEventScroll* inEvent)
-//{
-//	return false;
-// }
-//
-// bool MView::OnExposeEvent(
-//	GdkEventExpose* inEvent)
-//{
-//	MRect bounds;
-//	GetBounds(bounds);
-//
-//	MRect update(inEvent->area);
-//
-//	MDevice dev(this, bounds);
-//	Draw(dev, update);
-//
-//	return true;
-// }
-
-// Drag and Drop support
-
-// void MView::SetupDragAndDrop(
-//	const GtkTargetEntry inTargets[],
-//	uint32_t inTargetCount)
-//{
-//	gtk_drag_dest_set(mWidget, GTK_DEST_DEFAULT_ALL,
-//		inTargets, inTargetCount,
-//		GdkDragAction(GDK_ACTION_COPY|GDK_ACTION_MOVE));
-//
-//	mDragDataReceived.Connect(mWidget, "drag-data-received");
-//	mDragMotion.Connect(mWidget, "drag-motion");
-//	mDragLeave.Connect(mWidget, "drag-leave");
-//
-//	mDragDataGet.Connect(mWidget, "drag-data-get");
-//	mDragDataDelete.Connect(mWidget, "drag-data-delete");
-//
-//	mDragWithin = false;
-// }
-//
-// void MView::OnDragDataReceived(
-//	GdkDragContext* inDragContext,
-//	gint inX,
-//	gint inY,
-//	GtkSelectionData* inData,
-//	guint inInfo,
-//	guint inTime)
-//{
-//	bool ok = false;
-//	bool del = false;
-//	bool move = inDragContext->action == GDK_ACTION_MOVE;
-//
-//	if (inData->length >= 0)
-//	{
-//		ok = DragAccept(
-//			move,
-//			inX, inY,
-//			reinterpret_cast<const char*>(inData->data), inData->length,
-//			inInfo);
-//		del = ok and move and gtk_drag_get_source_widget(inDragContext) != mWidget;
-//	}
-//
-//	gtk_drag_finish(inDragContext, ok, del, inTime);
-// }
-//
-// bool MView::OnDragMotion(
-//	GdkDragContext* inDragContext,
-//	gint inX,
-//	gint inY,
-//	guint inTime)
-//{
-//	if (not mDragWithin)
-//	{
-//		DragEnter();
-//		mDragWithin = true;
-//	}
-//
-//	if (DragWithin(inX, inY))
-//	{
-//		bool copy =
-//			IsModifierDown(GDK_SHIFT_MASK) or
-//			mWidget != gtk_drag_get_source_widget(inDragContext);
-//		gdk_drag_status(inDragContext, copy ? GDK_ACTION_COPY : GDK_ACTION_MOVE, inTime);
-//	}
-//	else
-//		gdk_drag_status(inDragContext, GdkDragAction(0), inTime);
-//
-//	return false;
-// }
-//
-// void MView::OnDragLeave(
-//	GdkDragContext* inDragContext,
-//	guint inTime)
-//{
-//	mDragWithin = false;
-//	DragLeave();
-// }
-//
-// void MView::OnDragDataDelete(
-//	GdkDragContext* inDragContext)
-//{
-//	DragDeleteData();
-// }
-//
-// void MView::OnDragDataGet(
-//	GdkDragContext* inDragContext,
-//	GtkSelectionData* inData,
-//	guint inInfo,
-//	guint inTime)
-//{
-//	string data;
-//
-//	DragSendData(data);
-//
-//	gtk_selection_data_set_text(inData, data.c_str(), data.length());
-// }
-//
-// void MView::DragEnter()
-//{
-// }
-//
-// bool MView::DragWithin(
-//	int32_t inX,
-//	int32_t inY)
-//{
-//	return false;
-// }
-//
-// void MView::DragLeave()
-//{
-// }
-//
-// bool MView::DragAccept(
-//	bool inMove,
-//	int32_t inX,
-//	int32_t inY,
-//	const char* inData,
-//	uint32_t inLength,
-//	uint32_t inType)
-//{
-//	return false;
-// }
-//
-// void MView::DragBegin(
-//	const GtkTargetEntry inTargets[],
-//	uint32_t inTargetCount,
-//	GdkEventMotion* inEvent)
-//{
-//	int button = 1;
-//
-//	GtkTargetList* lst = gtk_target_list_new(inTargets, inTargetCount);
-//
-////	GdkDragAction action = GDK_ACTION_MOVE;
-////	if (inEvent->state & GDK_SHIFT_MASK)
-////		action = GDK_ACTION_COPY;
-////
-//	GdkDragContext* context = gtk_drag_begin(
-//		mWidget, lst, GdkDragAction(GDK_ACTION_MOVE|GDK_ACTION_COPY),
-//		button, (GdkEvent*)inEvent);
-//
-////	gtk_drag_set_icon_default(context);
-//	MRect bounds;
-//	GetBounds(bounds);
-//	MDevice dev(this, bounds, true);
-//
-//	GdkPixmap* pm = nullptr;
-//	int32_t x, y;
-//	GdkModifierType state;
-//
-//	if (inEvent->is_hint)
-//		gdk_window_get_pointer(inEvent->window, &x, &y, &state);
-//	else
-//	{
-//		x = static_cast<int32_t>(inEvent->x);
-//		y = static_cast<int32_t>(inEvent->y);
-//		state = GdkModifierType(inEvent->state);
-//	}
-//
-//	// only draw a transparent bitmap to drag around
-//	// if we're on a composited screen.
-//
-//	GdkScreen* screen = gtk_widget_get_screen(mWidget);
-//	if (gdk_screen_is_composited(screen))
-//		DrawDragImage(pm, x, y);
-//
-//	if (pm != nullptr)
-//	{
-//		int32_t w, h;
-//		gdk_drawable_get_size(pm, &w, &h);
-//
-//		gtk_drag_set_icon_pixmap(context, gdk_drawable_get_colormap(pm),
-//			pm, nullptr, x, y);
-//
-//		g_object_unref(pm);
-//	}
-//	else
-//		gtk_drag_set_icon_default(context);
-//
-//	gtk_target_list_unref(lst);
-//}
-//
-// void MView::DragSendData(
-//	string& outData)
-//{
-//}
-//
-// void MView::DragDeleteData()
-//{
-//}

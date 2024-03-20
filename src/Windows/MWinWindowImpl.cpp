@@ -464,18 +464,6 @@ void MWinWindowImpl::UpdateNow()
 	::UpdateWindow(GetHandle());
 }
 
-uint32_t MWinWindowImpl::GetModifiers() const
-{
-	uint32_t modifiers = 0;
-	if (::GetKeyState(VK_SHIFT) & 0x8000)
-		modifiers |= kShiftKey;
-	if (::GetKeyState(VK_CONTROL) & 0x8000)
-		modifiers |= kControlKey;
-	if (::GetKeyState(VK_MENU) & 0x8000)
-		modifiers |= kOptionKey;
-	return modifiers;
-}
-
 void MWinWindowImpl::SetCursor(MCursor inCursor)
 {
 	static HCURSOR sArrow = ::LoadCursor(NULL, IDC_ARROW);

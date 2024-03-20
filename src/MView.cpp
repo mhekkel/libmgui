@@ -633,17 +633,6 @@ bool MView::IsEnabled() const
 	return (mEnabled == eTriStateOn) and IsVisible();
 }
 
-uint32_t MView::GetModifiers() const
-{
-	uint32_t result = 0;
-
-	MWindow *w = GetWindow();
-	if (w != nullptr)
-		result = w->GetModifiers();
-
-	return result;
-}
-
 uint32_t MView::CountPages(
 	MDevice &inDevice)
 {
