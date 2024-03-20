@@ -207,15 +207,15 @@ void MDocWindow::RemoveRoutes(
 	RemoveRoute(inDocument->eFileSpecChanged, eFileSpecChanged);
 }
 
-void MDocWindow::ActivateSelf()
-{
-	static bool sShowingDialog = false;
-	if (not sShowingDialog)
-	{
-		value_changer<bool> save(sShowingDialog, true);
+// void MDocWindow::ActivateSelf()
+// {
+// 	static bool sShowingDialog = false;
+// 	if (not sShowingDialog)
+// 	{
+// 		value_changer<bool> save(sShowingDialog, true);
 
-		MDocument *doc = mController.GetDocument();
-		if (doc != nullptr and doc->IsSpecified())
-			doc->CheckIfModifiedOnDisk(this);
-	}
-}
+// 		MDocument *doc = mController.GetDocument();
+// 		if (doc != nullptr and doc->IsSpecified())
+// 			doc->CheckIfModifiedOnDisk(this);
+// 	}
+// }

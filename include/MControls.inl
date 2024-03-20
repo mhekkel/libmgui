@@ -86,18 +86,6 @@ void MControl<IMPL>::SetMargins(int32_t inLeftMargin, int32_t inTopMargin, int32
 }
 
 template <class IMPL>
-void MControl<IMPL>::ActivateSelf()
-{
-	mImpl->ActivateSelf();
-}
-
-template <class IMPL>
-void MControl<IMPL>::DeactivateSelf()
-{
-	mImpl->DeactivateSelf();
-}
-
-template <class IMPL>
 void MControl<IMPL>::EnableSelf()
 {
 	mImpl->EnableSelf();

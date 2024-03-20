@@ -65,10 +65,8 @@ struct MMenuItem
 	void SetChecked(bool inChecked);
 	void ItemCallback();
 	void ItemToggled();
-	//	void RecentItemActivated();
 
 	MSlot<void()> mCallback;
-	//	MSlot<void()>	mRecentItemActivated;
 
 	GtkWidget *mGtkMenuItem;
 	string mLabel;
@@ -84,7 +82,6 @@ struct MMenuItem
 
 MMenuItem::MMenuItem(MMenu *inMenu, const string &inLabel, uint32_t inCommand)
 	: mCallback(this, &MMenuItem::ItemCallback)
-	//	, mRecentItemActivated(this, &MMenuItem::RecentItemActivated)
 	, mGtkMenuItem(nullptr)
 	, mLabel(inLabel)
 	, mCommand(inCommand)
@@ -149,20 +146,7 @@ void MMenuItem::ItemCallback()
 			}
 
 			uint32_t modifiers = 0;
-			// GdkModifierType gdkModifiers = 0;
 			uint32_t gdkModifiers = 0;
-			// gdk_window_get_pointer(gtk_widget_get_window(mGtkMenuItem), nullptr, nullptr, &gdkModifiers);
-
-// #if GTK_CHECK_VERSION(3, 20, 0)
-// 			auto seat = gdk_display_get_default_seat(gdk_display_get_default());
-// 			auto mouse_device = gdk_seat_get_pointer(seat);
-// #else
-// 			auto devman = gdk_display_get_device_manager(gdk_display_get_default());
-// 			auto mouse_device = gdk_device_manager_get_client_pointer(devman);
-// #endif
-
-// 			auto w = gdk_display_get_default_group(gdk_display_get_default());
-// 			gdk_window_get_device_position(w, mouse_device, nullptr, nullptr, &gdkModifiers);
 
 			auto keyMap = gdk_keymap_get_for_display(gdk_display_get_default());
 			if (GDK_IS_KEYMAP(keyMap))

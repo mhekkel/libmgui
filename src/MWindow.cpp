@@ -70,7 +70,6 @@ MWindow::MWindow(const string &inTitle, const MRect &inBounds, MWindowFlags inFl
 	, MHandler(gApp)
 	, mImpl(MWindowImpl::Create(inTitle, inBounds, inFlags, inMenu, this))
 	, mModified(false)
-	, mLatentFocus(this)
 {
 	mVisible = eTriStateLatent;
 
@@ -85,7 +84,6 @@ MWindow::MWindow(MWindowImpl *inImpl)
 	: MView("window", MRect(0, 0, 100, 100))
 	, MHandler(gApp)
 	, mImpl(inImpl)
-	, mLatentFocus(this)
 {
 	SetBindings(true, true, true, true);
 
@@ -185,32 +183,6 @@ void MWindow::Select()
 	mImpl->Select();
 }
 
-void MWindow::Activate()
-{
-	if (mActive == eTriStateOff and IsVisible())
-	{
-		mActive = eTriStateOn;
-		ActivateSelf();
-		MView::Activate();
-
-		if (mLatentFocus != nullptr)
-			mLatentFocus->SetFocus();
-	}
-
-	if (not sWindowList.empty() and sWindowList.front() != this)
-	{
-		if (sWindowList.front()->IsActive())
-			sWindowList.front()->Deactivate();
-
-		sWindowList.erase(find(sWindowList.begin(), sWindowList.end(), this));
-		sWindowList.push_front(this);
-	}
-}
-
-void MWindow::ActivateSelf()
-{
-}
-
 void MWindow::UpdateNow()
 {
 	mImpl->UpdateNow();
@@ -254,20 +226,6 @@ void MWindow::SetModifiedMarkInTitle(bool inModified)
 void MWindow::SetTransparency(float inAlpha)
 {
 	mImpl->SetTransparency(inAlpha);
-}
-
-void MWindow::SetLatentFocus(MHandler *inFocus)
-{
-	mLatentFocus = inFocus;
-
-	//	if (dynamic_cast<MView*>(inFocus) != nullptr)
-	//		mImpl->SetFocus(dynamic_cast<MView*>(inFocus));
-}
-
-void MWindow::BeFocus()
-{
-	if (mLatentFocus != nullptr and mLatentFocus != this)
-		mLatentFocus->SetFocus();
 }
 
 bool MWindow::UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked)

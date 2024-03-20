@@ -23,8 +23,6 @@ class MWinControlImpl : public CONTROL::MImpl, public MWinProcMixin
 	virtual void FrameMoved();
 	virtual void FrameResized();
 	virtual void Draw(MRect inBounds);
-	virtual void ActivateSelf();
-	virtual void DeactivateSelf();
 	virtual void EnableSelf();
 	virtual void DisableSelf();
 	virtual void ShowSelf();

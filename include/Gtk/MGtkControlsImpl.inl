@@ -106,21 +106,6 @@ void MGtkControlImpl<CONTROL>::SetText(const std::string &inText)
 }
 
 template <class CONTROL>
-void MGtkControlImpl<CONTROL>::ActivateSelf()
-{
-	//	if (GetWidget() != nullptr)
-	//		gtk_widget_set_state(GetWidget(),
-	//			mControl->IsActive() and mControl->IsEnabled() ? GTK_STATE_ACTIVE : GTK_STATE_INSENSITIVE);
-}
-
-template <class CONTROL>
-void MGtkControlImpl<CONTROL>::DeactivateSelf()
-{
-	if (GetWidget() != nullptr)
-		gtk_widget_set_state_flags(GetWidget(), GTK_STATE_FLAG_INSENSITIVE, true);
-}
-
-template <class CONTROL>
 void MGtkControlImpl<CONTROL>::EnableSelf()
 {
 	if (auto w = GetWidget(); w != nullptr)

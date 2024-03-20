@@ -67,7 +67,6 @@ class MWindow : public MView, public MHandler
 
 	virtual void Show();
 	virtual void Select();
-	virtual void Activate();
 	virtual void UpdateNow();
 
 	virtual bool AllowClose(bool inQuit);
@@ -87,12 +86,6 @@ class MWindow : public MView, public MHandler
 
 	// 0.0 is fully transparent, 1.0 is fully opaque
 	void SetTransparency(float inAlpha);
-
-	// Latent focus is the control that should receive focus
-	// when the window becomes active/receives focus
-	virtual void SetLatentFocus(MHandler *inHandler);
-
-	virtual void BeFocus();
 
 	virtual bool UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked);
 
@@ -130,21 +123,15 @@ class MWindow : public MView, public MHandler
 
 	void SetImpl(MWindowImpl *inImpl);
 
-	virtual void ActivateSelf();
-
   private:
-	void TransitionTo(MRect inPosition);
-
 	virtual void ShowSelf();
 	virtual void HideSelf();
 
 	MWindowImpl *mImpl;
 	std::string mTitle;
 	bool mModified;
-	MHandler *mLatentFocus;
 
-	static std::list<MWindow *>
-		sWindowList;
+	static std::list<MWindow *> sWindowList;
 };
 
 // clean way to work with bitfields

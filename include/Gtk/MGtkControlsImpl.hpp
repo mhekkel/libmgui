@@ -45,8 +45,6 @@ class MGtkControlImpl : public CONTROL::MImpl, public MGtkWidgetMixin
 	virtual void FrameMoved();
 	virtual void FrameResized();
 	virtual void MarginsChanged();
-	virtual void ActivateSelf();
-	virtual void DeactivateSelf();
 	virtual void EnableSelf();
 	virtual void DisableSelf();
 	virtual void ShowSelf();
@@ -191,19 +189,18 @@ class MGtkComboboxImpl : public MGtkControlImpl<MCombobox>
   public:
 	MGtkComboboxImpl(MCombobox *inCombobox);
 
-	virtual void CreateWidget();
-	virtual void AddedToWindow();
+	void CreateWidget() override;
+	void AddedToWindow() override;
 
-	virtual std::string GetText() const;
-	virtual void SetText(const std::string &inText);
+	std::string GetText() const override;
+	void SetText(const std::string &inText) override;
 
-	virtual void SetChoices(const std::vector<std::string> &inChoices);
+	void SetChoices(const std::vector<std::string> &inChoices) override;
 
-	virtual int GetActive();
-	virtual void SetActive(int inActive);
+	int GetActive() override;
+	void SetActive(int inActive) override;
 
-	virtual bool DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat);
-	virtual void OnChanged();
+	void OnChanged() override;
 
   private:
 	std::vector<std::string> mChoices;
@@ -238,21 +235,18 @@ class MGtkEdittextImpl : public MGtkControlImpl<MEdittext>
   public:
 	MGtkEdittextImpl(MEdittext *inEdittext, uint32_t inFlags);
 
-	virtual void CreateWidget();
+	void CreateWidget() override;
 
-	virtual void SetFocus();
+	void SetFocus() override;
 
-	virtual std::string
-	GetText() const;
-	virtual void SetText(const std::string &inText);
+	std::string GetText() const override;
+	void SetText(const std::string &inText) override;
 
-	virtual uint32_t GetFlags() const { return mFlags; }
+	uint32_t GetFlags() const override { return mFlags; }
 
-	virtual void SetPasswordChar(uint32_t inUnicode);
+	void SetPasswordChar(uint32_t inUnicode) override;
 
-	virtual bool DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat);
-
-	virtual bool OnMouseDown(int32_t inX, int32_t inY, uint32_t inButtonNr, uint32_t inClickCount, uint32_t inModifiers);
+	bool OnKeyPressEvent(GdkEventKey *inEvent) override;
 
   protected:
 	uint32_t mFlags;

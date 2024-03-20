@@ -68,8 +68,6 @@ class MDocWindow : public MWindow
 
 	virtual void FileSpecChanged(MDocument *inDocument);
 
-	virtual void ActivateSelf();
-
   protected:
 	MController mController;
 

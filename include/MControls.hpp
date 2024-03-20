@@ -107,9 +107,6 @@ class MControl : public MControlBase
   protected:
 	MControl(const std::string &inID, MRect inBounds, I *inImpl);
 
-	virtual void ActivateSelf();
-	virtual void DeactivateSelf();
-
 	virtual void EnableSelf();
 	virtual void DisableSelf();
 
@@ -333,6 +330,7 @@ class MEdittext : public MControl<MEdittextImpl>
 		uint32_t inFlags = eMEditTextNoFlags);
 
 	MEventOut<void(const std::string &, const std::string &)> eValueChanged;
+	MEventOut<void(uint32_t inKeyCode, uint32_t inModifiers)> eKeyDown;
 
 	virtual void SetText(const std::string &inText);
 	virtual std::string

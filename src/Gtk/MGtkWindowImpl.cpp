@@ -402,12 +402,8 @@ void MGtkWindowImpl::RecycleWindows()
 
 bool MGtkWindowImpl::OnDestroy()
 {
-	//	PRINT(("MGtkWindowImpl::OnDestroy"));
-
 	SetWidget(nullptr);
 
-	//	mWindow->eWindowClosed(mWindow);
-	//	delete mWindow;
 	sRecycle.push_back(mWindow);
 
 	return true;
@@ -415,8 +411,6 @@ bool MGtkWindowImpl::OnDestroy()
 
 bool MGtkWindowImpl::OnDelete(GdkEvent *inEvent)
 {
-	//	PRINT(("MGtkWindowImpl::OnDelete"));
-
 	bool result = true;
 
 	if (mWindow->AllowClose(false))
@@ -427,8 +421,6 @@ bool MGtkWindowImpl::OnDelete(GdkEvent *inEvent)
 
 bool MGtkWindowImpl::OnMapEvent(GdkEvent *inEvent)
 {
-	//	PRINT(("MGtkWindowImpl::OnMapEvent"));
-
 	DoForEach(GetWidget());
 
 	mWindow->BeFocus();
@@ -438,7 +430,6 @@ bool MGtkWindowImpl::OnMapEvent(GdkEvent *inEvent)
 
 bool MGtkWindowImpl::OnConfigureEvent(GdkEventConfigure *inEvent)
 {
-	//	PRINT(("MGtkWindowImpl::OnConfigureEvent"));
 	if (not mConfigured)
 		mWindow->Mapped();
 	mConfigured = true;
@@ -486,87 +477,6 @@ void MGtkWindowImpl::SetWindowPosition(MRect inPosition, bool inTransition)
 	}
 }
 
-// try to be nice to those with multiple monitors:
-
-// void MGtkWindowImpl::GetMaxPosition(
-//	MRect&			outRect) const
-//{
-//	GdkScreen* screen = gtk_widget_get_screen(GetWidget());
-//
-//	uint32_t monitor = gdk_screen_get_monitor_at_window(screen, gtk_widget_get_window(GetWidget()));
-//
-//	GdkRectangle r;
-//	gdk_screen_get_monitor_geometry(screen, monitor, &r);
-//	outRect = r;
-// }
-//
-// void MGtkWindowImpl::TransitionTo(
-//	MRect			inPosition)
-//{
-//	MRect start;
-//
-//	gdk_threads_enter();
-//	GetWindowPosition(start);
-//	gdk_threads_leave();
-//
-//	uint32_t
-//		kSleep = 10000,
-//		kSteps = 6;
-//
-//	for (uint32_t step = 0; step < kSteps; ++step)
-//	{
-//		MRect r;
-//
-//		r.x = ((kSteps - step) * start.x + step * inPosition.x) / kSteps;
-//		r.y = ((kSteps - step) * start.y + step * inPosition.y) / kSteps;
-//		r.width = ((kSteps - step) * start.width + step * inPosition.width) / kSteps;
-//		r.height = ((kSteps - step) * start.height + step * inPosition.height) / kSteps;
-//
-//		gdk_threads_enter();
-//		SetWindowPosition(r, false);
-//		gdk_window_process_all_updates();
-//		gdk_threads_leave();
-//
-//		usleep(kSleep);
-//	}
-//
-//	gdk_threads_enter();
-//	SetWindowPosition(inPosition, false);
-//	gdk_threads_leave();
-//
-//	mTransitionThread = nullptr;
-// }
-//
-// const char* MGtkWindowImpl::IDToName(
-//	uint32_t			inID,
-//	char			inName[5])
-//{
-//	inName[4] = 0;
-//	inName[3] = inID & 0x000000ff; inID >>= 8;
-//	inName[2] = inID & 0x000000ff; inID >>= 8;
-//	inName[1] = inID & 0x000000ff; inID >>= 8;
-//	inName[0] = inID & 0x000000ff;
-//
-//	return inName;
-// }
-//
-// GtkWidget* MGtkWindowImpl::GetWidget(
-//	uint32_t			inID) const
-//{
-//	char name[5];
-//	GtkWidget* wdgt = mGtkBuilder->GetWidget(IDToName(inID, name));
-//	if (wdgt == nullptr)
-//		THROW(("Widget '%s' does not exist", name));
-//	return wdgt;
-// }
-//
-// void MGtkWindowImpl::Beep()
-//{
-////	gdk_window_beep(gtk_widget_get_window(GetWidget()));
-//	cout << "beep!\n";
-//	gdk_beep();
-//}
-
 void MGtkWindowImpl::DoForEachCallBack(GtkWidget *inWidget, gpointer inUserData)
 {
 	MGtkWindowImpl *w = reinterpret_cast<MGtkWindowImpl *>(inUserData);
@@ -600,298 +510,10 @@ bool MGtkWindowImpl::ChildFocus(GdkEventFocus *inEvent)
 	return false;
 }
 
-// void MGtkWindowImpl::PutOnDuty(
-//	MHandler*		inHandler)
-//{
-//	MWindow* w = sFirst;
-//	while (w != nullptr)
-//	{
-//		if (w == this)
-//		{
-//			RemoveWindowFromList(this);
-//
-//			mNext = sFirst;
-//			sFirst = this;
-//
-//			break;
-//		}
-//		w = w->mNext;
-//	}
-// }
-//
-// void MGtkWindowImpl::SetFocus(
-//	uint32_t				inID)
-//{
-//	gtk_widget_grab_focus(GetWidget(inID));
-// }
-//
-// string MGtkWindowImpl::GetText(
-//	uint32_t				inID) const
-//{
-//	string result;
-//
-//	GtkWidget* wdgt = GetWidget(inID);
-//	if (GTK_IS_COMBO_BOX(wdgt))
-//	{
-//		char* text = gtk_combo_box_get_active_text(GTK_COMBO_BOX(wdgt));
-//		if (text != nullptr)
-//		{
-//			result = text;
-//			g_free(text);
-//		}
-//	}
-//	else if (GTK_IS_FONT_BUTTON(wdgt))
-//		result = gtk_font_button_get_font_name(GTK_FONT_BUTTON(wdgt));
-//	else if (GTK_IS_ENTRY(wdgt))
-//		result = gtk_entry_get_text(GTK_ENTRY(wdgt));
-//	else if (GTK_IS_TEXT_VIEW(wdgt))
-//	{
-//		GtkTextBuffer* buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(wdgt));
-//		if (buffer == nullptr)
-//			THROW(("Invalid text buffer"));
-//
-//		GtkTextIter start, end;
-//		gtk_text_buffer_get_bounds(buffer, &start, &end);
-//		gchar* text = gtk_text_buffer_get_text(buffer, &start, &end, false);
-//
-//		if (text != nullptr)
-//		{
-//			result = text;
-//			g_free(text);
-//		}
-//	}
-//	else
-//		THROW(("item is not an entry"));
-//
-//	return result;
-// }
-
 MHandler *MGtkWindowImpl::GetFocus()
 {
 	return nullptr;
 }
-
-// void MGtkWindowImpl::SetText(
-//	uint32_t				inID,
-//	const std::string&	inText)
-//{
-//	GtkWidget* wdgt = GetWidget(inID);
-//	if (GTK_IS_COMBO_BOX(wdgt))
-// assert(false);//		gtk_combo_box_set_active_text(GTK_COMBO_BOX(wdgt), inText.c_str());
-//	else if (GTK_IS_FONT_BUTTON(wdgt))
-//		gtk_font_button_set_font_name(GTK_FONT_BUTTON(wdgt), inText.c_str());
-//	else if (GTK_IS_ENTRY(wdgt))
-//		gtk_entry_set_text(GTK_ENTRY(wdgt), inText.c_str());
-//	else if (GTK_IS_LABEL(wdgt))
-//		gtk_label_set_text(GTK_LABEL(wdgt), inText.c_str());
-//	else if (GTK_IS_BUTTON(wdgt))
-//		gtk_button_set_label(GTK_BUTTON(wdgt), inText.c_str());
-//	else if (GTK_IS_TEXT_VIEW(wdgt))
-//	{
-//		GtkTextBuffer* buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(wdgt));
-//		if (buffer == nullptr)
-//			THROW(("Invalid text buffer"));
-//		gtk_text_buffer_set_text(buffer, inText.c_str(), inText.length());
-//	}
-//	else if (GTK_IS_PROGRESS_BAR(wdgt))
-//	{
-//		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(wdgt), inText.c_str());
-//		gtk_progress_bar_set_ellipsize(GTK_PROGRESS_BAR(wdgt),
-//			PANGO_ELLIPSIZE_MIDDLE);
-//	}
-//	else
-//		THROW(("item is not an entry"));
-// }
-//
-// void MGtkWindowImpl::SetPasswordField(
-//	uint32_t				inID,
-//	bool				isVisible)
-//{
-//	GtkWidget* wdgt = GetWidget(inID);
-//	if (GTK_IS_ENTRY(wdgt))
-//		g_object_set(G_OBJECT(wdgt), "visibility", isVisible, nullptr);
-//	else
-//		THROW(("item is not an entry"));
-// }
-//
-// int32_t MGtkWindowImpl::GetValue(
-//	uint32_t				inID) const
-//{
-//	int32_t result = 0;
-//	GtkWidget* wdgt = GetWidget(inID);
-//
-//	if (GTK_IS_COMBO_BOX(wdgt))
-//		result = gtk_combo_box_get_active(GTK_COMBO_BOX(wdgt)) + 1;
-//	else
-//		THROW(("Cannot get value"));
-//
-//	return result;
-// }
-//
-// void MGtkWindowImpl::SetValue(
-//	uint32_t				inID,
-//	int32_t				inValue)
-//{
-//	GtkWidget* wdgt = GetWidget(inID);
-//
-//	if (GTK_IS_COMBO_BOX(wdgt))
-//		gtk_combo_box_set_active(GTK_COMBO_BOX(wdgt), inValue - 1);
-//	else
-//		THROW(("Cannot get value"));
-// }
-//
-//// for comboboxes
-// void MGtkWindowImpl::GetValues(
-//	uint32_t				inID,
-//	vector<string>& 	outValues) const
-//{
-//	assert(false);
-// }
-//
-// void MGtkWindowImpl::SetValues(
-//	uint32_t				inID,
-//	const vector<string>&
-//						inValues)
-//{
-//	GtkWidget* wdgt = GetWidget(inID);
-//
-//	char name[5];
-//	if (not GTK_IS_COMBO_BOX(wdgt))
-//		THROW(("Item %s is not a combo box", IDToName(inID, name)));
-//
-//	GtkTreeModel* model = gtk_combo_box_get_model(GTK_COMBO_BOX(wdgt));
-//	int32_t count = gtk_tree_model_iter_n_children(model, nullptr);
-//
-//	while (count-- > 0)
-//		gtk_combo_box_remove_text(GTK_COMBO_BOX(wdgt), count);
-//
-//	for (vector<string>::const_iterator s = inValues.begin(); s != inValues.end(); ++s)
-//		gtk_combo_box_append_text(GTK_COMBO_BOX(wdgt), s->c_str());
-//
-//	gtk_combo_box_set_active(GTK_COMBO_BOX(wdgt), 0);
-// }
-//
-// void MGtkWindowImpl::SetColor(
-//	uint32_t				inID,
-//	MColor				inColor)
-//{
-//	GtkWidget* wdgt = GetWidget(inID);
-//	if (not GTK_IS_COLOR_BUTTON(wdgt))
-//		THROW(("Widget '%d' is not of the correct type", inID));
-//
-//	GdkColor c = inColor;
-//	gtk_color_button_set_color(GTK_COLOR_BUTTON(wdgt), &c);
-// }
-//
-// MColor MGtkWindowImpl::GetColor(
-//	uint32_t				inID) const
-//{
-//	GtkWidget* wdgt = GetWidget(inID);
-//	if (not GTK_IS_COLOR_BUTTON(wdgt))
-//		THROW(("Widget '%d' is not of the correct type", inID));
-//
-//	GdkColor c;
-//	gtk_color_button_get_color(GTK_COLOR_BUTTON(wdgt), &c);
-//	return MColor(c);
-// }
-//
-// bool MGtkWindowImpl::IsChecked(
-//	uint32_t				inID) const
-//{
-//	GtkWidget* wdgt = GetWidget(inID);
-//	if (not GTK_IS_TOGGLE_BUTTON(wdgt))
-//		THROW(("Widget '%d' is not of the correct type", inID));
-//	return gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(wdgt));
-// }
-//
-// void MGtkWindowImpl::SetChecked(
-//	uint32_t				inID,
-//	bool				inOn)
-//{
-//	GtkWidget* wdgt = GetWidget(inID);
-//	if (not GTK_IS_TOGGLE_BUTTON(wdgt))
-//		THROW(("Widget '%d' is not of the correct type", inID));
-//	return gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(wdgt), inOn);
-// }
-//
-// bool MGtkWindowImpl::IsVisible(
-//	uint32_t				inID) const
-//{
-//	GtkWidget* wdgt = GetWidget(inID);
-//	return GTK_WIDGET_VISIBLE(wdgt);
-// }
-//
-// void MGtkWindowImpl::SetVisible(
-//	uint32_t				inID,
-//	bool				inVisible)
-//{
-//	GtkWidget* wdgt = GetWidget(inID);
-//	if (inVisible)
-//		gtk_widget_show(wdgt);
-//	else
-//		gtk_widget_hide(wdgt);
-// }
-//
-// bool MGtkWindowImpl::IsEnabled(
-//	uint32_t				inID) const
-//{
-//	GtkWidget* wdgt = GetWidget(inID);
-//	return GTK_WIDGET_IS_SENSITIVE(wdgt);
-// }
-//
-// void MGtkWindowImpl::SetEnabled(
-//	uint32_t				inID,
-//	bool				inEnabled)
-//{
-//	GtkWidget* wdgt = GetWidget(inID);
-//	gtk_widget_set_sensitive(wdgt, inEnabled);
-// }
-//
-// bool MGtkWindowImpl::IsExpanded(
-//	uint32_t				inID) const
-//{
-//	GtkWidget* wdgt = GetWidget(inID);
-//	assert(GTK_IS_EXPANDER(wdgt));
-//	return gtk_expander_get_expanded(GTK_EXPANDER(wdgt));
-// }
-//
-// void MGtkWindowImpl::SetExpanded(
-//	uint32_t				inID,
-//	bool				inExpanded)
-//{
-//	GtkWidget* wdgt = GetWidget(inID);
-//	assert(GTK_IS_EXPANDER(wdgt));
-//	gtk_expander_set_expanded(GTK_EXPANDER(wdgt), inExpanded);
-// }
-//
-// void MGtkWindowImpl::SetProgressFraction(
-//	uint32_t				inID,
-//	float				inFraction)
-//{
-//	GtkWidget* wdgt = GetWidget(inID);
-//	assert(GTK_IS_PROGRESS_BAR(wdgt));
-//	gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(wdgt), inFraction);
-// }
-//
-// void MGtkWindowImpl::ValueChanged(
-//	uint32_t				inID)
-//{
-////	char name[5];
-////	cout << "Value Changed for " << IDToName(inID, name) << '\n';
-//}
-
-// void MGtkWindowImpl::Changed()
-//{
-//	const char* name = gtk_buildable_get_name(GTK_BUILDABLE(mChanged.GetSourceGObject()));
-//	if (name != nullptr)
-//	{
-//		uint32_t id = 0;
-//		for (uint32_t i = 0; i < 4 and name[i]; ++i)
-//			id = (id << 8) | name[i];
-//
-////		mWindow->ValueChanged(id);
-//	}
-//}
 
 bool MGtkWindowImpl::DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, const string &inText)
 {

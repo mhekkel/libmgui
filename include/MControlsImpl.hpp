@@ -60,8 +60,6 @@ class MControlImpl : public MControlImplBase
 	// virtual void	Draw(MRect inBounds)						{}
 	virtual void Draw() {}
 	virtual void Click(int32_t inX, int32_t inY) {}
-	virtual void ActivateSelf() {}
-	virtual void DeactivateSelf() {}
 	virtual void EnableSelf() {}
 	virtual void DisableSelf() {}
 	virtual void ShowSelf() {}

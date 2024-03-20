@@ -63,11 +63,6 @@ class MWindowImpl
 	virtual void Select() = 0;
 	virtual void Close() = 0;
 
-	// virtual void		ActivateSelf();
-	// virtual void		DeactivateSelf();
-	// virtual void		BeFocus();
-	// virtual void		SubFocusChanged();
-
 	//	virtual void		SetFocus(MView* inFocus) {}
 	virtual MHandler *GetFocus() = 0;
 

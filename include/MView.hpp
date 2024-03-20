@@ -93,8 +93,7 @@ class MView
 	virtual void AddChild(MView *inChild);
 	virtual void RemoveChild(MView *inChild);
 	virtual void AddedToWindow();
-	virtual MWindow *
-	GetWindow() const;
+	virtual MWindow *GetWindow() const;
 	virtual void SetViewScroller(MViewScroller *inScroller);
 	virtual void GetBounds(MRect &outBounds) const;
 	virtual void GetFrame(MRect &outFrame) const;
@@ -125,10 +124,6 @@ class MView
 	virtual void RedrawAll(MRect inUpdate);
 	// virtual void	Draw(MRect inUpdate);
 	virtual void Draw();
-
-	virtual void Activate();
-	virtual void Deactivate();
-	bool IsActive() const;
 
 	virtual void Enable();
 	virtual void Disable();
@@ -172,11 +167,6 @@ class MView
 	virtual bool PastePrimaryBuffer(const std::string &inText);
 
   protected:
-	void SuperActivate();
-	virtual void ActivateSelf();
-	void SuperDeactivate();
-	virtual void DeactivateSelf();
-
 	void SuperEnable();
 	virtual void EnableSelf();
 	void SuperDisable();

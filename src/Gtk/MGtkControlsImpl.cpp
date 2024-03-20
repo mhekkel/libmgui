@@ -174,192 +174,9 @@ bool MGtkExpanderImpl::IsOpen() const
 	return mIsOpen;
 }
 
-// bool MGtkExpanderImpl::WMActivate(HWND /*inHWnd*/, UINT /*inUMsg*/, WPARAM inWParam, LPARAM /*inLParam*/, LRESULT& /*outResult*/)
-//{
-//	mControl->Invalidate();
-//	return false;
-// }
-//
-// bool MGtkExpanderImpl::WMPaint(HWND inHWnd, UINT inMsg, WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)
-//{
-//	bool result = false;
-//
-//	HTHEME hTheme = ::OpenThemeData(inHWnd, VSCLASS_TASKDIALOG);
-//	if (hTheme != nullptr)
-//	{
-//		PAINTSTRUCT lPs;
-//		HDC hdc = ::BeginPaint(inHWnd, &lPs);
-//		THROW_IF_NIL(hdc);
-//
-////		::GetUpdateRect(inHWnd, &lPs.rcPaint, false);
-//
-//		if (::IsThemeBackgroundPartiallyTransparent(hTheme, TDLG_EXPANDOBUTTON, TDLGEBS_NORMAL))
-//			::DrawThemeParentBackground(inHWnd, hdc, &lPs.rcPaint);
-//
-//		RECT clientRect;
-//		::GetClientRect(inHWnd, &clientRect);
-//
-//		RECT contentRect;
-//		::GetThemeBackgroundContentRect(hTheme, hdc, TDLG_EXPANDOBUTTON, TDLGEBS_NORMAL, &clientRect, &contentRect);
-//
-//		int w = contentRect.bottom - contentRect.top;
-//		::GetThemeMetric(hTheme, nullptr, TDLG_EXPANDOBUTTON, TDLGEBS_NORMAL, TMT_WIDTH, &w);
-//		int sr = contentRect.right;
-//		contentRect.right = contentRect.left + w;
-//
-//		int state = TDLGEBS_NORMAL;
-//		if ((mMouseInside and not mMouseDown) or (not mMouseInside and mMouseDown))
-//			state = TDLGEBS_HOVER;
-//		else if (mMouseDown)
-//			state = TDLGEBS_PRESSED;
-//
-//		if (mIsOpen)
-//			state += 3;		// expanded
-//
-//		::DrawThemeBackground(hTheme, hdc, TDLG_EXPANDOBUTTON, state, &contentRect, 0);
-//
-//	    ::CloseThemeData(hTheme);
-//	    hTheme = ::OpenThemeData(inHWnd, VSCLASS_TEXTSTYLE);
-//	    if (hTheme != nullptr)
-//	    {
-//			contentRect.left = contentRect.right;
-//			contentRect.right = sr;
-//
-//			wstring label(c2w(mLabel));
-//
-//			RECT r;
-//			::GetThemeTextExtent(hTheme, mDC, TEXT_BODYTEXT, 0, label.c_str(), label.length(), 0, nullptr, &r);
-//			contentRect.left += (r.bottom - r.top) / 2;
-//			contentRect.top += ((contentRect.bottom - contentRect.top) - (r.bottom - r.top)) / 2;
-//
-//			int state = TS_CONTROLLABEL_NORMAL;
-//			if (not ::IsWindowEnabled(inHWnd))
-//				state = TS_CONTROLLABEL_DISABLED;
-//
-//			::DrawThemeText(hTheme, hdc, TEXT_BODYTEXT, state, label.c_str(), label.length(),
-//				0, 0, &contentRect);
-//
-//			::CloseThemeData(hTheme);
-//	    }
-//
-//		::EndPaint (inHWnd, &lPs);
-//
-//	    result = true;
-//	}
-//
-//	return result;
-//}
-//
-// bool MGtkExpanderImpl::WMMouseDown(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)
-//{
-//	::SetFocus(inHWnd);
-//	::SetCapture(inHWnd);
-//
-//	mMouseInside = true;
-//	mMouseDown = true;
-//	mControl->Invalidate();
-//	mControl->UpdateNow();
-//
-//	return true;
-//}
-//
-// bool MGtkExpanderImpl::WMMouseMove(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)
-//{
-//	if (not mMouseTracking)
-//	{
-//		TRACKMOUSEEVENT me = { sizeof(TRACKMOUSEEVENT) };
-//		me.dwFlags = TME_LEAVE;
-//		me.hwndTrack = GetWidget();
-//
-//		if (not mMouseDown)
-//			me.dwHoverTime = HOVER_DEFAULT;
-//
-//		if (::TrackMouseEvent(&me))
-//			mMouseTracking = true;
-//
-//		mControl->Invalidate();
-//		mControl->UpdateNow();
-//	}
-//
-//	int32_t x = static_cast<int16_t>(LOWORD(inLParam));
-//	int32_t y = static_cast<int16_t>(HIWORD(inLParam));
-//
-//	MRect bounds;
-//	mControl->GetBounds(bounds);
-//
-//	if (mMouseInside != bounds.ContainsPoint(x, y))
-//	{
-//		mMouseInside = not mMouseInside;
-//		mControl->Invalidate();
-//		mControl->UpdateNow();
-//	}
-//
-//	return true;
-//}
-//
-// bool MGtkExpanderImpl::WMMouseExit(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)
-//{
-//	mMouseInside = false;
-//	mMouseTracking = false;
-//	mLastExit = std::chrono::system_clock::now();
-//
-//	mControl->Invalidate();
-//	mControl->UpdateNow();
-//
-//	return true;
-//}
-//
-// bool MGtkExpanderImpl::WMMouseUp(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)
-//{
-//	::ReleaseCapture();
-//
-//	int32_t x = static_cast<int16_t>(LOWORD(inLParam));
-//	int32_t y = static_cast<int16_t>(HIWORD(inLParam));
-//
-//	MRect bounds;
-//	mControl->GetBounds(bounds);
-//	mMouseInside = bounds.ContainsPoint(x, y);
-//
-//	if (mMouseInside)
-//	{
-//		mIsOpen = not mIsOpen;
-//		mControl->eClicked(mControl->GetID());
-//	}
-//	mMouseDown = false;
-//
-//	mControl->Invalidate();
-//	mControl->UpdateNow();
-//
-//	return true;
-//}
-
 void MGtkExpanderImpl::AddedToWindow()
 {
 	MGtkControlImpl::AddedToWindow();
-
-	//	mDC = ::GetDC(GetWidget());
-	//
-	//	HTHEME hTheme = ::OpenThemeData(GetWidget(), VSCLASS_TASKDIALOG);
-	//	if (hTheme != nullptr)
-	//	{
-	//		int w, h;
-	//		RECT r;
-	//
-	//		wstring label(c2w(mLabel));
-	//
-	//		if (::GetThemeMetric(hTheme, nullptr, TDLG_EXPANDOBUTTON, TDLGEBS_NORMAL, TMT_WIDTH, &w) == S_OK and
-	//			::GetThemeMetric(hTheme, nullptr, TDLG_EXPANDOBUTTON, TDLGEBS_NORMAL, TMT_HEIGHT, &h) == S_OK and
-	//			::GetThemeTextExtent(hTheme, mDC, TDLG_EXPANDOTEXT, 0, label.c_str(), label.length(), 0, nullptr, &r) == S_OK)
-	//		{
-	//			MGtkProcMixin* parent;
-	//			MRect bounds;
-	//
-	//			GetParentAndBounds(parent, bounds);
-	//
-	//			int lw = r.right - r.left + (r.bottom - r.top) / 2;
-	//			mControl->ResizeFrame(w + lw - bounds.width, h - bounds.height);
-	//		}
-	//	}
 }
 
 MExpanderImpl *MExpanderImpl::Create(MExpander *inExpander, const std::string &inLabel)
@@ -664,22 +481,6 @@ void MGtkComboboxImpl::AddedToWindow()
 		SetChoices(mChoices);
 }
 
-bool MGtkComboboxImpl::DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat)
-{
-	bool result = false;
-
-	if (inKeyCode == kReturnKeyCode or
-		inKeyCode == kEnterKeyCode or
-		inKeyCode == kTabKeyCode or
-		inKeyCode == kEscapeKeyCode or
-		(inModifiers & ~kShiftKey) != 0)
-	{
-		//		result = MGtkControlImpl::DispatchKeyDown(inKeyCode, inModifiers, inRepeat);
-	}
-
-	return result;
-}
-
 void MGtkComboboxImpl::OnChanged()
 {
 	mControl->eValueChanged(mControl->GetID(), GetActive());
@@ -819,30 +620,20 @@ void MGtkEdittextImpl::SetPasswordChar(uint32_t inUnicode)
 		THROW(("item is not an entry"));
 }
 
-bool MGtkEdittextImpl::DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat)
+bool MGtkEdittextImpl::OnKeyPressEvent(GdkEventKey *inEvent)
 {
-	bool result = false;
 
-	if (inKeyCode == kReturnKeyCode or
-		inKeyCode == kEnterKeyCode or
-		inKeyCode == kTabKeyCode or
-		inKeyCode == kEscapeKeyCode or
-		(inModifiers & ~kShiftKey) != 0)
-	{
-		//		result = MGtkControlImpl::DispatchKeyDown(inKeyCode, inModifiers, inRepeat);
-	}
+	const uint32_t kValidModifiersMask = gtk_accelerator_get_default_mod_mask();
+	uint32_t modifiers = MapModifier(inEvent->state & kValidModifiersMask);
+	uint32_t keyValue = MapKeyCode(inEvent->keyval);
+
+	bool result = mControl->HandleKeyDown(keyValue, modifiers, false);
+
+	if (not result)
+		result = MGtkControlImpl::OnKeyPressEvent(inEvent);
 
 	return result;
 }
-
-bool MGtkEdittextImpl::OnMouseDown(int32_t inX, int32_t inY, uint32_t inButtonNr, uint32_t inClickCount, uint32_t inModifiers)
-{
-	PRINT(("Event mask is %d\n", gtk_widget_get_events(GetWidget())));
-
-	// gtk_widget_grab_focus(GetWidget());
-	return false;
-}
-
 
 MEdittextImpl *MEdittextImpl::Create(MEdittext *inEdittext, uint32_t inFlags)
 {
@@ -1357,138 +1148,10 @@ void MGtkListBoxImpl::OnSelectionChanged()
 	}
 }
 
-// bool MGtkListBoxImpl::WMCommand(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)
-//{
-//	switch (inUMsg)
-//	{
-//		case LBN_SELCHANGE:
-//		case LBN_SELCANCEL:
-//			mControl->eValueChanged(mControl->GetID(), ::SendMessage(GetWidget(), LB_GETCURSEL, 0, 0));
-//			break;
-//	}
-//
-//	return true;
-// }
-//
 MListBoxImpl *MListBoxImpl::Create(MListBox *inListBox)
 {
 	return new MGtkListBoxImpl(inListBox);
 }
-
-// // --------------------------------------------------------------------
-
-// MGtkListViewImpl::MGtkListViewImpl(MListView *inListView)
-// 	: MGtkControlImpl(inListView, "")
-// 	, mStore(nullptr)
-// {
-// }
-
-// void MGtkListViewImpl::CreateWidget()
-// {
-// 	mStore = gtk_list_store_new(1, G_TYPE_STRING);
-
-// 	for (string &s : mItems)
-// 	{
-// 		GtkTreeIter iter;
-
-// 		gtk_list_store_append(mStore, &iter);
-// 		gtk_list_store_set(mStore, &iter,
-// 		                   0, s.c_str(),
-// 		                   -1);
-// 	}
-
-// 	SetWidget(gtk_tree_view_new_with_model(GTK_TREE_MODEL(mStore)));
-
-// 	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
-// 	//	GtkTreeViewColumn* column = gtk_tree_view_column_new_with_attributes("Author",
-// 	//                                                   renderer,
-// 	//                                                   "text", 0,
-// 	//                                                   NULL);
-
-// 	GtkTreeViewColumn *column = gtk_tree_view_column_new();
-// 	gtk_tree_view_column_add_attribute(column, renderer, "text", 0);
-// 	gtk_tree_view_column_pack_start(column, renderer, true);
-// 	gtk_tree_view_append_column(GTK_TREE_VIEW(GetWidget()), column);
-// }
-
-// void MGtkListViewImpl::CreateParams(DWORD& outStyle, DWORD& outExStyle,
-//	wstring& outClassName, HMENU& outMenu)
-//{
-//	MGtkControlImpl::CreateParams(outStyle, outExStyle, outClassName, outMenu);
-//
-//	outStyle = WS_CHILD | LVS_REPORT | LVS_SINGLESEL | LVS_NOCOLUMNHEADER;
-//	outExStyle |= WS_EX_STATICEDGE;
-//
-//	outClassName = WC_LISTVIEW;
-// }
-//
-// void MGtkListViewImpl::CreateHandle(MGtkProcMixin* inParent, MRect inBounds, const wstring& inTitle)
-//{
-//	MGtkControlImpl::CreateHandle(inParent, inBounds, inTitle);
-//
-//	// add a single column
-//     LVCOLUMN lvc = {};
-//
-//     lvc.mask = LVCF_FMT | LVCF_SUBITEM;
-//	lvc.cx = inBounds.width - 10;
-//	lvc.fmt = LVCFMT_LEFT;
-//	::SendMessage(GetWidget(), LVM_INSERTCOLUMN, 0, (LPARAM)&lvc);
-//
-//	if (inParent != nullptr)
-//	{
-//		inParent->AddNotify(LVN_ITEMACTIVATE, GetWidget(),
-//			std::bind(&MGtkListViewImpl::LVMItemActivate, this, _1, _2, _3));
-//		inParent->AddNotify(LVN_GETDISPINFO, GetWidget(),
-//			std::bind(&MGtkListViewImpl::LVMGetDispInfo, this, _1, _2, _3));
-//	}
-// }
-//
-//  void MGtkListViewImpl::AddedToWindow()
-//  {
-//  	MGtkControlImpl::AddedToWindow();
-
-// 	for (string &item : mItems)
-// 		AddItem(item);
-
-// 	mItems.clear();
-// }
-
-// void MGtkListViewImpl::AddItem(const string &inText)
-// {
-// 	if (GetWidget() != nullptr)
-// 		mItems.push_back(inText);
-// 	else
-// 	{
-// 		GtkTreeIter iter;
-
-// 		gtk_list_store_append(mStore, &iter);
-// 		gtk_list_store_set(mStore, &iter,
-// 		                   0, inText.c_str(),
-// 		                   -1);
-// 	}
-// }
-
-// bool MGtkListViewImpl::LVMItemActivate(WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)
-//{
-//	NMITEMACTIVATE* nmItemActivate = reinterpret_cast<NMITEMACTIVATE*>(inLParam);
-//
-//	mControl->eValueChanged(mControl->GetID(), nmItemActivate->iItem);
-//
-//	return true;
-// }
-//
-// bool MGtkListViewImpl::LVMGetDispInfo(WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)
-//{
-//	NMLVDISPINFO* plvdi = reinterpret_cast<NMLVDISPINFO*>(inLParam);
-//
-//
-//	return true;
-// }
-//
-//  MListViewImpl *MListViewImpl::Create(MListView *inListView)
-//  {
-//  	return new MGtkListViewImpl(inListView);
-//  }
 
 // --------------------------------------------------------------------
 
