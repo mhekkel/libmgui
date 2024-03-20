@@ -219,4 +219,3 @@ void MApplication::Pulse()
 	eIdle();
 	Preferences::SaveIfDirty();
 }
-

@@ -300,40 +300,6 @@ class MGtkRadiobuttonImpl : public MGtkControlImpl<MRadiobutton>
 	std::list<MRadiobutton *> mGroup;
 };
 
-class MGtkListHeaderImpl : public MGtkControlImpl<MListHeader>
-{
-  public:
-	MGtkListHeaderImpl(MListHeader *inListHeader);
-
-	virtual void CreateWidget();
-
-	virtual void AppendColumn(const std::string &inLabel, int inWidth);
-};
-
-class MGtkNotebookImpl : public MGtkControlImpl<MNotebook>
-{
-  public:
-	MGtkNotebookImpl(MNotebook *inControl);
-
-	virtual void CreateWidget();
-	virtual void AddedToWindow();
-	virtual void FrameResized();
-
-	virtual void AddPage(const std::string &inLabel, MView *inPage);
-
-	virtual void SelectPage(uint32_t inPage);
-	virtual uint32_t GetSelectedPage() const;
-
-  private:
-	struct MPage
-	{
-		std::string mTitle;
-		MView *mPage;
-	};
-
-	std::vector<MPage> mPages;
-};
-
 class MGtkColorSwatchImpl : public MGtkControlImpl<MColorSwatch>
 {
   public:
@@ -382,21 +348,6 @@ class MGtkListBoxImpl : public MGtkControlImpl<MListBox>
 	GtkListStore *mStore;
 	int32_t mNr;
 };
-
-// class MGtkListViewImpl : public MGtkControlImpl<MListView>
-// {
-//   public:
-// 	MGtkListViewImpl(MListView *inListView);
-
-// 	virtual void CreateWidget();
-// 	virtual void AddedToWindow();
-
-// 	virtual void AddItem(const std::string &inLabel);
-
-//   private:
-// 	std::vector<std::string> mItems;
-// 	GtkListStore *mStore;
-// };
 
 class MGtkBoxControlImpl : public MGtkControlImpl<MBoxControl>
 {

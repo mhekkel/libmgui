@@ -71,15 +71,9 @@ class MWindowImpl
 	virtual void SetWindowPosition(MRect inBounds, bool inTransition) = 0;
 	virtual void GetWindowPosition(MRect &outBounds) const = 0;
 
-	virtual void Invalidate(MRect inRect) = 0;
-	virtual void Validate(MRect inRect) = 0;
 	virtual void UpdateNow() = 0;
 
-	virtual void ScrollRect(MRect inRect, int32_t inDeltaH, int32_t inDeltaV) = 0;
-
-	virtual bool GetMouse(int32_t &outX, int32_t &outY, uint32_t &outModifiers) = 0;
 	virtual uint32_t GetModifiers() const = 0;
-	virtual bool WaitMouseMoved(int32_t inX, int32_t inY) = 0;
 
 	virtual void SetCursor(MCursor inCursor) = 0;
 	virtual void ObscureCursor() = 0;

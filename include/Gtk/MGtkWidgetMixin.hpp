@@ -300,7 +300,6 @@ class MGtkWidgetMixin
 	virtual void ReleaseFocus();
 	virtual bool IsFocus() const;
 
-	void GetMouse(int32_t &outX, int32_t &outY) const;
 	uint32_t GetModifiers() const;
 
 	void CreateIMContext();

@@ -40,14 +40,7 @@ class MWinWindowImpl : public MWindowImpl, public MWinProcMixin
 	virtual void SetWindowPosition(MRect inBounds, bool inTransition);
 	virtual void GetWindowPosition(MRect &outBounds) const;
 
-	virtual void Invalidate(MRect inRect);
-	virtual void Validate(MRect inRect);
 	virtual void UpdateNow();
-
-	virtual void ScrollRect(MRect inRect, int32_t inDeltaH, int32_t inDeltaV);
-
-	virtual bool GetMouse(int32_t &outX, int32_t &outY, uint32_t &outModifiers);
-	virtual bool WaitMouseMoved(int32_t inX, int32_t inY);
 
 	virtual uint32_t GetModifiers() const;
 
@@ -112,7 +105,6 @@ class MWinWindowImpl : public MWindowImpl, public MWinProcMixin
 	HWND mStatus;
 	int32_t mMinWidth, mMinHeight;
 	MMenu *mMenubar;
-	int32_t mLastGetMouseX, mLastGetMouseY;
 	MView *mMousedView;
 	uint32_t mClickCount;
 	std::chrono::system_clock::time_point mLastClickTime;

@@ -96,10 +96,7 @@ class MWindow : public MView, public MHandler
 	virtual void ResizeWindow(int32_t inWidthDelta, int32_t inHeightDelta);
 
 	void GetWindowPosition(MRect &outPosition);
-
 	void SetWindowPosition(const MRect &outPosition, bool inTransition = false);
-
-	void GetMaxPosition(MRect &outRect) const;
 
 	MWindowImpl *GetImpl() const { return mImpl; }
 
@@ -107,11 +104,7 @@ class MWindow : public MView, public MHandler
 	virtual void ConvertToScreen(int32_t &ioX, int32_t &ioY) const;
 	virtual void ConvertFromScreen(int32_t &ioX, int32_t &ioY) const;
 
-	virtual void GetMouse(int32_t &outX, int32_t &outY, uint32_t &outModifiers) const;
 	virtual uint32_t GetModifiers() const;
-
-	virtual void Invalidate(MRect inRect);
-	virtual void ScrollRect(MRect inRect, int32_t inX, int32_t inY);
 
 	virtual void SetCursor(MCursor inCursor);
 	virtual void ObscureCursor();

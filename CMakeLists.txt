@@ -49,7 +49,7 @@ if(WIN32)
 		add_definitions(-D _WIN32_WINNT=0x0501)
 	endif()
 
-	# Man, this is 2024 we're living in... 
+	# Man, this is 2024 we're living in...
 	add_definitions(-DNOMINMAX)
 
 	# We do not want to write an export file for all our symbols...
@@ -87,68 +87,51 @@ list(APPEND headers
 	include/Gtk/MGtkControlsImpl.hpp
 	include/Gtk/MGtkDeviceImpl.hpp
 	include/Gtk/MGtkLib.hpp
-	include/Gtk/MGtkList.hpp
 	include/Gtk/MGtkWidgetMixin.hpp
 	include/Gtk/MGtkWindowImpl.hpp
 	include/Gtk/MPrimary.hpp
 	include/Gtk/MGtkApplicationImpl.hpp
 
 	include/MAcceleratorTable.hpp
+	include/MAlerts.hpp
 	include/MAnimation.hpp
-	include/MTypes.hpp
 	include/MApplication.hpp
 	include/MApplicationImpl.hpp
-	include/mrsrc.hpp
 	include/MCanvas.hpp
 	include/MCanvasImpl.hpp
 	include/MClipboard.hpp
 	include/MClipboardImpl.hpp
+	include/MColor.hpp
 	include/MColorPicker.hpp
 	include/MCommands.hpp
-	include/MUnicode.hpp
-	include/MController.hpp
-	include/MView.hpp
-	include/MDevice.hpp
-	include/MDialog.hpp
-
-	# include/MDocApplication.hpp
-	# include/MDocClosedNotifier.hpp
-	# include/MDocWindow.hpp
-	include/MError.hpp
-
-	# include/MExploreBrowserView.hpp
-	include/MFile.hpp
-	# include/MGfxDevice.hpp
-	include/MLib.hpp
-	include/MWindowImpl.hpp
-
-	# include/MListViewImpl.hpp
-	include/MMenu.hpp
-	include/MP2PEvents.hpp
-	include/MPreferences.hpp
-	include/MPrinter.hpp
-	include/MSound.hpp
-	include/MStrings.hpp
-	include/MUnicodeTables.hpp
-	include/MUtils.hpp
-	include/MWindow.hpp
-
-	include/MHandler.hpp
-	include/MAlerts.hpp
-	include/MAnimationImpl.hpp
-	include/MColor.hpp
 	include/MControls.hpp
 	include/MControlsImpl.hpp
+	include/MDevice.hpp
 	include/MDeviceImpl.hpp
-	include/MDocument.hpp
-	include/MMenuImpl.hpp)
+	include/MDialog.hpp
+	include/MError.hpp
+	include/MFile.hpp
+	include/MHandler.hpp
+	include/MLib.hpp
+	include/MMenu.hpp
+	include/MMenuImpl.hpp
+	include/MP2PEvents.hpp
+	include/MPreferences.hpp
+	include/mrsrc.hpp
+	include/MSound.hpp
+	include/MStrings.hpp
+	include/MTypes.hpp
+	include/MUnicode.hpp
+	include/MUnicodeTables.hpp
+	include/MUtils.hpp
+	include/MView.hpp
+	include/MWindow.hpp
+	include/MWindowImpl.hpp
+)
 
 list(APPEND sources
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkAlerts.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkAnimationImpl.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkClipboardImpl.cpp
-
-	# ${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkDocClosedNotifier.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkError.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkFile.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkMenu.cpp
@@ -163,43 +146,29 @@ list(APPEND sources
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkApplicationImpl.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkMain.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkWindowImpl.cpp
+
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MAcceleratorTable.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MAlerts.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MAnimation.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/MMenu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MApplication.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MCanvas.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MClipboard.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MColor.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MColorPicker.cpp
-
-	# ${CMAKE_CURRENT_SOURCE_DIR}/src/MFile.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MControls.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MDevice.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MDialog.cpp
-
-	# ${CMAKE_CURRENT_SOURCE_DIR}/src/MDocApplication.cpp
-	# ${CMAKE_CURRENT_SOURCE_DIR}/src/MDocClosedNotifier.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/MWindow.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MError.cpp
-	# ${CMAKE_CURRENT_SOURCE_DIR}/src/MGfxDevice.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/MApplication.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MHandler.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MLib.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MMenu.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MPreferences.cpp
-
-	# ${CMAKE_CURRENT_SOURCE_DIR}/src/MPrinter.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MStrings.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MTypes.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MUnicode.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MUtils.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MView.cpp
-
-	${CMAKE_CURRENT_SOURCE_DIR}/src/MHandler.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/MAlerts.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/MAnimationImpl.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/MColor.cpp
-
-	# ${CMAKE_CURRENT_SOURCE_DIR}/src/MController.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/MControls.cpp
-
-	# ${CMAKE_CURRENT_SOURCE_DIR}/src/MDocWindow.cpp
-	# ${CMAKE_CURRENT_SOURCE_DIR}/src/MDocument.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MWindow.cpp
 )
 
 add_library(mgui STATIC)
@@ -225,7 +194,6 @@ if(UNIX)
 
 	target_link_libraries(mgui PkgConfig::GTK3)
 endif()
-
 
 # install(TARGETS salt
 # RUNTIME DESTINATION ${BIN_INSTALL_DIR}

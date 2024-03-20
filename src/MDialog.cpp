@@ -298,8 +298,6 @@ void MDialog::SetValue(const std::string &inID, int32_t inValue)
 	THROW_IF_NIL(view);
 	if (dynamic_cast<MPopup *>(view) != nullptr)
 		static_cast<MPopup *>(view)->SetValue(inValue);
-	else if (dynamic_cast<MNotebook *>(view) != nullptr)
-		static_cast<MNotebook *>(view)->SelectPage(inValue);
 }
 
 bool MDialog::IsChecked(const string &inID) const

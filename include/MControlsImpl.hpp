@@ -287,37 +287,6 @@ class MRadiobuttonImpl : public MControlImpl<MRadiobutton>
 	Create(MRadiobutton *inRadiobutton, const std::string &inTitle);
 };
 
-class MListHeaderImpl : public MControlImpl<MListHeader>
-{
-  public:
-	MListHeaderImpl(MListHeader *inListHeader)
-		: MControlImpl<MListHeader>(inListHeader)
-	{
-	}
-
-	virtual void AppendColumn(const std::string &inLabel, int inWidth) = 0;
-
-	static MListHeaderImpl *
-	Create(MListHeader *inListHeader);
-};
-
-class MNotebookImpl : public MControlImpl<MNotebook>
-{
-  public:
-	MNotebookImpl(MNotebook *inNotebook)
-		: MControlImpl<MNotebook>(inNotebook)
-	{
-	}
-
-	virtual void AddPage(const std::string &inLabel, MView *inPage) = 0;
-
-	virtual void SelectPage(uint32_t inPage) = 0;
-	virtual uint32_t GetSelectedPage() const = 0;
-
-	static MNotebookImpl *
-	Create(MNotebook *inNotebook);
-};
-
 class MColorSwatchImpl : public MControlImpl<MColorSwatch>
 {
   public:

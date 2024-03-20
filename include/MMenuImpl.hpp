@@ -36,7 +36,7 @@ class MMenuImpl
 	{
 	}
 
-	virtual ~MMenuImpl() {}
+	virtual ~MMenuImpl() = default;
 
 	virtual void SetTarget(MHandler *inHandler) = 0;
 

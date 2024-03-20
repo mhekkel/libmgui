@@ -9,21 +9,20 @@
 
 #include "zeep/xml/document.hpp"
 
-
-#include "MWinWindowImpl.hpp"
-#include "MWindow.hpp"
-#include "MError.hpp"
-#include "MWinApplicationImpl.hpp"
-#include "MWinControlsImpl.hpp"
-#include "MUtils.hpp"
-#include "MWinUtils.hpp"
-#include "MWinMenuImpl.hpp"
-#include "MDevice.hpp"
-#include "mrsrc.hpp"
 #include "MAcceleratorTable.hpp"
 #include "MControls.hpp"
+#include "MDevice.hpp"
 #include "MDialog.hpp"
+#include "MError.hpp"
 #include "MStrings.hpp"
+#include "MUtils.hpp"
+#include "MWinApplicationImpl.hpp"
+#include "MWinControlsImpl.hpp"
+#include "MWinMenuImpl.hpp"
+#include "MWinUtils.hpp"
+#include "MWinWindowImpl.hpp"
+#include "MWindow.hpp"
+#include "mrsrc.hpp"
 
 using namespace std;
 using namespace zeep;
@@ -31,61 +30,57 @@ using namespace zeep;
 class MWinDialogImpl : public MWinWindowImpl
 {
   public:
-					MWinDialogImpl(const string& inResource, MWindow* inWindow);
-	virtual			~MWinDialogImpl();
+	MWinDialogImpl(const string &inResource, MWindow *inWindow);
+	virtual ~MWinDialogImpl();
 
-	virtual void	Finish();
+	virtual void Finish();
 
-	virtual bool	IsDialogMessage(MSG& inMesssage);
+	virtual bool IsDialogMessage(MSG &inMesssage);
 
-private:
+  private:
+	virtual void CreateParams(DWORD &outStyle, DWORD &outExStyle, wstring &outClassName, HMENU &outMenu);
+	virtual void RegisterParams(UINT &outStyle, int &outWndExtra, HCURSOR &outCursor, HICON &outIcon, HICON &outSmallIcon, HBRUSH &outBackground);
 
-	virtual void	CreateParams(DWORD& outStyle, DWORD& outExStyle, wstring& outClassName, HMENU& outMenu);
-	virtual void	RegisterParams(UINT& outStyle, int& outWndExtra, HCURSOR& outCursor, HICON& outIcon, HICON& outSmallIcon, HBRUSH& outBackground);
+	void GetMargins(xml::element *inTemplate,
+		int32_t &outLeftMargin, int32_t &outTopMargin,
+		int32_t &outRightMargin, int32_t &outBottomMargin);
 
-	void			GetMargins(xml::element* inTemplate,
-						int32_t& outLeftMargin, int32_t& outTopMargin,
-						int32_t& outRightMargin, int32_t& outBottomMargin);
+	MView *CreateControls(xml::element *inTemplate, int32_t inX, int32_t inY);
 
-	MView*			CreateControls(xml::element* inTemplate, int32_t inX, int32_t inY);
+	MView *CreateButton(xml::element *inTemplate, int32_t inX, int32_t inY);
+	MView *CreateColorSwatch(xml::element *inTemplate, int32_t inX, int32_t inY);
+	MView *CreateCaption(xml::element *inTemplate, int32_t inX, int32_t inY);
+	MView *CreateCheckbox(xml::element *inTemplate, int32_t inX, int32_t inY);
+	MView *CreateRadiobutton(xml::element *inTemplate, int32_t inX, int32_t inY);
+	MView *CreateExpander(xml::element *inTemplate, int32_t inX, int32_t inY);
+	MView *CreateCombobox(xml::element *inTemplate, int32_t inX, int32_t inY);
+	MView *CreateEdittext(xml::element *inTemplate, int32_t inX, int32_t inY);
+	MView *CreatePopup(xml::element *inTemplate, int32_t inX, int32_t inY);
+	MView *CreateScrollbar(xml::element *inTemplate, int32_t inX, int32_t inY);
+	MView *CreateSeparator(xml::element *inTemplate, int32_t inX, int32_t inY);
+	MView *CreateVBox(xml::element *inTemplate, int32_t inX, int32_t inY);
+	MView *CreateHBox(xml::element *inTemplate, int32_t inX, int32_t inY);
+	MView *CreateTable(xml::element *inTemplate, int32_t inX, int32_t inY);
+	MView *CreatePager(xml::element *inTemplate, int32_t inX, int32_t inY);
+	MView *CreateListBox(xml::element *inTemplate, int32_t inX, int32_t inY);
 
-	MView*			CreateButton(xml::element* inTemplate, int32_t inX, int32_t inY);
-	MView*			CreateColorSwatch(xml::element* inTemplate, int32_t inX, int32_t inY);
-	MView*			CreateCaption(xml::element* inTemplate, int32_t inX, int32_t inY);
-	MView*			CreateCheckbox(xml::element* inTemplate, int32_t inX, int32_t inY);
-	MView*			CreateRadiobutton(xml::element* inTemplate, int32_t inX, int32_t inY);
-	MView*			CreateExpander(xml::element* inTemplate, int32_t inX, int32_t inY);
-	MView*			CreateCombobox(xml::element* inTemplate, int32_t inX, int32_t inY);
-	MView*			CreateEdittext(xml::element* inTemplate, int32_t inX, int32_t inY);
-	MView*			CreatePopup(xml::element* inTemplate, int32_t inX, int32_t inY);
-	MView*			CreateScrollbar(xml::element* inTemplate, int32_t inX, int32_t inY);
-	MView*			CreateSeparator(xml::element* inTemplate, int32_t inX, int32_t inY);
-	MView*			CreateVBox(xml::element* inTemplate, int32_t inX, int32_t inY);
-	MView*			CreateHBox(xml::element* inTemplate, int32_t inX, int32_t inY);
-	MView*			CreateTable(xml::element* inTemplate, int32_t inX, int32_t inY);
-	MView*			CreateNotebook(xml::element* inTemplate, int32_t inX, int32_t inY);
-	MView*			CreatePager(xml::element* inTemplate, int32_t inX, int32_t inY);
-	MView*			CreateListBox(xml::element* inTemplate, int32_t inX, int32_t inY);
-	MView*			CreateListView(xml::element* inTemplate, int32_t inX, int32_t inY);
-//	MView*			CreateTable(xml::element* inTemplate, int32_t inX, int32_t inY);
+	uint32_t GetTextWidth(const string &inText,
+		const wchar_t *inClass, int inPartID, int inStateID);
 
-	uint32_t			GetTextWidth(const string& inText,
-						const wchar_t* inClass, int inPartID, int inStateID);
+	string l(const string &s) { return GetLocalisedStringForContext(mRsrc, s); }
 
-	string			l(const string& s)					{ return GetLocalisedStringForContext(mRsrc, s); }
+	string mRsrc;
+	HDC mDC;
+	float mDLUX, mDLUY;
+	MButton *mOKButton;
+	MButton *mCancelButton;
 
-	string			mRsrc;
-	HDC				mDC;
-	float			mDLUX, mDLUY;
-	MButton*		mOKButton;
-	MButton*		mCancelButton;
-	
 	// TODO: improve this (separate radio groups)
-	list<MRadiobutton*>
-					mRadioGroup;
+	list<MRadiobutton *>
+		mRadioGroup;
 };
 
-MWinDialogImpl::MWinDialogImpl(const string& inResource, MWindow* inWindow)
+MWinDialogImpl::MWinDialogImpl(const string &inResource, MWindow *inWindow)
 	: MWinWindowImpl(MWindowFlags(0), "", inWindow)
 	, mRsrc(inResource)
 	, mDC(nullptr)
@@ -101,8 +96,8 @@ MWinDialogImpl::~MWinDialogImpl()
 	::ReleaseDC(GetHandle(), mDC);
 }
 
-void MWinDialogImpl::CreateParams(DWORD& outStyle,
-	DWORD& outExStyle, wstring& outClassName, HMENU& outMenu)
+void MWinDialogImpl::CreateParams(DWORD &outStyle,
+	DWORD &outExStyle, wstring &outClassName, HMENU &outMenu)
 {
 	MWinWindowImpl::CreateParams(outStyle, outExStyle, outClassName, outMenu);
 
@@ -115,46 +110,46 @@ void MWinDialogImpl::CreateParams(DWORD& outStyle,
 	outMenu = nullptr;
 }
 
-void MWinDialogImpl::RegisterParams(UINT& outStyle, int& outWndExtra, HCURSOR& outCursor,
-	HICON& outIcon, HICON& outSmallIcon, HBRUSH& outBackground)
+void MWinDialogImpl::RegisterParams(UINT &outStyle, int &outWndExtra, HCURSOR &outCursor,
+	HICON &outIcon, HICON &outSmallIcon, HBRUSH &outBackground)
 {
 	MWinWindowImpl::RegisterParams(outStyle, outWndExtra,
 		outCursor, outIcon, outSmallIcon, outBackground);
-	
+
 	HINSTANCE inst = MWinApplicationImpl::GetInstance()->GetHInstance();
-	
+
 	outStyle = 0;
 	outWndExtra = DLGWINDOWEXTRA;
-	//outIcon = ::LoadIcon(inst, MAKEINTRESOURCE(ID_DEF_DOC_ICON));
-	//outSmallIcon = ::LoadIcon(inst, MAKEINTRESOURCE(ID_DEF_DOC_ICON));
+	// outIcon = ::LoadIcon(inst, MAKEINTRESOURCE(ID_DEF_DOC_ICON));
+	// outSmallIcon = ::LoadIcon(inst, MAKEINTRESOURCE(ID_DEF_DOC_ICON));
 	outCursor = ::LoadCursor(NULL, IDC_ARROW);
 	outBackground = (HBRUSH)(COLOR_BTNFACE + 1);
 }
 
-bool MWinDialogImpl::IsDialogMessage(MSG& inMessage)
+bool MWinDialogImpl::IsDialogMessage(MSG &inMessage)
 {
 	bool result = false;
-	
+
 	if (inMessage.message == WM_KEYDOWN and GetHandle() == ::GetForegroundWindow())
 	{
 		result = true;
 
 		switch (inMessage.wParam)
 		{
-//			case VK_TAB:
-//			case VK_SPACE:
-//				break;
-			
+				//			case VK_TAB:
+				//			case VK_SPACE:
+				//				break;
+
 			case VK_ESCAPE:
 				if (mCancelButton != nullptr)
 					mCancelButton->SimulateClick();
 				else
 					mWindow->Close();
 				break;
-			
+
 			case VK_RETURN:
 			{
-				MEdittext* edit = dynamic_cast<MEdittext*>(GetFocus());
+				MEdittext *edit = dynamic_cast<MEdittext *>(GetFocus());
 				if (mOKButton != nullptr and (edit == nullptr or (edit->GetFlags() & eMEditTextMultiLine) == 0))
 					mOKButton->SimulateClick();
 				else
@@ -173,8 +168,8 @@ bool MWinDialogImpl::IsDialogMessage(MSG& inMessage)
 			}
 		}
 	}
-		
-	return result;	
+
+	return result;
 }
 
 void MWinDialogImpl::Finish()
@@ -184,10 +179,10 @@ void MWinDialogImpl::Finish()
 	mrsrc::rsrc rsrc("Dialogs/"s) + mRsrc + ".xml");
 	xml::document doc(rsrc);
 
-	xml::element* dialog = doc.find_first("/dialog");
+	xml::element *dialog = doc.find_first("/dialog");
 	if (dialog == nullptr)
 		THROW(("Invalid dialog resource"));
-	
+
 	wstring title = c2w(l(dialog->get_attribute("title")));
 
 	mFlags = kMFixedSize;
@@ -220,7 +215,7 @@ void MWinDialogImpl::Finish()
 		::GetThemeTextMetrics(hTheme, mDC, TEXT_BODYTEXT, TS_CONTROLLABEL_NORMAL, &tm);
 
 		RECT r;
-		THROW_IF_HRESULT_ERROR(::GetThemeTextExtent(hTheme, mDC, TEXT_BODYTEXT, TS_CONTROLLABEL_NORMAL, 
+		THROW_IF_HRESULT_ERROR(::GetThemeTextExtent(hTheme, mDC, TEXT_BODYTEXT, TS_CONTROLLABEL_NORMAL,
 			L"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", 52, 0, nullptr, &r));
 
 		mDLUY = tm.tmHeight / 8.0f;
@@ -241,28 +236,32 @@ void MWinDialogImpl::Finish()
 	}
 
 	// create the dialog controls, all stacked on top of each other
-	MView* content = CreateControls(dialog, 0, 0);
+	MView *content = CreateControls(dialog, 0, 0);
 	content->SetBindings(true, true, true, true);
 
-	for (MRadiobutton* radiobutton : mRadioGroup)
+	for (MRadiobutton *radiobutton : mRadioGroup)
 		radiobutton->SetGroup(mRadioGroup);
 
 	RECT cr;
 	::GetClientRect(GetHandle(), &cr);
 
 	// final update
-	//content->CalculateFrame(bounds);
+	// content->CalculateFrame(bounds);
 	content->GetFrame(bounds);
 
-	int32_t dw = bounds.width - (cr.right - cr.left);		if (dw < 0) dw = 0;
-	int32_t dh = bounds.height - (cr.bottom - cr.top);	if (dh < 0) dh = 0;
+	int32_t dw = bounds.width - (cr.right - cr.left);
+	if (dw < 0)
+		dw = 0;
+	int32_t dh = bounds.height - (cr.bottom - cr.top);
+	if (dh < 0)
+		dh = 0;
 
 	if (dw > 0 or dh > 0)
 	{
 		MRect p;
 		mWindow->GetWindowPosition(p);
-//		p.x -= dw / 2;
-//		p.y -= dh / 2;
+		//		p.x -= dw / 2;
+		//		p.y -= dh / 2;
 		p.width += dw;
 		p.height += dh;
 		mWindow->SetWindowPosition(p);
@@ -271,19 +270,19 @@ void MWinDialogImpl::Finish()
 	mWindow->AddChild(content);
 }
 
-void MWinDialogImpl::GetMargins(xml::element* inTemplate,
-	int32_t& outLeftMargin, int32_t& outTopMargin,
-	int32_t& outRightMargin, int32_t& outBottomMargin)
+void MWinDialogImpl::GetMargins(xml::element *inTemplate,
+	int32_t &outLeftMargin, int32_t &outTopMargin,
+	int32_t &outRightMargin, int32_t &outBottomMargin)
 {
 	outLeftMargin = outTopMargin = outRightMargin = outBottomMargin = 0;
-	
+
 	if (inTemplate->name() == "dialog" or inTemplate->name() == "notebook")
 		outLeftMargin = outTopMargin = outRightMargin = outBottomMargin = 7;
-	
+
 	string m = inTemplate->get_attribute("margin");
 	if (not m.empty())
 		outLeftMargin = outRightMargin =
-		outTopMargin = outBottomMargin = std::stoi(m);
+			outTopMargin = outBottomMargin = std::stoi(m);
 
 	m = inTemplate->get_attribute("margin-left-right");
 	if (not m.empty())
@@ -315,23 +314,23 @@ void MWinDialogImpl::GetMargins(xml::element* inTemplate,
 	outBottomMargin = static_cast<int32_t>(outBottomMargin * mDLUY);
 }
 
-MView* MWinDialogImpl::CreateButton(xml::element* inTemplate, int32_t inX, int32_t inY)
+MView *MWinDialogImpl::CreateButton(xml::element *inTemplate, int32_t inX, int32_t inY)
 {
 	string id = inTemplate->get_attribute("id");
 	string title = l(inTemplate->get_attribute("title"));
-	
+
 	float idealWidth = GetTextWidth(title, VSCLASS_BUTTON, BP_PUSHBUTTON, PBS_NORMAL) + 10 * mDLUX;
 	if (idealWidth < 50 * mDLUX)
 		idealWidth = 50 * mDLUX;
 	MRect bounds(inX, inY, static_cast<int32_t>(idealWidth), static_cast<int32_t>(14 * mDLUY));
 
 	MButtonFlags flags = eBF_None;
-	
+
 	if (inTemplate->get_attribute("split") == "true")
 		flags = eBF_Split;
 
-	MButton* button = new MButton(id, bounds, title, flags);
-	
+	MButton *button = new MButton(id, bounds, title, flags);
+
 	if (inTemplate->get_attribute("default") == "true")
 	{
 		button->MakeDefault(true);
@@ -340,46 +339,46 @@ MView* MWinDialogImpl::CreateButton(xml::element* inTemplate, int32_t inX, int32
 
 	if (id == "ok" and mOKButton == nullptr)
 		mOKButton = button;
-	
+
 	if (id == "cancel")
 		mCancelButton = button;
 
-	AddRoute(button->eClicked, static_cast<MDialog*>(mWindow)->eButtonClicked);
+	AddRoute(button->eClicked, static_cast<MDialog *>(mWindow)->eButtonClicked);
 
 	return button;
 }
 
-MView* MWinDialogImpl::CreateColorSwatch(xml::element* inTemplate, int32_t inX, int32_t inY)
+MView *MWinDialogImpl::CreateColorSwatch(xml::element *inTemplate, int32_t inX, int32_t inY)
 {
 	string id = inTemplate->get_attribute("id");
-	
+
 	MRect bounds(inX, inY, static_cast<int32_t>(25 * mDLUX), static_cast<int32_t>(14 * mDLUY));
 
 	MColor color(inTemplate->get_attribute("color").c_str());
-	MColorSwatch* swatch = new MColorSwatch(id, bounds, color);
-	
-	AddRoute(swatch->eColorChanged, static_cast<MDialog*>(mWindow)->eColorChanged);
+	MColorSwatch *swatch = new MColorSwatch(id, bounds, color);
+
+	AddRoute(swatch->eColorChanged, static_cast<MDialog *>(mWindow)->eColorChanged);
 
 	return swatch;
 }
 
-MView* MWinDialogImpl::CreateExpander(xml::element* inTemplate, int32_t inX, int32_t inY)
+MView *MWinDialogImpl::CreateExpander(xml::element *inTemplate, int32_t inX, int32_t inY)
 {
 	string id = inTemplate->get_attribute("id");
 	string title = l(inTemplate->get_attribute("title"));
-	
+
 	MRect bounds(inX, inY,
 		static_cast<int32_t>((13 + 3) * mDLUX) +
 			GetTextWidth(title, VSCLASS_TEXTSTYLE, TEXT_LABEL, 0),
 		static_cast<int32_t>(12 * mDLUY));
 
-	MExpander* expander = new MExpander(id, bounds, title);
-	AddRoute(expander->eClicked, static_cast<MDialog*>(mWindow)->eButtonClicked);
+	MExpander *expander = new MExpander(id, bounds, title);
+	AddRoute(expander->eClicked, static_cast<MDialog *>(mWindow)->eButtonClicked);
 
 	return expander;
 }
 
-MView* MWinDialogImpl::CreateCaption(xml::element* inTemplate, int32_t inX, int32_t inY)
+MView *MWinDialogImpl::CreateCaption(xml::element *inTemplate, int32_t inX, int32_t inY)
 {
 	string id = inTemplate->get_attribute("id");
 	if (id.empty())
@@ -391,55 +390,55 @@ MView* MWinDialogImpl::CreateCaption(xml::element* inTemplate, int32_t inX, int3
 	return new MCaption(id, bounds, text);
 }
 
-MView* MWinDialogImpl::CreateCheckbox(xml::element* inTemplate, int32_t inX, int32_t inY)
+MView *MWinDialogImpl::CreateCheckbox(xml::element *inTemplate, int32_t inX, int32_t inY)
 {
 	string id = inTemplate->get_attribute("id");
 	string title = l(inTemplate->get_attribute("title"));
 
 	MRect bounds(inX, inY, 0, static_cast<int32_t>(10 * mDLUY));
 	bounds.width = static_cast<int32_t>(14 * mDLUX) +
-		GetTextWidth(title, VSCLASS_TEXTSTYLE, TEXT_BODYTEXT, 0);
-		//GetTextWidth(title, VSCLASS_BUTTON, BP_CHECKBOX, PBS_NORMAL);
+	               GetTextWidth(title, VSCLASS_TEXTSTYLE, TEXT_BODYTEXT, 0);
+	// GetTextWidth(title, VSCLASS_BUTTON, BP_CHECKBOX, PBS_NORMAL);
 
-	MCheckbox* checkbox = new MCheckbox(id, bounds, title);
+	MCheckbox *checkbox = new MCheckbox(id, bounds, title);
 	AddRoute(checkbox->eValueChanged,
-		static_cast<MDialog*>(mWindow)->eCheckboxClicked);
+		static_cast<MDialog *>(mWindow)->eCheckboxClicked);
 	return checkbox;
 }
 
-MView* MWinDialogImpl::CreateRadiobutton(xml::element* inTemplate, int32_t inX, int32_t inY)
+MView *MWinDialogImpl::CreateRadiobutton(xml::element *inTemplate, int32_t inX, int32_t inY)
 {
 	string id = inTemplate->get_attribute("id");
 	string title = l(inTemplate->get_attribute("title"));
 
 	MRect bounds(inX, inY, 0, static_cast<int32_t>(10 * mDLUY));
 	bounds.width = static_cast<int32_t>(14 * mDLUX) +
-		GetTextWidth(title, VSCLASS_TEXTSTYLE, TEXT_BODYTEXT, 0);
-//		GetTextWidth(title, VSCLASS_BUTTON, BP_RADIOBUTTON, PBS_NORMAL);
-	MRadiobutton* radiobutton = new MRadiobutton(id, bounds, title);
+	               GetTextWidth(title, VSCLASS_TEXTSTYLE, TEXT_BODYTEXT, 0);
+	//		GetTextWidth(title, VSCLASS_BUTTON, BP_RADIOBUTTON, PBS_NORMAL);
+	MRadiobutton *radiobutton = new MRadiobutton(id, bounds, title);
 	AddRoute(radiobutton->eValueChanged,
-		static_cast<MDialog*>(mWindow)->eRadiobuttonClicked);
+		static_cast<MDialog *>(mWindow)->eRadiobuttonClicked);
 
 	mRadioGroup.push_back(radiobutton);
 
 	return radiobutton;
 }
 
-MView* MWinDialogImpl::CreateCombobox(xml::element* inTemplate, int32_t inX, int32_t inY)
+MView *MWinDialogImpl::CreateCombobox(xml::element *inTemplate, int32_t inX, int32_t inY)
 {
 	string id = inTemplate->get_attribute("id");
 
 	MRect bounds(inX, inY, static_cast<int32_t>(50 * mDLUX), static_cast<int32_t>(14 * mDLUY));
-	MCombobox* combobox = new MCombobox(id, bounds);
+	MCombobox *combobox = new MCombobox(id, bounds);
 	AddRoute(combobox->eValueChanged,
-		static_cast<MDialog*>(mWindow)->eTextChanged);
+		static_cast<MDialog *>(mWindow)->eTextChanged);
 	return combobox;
 }
 
-MView* MWinDialogImpl::CreateEdittext(xml::element* inTemplate, int32_t inX, int32_t inY)
+MView *MWinDialogImpl::CreateEdittext(xml::element *inTemplate, int32_t inX, int32_t inY)
 {
 	string id = inTemplate->get_attribute("id");
-	
+
 	uint32_t flags = eMEditTextNoFlags;
 	if (ba::contains(inTemplate->get_attribute("style"), "right"))
 		flags |= eMEditTextAlignRight;
@@ -451,20 +450,20 @@ MView* MWinDialogImpl::CreateEdittext(xml::element* inTemplate, int32_t inX, int
 		flags |= eMEditTextReadOnly;
 
 	MRect bounds(inX, inY, static_cast<int32_t>(5 * mDLUX), static_cast<int32_t>(14 * mDLUY));
-	MEdittext* edittext = new MEdittext(id, bounds, flags);
+	MEdittext *edittext = new MEdittext(id, bounds, flags);
 	AddRoute(edittext->eValueChanged,
-		static_cast<MDialog*>(mWindow)->eTextChanged);
+		static_cast<MDialog *>(mWindow)->eTextChanged);
 	return edittext;
 }
 
-MView* MWinDialogImpl::CreatePopup(xml::element* inTemplate, int32_t inX, int32_t inY)
+MView *MWinDialogImpl::CreatePopup(xml::element *inTemplate, int32_t inX, int32_t inY)
 {
 	string id = inTemplate->get_attribute("id");
 
 	MRect bounds(inX, inY, 0, static_cast<int32_t>(14 * mDLUY));
-	
+
 	vector<string> choices;
-	for (xml::element* option: inTemplate->find("./option"))
+	for (xml::element *option : inTemplate->find("./option"))
 	{
 		string label = option->content();
 		int32_t width = GetTextWidth(label, VSCLASS_COMBOBOX, CP_DROPDOWNBUTTON, CBXSL_NORMAL);
@@ -475,86 +474,32 @@ MView* MWinDialogImpl::CreatePopup(xml::element* inTemplate, int32_t inX, int32_
 
 	bounds.width += static_cast<int32_t>(14 * mDLUX);
 
-	MPopup* popup = new MPopup(id, bounds);
+	MPopup *popup = new MPopup(id, bounds);
 
 	popup->SetChoices(choices);
 	AddRoute(popup->eValueChanged,
-		static_cast<MDialog*>(mWindow)->eValueChanged);
+		static_cast<MDialog *>(mWindow)->eValueChanged);
 
 	return popup;
 }
 
-MView* MWinDialogImpl::CreateNotebook(xml::element* inTemplate, int32_t inX, int32_t inY)
+MView *MWinDialogImpl::CreatePager(xml::element *inTemplate, int32_t inX, int32_t inY)
 {
 	string id = inTemplate->get_attribute("id");
 
 	MRect r(inX, inY, 0, 0);
-	MNotebook* result = new MNotebook(id, r);
-	
+	MPager *result = new MPager(id, r);
+
 	MRect b;
-	
-	for (xml::element* page: inTemplate->find("./page"))
+
+	for (xml::element *page : inTemplate->find("./page"))
 	{
-		string title = l(page->get_attribute("title"));
-		
-		MView* control = CreateControls(page, 0, 0);
-		control->SetBindings(true, true, true, true);
-		result->AddPage(title, control);
-		
-		control->RecalculateLayout();
-		
-		MRect f;
-		control->GetFrame(f);
-		b |= f;
-	}
-
-	// calculate a new width/height for our tab control
-	HTHEME hTheme = ::OpenThemeData(GetHandle(), VSCLASS_TAB);
-	if (hTheme != nullptr)
-	{
-		RECT r = { 0, 0, b.width, b.height };
-
-		RECT extend;
-		::GetThemeBackgroundContentRect(hTheme, mDC, TABP_PANE, 0, &r, &extend);
-
-//		h += h - (extend.bottom - extend.top);
-//		w += w - (extend.right - extend.left);
-
-		SIZE size;
-		::GetThemePartSize(hTheme, mDC, TABP_TABITEM, TTIS_NORMAL, &extend, TS_TRUE, &size);
-
-		::CloseThemeData(hTheme);
-
-		//h += size.cy;
-		//w += size.cx;
-	}
-
-	r.width = b.width;
-	r.height = b.height;
-
-	result->SetFrame(r);
-	result->SelectPage(0);
-	
-	return result;
-}
-
-MView* MWinDialogImpl::CreatePager(xml::element* inTemplate, int32_t inX, int32_t inY)
-{
-	string id = inTemplate->get_attribute("id");
-
-	MRect r(inX, inY, 0, 0);
-	MPager* result = new MPager(id, r);
-	
-	MRect b;
-	
-	for (xml::element* page: inTemplate->find("./page"))
-	{
-		MView* control = CreateControls(page, 0, 0);
+		MView *control = CreateControls(page, 0, 0);
 		control->SetBindings(true, true, true, true);
 		result->AddPage(control);
-		
+
 		control->RecalculateLayout();
-		
+
 		MRect f;
 		control->GetFrame(f);
 		b |= f;
@@ -565,18 +510,18 @@ MView* MWinDialogImpl::CreatePager(xml::element* inTemplate, int32_t inX, int32_
 
 	result->SetFrame(r);
 	result->SelectPage(0);
-	
+
 	return result;
 }
 
-MView* MWinDialogImpl::CreateListBox(xml::element* inTemplate, int32_t inX, int32_t inY)
+MView *MWinDialogImpl::CreateListBox(xml::element *inTemplate, int32_t inX, int32_t inY)
 {
 	string id = inTemplate->get_attribute("id");
 
 	MRect r(inX, inY, 0, 0);
-	MListBox* result = new MListBox(id, r);
-	
-	for (xml::element* listitem: inTemplate->find("./listitem"))
+	MListBox *result = new MListBox(id, r);
+
+	for (xml::element *listitem : inTemplate->find("./listitem"))
 	{
 		string text = l(listitem->content());
 		int32_t textWidth = GetTextWidth(text, VSCLASS_LISTBOX, LBCP_ITEM, 0);
@@ -584,12 +529,12 @@ MView* MWinDialogImpl::CreateListBox(xml::element* inTemplate, int32_t inX, int3
 			r.width = textWidth;
 		result->AddItem(text);
 	}
-	
+
 	r.width += static_cast<int32_t>(mDLUX * 6);
 	result->SetFrame(r);
 
-	AddRoute(result->eValueChanged, static_cast<MDialog*>(mWindow)->eValueChanged);
-	
+	AddRoute(result->eValueChanged, static_cast<MDialog *>(mWindow)->eValueChanged);
+
 	return result;
 }
 
@@ -599,7 +544,7 @@ MView* MWinDialogImpl::CreateListBox(xml::element* inTemplate, int32_t inX, int3
 
 // 	MRect r(inX, inY, 0, 0);
 // 	MListView* result = new MListView(id, r);
-	
+
 // 	for (xml::element* listitem: inTemplate->find("./listitem"))
 // 	{
 // 		string text = l(listitem->content());
@@ -608,7 +553,7 @@ MView* MWinDialogImpl::CreateListBox(xml::element* inTemplate, int32_t inX, int3
 // 			r.width = textWidth;
 // 		result->AddItem(text);
 // 	}
-	
+
 // 	r.width += static_cast<int32_t>(mDLUX * 6);
 // 	result->SetFrame(r);
 
@@ -617,28 +562,28 @@ MView* MWinDialogImpl::CreateListBox(xml::element* inTemplate, int32_t inX, int3
 // 	return result;
 // }
 
-MView* MWinDialogImpl::CreateSeparator(xml::element* inTemplate, int32_t inX, int32_t inY)
+MView *MWinDialogImpl::CreateSeparator(xml::element *inTemplate, int32_t inX, int32_t inY)
 {
 	MRect bounds(inX, inY, 2, 2);
 	return new MSeparator("separator", bounds);
 }
 
-MView* MWinDialogImpl::CreateScrollbar(xml::element* inTemplate, int32_t inX, int32_t inY)
+MView *MWinDialogImpl::CreateScrollbar(xml::element *inTemplate, int32_t inX, int32_t inY)
 {
 	string id = inTemplate->get_attribute("id");
 	string orientation = inTemplate->get_attribute("orientation");
 
 	MRect bounds(inX, inY, kScrollbarWidth, kScrollbarWidth);
-	
+
 	if (orientation == "horizontal")
 		bounds.width *= 2;
 	else
 		bounds.height *= 2;
-	
+
 	return new MScrollbar(id, bounds);
 }
 
-MView* MWinDialogImpl::CreateVBox(xml::element* inTemplate, int32_t inX, int32_t inY)
+MView *MWinDialogImpl::CreateVBox(xml::element *inTemplate, int32_t inX, int32_t inY)
 {
 	string id = inTemplate->get_attribute("id");
 
@@ -646,16 +591,16 @@ MView* MWinDialogImpl::CreateVBox(xml::element* inTemplate, int32_t inX, int32_t
 	if (not inTemplate->get_attribute("spacing").empty())
 		spacing = std::stoul(inTemplate->get_attribute("spacing"));
 
-	MRect r{inX, inY, 0, 0};
-	MView* result = new MVBox(id, r, static_cast<int32_t>(spacing * mDLUY));
-	
-	for (auto &b: *inTemplate)
+	MRect r{ inX, inY, 0, 0 };
+	MView *result = new MVBox(id, r, static_cast<int32_t>(spacing * mDLUY));
+
+	for (auto &b : *inTemplate)
 		result->AddChild(CreateControls(&b, 0, 0));
-	
+
 	return result;
 }
 
-MView* MWinDialogImpl::CreateHBox(xml::element* inTemplate, int32_t inX, int32_t inY)
+MView *MWinDialogImpl::CreateHBox(xml::element *inTemplate, int32_t inX, int32_t inY)
 {
 	string id = inTemplate->get_attribute("id");
 
@@ -664,50 +609,50 @@ MView* MWinDialogImpl::CreateHBox(xml::element* inTemplate, int32_t inX, int32_t
 		spacing = std::stoul(inTemplate->get_attribute("spacing"));
 
 	MRect r(inX, inY, 0, 0);
-	MView* result = new MHBox(id, r, static_cast<int32_t>(spacing * mDLUX));
-	
-	for (auto &b: *inTemplate)
+	MView *result = new MHBox(id, r, static_cast<int32_t>(spacing * mDLUX));
+
+	for (auto &b : *inTemplate)
 		result->AddChild(CreateControls(&b, 0, 0));
-	
+
 	return result;
 }
 
-MView* MWinDialogImpl::CreateTable(xml::element* inTemplate, int32_t inX, int32_t inY)
+MView *MWinDialogImpl::CreateTable(xml::element *inTemplate, int32_t inX, int32_t inY)
 {
 	string id = inTemplate->get_attribute("id");
 
-	vector<MView*> views;
+	vector<MView *> views;
 	uint32_t colCount = 0, rowCount = 0;
-	
-	for (xml::element* row: inTemplate->find("./row"))
+
+	for (xml::element *row : inTemplate->find("./row"))
 	{
 		uint32_t cn = 0;
-		
-		for (xml::element* col: row->children<xml::element>())
+
+		for (xml::element *col : row->children<xml::element>())
 		{
 			++cn;
 			if (colCount < cn)
 				colCount = cn;
 			views.push_back(CreateControls(col, 0, 0));
 		}
-		
+
 		++rowCount;
 	}
 
 	// fix me!
 	while (views.size() < (rowCount * colCount))
 		views.push_back(nullptr);
-	
+
 	MRect r(inX, inY, 0, 0);
-	MTable* result = new MTable(id, r,
+	MTable *result = new MTable(id, r,
 		&views[0], colCount, rowCount, static_cast<int32_t>(4 * mDLUX), static_cast<int32_t>(4 * mDLUY));
-	
+
 	return result;
 }
 
-MView* MWinDialogImpl::CreateControls(xml::element* inTemplate, int32_t inX, int32_t inY)
+MView *MWinDialogImpl::CreateControls(xml::element *inTemplate, int32_t inX, int32_t inY)
 {
-	MView* result = nullptr;
+	MView *result = nullptr;
 
 	string name = inTemplate->name();
 
@@ -757,12 +702,12 @@ MView* MWinDialogImpl::CreateControls(xml::element* inTemplate, int32_t inX, int
 	if (not inTemplate->get_attribute("width").empty())
 	{
 		int32_t width = marginLeft + marginRight;
-		
+
 		if (inTemplate->get_attribute("width") == "scrollbarwidth")
 			width += kScrollbarWidth;
 		else
 			width += static_cast<int32_t>(std::stoi(inTemplate->get_attribute("width")) * mDLUX);
-		
+
 		MRect frame;
 		result->GetFrame(frame);
 		if (frame.width < width)
@@ -772,12 +717,12 @@ MView* MWinDialogImpl::CreateControls(xml::element* inTemplate, int32_t inX, int
 	if (not inTemplate->get_attribute("height").empty())
 	{
 		int32_t height = marginTop + marginBottom;
-		
+
 		if (inTemplate->get_attribute("height") == "scrollbarheight")
 			height += kScrollbarWidth;
 		else
 			height += static_cast<int32_t>(std::stoi(inTemplate->get_attribute("height")) * mDLUY);
-		
+
 		MRect frame;
 		result->GetFrame(frame);
 		if (frame.height < height)
@@ -794,12 +739,12 @@ MView* MWinDialogImpl::CreateControls(xml::element* inTemplate, int32_t inX, int
 	return result;
 }
 
-uint32_t MWinDialogImpl::GetTextWidth(const string& inText,
-	const wchar_t* inClass, int inPartID, int inStateID)
+uint32_t MWinDialogImpl::GetTextWidth(const string &inText,
+	const wchar_t *inClass, int inPartID, int inStateID)
 {
 	uint32_t result = 0;
 	wstring text(c2w(inText));
-	
+
 	HTHEME hTheme = ::OpenThemeData(GetHandle(), inClass);
 
 	if (hTheme != nullptr)
@@ -816,13 +761,13 @@ uint32_t MWinDialogImpl::GetTextWidth(const string& inText,
 		::GetTextExtentPoint32_t(mDC, text.c_str(), text.length(), &size);
 		result = size.cx;
 	}
-	
+
 	return result;
 }
 
 // --------------------------------------------------------------------
 
-MWindowImpl* MWindowImpl::CreateDialog(const string& inResource, MWindow* inWindow)
+MWindowImpl *MWindowImpl::CreateDialog(const string &inResource, MWindow *inWindow)
 {
 	return new MWinDialogImpl(inResource, inWindow);
 }

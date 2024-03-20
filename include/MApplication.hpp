@@ -67,6 +67,12 @@ class MApplication : public MHandler
 
 	MEventOut<void()> eIdle;
 
+	template <typename Handler>
+	void ExecuteAsync(Handler &&handler)
+	{
+		mImpl->execute(std::move(handler));
+	}
+
 	virtual int RunEventLoop();
 	virtual void Pulse();
 

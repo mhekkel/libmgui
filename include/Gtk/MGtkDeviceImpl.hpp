@@ -34,8 +34,6 @@
 #include <stack>
 
 // --------------------------------------------------------------------
-
-// --------------------------------------------------------------------
 // base class for MDeviceImp
 // provides only the basic Pango functionality
 // This is needed in measuring text metrics and such

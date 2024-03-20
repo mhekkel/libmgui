@@ -300,24 +300,9 @@ void MWindow::ConvertFromScreen(int32_t &ioX, int32_t &ioY) const
 	mImpl->ConvertFromScreen(ioX, ioY);
 }
 
-void MWindow::GetMouse(int32_t &outX, int32_t &outY, uint32_t &outModifiers) const
-{
-	mImpl->GetMouse(outX, outY, outModifiers);
-}
-
 uint32_t MWindow::GetModifiers() const
 {
 	return mImpl->GetModifiers();
-}
-
-void MWindow::Invalidate(MRect inRect)
-{
-	mImpl->Invalidate(inRect);
-}
-
-void MWindow::ScrollRect(MRect inRect, int32_t inX, int32_t inY)
-{
-	mImpl->ScrollRect(inRect, inX, inY);
 }
 
 void MWindow::SetCursor(MCursor inCursor)

@@ -294,51 +294,6 @@ void MRadiobutton::SetGroup(const std::list<MRadiobutton*>& inButtons)
 
 // --------------------------------------------------------------------
 
-MListHeader::MListHeader(const std::string& inID, MRect inBounds)
-	: MControl<MListHeaderImpl>(inID, inBounds, MListHeaderImpl::Create(this))
-{
-}
-
-void MListHeader::AppendColumn(const std::string& inLabel, int inWidth)
-{
-	mImpl->AppendColumn(inLabel, inWidth);
-}
-
-// --------------------------------------------------------------------
-
-MNotebook::MNotebook(const std::string& inID, MRect inBounds)
-	: MControl<MNotebookImpl>(inID, inBounds, MNotebookImpl::Create(this))
-{
-}
-
-void MNotebook::AddPage(const std::string& inLabel, MView* inPage)
-{
-	mImpl->AddPage(inLabel, inPage);
-//	
-//	MRect frame;
-//	inPage->GetFrame(frame);
-//	
-//	MRect bounds = mBounds;
-//	bounds |= frame;
-//	if (bounds != mBounds)
-//	{
-//		ResizeFrame(bounds.width - mBounds.width,
-//			bounds.height - mBounds.height);
-//	}
-}
-
-void MNotebook::SelectPage(uint32_t inPage)
-{
-	mImpl->SelectPage(inPage);
-}
-
-uint32_t MNotebook::GetSelectedPage() const
-{
-	return mImpl->GetSelectedPage();
-}
-
-// --------------------------------------------------------------------
-
 MColorSwatch::MColorSwatch(const std::string& inID, MRect inBounds, MColor inColor)
 	: MControl<MColorSwatchImpl>(inID, inBounds, MColorSwatchImpl::Create(this, inColor))
 {

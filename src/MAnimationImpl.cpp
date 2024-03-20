@@ -76,11 +76,18 @@ class MFallBackStoryboardImpl : public MStoryboardImpl
 
 	virtual void AddFinishedCallback(std::function<void()> cb)
 	{
+mFinishedCB = cb;
 	}
 
 	// inTime is relative to the start of the story
 	bool Update(std::chrono::system_clock::duration inTime);
 	bool Done(std::chrono::system_clock::duration inTime);
+
+	void Finish()
+	{
+		if (mFinishedCB)
+			mFinishedCB();
+	}
 
 	struct MTransition
 	{
@@ -97,6 +104,7 @@ class MFallBackStoryboardImpl : public MStoryboardImpl
 	};
 
 	std::list<MVariableStory> mVariableStories;
+std::function<void()> mFinishedCB;
 };
 
 void MFallBackStoryboardImpl::AddTransition(MAnimationVariable *inVariable,
@@ -197,6 +205,9 @@ class MFallBackAnimationManagerImpl : public MAnimationManagerImpl
 	virtual bool Update() { return false; }
 	virtual void Stop()
 	{
+if (mDone)
+			return;
+
 		try
 		{
 			std::unique_lock<std::mutex> lock(mMutex);
@@ -253,7 +264,7 @@ class MFallBackAnimationManagerImpl : public MAnimationManagerImpl
 	MAnimationManager *mAnimationManager;
 	std::list<MScheduledStoryboard> mStoryboards;
 	std::mutex mMutex;
-	std::condition_variable mCondition;
+	std::condition_variable mCondition, mIdleCondition;
 	bool mDone;
 	std::thread mThread;
 };
@@ -273,7 +284,7 @@ void MFallBackAnimationManagerImpl::Run()
 
 			if (mStoryboards.empty())
 			{
-				mCondition.wait(lock);
+				mCondition.wait_for(lock, 1s);
 				continue;
 			}
 
@@ -289,21 +300,8 @@ void MFallBackAnimationManagerImpl::Run()
 
 			if (update)
 			{
-				// gdk_threads_enter();
-				// try
-				// {
-				// 	mAnimationManager->eAnimate();
-				// }
-				// catch (const exception& e)
-				// {
-				// 	PRINT(("Exception: %s", e.what()));
-				// }
-				// catch (...)
-				// {
-				// 	PRINT(("Exception"));
-				// }
-
-				// gdk_threads_leave();
+				mIdleTag = gdk_threads_add_idle(&MGtkAnimationManagerImpl::IdleCallback, this);
+				mIdleCondition.wait(lock);
 			}
 
 			mStoryboards.erase(std::remove_if(mStoryboards.begin(), mStoryboards.end(),
@@ -322,7 +320,32 @@ void MFallBackAnimationManagerImpl::Run()
 	}
 }
 
-// // --------------------------------------------------------------------
+gboolean MGtkAnimationManagerImpl::IdleCallback(gpointer data)
+{
+	MGtkAnimationManagerImpl *self = reinterpret_cast<MGtkAnimationManagerImpl *>(data);
+
+	self->mIdleTag = 0;
+
+	try
+	{
+		std::unique_lock<std::mutex> lock(self->mMutex);
+		self->mAnimationManager->eAnimate();
+	}
+	catch (const std::exception &e)
+	{
+		PRINT(("Exception: %s", e.what()));
+	}
+	catch (...)
+	{
+		PRINT(("Exception"));
+	}
+
+	self->mIdleCondition.notify_one();
+
+	return false;
+}
+
+// --------------------------------------------------------------------
 
 // MAnimationManagerImpl* MAnimationManagerImpl::Create(MAnimationManager* inManager)
 // {

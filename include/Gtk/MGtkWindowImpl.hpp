@@ -67,14 +67,7 @@ class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin
 	virtual void SetWindowPosition(MRect inBounds, bool inTransition);
 	virtual void GetWindowPosition(MRect &outBounds) const;
 
-	virtual void Invalidate(MRect inRect);
-	virtual void Validate(MRect inRect);
 	virtual void UpdateNow();
-
-	virtual void ScrollRect(MRect inRect, int32_t inDeltaH, int32_t inDeltaV);
-
-	virtual bool GetMouse(int32_t &outX, int32_t &outY, uint32_t &outModifiers);
-	virtual bool WaitMouseMoved(int32_t inX, int32_t inY);
 
 	virtual void SetCursor(MCursor inCursor);
 	virtual void ObscureCursor();

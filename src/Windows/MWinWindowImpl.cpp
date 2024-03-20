@@ -464,86 +464,6 @@ void MWinWindowImpl::UpdateNow()
 	::UpdateWindow(GetHandle());
 }
 
-void MWinWindowImpl::ScrollRect(MRect inRect, int32_t inDeltaH, int32_t inDeltaV)
-{
-	RECT r = { inRect.x, inRect.y, inRect.x + inRect.width, inRect.y + inRect.height };
-//	::ScrollWindowEx(GetHandle(), inDeltaH, inDeltaV, &r, &r, nullptr, nullptr, SW_INVALIDATE);
-	::InvalidateRect(GetHandle(), &r, false);
-}
-	
-bool MWinWindowImpl::GetMouse(int32_t& outX, int32_t& outY, uint32_t& outModifiers)
-{
-	POINT lPoint;
-	::GetCursorPos(&lPoint);
-	::ScreenToClient(GetHandle(), &lPoint);
-
-	int button = VK_LBUTTON;
-	if (::GetSystemMetrics(SM_SWAPBUTTON))
-		button = VK_RBUTTON;
-
-	bool result = (::GetAsyncKeyState(button) & 0x8000) != 0;
-	
-	if (result and
-		mLastGetMouseX == lPoint.x and
-		mLastGetMouseY == lPoint.y)
-	{
-		::delay(0.02);
-		::GetCursorPos(&lPoint);
-		::ScreenToClient(GetHandle(), &lPoint);
-		
-		result = (::GetAsyncKeyState(button) & 0x8000) != 0;
-	}
-	
-	outX = lPoint.x;
-	outY = lPoint.y;
-	
-	mLastGetMouseX = lPoint.x;
-	mLastGetMouseY = lPoint.y;
-
-	::GetModifierState(outModifiers, true);
-
-	return result;
-}
-
-bool MWinWindowImpl::WaitMouseMoved(int32_t inX, int32_t inY)
-{
-	bool result = false;
-
-	if (mWindow->IsActive())
-	{
-		POINT w = { inX, inY };
-		result = ::DragDetect(GetHandle(), w) != 0;
-	}
-	else if (MWindow::GetFirstWindow() and MWindow::GetFirstWindow()->IsActive())
-	{
-		double test = std::chrono::system_clock::now() + 0.5;
-		
-		for (;;)
-		{
-			if (std::chrono::system_clock::now() > test)
-			{
-				result = true;
-				break;
-			}
-			
-			int32_t x, y;
-			uint32_t mod;
-			
-			if (not GetMouse(x, y, mod))
-				break;
-			
-			if (std::abs(x - inX) > 2 or
-				std::abs(y - inY) > 2)
-			{
-				result = true;
-				break;
-			}
-		}
-	}
-
-	return result;
-}
-
 uint32_t MWinWindowImpl::GetModifiers() const
 {
 	uint32_t modifiers = 0;
@@ -1131,30 +1051,30 @@ bool MWinWindowImpl::WMContextMenu(HWND /*inHWnd*/, UINT /*inUMsg*/, WPARAM /*in
 bool MWinWindowImpl::WMSetCursor(HWND /*inHWnd*/, UINT /*inUMsg*/, WPARAM /*inWParam*/, LPARAM /*inLParam*/, LRESULT& /*outResult*/)
 {
 	bool handled = false;
-	try
-	{
-		int32_t x, y;
-		uint32_t modifiers;
+	// try
+	// {
+	// 	int32_t x, y;
+	// 	uint32_t modifiers;
 		
-		GetMouse(x, y, modifiers);
+	// 	GetMouse(x, y, modifiers);
 		
-		MView* view;
-		//if (HNode::GetGrabbingNode())
-		//	node = HNode::GetGrabbingNode();
-		//else
-			view = mWindow->FindSubView(x, y);
+	// 	MView* view;
+	// 	//if (HNode::GetGrabbingNode())
+	// 	//	node = HNode::GetGrabbingNode();
+	// 	//else
+	// 		view = mWindow->FindSubView(x, y);
 
-			// if node == mWindow defproc should handle setcursor
-		if (view != nullptr and view != mWindow and view->IsActive())
-		{
-			view->ConvertFromWindow(x, y);
-			view->AdjustCursor(x, y, modifiers);
-			handled = true;
-		}
-	}
-	catch (...)
-	{
-	}
+	// 		// if node == mWindow defproc should handle setcursor
+	// 	if (view != nullptr and view != mWindow and view->IsActive())
+	// 	{
+	// 		view->ConvertFromWindow(x, y);
+	// 		view->AdjustCursor(x, y, modifiers);
+	// 		handled = true;
+	// 	}
+	// }
+	// catch (...)
+	// {
+	// }
 
 	return handled;
 }

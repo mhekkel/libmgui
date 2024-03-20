@@ -395,41 +395,6 @@ class MRadiobutton : public MControl<MRadiobuttonImpl>
 
 // --------------------------------------------------------------------
 
-class MListHeaderImpl;
-
-class MListHeader : public MControl<MListHeaderImpl>
-{
-  public:
-	typedef MListHeaderImpl MImpl;
-	MListHeader(const std::string &inID, MRect inBounds);
-
-	MEventOut<void(uint32_t, uint32_t)> eColumnResized;
-
-	void AppendColumn(const std::string &inLabel, int inWidth = -1);
-};
-
-// --------------------------------------------------------------------
-
-class MNotebookImpl;
-
-class MNotebook : public MControl<MNotebookImpl>
-{
-  public:
-	typedef MNotebookImpl MImpl;
-
-	MNotebook(const std::string &inID, MRect inBounds);
-
-	void AddPage(const std::string &inLabel, MView *inPage);
-
-	void SelectPage(uint32_t inPage);
-	uint32_t GetSelectedPage() const;
-
-	MEventOut<void(uint32_t)>
-		ePageSelected;
-};
-
-// --------------------------------------------------------------------
-
 class MColorSwatchImpl;
 
 class MColorSwatch : public MControl<MColorSwatchImpl>

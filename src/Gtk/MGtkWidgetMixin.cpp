@@ -556,22 +556,6 @@ void MGtkWidgetMixin::DragDeleteData()
 {
 }
 
-void MGtkWidgetMixin::GetMouse(int32_t &outX, int32_t &outY) const
-{
-	GdkModifierType modifiers;
-	// gdk_window_get_pointer(gtk_widget_get_window(mWidget), nullptr, nullptr, &modifiers);
-
-#if GTK_CHECK_VERSION(3, 20, 0)
-	auto seat = gdk_display_get_default_seat(gdk_display_get_default());
-	auto mouse_device = gdk_seat_get_pointer(seat);
-#else
-	auto devman = gdk_display_get_device_manager(gdk_display_get_default());
-	auto mouse_device = gdk_device_manager_get_client_pointer(devman);
-#endif
-	gdk_window_get_device_position(gtk_widget_get_window(mWidget), mouse_device, &outX, &outY, &modifiers);
-	// gtk_widget_get_pointer(mWidget, &outX, &outY);
-}
-
 uint32_t MGtkWidgetMixin::GetModifiers() const
 {
 	GdkModifierType modifiers;

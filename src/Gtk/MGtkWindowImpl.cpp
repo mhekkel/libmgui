@@ -520,32 +520,10 @@ bool MGtkWindowImpl::DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, c
 	return false;
 }
 
-void MGtkWindowImpl::Invalidate(MRect inRect)
-{
-}
-
-void MGtkWindowImpl::Validate(MRect inRect)
-{
-}
-
 void MGtkWindowImpl::UpdateNow()
 {
 	// if (GTK_IS_WINDOW(GetWidget()))
 	// 	gdk_window_process_updates(gtk_widget_get_window(GetWidget()), true);
-}
-
-void MGtkWindowImpl::ScrollRect(MRect inRect, int32_t inDeltaH, int32_t inDeltaV)
-{
-}
-
-bool MGtkWindowImpl::GetMouse(int32_t &outX, int32_t &outY, uint32_t &outModifiers)
-{
-	return false;
-}
-
-bool MGtkWindowImpl::WaitMouseMoved(int32_t inX, int32_t inY)
-{
-	return false;
 }
 
 void MGtkWindowImpl::SetCursor(MCursor inCursor)

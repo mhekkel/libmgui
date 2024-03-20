@@ -326,35 +326,6 @@ class MWinListHeaderImpl : public MWinControlImpl<MListHeader>
 	virtual bool HDNTrack(WPARAM inWParam, LPARAM inLParam, LRESULT &outResult);
 };
 
-class MWinNotebookImpl : public MWinControlImpl<MNotebook>
-{
-  public:
-	MWinNotebookImpl(MNotebook *inControl);
-
-	virtual void AddedToWindow();
-	virtual void FrameResized();
-
-	virtual void AddPage(const std::string &inLabel, MView *inPage);
-
-	virtual void SelectPage(uint32_t inPage);
-	virtual uint32_t GetSelectedPage() const;
-
-	virtual void CreateParams(DWORD &outStyle, DWORD &outExStyle,
-		std::wstring &outClassName, HMENU &outMenu);
-
-	virtual bool TCNSelChange(WPARAM inWParam, LPARAM inLParam, LRESULT &outResult);
-
-  private:
-	struct MPage
-	{
-		std::string mTitle;
-		MView *mPage;
-	};
-
-	std::vector<MPage>
-		mPages;
-};
-
 class MWinColorSwatchImpl : public MWinControlImpl<MColorSwatch>
 {
   public:

@@ -98,7 +98,6 @@ class MGtkDialogImpl : public MGtkWindowImpl
 	MView *CreateSeparator(xml::element *inTemplate, int32_t inX, int32_t inY);
 	MView *CreateBox(xml::element *inTemplate, int32_t inX, int32_t inY, bool inHorizontal);
 	MView *CreateTable(xml::element *inTemplate, int32_t inX, int32_t inY);
-	MView *CreateNotebook(xml::element *inTemplate, int32_t inX, int32_t inY);
 	MView *CreatePager(xml::element *inTemplate, int32_t inX, int32_t inY);
 	MView *CreateListBox(xml::element *inTemplate, int32_t inX, int32_t inY);
 	// MView *CreateListView(xml::element *inTemplate, int32_t inX, int32_t inY);
@@ -316,9 +315,6 @@ void MGtkDialogImpl::GetMargins(xml::element *inTemplate,
 {
 	outLeftMargin = outTopMargin = outRightMargin = outBottomMargin = 0;
 
-	if (inTemplate->name() == "dialog" or inTemplate->name() == "notebook")
-		outLeftMargin = outTopMargin = outRightMargin = outBottomMargin = 7;
-
 	outLeftMargin = outRightMargin =
 		outTopMargin = outBottomMargin = get_attribute_int(inTemplate, "margin");
 
@@ -509,63 +505,6 @@ MView *MGtkDialogImpl::CreatePopup(xml::element *inTemplate, int32_t inX, int32_
 	return popup;
 }
 
-MView *MGtkDialogImpl::CreateNotebook(xml::element *inTemplate, int32_t inX, int32_t inY)
-{
-	string id = inTemplate->get_attribute("id");
-
-	MRect r(inX, inY, 0, 0);
-	MNotebook *result = new MNotebook(id, r);
-
-	MRect b;
-
-	for (xml::element *page : inTemplate->find("./page"))
-	{
-		if (page->get_attribute("if") == "WINDOWS")
-			continue;
-
-		string title = l(page->get_attribute("title"));
-
-		MView *control = CreateControls(page, 0, 0);
-		control->SetBindings(true, true, true, true);
-		result->AddPage(title, control);
-
-		control->RecalculateLayout();
-
-		MRect f;
-		control->GetFrame(f);
-		b |= f;
-	}
-
-	//	// calculate a new width/height for our tab control
-	//	HTHEME hTheme = ::OpenThemeData(GetHandle(), VSCLASS_TAB);
-	//	if (hTheme != nullptr)
-	//	{
-	//		RECT r = { 0, 0, b.width, b.height };
-	//
-	//		RECT extend;
-	//		::GetThemeBackgroundContentRect(hTheme, mDC, TABP_PANE, 0, &r, &extend);
-	//
-	////		h += h - (extend.bottom - extend.top);
-	////		w += w - (extend.right - extend.left);
-	//
-	//		SIZE size;
-	//		::GetThemePartSize(hTheme, mDC, TABP_TABITEM, TTIS_NORMAL, &extend, TS_TRUE, &size);
-	//
-	//		::CloseThemeData(hTheme);
-	//
-	//		//h += size.cy;
-	//		//w += size.cx;
-	//	}
-	//
-	//	r.width = b.width;
-	//	r.height = b.height;
-	//
-	//	result->SetFrame(r);
-	//	result->SelectPage(0);
-
-	return result;
-}
-
 MView *MGtkDialogImpl::CreatePager(xml::element *inTemplate, int32_t inX, int32_t inY)
 {
 	string id = inTemplate->get_attribute("id");
@@ -696,42 +635,42 @@ MView *MGtkDialogImpl::CreateBox(xml::element *inTemplate, int32_t inX, int32_t 
 	return result;
 }
 
-MView *MGtkDialogImpl::CreateTable(xml::element *inTemplate, int32_t inX, int32_t inY)
-{
-	string id = inTemplate->get_attribute("id");
+// MView *MGtkDialogImpl::CreateTable(xml::element *inTemplate, int32_t inX, int32_t inY)
+// {
+// 	string id = inTemplate->get_attribute("id");
 
-	vector<MView *> views;
-	uint32_t colCount = 0, rowCount = 0;
+// 	vector<MView *> views;
+// 	uint32_t colCount = 0, rowCount = 0;
 
-	for (xml::element *row : inTemplate->find("./row"))
-	{
-		uint32_t cn = 0;
+// 	for (xml::element *row : inTemplate->find("./row"))
+// 	{
+// 		uint32_t cn = 0;
 
-		for (auto &col : *row)
-		{
-			if (col.get_attribute("if") == "WINDOWS")
-				continue;
+// 		for (auto &col : *row)
+// 		{
+// 			if (col.get_attribute("if") == "WINDOWS")
+// 				continue;
 
-			++cn;
-			if (colCount < cn)
-				colCount = cn;
-			views.push_back(CreateControls(&col, 0, 0));
-		}
+// 			++cn;
+// 			if (colCount < cn)
+// 				colCount = cn;
+// 			views.push_back(CreateControls(&col, 0, 0));
+// 		}
 
-		++rowCount;
-	}
+// 		++rowCount;
+// 	}
 
-	// fix me!
-	while (views.size() < (rowCount * colCount))
-		views.push_back(nullptr);
+// 	// fix me!
+// 	while (views.size() < (rowCount * colCount))
+// 		views.push_back(nullptr);
 
-	MRect r(inX, inY, 0, 0);
-	MTable *result = new MTable(id, r,
-		//		&views[0], colCount, rowCount, static_cast<int32_t>(4 * mDLUX), static_cast<int32_t>(4 * mDLUY));
-		&views[0], colCount, rowCount, 4, 4);
+// 	MRect r(inX, inY, 0, 0);
+// 	MTable *result = new MTable(id, r,
+// 		//		&views[0], colCount, rowCount, static_cast<int32_t>(4 * mDLUX), static_cast<int32_t>(4 * mDLUY));
+// 		&views[0], colCount, rowCount, 4, 4);
 
-	return result;
-}
+// 	return result;
+// }
 
 MView *MGtkDialogImpl::CreateControls(xml::element *inTemplate, int32_t inX, int32_t inY)
 {
@@ -761,14 +700,12 @@ MView *MGtkDialogImpl::CreateControls(xml::element *inTemplate, int32_t inX, int
 		result = CreateScrollbar(inTemplate, inX, inY);
 	else if (name == "separator")
 		result = CreateSeparator(inTemplate, inX, inY);
-	else if (name == "table")
-		result = CreateTable(inTemplate, inX, inY);
+	// else if (name == "table")
+	// 	result = CreateTable(inTemplate, inX, inY);
 	else if (name == "vbox" or name == "dialog" or name == "page")
 		result = CreateBox(inTemplate, inX, inY, false);
 	else if (name == "hbox")
 		result = CreateBox(inTemplate, inX, inY, true);
-	else if (name == "notebook")
-		result = CreateNotebook(inTemplate, inX, inY);
 	else if (name == "pager")
 		result = CreatePager(inTemplate, inX, inY);
 	else if (name == "listbox")
