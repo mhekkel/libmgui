@@ -374,7 +374,7 @@ bool Choose(
 				outSelected.push_back(p);
 				result = true;
 			}
-			catch (exception& e)
+			catch (const exception& e)
 			{
 				DisplayError(e);
 			}
@@ -505,7 +505,7 @@ bool SaveFileAs(MWindow* inParent, fs::path& ioFile)
 			ioFile = path;
 			result = true;
 		}
-		catch (exception& e)
+		catch (const exception& e)
 		{
 			DisplayError(e);
 			result = false;

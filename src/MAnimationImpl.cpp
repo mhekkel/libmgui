@@ -294,7 +294,7 @@ void MFallBackAnimationManagerImpl::Run()
 				// {
 				// 	mAnimationManager->eAnimate();
 				// }
-				// catch (exception& e)
+				// catch (const exception& e)
 				// {
 				// 	PRINT(("Exception: %s", e.what()));
 				// }

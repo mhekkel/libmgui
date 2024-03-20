@@ -123,14 +123,15 @@ void MGtkControlImpl<CONTROL>::DeactivateSelf()
 template <class CONTROL>
 void MGtkControlImpl<CONTROL>::EnableSelf()
 {
-	//	::EnableWindow(GetWidget(), mControl->IsEnabled());
+	if (auto w = GetWidget(); w != nullptr)
+		gtk_widget_set_sensitive(w, true);
 }
 
 template <class CONTROL>
 void MGtkControlImpl<CONTROL>::DisableSelf()
 {
-	//	if (::IsWindowEnabled(GetWidget()))
-	//		::EnableWindow(GetWidget(), false);
+	if (auto w = GetWidget(); w != nullptr)
+		gtk_widget_set_sensitive(w, false);
 }
 
 template <class CONTROL>

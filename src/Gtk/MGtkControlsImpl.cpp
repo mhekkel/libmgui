@@ -780,7 +780,10 @@ MGtkEdittextImpl::MGtkEdittextImpl(MEdittext *inEdittext, uint32_t inFlags)
 
 void MGtkEdittextImpl::CreateWidget()
 {
-	SetWidget(gtk_entry_new());
+	auto entry = gtk_entry_new();
+	SetWidget(entry);
+
+	gtk_widget_set_focus_on_click(entry, true);
 }
 
 void MGtkEdittextImpl::SetFocus()
@@ -831,6 +834,15 @@ bool MGtkEdittextImpl::DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers,
 
 	return result;
 }
+
+bool MGtkEdittextImpl::OnMouseDown(int32_t inX, int32_t inY, uint32_t inButtonNr, uint32_t inClickCount, uint32_t inModifiers)
+{
+	PRINT(("Event mask is %d\n", gtk_widget_get_events(GetWidget())));
+
+	// gtk_widget_grab_focus(GetWidget());
+	return false;
+}
+
 
 MEdittextImpl *MEdittextImpl::Create(MEdittext *inEdittext, uint32_t inFlags)
 {

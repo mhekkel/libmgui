@@ -167,7 +167,7 @@ void MWinApplicationImpl::Pulse()
 		if (gApp != nullptr)
 			gApp->Pulse();
 	}
-	catch (exception& e)
+	catch (const exception& e)
 	{
 		DisplayError(e);
 	}

@@ -165,7 +165,7 @@ gboolean MGtkApplicationImpl::Timeout(gpointer inData)
 
 		gApp->Pulse();
 	}
-	catch (std::exception &e)
+	catch (const std::exception &e)
 	{
 		DisplayError(e);
 	}

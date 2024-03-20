@@ -347,7 +347,7 @@ gboolean MGtkAnimationManagerImpl::IdleCallback(gpointer data)
 		std::unique_lock<std::mutex> lock(self->mMutex);
 		self->mAnimationManager->eAnimate();
 	}
-	catch (std::exception &e)
+	catch (const std::exception &e)
 	{
 		PRINT(("Exception: %s", e.what()));
 	}

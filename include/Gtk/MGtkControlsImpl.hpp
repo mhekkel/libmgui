@@ -252,6 +252,8 @@ class MGtkEdittextImpl : public MGtkControlImpl<MEdittext>
 
 	virtual bool DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat);
 
+	virtual bool OnMouseDown(int32_t inX, int32_t inY, uint32_t inButtonNr, uint32_t inClickCount, uint32_t inModifiers);
+
   protected:
 	uint32_t mFlags;
 };

@@ -62,8 +62,7 @@ void MDocApplication::Initialise()
 
 	mRecentFiles.clear();
 
-	vector<string> recent;
-	Preferences::GetArray("recent", recent);
+	auto recent = GetArray("recent");
 	reverse(recent.begin(), recent.end());
 
 	for (string path : recent)

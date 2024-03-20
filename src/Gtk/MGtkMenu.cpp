@@ -188,7 +188,7 @@ void MMenuItem::ItemCallback()
 				PRINT(("Unhandled command: %s", (const char *)MCommandToString(mCommand)));
 		}
 	}
-	catch (exception &e)
+	catch (const exception &e)
 	{
 		DisplayError(e);
 	}

@@ -289,7 +289,7 @@ bool MController::SaveDocument()
 			}
 		}
 	}
-	catch (std::exception &inErr)
+	catch (const std::exception &inErr)
 	{
 		DisplayError(inErr);
 		result = false;

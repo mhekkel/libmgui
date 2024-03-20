@@ -432,7 +432,7 @@ LRESULT MWinProcMixin::WinProc(HWND inHandle, UINT inMsg, WPARAM inWParam, LPARA
 		if (not call or not call(inHandle, inMsg, inWParam, inLParam, result))
 			result = DefProc(inHandle, inMsg, inWParam, inLParam);
 	}
-	catch (exception& e)
+	catch (const exception& e)
 	{
 		DisplayError(e);
 	}
@@ -525,7 +525,7 @@ LRESULT CALLBACK MWinProcMixin::WinProcCallBack(HWND hwnd, UINT uMsg,
 		else
 			result = ::DefWindowProcW(hwnd, uMsg, wParam, lParam);
 	}
-	catch (std::exception& e)
+	catch (const std::exception& e)
 	{
 		DisplayError(e);
 	}

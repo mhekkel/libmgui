@@ -178,7 +178,7 @@ namespace MFileDialogs
 // 			//				gtk_file_chooser_get_current_folder_uri(GTK_FILE_CHOOSER(dialog)));
 // 		}
 // 	}
-// 	catch (exception &e)
+// 	catch (const exception &e)
 // 	{
 // 		if (dialog)
 // 			gtk_widget_destroy(dialog);
@@ -252,7 +252,7 @@ namespace MFileDialogs
 // 			}
 // 		}
 // 	}
-// 	catch (exception &e)
+// 	catch (const exception &e)
 // 	{
 // 		if (dialog)
 // 			gtk_widget_destroy(dialog);
@@ -317,7 +317,7 @@ namespace MFileDialogs
 // 			g_free(cwd);
 // 		}
 // 	}
-// 	catch (exception &e)
+// 	catch (const exception &e)
 // 	{
 // 		if (dialog)
 // 			gtk_widget_destroy(dialog);
@@ -380,7 +380,7 @@ namespace MFileDialogs
 // ////				gtk_file_chooser_get_current_folder_uri(GTK_FILE_CHOOSER(dialog)));
 // //		}
 // //	}
-// //	catch (exception& e)
+// //	catch (const exception& e)
 // //	{
 // //		if (dialog)
 // //			gtk_widget_destroy(dialog);
@@ -455,7 +455,7 @@ namespace MFileDialogs
 // //			}
 // //		}
 // //	}
-// //	catch (exception& e)
+// //	catch (const exception& e)
 // //	{
 // //		if (dialog)
 // //			gtk_widget_destroy(dialog);
@@ -522,7 +522,7 @@ namespace MFileDialogs
 // //			g_free(cwd);
 // //		}
 // //	}
-// //	catch (exception& e)
+// //	catch (const exception& e)
 // //	{
 // //		if (dialog)
 // //			gtk_widget_destroy(dialog);

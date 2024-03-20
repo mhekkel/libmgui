@@ -169,7 +169,7 @@ int32_t DisplayAlert(MWindow *inParent, const std::string &inResourceName, std::
 
 		gtk_widget_destroy(dlg);
 	}
-	catch (std::exception &e)
+	catch (const std::exception &e)
 	{
 		DisplayError(e);
 	}

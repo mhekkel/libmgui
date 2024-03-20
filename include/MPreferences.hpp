@@ -48,7 +48,7 @@ void SetInteger(const char *inName, int32_t inValue);
 std::string GetString(const char *inName, std::string inDefaultValue);
 void SetString(const char *inName, std::string inValue);
 
-void GetArray(const char *inName, std::vector<std::string> &outArray);
+std::vector<std::string> GetArray(const char *inName);
 void SetArray(const char *inName, const std::vector<std::string> &inArray);
 
 MColor GetColor(const char *inName, MColor inDefaultValue);
@@ -57,8 +57,7 @@ void SetColor(const char *inName, MColor inValue);
 MRect GetRect(const char *inName, MRect inDefault);
 void SetRect(const char *inName, MRect inValue);
 
-std::filesystem::file_time_type
-GetPrefsFileCreationTime();
+std::filesystem::file_time_type GetPrefsFileCreationTime();
 
 void Save();
 void SaveIfDirty();

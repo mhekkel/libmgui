@@ -189,8 +189,6 @@ bool MGtkWidgetMixin::OnRealize()
 
 bool MGtkWidgetMixin::OnFocusInEvent(GdkEventFocus *inEvent)
 {
-	// PRINT(("MGtkWidgetMixin::OnFocusInEvent [%p, %s]", this, G_OBJECT_TYPE_NAME(mWidget)));
-
 	mGainedFocusAt = std::chrono::steady_clock::now();
 
 	if (mIMContext)
@@ -201,8 +199,6 @@ bool MGtkWidgetMixin::OnFocusInEvent(GdkEventFocus *inEvent)
 
 bool MGtkWidgetMixin::OnFocusOutEvent(GdkEventFocus *inEvent)
 {
-	// PRINT(("MGtkWidgetMixin::OnFocusOutEvent"));
-
 	if (mIMContext)
 		gtk_im_context_focus_out(mIMContext);
 
@@ -216,10 +212,6 @@ bool MGtkWidgetMixin::IsActive() const
 
 bool MGtkWidgetMixin::OnButtonPressEvent(GdkEventButton *inEvent)
 {
-	// PRINT(("MGtkWidgetMixin::OnButtonPressEvent(%ld, %ld) [%s]",
-	//        static_cast<int32_t>(inEvent->x),
-	//        static_cast<int32_t>(inEvent->y), G_OBJECT_TYPE_NAME(mWidget)));
-
 	if (std::chrono::steady_clock::now() - mGainedFocusAt < std::chrono::milliseconds(100))
 	{
 		// PRINT(("Ignoring click, since it was too soon after a focus in event"));

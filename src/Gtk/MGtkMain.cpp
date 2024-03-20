@@ -374,7 +374,7 @@ int MApplication::Main(const std::string &cmd, const std::vector<std::string> &a
 
 		MGDbusServer dBusServer(cmd, argv);
 	}
-	catch (std::exception &e)
+	catch (const std::exception &e)
 	{
 		std::cerr << e.what() << '\n';
 	}

@@ -87,7 +87,7 @@ class IniFile
 	std::string GetString(const char *inName, const std::string &inDefault);
 
 	void SetStrings(const char *inName, const std::vector<std::string> &inValues);
-	void GetStrings(const char *inName, std::vector<std::string> &outStrings);
+	std::vector<std::string> GetStrings(const char *inName);
 
 	std::filesystem::file_time_type GetCreationTime() const { return fs::last_write_time(mPrefsFile); }
 	bool IsDirty() const { return mDirty; }
@@ -247,9 +247,9 @@ void IniFile::SetStrings(const char *inName, const std::vector<std::string> &inV
 	}
 }
 
-void IniFile::GetStrings(const char *inName, std::vector<std::string> &outStrings)
+std::vector<std::string> IniFile::GetStrings(const char *inName)
 {
-	outStrings = mPrefs[inName];
+	return mPrefs[inName];
 }
 
 bool GetBoolean(const char *inName, bool inDefaultValue)
@@ -304,9 +304,9 @@ void SetString(const char *inName, std::string inValue)
 	IniFile::Instance().SetString(inName, inValue);
 }
 
-void GetArray(const char *inName, std::vector<std::string> &outArray)
+std::vector<std::string> GetArray(const char *inName)
 {
-	IniFile::Instance().GetStrings(inName, outArray);
+	return IniFile::Instance().GetStrings(inName);
 }
 
 void SetArray(const char *inName, const std::vector<std::string> &inArray)

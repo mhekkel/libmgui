@@ -596,7 +596,7 @@ void MColorPicker::TextChanged(const std::string &inID, const std::string &inTex
 			else if (inID == "value-text")
 				SetHSV(mHue, mSaturation, v / 100.f);
 		}
-		catch (std::invalid_argument &)
+		catch (const std::invalid_argument &)
 		{
 		}
 	}
