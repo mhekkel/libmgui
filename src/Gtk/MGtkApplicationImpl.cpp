@@ -70,14 +70,13 @@ void MGtkApplicationImpl::Initialise()
 	if (error)
 		g_free(error);
 
-#warning FIXME
-	// if (iconList)
-	// 	gtk_window_set_default_icon_list(iconList);
+	if (iconList)
+		gtk_window_set_default_icon_list(iconList);
 
 	// now start up the normal executable
 	gtk_window_set_default_icon_name("salt-terminal");
 
-	// gdk_notify_startup_complete();
+	gdk_notify_startup_complete();
 }
 
 MGtkApplicationImpl::~MGtkApplicationImpl()
@@ -97,8 +96,7 @@ int MGtkApplicationImpl::RunEventLoop()
 	mAsyncTaskThread = std::thread([this, context = g_main_context_get_thread_default()]()
 		{ ProcessAsyncTasks(context); });
 
-#warning FIXME
-	// gtk_main();
+	gtk_main();
 
 	return 0;
 }
@@ -108,8 +106,7 @@ void MGtkApplicationImpl::Quit()
 	if (mPulseID)
 		g_source_remove(mPulseID);
 
-#warning FIXME
-	// gtk_main_quit();
+	gtk_main_quit();
 
 	std::unique_lock lock(mMutex);
 	mHandlerQueue.push_front(nullptr);

@@ -370,8 +370,7 @@ int MApplication::Main(const std::string &cmd, const std::vector<std::string> &a
 			gPrefixPath = gExecutablePath.parent_path();
 		}
 
-#warning FIXME
-		// gtk_init(0, nullptr);
+		gtk_init(0, nullptr);
 
 		MGDbusServer dBusServer(cmd, argv);
 	}

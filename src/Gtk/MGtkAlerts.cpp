@@ -165,10 +165,9 @@ int32_t DisplayAlert(MWindow *inParent, const std::string &inResourceName, std::
 				GTK_WINDOW(impl->GetWidget()));
 		}
 
-#warning FIXME
-		// result = gtk_dialog_run(GTK_DIALOG(dlg));
+		result = gtk_dialog_run(GTK_DIALOG(dlg));
 
-		// gtk_widget_destroy(dlg);
+		gtk_widget_destroy(dlg);
 	}
 	catch (const std::exception &e)
 	{

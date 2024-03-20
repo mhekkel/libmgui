@@ -60,12 +60,12 @@ class MGtkCanvasImpl : public MGtkControlImpl<MCanvas>
 
   protected:
 	virtual bool OnDrawEvent(cairo_t *inCairo);
-	virtual bool OnConfigureEvent(GdkEvent *inEvent);
+	virtual bool OnConfigureEvent(GdkEventConfigure *inEvent);
 
-	virtual bool OnKeyPressEvent(GdkEvent *inEvent);
+	virtual bool OnKeyPressEvent(GdkEventKey *inEvent);
 	virtual bool OnCommit(gchar *inText);
 
-	virtual bool OnScrollEvent(GdkEvent *inEvent);
+	virtual bool OnScrollEvent(GdkEventScroll *inEvent);
 
 	cairo_t *mCurrentCairo = nullptr;
 };

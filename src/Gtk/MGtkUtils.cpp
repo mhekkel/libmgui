@@ -74,6 +74,18 @@ std::string GetUserName(bool inShortName)
 	return result;
 }
 
+bool IsModifierDown(int inModifierMask)
+{
+	bool result = false;
+
+	GdkModifierType state;
+
+	if (gtk_get_current_event_state(&state))
+		result = (state & inModifierMask) != 0;
+
+	return result;
+}
+
 // --------------------------------------------------------------------
 // code to create a GdkPixbuf containing a single dot.
 //

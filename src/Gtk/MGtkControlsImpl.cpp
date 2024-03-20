@@ -87,8 +87,8 @@ void MGtkButtonImpl::MakeDefault(bool inDefault)
 {
 	mDefault = inDefault;
 
-	// if (GetWidget() != nullptr)
-	// 	gtk_widget_grab_default(GetWidget());
+	if (GetWidget() != nullptr)
+		gtk_widget_grab_default(GetWidget());
 }
 
 void MGtkButtonImpl::SetText(const std::string &inText)
@@ -152,9 +152,8 @@ void MGtkExpanderImpl::CreateWidget()
 void MGtkExpanderImpl::Append(MGtkWidgetMixin *inChild, MControlPacking inPacking,
 	bool inExpand, bool inFill, uint32_t inPadding)
 {
-	// assert(GTK_IS_CONTAINER(GetWidget()));
-	// gtk_container_add(GTK_CONTAINER(GetWidget()), inChild->GetWidget());
-	gtk_expander_set_child(GTK_EXPANDER(GetWidget()), inChild->GetWidget());
+	assert(GTK_IS_CONTAINER(GetWidget()));
+	gtk_container_add(GTK_CONTAINER(GetWidget()), inChild->GetWidget());
 }
 
 void MGtkExpanderImpl::SetOpen(bool inOpen)
@@ -311,13 +310,13 @@ void MGtkStatusbarImpl::CreateWidget()
 {
 	GtkWidget *statusBar = gtk_statusbar_new();
 
-	// GtkShadowType shadow_type = GTK_SHADOW_NONE;
+	GtkShadowType shadow_type = GTK_SHADOW_NONE;
 	//	gtk_widget_style_get(statusBar, "shadow_type", &shadow_type, nullptr);
 
 	for (auto part : mParts)
 	{
 		GtkWidget *frame = gtk_frame_new(nullptr);
-		// gtk_frame_set_shadow_type(GTK_FRAME(frame), shadow_type);
+		gtk_frame_set_shadow_type(GTK_FRAME(frame), shadow_type);
 
 		GtkWidget *label = gtk_label_new("");
 		gtk_label_set_single_line_mode(GTK_LABEL(label), true);
@@ -325,13 +324,12 @@ void MGtkStatusbarImpl::CreateWidget()
 		gtk_label_set_xalign(GTK_LABEL(label), 0);
 		gtk_label_set_yalign(GTK_LABEL(label), 0.5);
 
-		// gtk_container_add(GTK_CONTAINER(frame), label);
-		gtk_frame_set_child(GTK_FRAME(frame), label);
+		gtk_container_add(GTK_CONTAINER(frame), label);
 
-		// if (part.packing == ePackStart)
-			gtk_box_append(GTK_BOX(statusBar), frame);//, part.expand, part.fill, part.padding);
-		// else
-		// 	gtk_box_pack_end(GTK_BOX(statusBar), frame, part.expand, part.fill, part.padding);
+		if (part.packing == ePackStart)
+			gtk_box_pack_start(GTK_BOX(statusBar), frame, part.expand, part.fill, part.padding);
+		else
+			gtk_box_pack_end(GTK_BOX(statusBar), frame, part.expand, part.fill, part.padding);
 
 		if (part.width > 0)
 			gtk_widget_set_size_request(frame, part.width, -1);
@@ -364,7 +362,7 @@ void MGtkStatusbarImpl::SetStatusText(uint32_t inPartNr, const std::string &inTe
 		gtk_label_set_text(GTK_LABEL(mPanels[inPartNr]), inText.c_str());
 }
 
-bool MGtkStatusbarImpl::Clicked(GdkEvent *inEvent)
+bool MGtkStatusbarImpl::Clicked(GdkEventButton *inEvent)
 {
 	GtkWidget *source = GTK_WIDGET(mClicked.GetSourceGObject());
 
@@ -402,10 +400,10 @@ std::string MGtkComboboxImpl::GetText() const
 {
 	std::string result;
 
-	// //	char* text = gtk_combo_box_get_active_text(GTK_COMBO_BOX(GetWidget()));
-	// const char *text = gtk_combo_box_text_get_active_text(GTK_ENTRY(gtk_combo_box_get_active(GTK_BIN(GetWidget()))));
-	// if (text != nullptr)
-	// 	result = text;
+	//	char* text = gtk_combo_box_get_active_text(GTK_COMBO_BOX(GetWidget()));
+	const char *text = gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(GetWidget()))));
+	if (text != nullptr)
+		result = text;
 	return result;
 }
 
@@ -583,11 +581,7 @@ MGtkEdittextImpl::MGtkEdittextImpl(MEdittext *inEdittext, uint32_t inFlags)
 
 void MGtkEdittextImpl::CreateWidget()
 {
-	mBuffer = gtk_entry_buffer_new(nullptr, 0);
-
 	auto entry = gtk_entry_new();
-	gtk_entry_set_buffer(GTK_ENTRY(entry), mBuffer);
-
 	SetWidget(entry);
 
 	gtk_widget_set_focus_on_click(entry, true);
@@ -604,14 +598,14 @@ std::string MGtkEdittextImpl::GetText() const
 {
 	const char *result = nullptr;
 	if (GTK_IS_ENTRY(GetWidget()))
-		result = gtk_entry_buffer_get_text(mBuffer);
+		result = gtk_entry_get_text(GTK_ENTRY(GetWidget()));
 	return result ? result : "";
 }
 
 void MGtkEdittextImpl::SetText(const std::string &inText)
 {
 	if (GTK_IS_ENTRY(GetWidget()))
-		gtk_entry_buffer_set_text(mBuffer, inText.data(), inText.size());
+		gtk_entry_set_text(GTK_ENTRY(GetWidget()), inText.c_str());
 }
 
 void MGtkEdittextImpl::SetPasswordChar(uint32_t inUnicode)
@@ -626,12 +620,12 @@ void MGtkEdittextImpl::SetPasswordChar(uint32_t inUnicode)
 		THROW(("item is not an entry"));
 }
 
-bool MGtkEdittextImpl::OnKeyPressEvent(GdkEvent *inEvent)
+bool MGtkEdittextImpl::OnKeyPressEvent(GdkEventKey *inEvent)
 {
 
 	const uint32_t kValidModifiersMask = gtk_accelerator_get_default_mod_mask();
-	uint32_t modifiers = MapModifier(gdk_event_get_modifier_state(inEvent) & kValidModifiersMask);
-	uint32_t keyValue = MapKeyCode(gdk_key_event_get_keyval(inEvent));
+	uint32_t modifiers = MapModifier(inEvent->state & kValidModifiersMask);
+	uint32_t keyValue = MapKeyCode(inEvent->keyval);
 
 	bool result = mControl->HandleKeyDown(keyValue, modifiers, false);
 
@@ -730,15 +724,15 @@ MGtkRadiobuttonImpl::MGtkRadiobuttonImpl(MRadiobutton *inControl, const std::str
 
 void MGtkRadiobuttonImpl::CreateWidget()
 {
-	// if (mGroup.empty() or mGroup.front() == mControl)
-	// 	SetWidget(gtk_radio_button_new_with_label(nullptr, mLabel.c_str()));
-	// else if (not mGroup.empty())
-	// {
-	// 	MGtkRadiobuttonImpl *first = dynamic_cast<MGtkRadiobuttonImpl *>(mGroup.front()->GetImpl());
+	if (mGroup.empty() or mGroup.front() == mControl)
+		SetWidget(gtk_radio_button_new_with_label(nullptr, mLabel.c_str()));
+	else if (not mGroup.empty())
+	{
+		MGtkRadiobuttonImpl *first = dynamic_cast<MGtkRadiobuttonImpl *>(mGroup.front()->GetImpl());
 
-	// 	SetWidget(gtk_radio_button_new_with_label_from_widget(
-	// 		GTK_RADIO_BUTTON(first->GetWidget()), mLabel.c_str()));
-	// }
+		SetWidget(gtk_radio_button_new_with_label_from_widget(
+			GTK_RADIO_BUTTON(first->GetWidget()), mLabel.c_str()));
+	}
 }
 
 bool MGtkRadiobuttonImpl::IsChecked() const
@@ -862,6 +856,23 @@ void MGtkColorSwatchImpl::SetPalette(const std::vector<MColor> &colors)
 			9, gtkColors.size(), gtkColors.data());
 }
 
+
+// void MGtkColorSwatchImpl::GetIdealSize(int32_t& outWidth, int32_t& outHeight)
+//{
+//	outWidth = 30;
+//	outHeight = 23;
+//
+//	SIZE size;
+//	if (GetWidget() != nullptr and ColorSwatch_GetIdealSize(GetWidget(), &size))
+//	{
+//		if (outWidth < size.cx + 20)
+//			outWidth = size.cx + 20;
+//
+//		if (outHeight < size.cy + 2)
+//			outHeight = size.cy + 2;
+//	}
+// }
+
 MColorSwatchImpl *MColorSwatchImpl::Create(MColorSwatch *inColorSwatch, MColor inColor)
 {
 	return new MGtkColorSwatchImpl(inColorSwatch, inColor);
@@ -896,6 +907,17 @@ void MGtkListBoxImpl::CreateWidget()
 	gtk_tree_selection_set_mode(selection, GTK_SELECTION_SINGLE);
 	mSelectionChanged.Connect(G_OBJECT(selection), "changed");
 }
+
+// void MGtkListBoxImpl::CreateParams(DWORD& outStyle, DWORD& outExStyle,
+//	wstring& outClassName, HMENU& outMenu)
+//{
+//	MGtkControlImpl::CreateParams(outStyle, outExStyle, outClassName, outMenu);
+//
+//	outStyle = WS_CHILD | LBS_HASSTRINGS | LBS_NOTIFY;
+//	outExStyle |= WS_EX_CLIENTEDGE;
+//
+//	outClassName = WC_LISTBOX;
+// }
 
 void MGtkListBoxImpl::AddedToWindow()
 {
@@ -998,12 +1020,8 @@ void MGtkBoxControlImpl::Append(MGtkWidgetMixin *inChild, MControlPacking inPack
 	gtk_widget_set_margin_start(childWidget, inPadding);
 	gtk_widget_set_margin_end(childWidget, inPadding);
 
-	gtk_box_append(GTK_BOX(GetWidget()), childWidget);
-	
-
-
-	// if (inPacking == ePackStart)
-	// 	gtk_box_pack_start(GTK_BOX(GetWidget()), childWidget, inExpand, inFill, 0);
-	// else
-	// 	gtk_box_pack_end(GTK_BOX(GetWidget()), childWidget, inExpand, inFill, 0);
+	if (inPacking == ePackStart)
+		gtk_box_pack_start(GTK_BOX(GetWidget()), childWidget, inExpand, inFill, 0);
+	else
+		gtk_box_pack_end(GTK_BOX(GetWidget()), childWidget, inExpand, inFill, 0);
 }

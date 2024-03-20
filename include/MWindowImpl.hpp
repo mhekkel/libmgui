@@ -73,6 +73,8 @@ class MWindowImpl
 
 	virtual void UpdateNow() = 0;
 
+	virtual uint32_t GetModifiers() const = 0;
+
 	virtual void SetCursor(MCursor inCursor) = 0;
 	virtual void ObscureCursor() = 0;
 

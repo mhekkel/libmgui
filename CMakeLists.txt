@@ -163,7 +163,7 @@ list(APPEND sources
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MLib.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MMenu.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MPreferences.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/src/MStrings.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MStrings.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MTypes.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MUnicode.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MUtils.cpp
@@ -187,12 +187,12 @@ target_include_directories(mgui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(mgui libmcfp::libmcfp Threads::Threads zeep::zeep)
 
 if(UNIX)
-	pkg_check_modules(GTK4 gtk4 REQUIRED IMPORTED_TARGET)
+	pkg_check_modules(GTK3 libcanberra-gtk3 REQUIRED IMPORTED_TARGET)
 
 	# The salt executable
 	add_compile_definitions(GDK_DISABLE_DEPRECATED GTK_DISABLE_DEPRECATED)
 
-	target_link_libraries(mgui PkgConfig::GTK4)
+	target_link_libraries(mgui PkgConfig::GTK3)
 endif()
 
 # install(TARGETS salt

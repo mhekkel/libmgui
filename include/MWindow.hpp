@@ -104,6 +104,8 @@ class MWindow : public MView, public MHandler
 	virtual void ConvertToScreen(int32_t &ioX, int32_t &ioY) const;
 	virtual void ConvertFromScreen(int32_t &ioX, int32_t &ioY) const;
 
+	virtual uint32_t GetModifiers() const;
+
 	virtual void SetCursor(MCursor inCursor);
 	virtual void ObscureCursor();
 

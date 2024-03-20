@@ -84,7 +84,9 @@ void MGtkControlImpl<CONTROL>::SetText(const std::string &inText)
 	mLabel = inText;
 
 	GtkWidget *wdgt = GetWidget();
-	if (GTK_IS_LABEL(wdgt))
+	if (GTK_IS_ENTRY(wdgt))
+		gtk_entry_set_text(GTK_ENTRY(wdgt), inText.c_str());
+	else if (GTK_IS_LABEL(wdgt))
 		gtk_label_set_text(GTK_LABEL(wdgt), inText.c_str());
 	else if (GTK_IS_BUTTON(wdgt))
 		gtk_button_set_label(GTK_BUTTON(wdgt), inText.c_str());
@@ -237,7 +239,7 @@ void MGtkControlImpl<CONTROL>::OnChanged()
 }
 
 template <class CONTROL>
-bool MGtkControlImpl<CONTROL>::OnKeyPressEvent(GdkEvent *inEvent)
+bool MGtkControlImpl<CONTROL>::OnKeyPressEvent(GdkEventKey *inEvent)
 {
 	// PRINT(("OnKeyPressEvent for %s", this->mControl->GetID().c_str()));
 
@@ -247,8 +249,8 @@ bool MGtkControlImpl<CONTROL>::OnKeyPressEvent(GdkEvent *inEvent)
 	{
 		const uint32_t kValidModifiersMask = gtk_accelerator_get_default_mod_mask();
 
-		uint32_t modifiers = MapModifier(gdk_event_get_modifier_state(inEvent) & kValidModifiersMask);
-		uint32_t keyValue = MapKeyCode(gdk_key_event_get_keyval(inEvent));
+		uint32_t modifiers = MapModifier(inEvent->state & kValidModifiersMask);
+		uint32_t keyValue = MapKeyCode(inEvent->keyval);
 		uint32_t cmd;
 
 		if (MAcceleratorTable::Instance().IsAcceleratorKey(keyValue, modifiers, cmd))
@@ -268,7 +270,7 @@ void MGtkControlImpl<CONTROL>::OnPopupMenu()
 {
 	// PRINT(("OnPopupMenu for %s", this->mControl->GetID().c_str()));
 
-	int32_t x = 0, y = 0;
+	int32_t x, y;
 
 #if GTK_CHECK_VERSION(3, 20, 0)
 	auto seat = gdk_display_get_default_seat(gdk_display_get_default());
@@ -278,13 +280,12 @@ void MGtkControlImpl<CONTROL>::OnPopupMenu()
 	auto mouse_device = gdk_device_manager_get_client_pointer(devman);
 #endif
 
-#warning "FIXME"
-	// auto window = gdk_display_get_default_group(gdk_display_get_default());
+	auto window = gdk_display_get_default_group(gdk_display_get_default());
 
-	// if (window == nullptr)
-	// 	window = gtk_widget_get_window(GetWidget());
+	if (window == nullptr)
+		window = gtk_widget_get_window(GetWidget());
 
-	// gdk_window_get_device_position(window, mouse_device, &x, &y, NULL);
+	gdk_window_get_device_position(window, mouse_device, &x, &y, NULL);
 	// g_message ("pointer: %i %i", x, y);
 
 	this->mControl->ShowContextMenu(x, y);

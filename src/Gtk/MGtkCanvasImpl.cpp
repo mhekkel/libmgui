@@ -119,7 +119,7 @@ void MGtkCanvasImpl::Invalidate()
 		gtk_widget_queue_draw(GetWidget());
 }
 
-bool MGtkCanvasImpl::OnConfigureEvent(GdkEvent *inEvent)
+bool MGtkCanvasImpl::OnConfigureEvent(GdkEventConfigure *inEvent)
 {
 	// PRINT(("MGtkCanvasImpl::OnConfigureEvent"));
 
@@ -138,14 +138,9 @@ bool MGtkCanvasImpl::OnConfigureEvent(GdkEvent *inEvent)
 		bounds.width = allocation.width;
 		bounds.height = allocation.height;
 
-		double x, y;
-
 		gtk_widget_translate_coordinates(parent, GetWidget(),
 			bounds.x, bounds.y,
-			&x, &y);
-
-		bounds.x = x;
-		bounds.y = y;
+			&bounds.x, &bounds.y);
 	}
 	else
 	{
@@ -163,7 +158,7 @@ bool MGtkCanvasImpl::OnConfigureEvent(GdkEvent *inEvent)
 	return false;
 }
 
-bool MGtkCanvasImpl::OnKeyPressEvent(GdkEvent *inEvent)
+bool MGtkCanvasImpl::OnKeyPressEvent(GdkEventKey *inEvent)
 {
 	bool result = MGtkControlImpl<MCanvas>::OnKeyPressEvent(inEvent);
 
@@ -173,8 +168,8 @@ bool MGtkCanvasImpl::OnKeyPressEvent(GdkEvent *inEvent)
 
 		// PRINT(("OnKeyPressEvent(keyval=0x%x)", inEvent->keyval));
 
-		uint32_t modifiers = MapModifier(gdk_event_get_modifier_state(inEvent) & kValidModifiersMask);
-		uint32_t keyValue = MapKeyCode(gdk_key_event_get_keyval(inEvent));
+		uint32_t modifiers = MapModifier(inEvent->state & kValidModifiersMask);
+		uint32_t keyValue = MapKeyCode(inEvent->keyval);
 
 		if (keyValue >= 0x60 and keyValue <= 0x7f and modifiers == kControlKey)
 		{
@@ -237,13 +232,13 @@ bool MGtkCanvasImpl::OnCommit(gchar *inText)
 	return mControl->HandleCharacter(text, mAutoRepeat);
 }
 
-bool MGtkCanvasImpl::OnScrollEvent(GdkEvent *inEvent)
+bool MGtkCanvasImpl::OnScrollEvent(GdkEventScroll *inEvent)
 {
-	uint32_t modifiers = MapModifier(gdk_event_get_modifier_state(inEvent));
-	double x, y;
-	gdk_event_get_position(inEvent, &x, &y);
+	int32_t x = inEvent->x;
+	int32_t y = inEvent->y;
+	uint32_t modifiers = MapModifier(inEvent->state & kValidModifiersMask);
 
-	switch (gdk_scroll_event_get_direction(inEvent))
+	switch (inEvent->direction)
 	{
 		case GDK_SCROLL_UP:
 			mControl->MouseWheel(x, y, 0, 1, modifiers);
@@ -262,12 +257,8 @@ bool MGtkCanvasImpl::OnScrollEvent(GdkEvent *inEvent)
 			break;
 
 		case GDK_SCROLL_SMOOTH:
-		{
-			double delta_x, delta_y;
-			gdk_scroll_event_get_deltas(inEvent, &delta_x, &delta_y);
-			mControl->MouseWheel(x, y, -delta_x, -delta_y, modifiers);
+			mControl->MouseWheel(x, y, -inEvent->delta_x, -inEvent->delta_y, modifiers);
 			break;
-		}
 	}
 
 	return true;
