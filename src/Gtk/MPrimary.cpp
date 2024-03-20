@@ -32,7 +32,7 @@
 #include "MTypes.hpp"
 #include "MUnicode.hpp"
 
-using namespace std;
+// --------------------------------------------------------------------
 
 struct MPrimaryImpl
 {
@@ -40,8 +40,8 @@ struct MPrimaryImpl
 	~MPrimaryImpl();
 
 	bool HasText();
-	void GetText(string &outText);
-	void SetText(const string &inText);
+	void GetText(std::string &outText);
+	void SetText(const std::string &inText);
 	void SetText(std::function<void(std::string &)> provider);
 	void LoadClipboardIfNeeded();
 
@@ -49,8 +49,8 @@ struct MPrimaryImpl
 	static void GtkClipboardClear(GtkClipboard *inClipboard, gpointer inUserDataOrOwner);
 	void OnOwnerChange(GdkEventOwnerChange *inEvent);
 
-	string mText;
-	std::function<void(string &)> mProvider;
+	std::string mText;
+	std::function<void(std::string &)> mProvider;
 	MSlot<void(GdkEventOwnerChange *)> mOwnerChange;
 	GtkClipboard *mGtkClipboard;
 	bool mClipboardIsMine;
@@ -125,7 +125,7 @@ void MPrimaryImpl::LoadClipboardIfNeeded()
 		gchar *text = gtk_clipboard_wait_for_text(mGtkClipboard);
 		if (text != nullptr)
 		{
-			SetText(string(text));
+			SetText(std::string(text));
 			g_free(text);
 		}
 		mOwnerChanged = false;
@@ -138,7 +138,7 @@ bool MPrimaryImpl::HasText()
 	return not(mText.empty() and not mProvider);
 }
 
-void MPrimaryImpl::GetText(string &outText)
+void MPrimaryImpl::GetText(std::string &outText)
 {
 	if (not mText.empty())
 		outText = mText;
@@ -146,7 +146,7 @@ void MPrimaryImpl::GetText(string &outText)
 		mProvider(outText);
 }
 
-void MPrimaryImpl::SetText(const string &inText)
+void MPrimaryImpl::SetText(const std::string &inText)
 {
 	mText = inText;
 	mProvider = {};
@@ -168,9 +168,9 @@ void MPrimaryImpl::SetText(const string &inText)
 	mClipboardIsMine = true;
 }
 
-void MPrimaryImpl::SetText(std::function<void(string &)> provider)
+void MPrimaryImpl::SetText(std::function<void(std::string &)> provider)
 {
-	SetText(string(""));
+	SetText(std::string(""));
 	mProvider = provider;
 }
 
@@ -197,12 +197,12 @@ bool MPrimary::HasText()
 	return mImpl->HasText();
 }
 
-void MPrimary::GetText(string &text)
+void MPrimary::GetText(std::string &text)
 {
 	mImpl->GetText(text);
 }
 
-void MPrimary::SetText(const string &text)
+void MPrimary::SetText(const std::string &text)
 {
 	mImpl->SetText(text);
 }
