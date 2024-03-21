@@ -63,7 +63,7 @@ class MGtkDialogImpl : public MGtkWindowImpl
 {
   public:
 	MGtkDialogImpl(const string &inResource, MWindow *inParent)
-		: MGtkWindowImpl(MWindowFlags(0), "", inParent)
+		: MGtkWindowImpl(MWindowFlags(0), inParent)
 		, mResponse(this, &MGtkDialogImpl::OnResponse)
 		, mRsrc(inResource)
 		, mResultIsOK(false)

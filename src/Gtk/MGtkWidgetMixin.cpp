@@ -33,7 +33,7 @@ using namespace std;
 MGtkWidgetMixin::MGtkWidgetMixin()
 	: mWidget(nullptr)
 	, mOnDestroy(this, &MGtkWidgetMixin::OnDestroy)
-	, mOnDelete(this, &MGtkWidgetMixin::OnDelete)
+	// , mOnDelete(this, &MGtkWidgetMixin::OnDelete)
 	, mOnShow(this, &MGtkWidgetMixin::OnShow)
 	, mFocusInEvent(this, &MGtkWidgetMixin::OnFocusInEvent)
 	, mFocusOutEvent(this, &MGtkWidgetMixin::OnFocusOutEvent)
@@ -96,11 +96,11 @@ bool MGtkWidgetMixin::OnDestroy()
 	return true;
 }
 
-bool MGtkWidgetMixin::OnDelete(GdkEvent *inEvent)
-{
-	// PRINT(("MGtkWidgetMixin::OnDelete"));
-	return true;
-}
+// bool MGtkWidgetMixin::OnDelete(GdkEvent *inEvent)
+// {
+// 	// PRINT(("MGtkWidgetMixin::OnDelete"));
+// 	return true;
+// }
 
 void MGtkWidgetMixin::OnShow()
 {
@@ -123,24 +123,23 @@ void MGtkWidgetMixin::SetWidget(GtkWidget *inWidget)
 	if (inWidget != nullptr)
 	{
 		mOnDestroy.Connect(mWidget, "destroy");
-		mOnDelete.Connect(mWidget, "delete_event");
 		mOnShow.Connect(mWidget, "show");
 
-		mFocusInEvent.Connect(mWidget, "focus-in-event");
-		mFocusOutEvent.Connect(mWidget, "focus-out-event");
-		mButtonPressEvent.Connect(mWidget, "button-press-event");
-		mMotionNotifyEvent.Connect(mWidget, "motion-notify-event");
-		mLeaveNotifyEvent.Connect(mWidget, "leave-notify-event");
-		mButtonReleaseEvent.Connect(mWidget, "button-release-event");
-		mKeyPressEvent.Connect(mWidget, "key-press-event");
-		mKeyReleaseEvent.Connect(mWidget, "key-release-event");
-		mConfigureEvent.Connect(mWidget, "configure-event");
-		mScrollEvent.Connect(mWidget, "scroll-event");
+		// mFocusInEvent.Connect(mWidget, "focus-in-event");
+		// mFocusOutEvent.Connect(mWidget, "focus-out-event");
+		// mButtonPressEvent.Connect(mWidget, "button-press-event");
+		// mMotionNotifyEvent.Connect(mWidget, "motion-notify-event");
+		// mLeaveNotifyEvent.Connect(mWidget, "leave-notify-event");
+		// mButtonReleaseEvent.Connect(mWidget, "button-release-event");
+		// mKeyPressEvent.Connect(mWidget, "key-press-event");
+		// mKeyReleaseEvent.Connect(mWidget, "key-release-event");
+		// mConfigureEvent.Connect(mWidget, "configure-event");
+		// mScrollEvent.Connect(mWidget, "scroll-event");
 		mRealize.Connect(mWidget, "realize");
-		mPopupMenu.Connect(mWidget, "popup-menu");
-		mDrawEvent.Connect(mWidget, "draw");
+		// mPopupMenu.Connect(mWidget, "popup-menu");
+		// mDrawEvent.Connect(mWidget, "draw");
 		// mExposeEvent.Connect(mWidget, "expose-event");
-		mOnGrabBroken.Connect(mWidget, "grab-broken-event");
+		// mOnGrabBroken.Connect(mWidget, "grab-broken-event");
 
 		if (mRequestedWidth >= 0 or mRequestedHeight >= 0)
 			gtk_widget_set_size_request(inWidget, mRequestedWidth, mRequestedHeight);

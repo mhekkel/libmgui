@@ -45,30 +45,15 @@ using namespace zeep;
 
 // --------------------------------------------------------------------
 //
-//	MWindowImpl
-//
-
-MMenuBar *MWindowImpl::CreateMenu(const std::string &inMenu)
-{
-	using namespace std::literals;
-
-	mrsrc::istream rsrc("Menus/"s + inMenu + ".xml");
-	xml::document doc(rsrc);
-
-	return MMenuBar::Create(&doc.front());
-}
-
-// --------------------------------------------------------------------
-//
 //	MWindow
 //
 
 list<MWindow *> MWindow::sWindowList;
 
-MWindow::MWindow(const string &inTitle, const MRect &inBounds, MWindowFlags inFlags, const string &inMenu)
+MWindow::MWindow(const string &inTitle, const MRect &inBounds, MWindowFlags inFlags)
 	: MView("window", inBounds)
 	, MHandler(gApp)
-	, mImpl(MWindowImpl::Create(inTitle, inBounds, inFlags, inMenu, this))
+	, mImpl(MWindowImpl::Create(inTitle, inBounds, inFlags, this))
 	, mModified(false)
 {
 	mVisible = eTriStateLatent;

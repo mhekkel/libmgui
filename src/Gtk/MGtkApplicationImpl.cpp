@@ -38,9 +38,26 @@
 
 #include <cstring>
 
-MGtkApplicationImpl::MGtkApplicationImpl()
+MGtkApplicationImpl::MGtkApplicationImpl(std::function<void()> inActivateCB)
+	: mStartup(this, &MGtkApplicationImpl::Startup)
+	, mActivate(this, &MGtkApplicationImpl::Activate)
+	, mGtkApplication(gtk_application_new("com.hekkelman.mgui-dummy-app-id", G_APPLICATION_NON_UNIQUE))
+	, mActivateCB(inActivateCB)
 {
 	sInstance = this;
+
+	mStartup.Connect(G_OBJECT(mGtkApplication), "startup");
+	mActivate.Connect(G_OBJECT(mGtkApplication), "activate");
+}
+
+void MGtkApplicationImpl::Startup()
+{
+	gApp->Initialise();
+}
+
+void MGtkApplicationImpl::Activate()
+{
+	mActivateCB();
 }
 
 void MGtkApplicationImpl::Initialise()
@@ -93,6 +110,8 @@ MGtkApplicationImpl::~MGtkApplicationImpl()
 	mCV.notify_one();
 	if (mAsyncTaskThread.joinable())
 		mAsyncTaskThread.join();
+
+	g_object_unref(mGtkApplication);
 }
 
 int MGtkApplicationImpl::RunEventLoop()
@@ -100,19 +119,10 @@ int MGtkApplicationImpl::RunEventLoop()
 	mPulseID = g_timeout_add(100, &MGtkApplicationImpl::Timeout, nullptr);
 
 	// Start processing async tasks
-
 	mAsyncTaskThread = std::thread([this, context = g_main_context_get_thread_default()]()
 		{ ProcessAsyncTasks(context); });
 
-#warning FIXME
-	// gtk_main();
-
-
-	auto loop = g_main_loop_new(nullptr, false);
-	g_main_loop_run(loop);
-	g_object_unref(loop);
-
-	return 0;
+	return g_application_run(G_APPLICATION(mGtkApplication), 0, nullptr);
 }
 
 void MGtkApplicationImpl::Quit()
@@ -120,8 +130,7 @@ void MGtkApplicationImpl::Quit()
 	if (mPulseID)
 		g_source_remove(mPulseID);
 
-#warning FIXME
-	// gtk_main_quit();
+	g_application_quit(G_APPLICATION(mGtkApplication));
 
 	std::unique_lock lock(mMutex);
 	mHandlerQueue.push_front(nullptr);

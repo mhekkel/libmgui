@@ -32,6 +32,7 @@
 #include <zeep/xml/node.hpp>
 
 #include <list>
+#include <memory>
 
 class MHandler;
 class MWindow;
@@ -83,10 +84,22 @@ class MMenu
 	MHandler *mTarget;
 };
 
+// Menu bars are global objects
+
 class MMenuBar : public MMenu
 {
   public:
-	MMenuBar();
+	static void Init(const std::string &inMenuResourceName);
+
+	static MMenuBar &instance()
+	{
+		return *sInstance;
+	}
+
 	void AddToWindow(MWindowImpl *inWindowImpl);
-	static MMenuBar *Create(zeep::xml::element *inXMLNode);
+
+  private:
+	MMenuBar();
+
+	static std::unique_ptr<MMenuBar> sInstance;
 };

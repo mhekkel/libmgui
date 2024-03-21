@@ -1,0 +1,6 @@
+<?xml version="1.0" standalone="yes"?>
+<menubar>
+	<menu id='filemenu' label="Connection">
+		<item label="Quit" cmd='quit'/>
+	</menu>
+</menubar>

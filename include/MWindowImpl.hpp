@@ -36,8 +36,7 @@ class MWindowImpl
 {
   public:
 	static MWindowImpl *Create(const std::string &inTitle, MRect inBounds,
-		MWindowFlags inFlags, const std::string &inMenu,
-		MWindow *inWindow);
+		MWindowFlags inFlags, MWindow *inWindow);
 
 	static MWindowImpl *CreateDialog(const std::string &inResource, MWindow *inWindow);
 

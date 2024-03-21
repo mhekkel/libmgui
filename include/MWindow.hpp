@@ -48,14 +48,14 @@ enum MWindowFlags
 	kMNoSizeBox = (1 << 5),
 	kMAcceptDragAndDrop = (1 << 6),
 	kMCustomNonClient = (1 << 7),
+	kMShowMenubar = (1 << 8)
 };
 
 class MWindow : public MView, public MHandler
 {
   public:
 	MWindow(const std::string &inTitle,
-		const MRect &inBounds, MWindowFlags inFlags,
-		const std::string &inMenu);
+		const MRect &inBounds, MWindowFlags inFlags);
 
 	virtual ~MWindow();
 

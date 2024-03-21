@@ -140,9 +140,9 @@ class MGDbusServer
 
 	void NameAcquired(GDBusConnection *connection, const char *name)
 	{
-		std::unique_ptr<MApplication> app(MApplication::Create(new MGtkApplicationImpl));
-
-		app->Initialise();
+		auto app = MApplication::Create(new MGtkApplicationImpl(
+			[this]() { gApp->Execute(mMethod, mArguments); }
+		));
 
 		struct sigaction act, oact;
 		act.sa_handler = my_signal_handler;
@@ -153,9 +153,6 @@ class MGDbusServer
 		::sigaction(SIGPIPE, &act, &oact);
 		::sigaction(SIGINT, &act, &oact);
 
-		app->Execute(mMethod, mArguments);
-
-		// exit the mloop since we're about to call gtk_main
 		g_main_loop_quit(mLoop);
 
 		app->RunEventLoop();

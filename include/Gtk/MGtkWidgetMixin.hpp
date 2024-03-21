@@ -312,7 +312,6 @@ class MGtkWidgetMixin
 
   protected:
 	virtual bool OnDestroy();
-	virtual bool OnDelete(GdkEvent *inEvent);
 	virtual void OnShow();
 	virtual bool OnFocusInEvent(GdkEvent *inEvent);
 	virtual bool OnFocusOutEvent(GdkEvent *inEvent);
@@ -356,7 +355,6 @@ class MGtkWidgetMixin
 	GtkWidget *mWidget;
 
 	MSlot<bool()> mOnDestroy;
-	MSlot<bool(GdkEvent *)> mOnDelete;
 	MSlot<void()> mOnShow;
 
 	MSlot<bool(GdkEvent *)> mFocusInEvent;

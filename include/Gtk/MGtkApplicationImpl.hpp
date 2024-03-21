@@ -27,6 +27,7 @@
 #pragma once
 
 #include "MApplicationImpl.hpp"
+#include "MGtkWidgetMixin.hpp"
 
 #include <filesystem>
 #include <thread>
@@ -36,7 +37,7 @@
 class MGtkApplicationImpl : public MApplicationImpl
 {
   public:
-	MGtkApplicationImpl();
+	MGtkApplicationImpl(std::function<void()> inActivateCB);
 	virtual ~MGtkApplicationImpl();
 
 	static MGtkApplicationImpl *
@@ -45,6 +46,8 @@ class MGtkApplicationImpl : public MApplicationImpl
 	void Initialise();
 	virtual int RunEventLoop();
 	virtual void Quit();
+
+	GtkApplication *GetGtkApp() const { return mGtkApplication; }
 
   private:
 	static gboolean Timeout(gpointer inData);
@@ -56,8 +59,16 @@ class MGtkApplicationImpl : public MApplicationImpl
 
 	static MGtkApplicationImpl *sInstance;
 
+	MSlot<void()> mStartup;
+	void Startup();
+
+	MSlot<void()> mActivate;
+	void Activate();
+
 	guint mPulseID = 0;
 	std::thread mAsyncTaskThread;
+	GtkApplication *mGtkApplication = nullptr;
+	std::function<void()> mActivateCB;
 };
 
 extern std::filesystem::path gExecutablePath, gPrefixPath;

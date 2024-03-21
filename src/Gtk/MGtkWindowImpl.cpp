@@ -25,6 +25,7 @@
  */
 
 #include "Gtk/MGtkWindowImpl.hpp"
+#include "Gtk/MGtkApplicationImpl.hpp"
 
 #include "MApplication.hpp"
 #include "MCommands.hpp"
@@ -47,20 +48,17 @@ list<MWindow *> MGtkWindowImpl::sRecycle;
 //	MGtkWindowImpl
 //
 
-MGtkWindowImpl::MGtkWindowImpl(MWindowFlags inFlags, const std::string &inMenu, MWindow *inWindow)
+MGtkWindowImpl::MGtkWindowImpl(MWindowFlags inFlags, MWindow *inWindow)
 	: MWindowImpl(inFlags, inWindow)
 	//	, mModified(false)
     //	, mTransitionThread(nullptr)
 	, mChildFocus(this, &MGtkWindowImpl::ChildFocus)
 	, mMapEvent(this, &MGtkWindowImpl::OnMapEvent)
 	//	, mChanged(this, &MGtkWindowImpl::Changed)
-	, mMenubar(nullptr)
 	, mMainVBox(nullptr)
 	, mFocus(this)
 	, mConfigured(false)
 {
-	if (not inMenu.empty())
-		mMenubar = MWindowImpl::CreateMenu(inMenu);
 }
 
 MGtkWindowImpl::~MGtkWindowImpl()
@@ -69,7 +67,7 @@ MGtkWindowImpl::~MGtkWindowImpl()
 
 void MGtkWindowImpl::Create(MRect inBounds, const std::string &inTitle)
 {
-	GtkWidget *widget = gtk_window_new();
+	GtkWidget *widget = gtk_application_window_new(static_cast<MGtkApplicationImpl *>(gApp->GetImpl())->GetGtkApp());
 	THROW_IF_NIL(widget);
 
 	gtk_window_set_default_size(GTK_WINDOW(widget), inBounds.width, inBounds.height);
@@ -77,30 +75,30 @@ void MGtkWindowImpl::Create(MRect inBounds, const std::string &inTitle)
 
 	SetWidget(widget);
 
-	GList *iconList = nullptr;
+	// GList *iconList = nullptr;
 
-	mrsrc::rsrc appIconResource("Icons/appicon.png");
-	GInputStream *s = g_memory_input_stream_new_from_data(appIconResource.data(), appIconResource.size(), nullptr);
-	THROW_IF_NIL(s);
+	// mrsrc::rsrc appIconResource("Icons/appicon.png");
+	// GInputStream *s = g_memory_input_stream_new_from_data(appIconResource.data(), appIconResource.size(), nullptr);
+	// THROW_IF_NIL(s);
 
-	GError *error = nullptr;
-	GdkPixbuf *icon = gdk_pixbuf_new_from_stream(s, nullptr, &error);
-	if (icon)
-		iconList = g_list_append(iconList, icon);
+	// GError *error = nullptr;
+	// GdkPixbuf *icon = gdk_pixbuf_new_from_stream(s, nullptr, &error);
+	// if (icon)
+	// 	iconList = g_list_append(iconList, icon);
 
-	if (error)
-		g_free(error);
+	// if (error)
+	// 	g_free(error);
 
-	mrsrc::rsrc smallAppIconResource("Icons/appicon.png");
-	s = g_memory_input_stream_new_from_data(smallAppIconResource.data(), smallAppIconResource.size(), nullptr);
-	THROW_IF_NIL(s);
+	// mrsrc::rsrc smallAppIconResource("Icons/appicon.png");
+	// s = g_memory_input_stream_new_from_data(smallAppIconResource.data(), smallAppIconResource.size(), nullptr);
+	// THROW_IF_NIL(s);
 
-	icon = gdk_pixbuf_new_from_stream(s, nullptr, &error);
-	if (icon)
-		iconList = g_list_append(iconList, icon);
+	// icon = gdk_pixbuf_new_from_stream(s, nullptr, &error);
+	// if (icon)
+	// 	iconList = g_list_append(iconList, icon);
 
-	if (error)
-		g_free(error);
+	// if (error)
+	// 	g_free(error);
 
 #warning FIXME
 	// if (iconList)
@@ -113,13 +111,16 @@ void MGtkWindowImpl::Create(MRect inBounds, const std::string &inTitle)
 	//		g_list_free(defaulIconList);
 	//	}
 
-	mMapEvent.Connect(widget, "map-event");
+	// mMapEvent.Connect(widget, "map-event");
 
-	if (mMenubar != nullptr)
-	{
-		mMenubar->AddToWindow(this);
-		mMenubar->SetTarget(mWindow);
-	}
+	// if (mMenubar != nullptr)
+	// {
+	// 	mMenubar->AddToWindow(this);
+	// 	mMenubar->SetTarget(mWindow);
+	// }
+
+	if (mFlags & MWindowFlags::kMShowMenubar)
+		MMenuBar::instance().AddToWindow(this);
 
 	//	mChanged.Connect(this, "on_changed");
 }
@@ -195,6 +196,7 @@ void MGtkWindowImpl::Hide()
 
 bool MGtkWindowImpl::Visible() const
 {
+	return gtk_window_get_focus_visible(GTK_WINDOW(GetWidget()));
 #warning FIXME
 	// return gtk_widget_get_window(GetWidget()) != nullptr and gdk_window_is_visible(gtk_widget_get_window(GetWidget()));
 }
@@ -361,12 +363,7 @@ void MGtkWindowImpl::Select()
 	// 	gdk_window_focus(gdkWindow, GDK_CURRENT_TIME);
 
 	if (Visible())
-	{
-		// gdk_window_raise(gdkWindow);
-		// gtk_window_present_with_time(GTK_WINDOW(GetWidget()), gtk_get_current_event_time());
-#warning FIXME
 		gtk_window_present_with_time(GTK_WINDOW(GetWidget()), 0);
-	}
 	else
 		Show();
 
@@ -556,9 +553,9 @@ void MGtkWindowImpl::ConvertFromScreen(int32_t &ioX, int32_t &ioY) const
 // --------------------------------------------------------------------
 
 MWindowImpl *MWindowImpl::Create(const string &inTitle, MRect inBounds,
-	MWindowFlags inFlags, const string &inMenu, MWindow *inWindow)
+	MWindowFlags inFlags, MWindow *inWindow)
 {
-	MGtkWindowImpl *result = new MGtkWindowImpl(inFlags, inMenu, inWindow);
+	MGtkWindowImpl *result = new MGtkWindowImpl(inFlags, inWindow);
 	result->Create(inBounds, inTitle);
 	return result;
 }

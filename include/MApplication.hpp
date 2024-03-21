@@ -84,6 +84,8 @@ class MApplication : public MHandler
 
 	static int Main(const std::string &command,
 		const std::vector<std::string> &argv);
+	
+	MApplicationImpl *GetImpl() const { return mImpl; }
 
   protected:
 	MApplication(MApplicationImpl *inImpl);

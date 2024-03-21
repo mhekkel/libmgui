@@ -35,8 +35,7 @@
 class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin
 {
   public:
-	MGtkWindowImpl(MWindowFlags inFlags,
-		const std::string &inMenu, MWindow *inWindow);
+	MGtkWindowImpl(MWindowFlags inFlags, MWindow *inWindow);
 	virtual ~MGtkWindowImpl();
 
 	static void RecycleWindows();
@@ -99,7 +98,6 @@ class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin
 	virtual void DoForEach(GtkWidget *inWidget);
 	static void DoForEachCallBack(GtkWidget *inWidget, gpointer inUserData);
 
-	MMenuBar *mMenubar;
 	GtkWidget *mMainVBox;
 	MGtkWidgetMixin *mFocus;
 	bool mConfigured;

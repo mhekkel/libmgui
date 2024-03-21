@@ -1,9 +1,19 @@
 #include "MApplication.hpp"
+#include "MMenu.hpp"
 #include "MWindow.hpp"
 
 #include <iostream>
 
 const char kAppName[] = "ExampleApp";
+
+class ExampleWindow : public MWindow
+{
+  public:
+	ExampleWindow()
+		: MWindow("Example", MRect{}, kMPostionDefault | kMShowMenubar)
+	{
+	}
+};
 
 class ExampleApp : public MApplication
 {
@@ -17,11 +27,10 @@ class ExampleApp : public MApplication
 	void Initialise() override
 	{
 		MApplication::Initialise();
-
-		std::cout << "Initialize\n";
+		MMenuBar::Init("example-menu");
 	}
 
-	void Execute(const std::string &command, const std::vector<std::string> &arguments)
+	void Execute(const std::string &command, const std::vector<std::string> &arguments) override
 	{
 		if (command == "New")
 			DoNew();
@@ -29,7 +38,8 @@ class ExampleApp : public MApplication
 
 	void DoNew() override
 	{
-		std::cout << "DoNew\n";
+		auto w = new ExampleWindow();
+		w->Select();
 	}
 };
 

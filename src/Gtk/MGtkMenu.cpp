@@ -3,10 +3,12 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
+#include "Gtk/MGtkApplicationImpl.hpp"
 #include "Gtk/MGtkWidgetMixin.hpp"
 #include "Gtk/MGtkWindowImpl.hpp"
 
 #include "MAcceleratorTable.hpp"
+#include "MApplication.hpp"
 #include "MError.hpp"
 #include "MFile.hpp"
 #include "MMenuImpl.hpp"
@@ -68,7 +70,7 @@ struct MMenuItem
 
 	MSlot<void()> mCallback;
 
-	GtkWidget *mGtkMenuItem;
+	GMenuItem *mGMenuItem;
 	string mLabel;
 	uint32_t mCommand;
 	uint32_t mIndex;
@@ -82,7 +84,7 @@ struct MMenuItem
 
 MMenuItem::MMenuItem(MMenu *inMenu, const string &inLabel, uint32_t inCommand)
 	: mCallback(this, &MMenuItem::ItemCallback)
-	, mGtkMenuItem(nullptr)
+	, mGMenuItem(nullptr)
 	, mLabel(inLabel)
 	, mCommand(inCommand)
 	, mIndex(0)
@@ -97,37 +99,31 @@ MMenuItem::MMenuItem(MMenu *inMenu, const string &inLabel, uint32_t inCommand)
 
 void MMenuItem::CreateWidget()
 {
-#warning FIXME
-	// if (mLabel == "-")
-	// 	mGtkMenuItem = gtk_separator_menu_item_new();
-	// else
-	// {
-	// 	mGtkMenuItem = gtk_menu_item_new_with_label(_(mLabel.c_str()));
-	// 	if (mCommand != 0)
-	// 		mCallback.Connect(mGtkMenuItem, "activate");
-	// }
+	mGMenuItem = g_menu_item_new(_(mLabel.c_str()), (std::string{ "app." } + (const char *)MCommandToString(mCommand)).c_str());
+	// if (mCommand != 0)
+	// 	mCallback.Connect(mGMenuItem, "activate");
 }
 
 void MMenuItem::CreateWidget(GSList *&ioRadioGroup)
 {
-#warning FIXME
-	// mGtkMenuItem = gtk_radio_menu_item_new_with_label(ioRadioGroup, _(mLabel.c_str()));
+	// #warning FIXME
+	// 	// mGMenuItem = gtk_radio_menu_item_new_with_label(ioRadioGroup, _(mLabel.c_str()));
 
-	// ioRadioGroup = gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(mGtkMenuItem));
+	// 	// ioRadioGroup = gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(mGMenuItem));
 
-	// if (mCommand != 0)
-	// 	mCallback.Connect(mGtkMenuItem, "toggled");
+	// 	// if (mCommand != 0)
+	// 	// 	mCallback.Connect(mGMenuItem, "toggled");
 
-	// mCanCheck = true;
+	// 	// mCanCheck = true;
 }
 
 void MMenuItem::CreateCheckWidget()
 {
 #warning FIXME
-	// mGtkMenuItem = gtk_check_menu_item_new_with_label(_(mLabel.c_str()));
+	// mGMenuItem = gtk_check_menu_item_new_with_label(_(mLabel.c_str()));
 
 	// if (mCommand != 0)
-	// 	mCallback.Connect(mGtkMenuItem, "toggled");
+	// 	mCallback.Connect(mGMenuItem, "toggled");
 
 	// //	mCanCheck = true;
 }
@@ -145,7 +141,7 @@ void MMenuItem::ItemCallback()
 
 	// 		if (mCanCheck)
 	// 		{
-	// 			mChecked = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(mGtkMenuItem));
+	// 			mChecked = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(mGMenuItem));
 	// 			process = mChecked;
 	// 		}
 
@@ -188,11 +184,11 @@ void MMenuItem::ItemCallback()
 void MMenuItem::SetChecked(bool inChecked)
 {
 #warning FIXME
-	// if (inChecked != mChecked and GTK_IS_CHECK_MENU_ITEM(mGtkMenuItem))
+	// if (inChecked != mChecked and GTK_IS_CHECK_MENU_ITEM(mGMenuItem))
 	// {
 	// 	mInhibitCallBack = true;
 	// 	mChecked = inChecked;
-	// 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(mGtkMenuItem), mChecked);
+	// 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(mGMenuItem), mChecked);
 	// 	mInhibitCallBack = false;
 	// }
 }
@@ -203,7 +199,7 @@ void MMenuItem::SetChecked(bool inChecked)
 class MGtkMenuImpl : public MMenuImpl
 {
   public:
-	MGtkMenuImpl(MMenu *inMenu);
+	MGtkMenuImpl(MMenu *inMenu, GApplication *inApp);
 
 	virtual void SetTarget(MHandler *inHandler);
 	virtual void SetItemState(uint32_t inItem, bool inEnabled, bool inChecked);
@@ -234,14 +230,14 @@ class MGtkMenuImpl : public MMenuImpl
 	MMenuItem *CreateNewItem(const std::string &inLabel, uint32_t inCommand, GSList **ioRadioGroup);
 
 	// for the menubar
-	MGtkMenuImpl(MMenu *inMenu, GtkWidget *inWidget)
-		: MGtkMenuImpl(inMenu)
+	MGtkMenuImpl(MMenu *inMenu, GMenu *inGMenu, GApplication *inApp)
+		: MGtkMenuImpl(inMenu, inApp)
 	{
-		mGtkMenu = inWidget;
+		mGMenu = inGMenu;
 	}
 
-	GtkWidget *mGtkMenu = nullptr;
-	// GtkAccelGroup *mGtkAccel;
+	GMenu *mGMenu = nullptr;
+	GApplication *mApp;
 	std::string mLabel;
 	MMenuItemList mItems;
 	MHandler *mTarget;
@@ -249,12 +245,12 @@ class MGtkMenuImpl : public MMenuImpl
 	int32_t mPopupX, mPopupY;
 };
 
-MGtkMenuImpl::MGtkMenuImpl(MMenu *inMenu)
+MGtkMenuImpl::MGtkMenuImpl(MMenu *inMenu, GApplication *inApp)
 	: MMenuImpl(inMenu)
 	, mOnDestroy(this, &MGtkMenuImpl::OnDestroy)
 	, mOnSelectionDone(this, &MGtkMenuImpl::OnSelectionDone)
-	// , mGtkMenu(gtk_menu_new())
-	// , mGtkAccel(nullptr)
+	, mGMenu(g_menu_new())
+	, mApp(inApp)
 	, mTarget(nullptr)
 	, mRadioGroup(nullptr)
 {
@@ -273,20 +269,20 @@ void MGtkMenuImpl::SetTarget(MHandler *inHandler)
 
 void MGtkMenuImpl::SetItemState(uint32_t inIndex, bool inEnabled, bool inChecked)
 {
-	if (inIndex >= mItems.size())
-		THROW(("Item index out of range"));
+	// if (inIndex >= mItems.size())
+	// 	THROW(("Item index out of range"));
 
-	MMenuItemList::iterator item = mItems.begin();
-	advance(item, inIndex);
+	// MMenuItemList::iterator item = mItems.begin();
+	// advance(item, inIndex);
 
-	if (inEnabled != (*item)->mEnabled)
-	{
-		gtk_widget_set_sensitive((*item)->mGtkMenuItem, inEnabled);
-		(*item)->mEnabled = inEnabled;
-	}
+	// if (inEnabled != (*item)->mEnabled)
+	// {
+	// 	gtk_widget_set_sensitive((*item)->mGMenuItem, inEnabled);
+	// 	(*item)->mEnabled = inEnabled;
+	// }
 
-	if ((*item)->mCanCheck)
-		(*item)->SetChecked(inChecked);
+	// if ((*item)->mCanCheck)
+	// 	(*item)->SetChecked(inChecked);
 }
 
 MMenuItem *MGtkMenuImpl::CreateNewItem(const string &inLabel, uint32_t inCommand, GSList **ioRadioGroup)
@@ -306,7 +302,7 @@ MMenuItem *MGtkMenuImpl::CreateNewItem(const string &inLabel, uint32_t inCommand
 	item->mIndex = mItems.size();
 	mItems.push_back(item);
 #warning FIXME
-	// gtk_menu_shell_append(GTK_MENU_SHELL(mGtkMenu), item->mGtkMenuItem);
+	// gtk_menu_shell_append(GTK_MENU_SHELL(mGtkMenu), item->mGMenuItem);
 
 	return item;
 }
@@ -327,7 +323,9 @@ void MGtkMenuImpl::AppendSubmenu(MMenu *inSubmenu)
 	MGtkMenuImpl *subImpl = dynamic_cast<MGtkMenuImpl *>(inSubmenu->impl());
 
 #warning FIXME
-	// gtk_menu_item_set_submenu(GTK_MENU_ITEM(item->mGtkMenuItem), subImpl->mGtkMenu);
+	g_menu_append_item(subImpl->mGMenu, item->mGMenuItem);
+
+	// gtk_menu_item_set_submenu(GTK_MENU_ITEM(item->mGMenuItem), subImpl->mGtkMenu);
 
 	// if (mGtkAccel)
 	// 	subImpl->SetAcceleratorGroup(mGtkAccel);
@@ -335,7 +333,7 @@ void MGtkMenuImpl::AppendSubmenu(MMenu *inSubmenu)
 
 void MGtkMenuImpl::AppendSeparator()
 {
-	CreateNewItem("-", 0, nullptr);
+	// CreateNewItem("-", 0, nullptr);
 }
 
 void MGtkMenuImpl::AppendCheckbox(const string &inLabel, uint32_t inCommand)
@@ -366,8 +364,8 @@ void MGtkMenuImpl::RemoveItems(uint32_t inFirstIndex, uint32_t inCount)
 
 #warning FIXME
 		// for (MMenuItemList::iterator mi = b; mi != e; ++mi)
-		// 	gtk_container_remove(GTK_CONTAINER(mGtkMenu), (*mi)->mGtkMenuItem);
-			// gtk_widget_destroy((*mi)->mGtkMenuItem);
+		// 	gtk_container_remove(GTK_CONTAINER(mGtkMenu), (*mi)->mGMenuItem);
+		// gtk_widget_destroy((*mi)->mGMenuItem);
 
 		mItems.erase(b, e);
 	}
@@ -423,8 +421,8 @@ void MGtkMenuImpl::Popup(MWindow *inHandler, int32_t inX, int32_t inY, bool inBo
 
 void MGtkMenuImpl::AddToWindow(MWindowImpl *inWindowImpl)
 {
-	MGtkWindowImpl *impl = dynamic_cast<MGtkWindowImpl *>(inWindowImpl);
-	impl->AddMenubarWidget(mGtkMenu);
+	// MGtkWindowImpl *impl = dynamic_cast<MGtkWindowImpl *>(inWindowImpl);
+	// impl->AddMenubarWidget(mGMenu);
 }
 
 void MGtkMenuImpl::MenuUpdated()
@@ -470,7 +468,7 @@ void MGtkMenuImpl::OnSelectionDone()
 // 				default: break;
 // 			}
 
-// 			gtk_widget_add_accelerator(item->mGtkMenuItem, "activate", inAcceleratorGroup,
+// 			gtk_widget_add_accelerator(item->mGMenuItem, "activate", inAcceleratorGroup,
 // 				key, GdkModifierType(m), GTK_ACCEL_VISIBLE);
 // 		}
 
@@ -485,30 +483,61 @@ void MGtkMenuImpl::OnSelectionDone()
 
 MMenuImpl *MMenuImpl::Create(MMenu *inMenu, bool inPopup)
 {
-	return new MGtkMenuImpl(inMenu);
+	GApplication *app = G_APPLICATION(static_cast<MGtkApplicationImpl *>(gApp->GetImpl())->GetGtkApp());
+	return new MGtkMenuImpl(inMenu, app);
 }
 
 // --------------------------------------------------------------------
 
-// class MGtkMenuBarImpl : public MGtkMenuImpl
-// {
-//   public:
-// 	MGtkMenuBarImpl(MMenu *inMenu)
-// 		: MGtkMenuImpl(inMenu, gtk_menu_bar_new())
-// 		, mOnButtonPressEvent(this, &MGtkMenuBarImpl::OnButtonPress)
-// 	{
-// 		mGtkAccel = gtk_accel_group_new();
-// 		mOnButtonPressEvent.Connect(mGtkMenu, "button-press-event");
-// 	}
+static void
+quit_activated(GSimpleAction *action, GVariant *parameter, GApplication *application)
+{
+	g_application_quit(application);
+}
 
-// 	bool OnButtonPress(GdkEventButton *inEvent);
-// 	MSlot<bool(GdkEventButton *)> mOnButtonPressEvent;
-// };
+class MGtkMenuBarImpl : public MGtkMenuImpl
+{
+  public:
+	MGtkMenuBarImpl(MMenu *inMenu, GApplication *inApp)
+		: MGtkMenuImpl(inMenu, g_menu_new(), inApp)
+	{
+		// GSimpleAction *act_quit = g_simple_action_new("quit", NULL);
+		// g_action_map_add_action(G_ACTION_MAP(inApp), G_ACTION(act_quit));
+		// g_signal_connect(act_quit, "activate", G_CALLBACK(quit_activated), inApp);
+
+		// GMenu *menubar = g_menu_new();
+		// GMenuItem *menu_item_menu = g_menu_item_new("Menu", NULL);
+		// GMenu *menu = g_menu_new();
+		// GMenuItem *menu_item_quit = g_menu_item_new("Quit", "app.quit");
+		// g_menu_append_item(menu, menu_item_quit);
+		// g_object_unref(menu_item_quit);
+		// g_menu_item_set_submenu(menu_item_menu, G_MENU_MODEL(menu));
+		// g_object_unref(menu);
+		// g_menu_append_item(menubar, menu_item_menu);
+		// g_object_unref(menu_item_menu);
+
+		gtk_application_set_menubar(GTK_APPLICATION(inApp), G_MENU_MODEL(mGMenu));
+
+		mGMenuBar = gtk_popover_menu_bar_new_from_model(G_MENU_MODEL(mGMenu));
+		// mGtkAccel = gtk_accel_group_new();
+		// mOnButtonPressEvent.Connect(mGMenu, "button-press-event");
+	}
+
+	virtual void AddToWindow(MWindowImpl *inWindow)
+	{
+		gtk_application_window_set_show_menubar(GTK_APPLICATION_WINDOW(static_cast<MGtkWindowImpl *>(inWindow)->operator GtkWidget *()), true);
+	}
+
+	// bool OnButtonPress(GdkEventButton *inEvent);
+	// MSlot<bool(GdkEventButton *)> mOnButtonPressEvent;
+
+	GtkWidget *mGMenuBar;
+};
 
 MMenuImpl *MMenuImpl::CreateBar(MMenu *inMenu)
 {
-	// return new MGtkMenuBarImpl(inMenu);
-	return nullptr;
+	GApplication *app = G_APPLICATION(static_cast<MGtkApplicationImpl *>(gApp->GetImpl())->GetGtkApp());
+	return new MGtkMenuBarImpl(inMenu, app);
 }
 
 // bool MGtkMenuBarImpl::OnButtonPress(GdkEvent *inEvent)
