@@ -173,11 +173,6 @@ void MApplication::DoSelectWindowFromWindowMenu(uint32_t inIndex)
 {
 }
 
-int MApplication::RunEventLoop()
-{
-	return mImpl->RunEventLoop();
-}
-
 bool MApplication::AllowQuit(bool inLogOff)
 {
 	bool result = mQuitPending;

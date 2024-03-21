@@ -37,12 +37,20 @@ struct MCommandToString
 	MCommandToString(
 		uint32_t inCommand)
 	{
-		strcpy(mCommandString, "MCmd_xxxx");
+		strcpy(mCommandString, "xxxx");
 
-		mCommandString[5] = ((inCommand & 0xff000000) >> 24) & 0x000000ff;
-		mCommandString[6] = ((inCommand & 0x00ff0000) >> 16) & 0x000000ff;
-		mCommandString[7] = ((inCommand & 0x0000ff00) >> 8) & 0x000000ff;
-		mCommandString[8] = ((inCommand & 0x000000ff) >> 0) & 0x000000ff;
+		mCommandString[0] = ((inCommand & 0xff000000) >> 24) & 0x000000ff;
+		mCommandString[1] = ((inCommand & 0x00ff0000) >> 16) & 0x000000ff;
+		mCommandString[2] = ((inCommand & 0x0000ff00) >> 8) & 0x000000ff;
+		mCommandString[3] = ((inCommand & 0x000000ff) >> 0) & 0x000000ff;
+
+
+		// strcpy(mCommandString, "MCmd_xxxx");
+
+		// mCommandString[5] = ((inCommand & 0xff000000) >> 24) & 0x000000ff;
+		// mCommandString[6] = ((inCommand & 0x00ff0000) >> 16) & 0x000000ff;
+		// mCommandString[7] = ((inCommand & 0x0000ff00) >> 8) & 0x000000ff;
+		// mCommandString[8] = ((inCommand & 0x000000ff) >> 0) & 0x000000ff;
 	}
 
 	operator const char *() const { return mCommandString; }
@@ -66,12 +74,14 @@ struct MMenuItem
 		if (inCommand)
 		{
 			GSimpleAction *action = g_simple_action_new(MCommandToString(inCommand), NULL);
-			std::cout << "action name: " << g_action_get_name(G_ACTION(action)) << "\n";
-			std::cout << "enabled: " << std::boolalpha << g_action_get_enabled(G_ACTION(action)) << "\n";
+
 			g_action_map_add_action(G_ACTION_MAP(app), G_ACTION(action));
 			g_signal_connect(action, "activate", G_CALLBACK(MGtkApplicationImpl::ActionActivated), app);
 
-			mGMenuItem = g_menu_item_new(_(mLabel.c_str()), MCommandToString(inCommand));
+			std::cout << "action name: " << g_action_get_name(G_ACTION(action)) << "\n";
+			std::cout << "enabled: " << std::boolalpha << g_action_get_enabled(G_ACTION(action)) << "\n";
+
+			mGMenuItem = g_menu_item_new(_(mLabel.c_str()), (std::string{"app."} + MCommandToString(inCommand).operator const char *()).c_str());
 		}
 		else
 			mGMenuItem = g_menu_item_new(_(mLabel.c_str()), nullptr);
@@ -206,7 +216,7 @@ class MGtkMenuImpl : public MMenuImpl
 	}
 
 	GMenu *mGMenu = nullptr;
-	GMenu *mSection = nullptr;
+	// GMenu *mSection = nullptr;
 	GApplication *mApp;
 	std::string mLabel;
 	MMenuItemList mItems;
@@ -272,13 +282,16 @@ MMenuItem *MGtkMenuImpl::CreateNewItem(const string &inLabel, uint32_t inCommand
 	item->mIndex = mItems.size();
 	mItems.push_back(item);
 
-	if (mSection == nullptr)
-	{
-		mSection = g_menu_new();
-		g_menu_append_section(mGMenu, nullptr, G_MENU_MODEL(mSection));
-	}
+	// if (mSection == nullptr)
+	// {
+	// 	mSection = g_menu_new();
+	// 	g_menu_append_section(mGMenu, nullptr, G_MENU_MODEL(mSection));
+	// }
 
-	g_menu_append_item(mSection, item->mGMenuItem);
+	// g_menu_append_item(mSection, item->mGMenuItem);
+
+	g_menu_append_item(mGMenu, item->mGMenuItem);
+
 
 	return item;
 }
@@ -422,47 +435,6 @@ void MGtkMenuImpl::OnSelectionDone()
 {
 }
 
-// void MGtkMenuImpl::SetAcceleratorGroup(GtkAccelGroup *inAcceleratorGroup)
-// {
-// 	MAcceleratorTable &at = MAcceleratorTable::Instance();
-
-// 	gtk_menu_set_accel_group(GTK_MENU(mGtkMenu), inAcceleratorGroup);
-
-// 	for (auto &item : mItems)
-// 	{
-// 		uint32_t key, mod;
-
-// 		if (at.GetAcceleratorKeyForCommand(item->mCommand, key, mod))
-// 		{
-// 			int m = 0;
-
-// 			if (mod & kShiftKey)
-// 				m |= GDK_SHIFT_MASK;
-// 			if (mod & kControlKey)
-// 				m |= GDK_CONTROL_MASK;
-// 			if (mod & kOptionKey)
-// 				m |= GDK_MOD1_MASK;
-
-// 			switch (key)
-// 			{
-// 				case kTabKeyCode: key = GDK_KEY_Tab; break;
-// 				case kF3KeyCode: key = GDK_KEY_F3; break;
-// 				default: break;
-// 			}
-
-// 			gtk_widget_add_accelerator(item->mGMenuItem, "activate", inAcceleratorGroup,
-// 				key, GdkModifierType(m), GTK_ACCEL_VISIBLE);
-// 		}
-
-// 		if (item->mSubMenu != nullptr)
-// 		{
-// 			MGtkMenuImpl *impl = dynamic_cast<MGtkMenuImpl *>(item->mSubMenu->impl());
-// 			if (impl != nullptr)
-// 				impl->SetAcceleratorGroup(inAcceleratorGroup);
-// 		}
-// 	}
-// }
-
 MMenuImpl *MMenuImpl::Create(MMenu *inMenu, bool inPopup)
 {
 	GApplication *app = G_APPLICATION(static_cast<MGtkApplicationImpl *>(gApp->GetImpl())->GetGtkApp());
@@ -483,49 +455,14 @@ class MGtkMenuBarImpl : public MGtkMenuImpl
 	MGtkMenuBarImpl(MMenu *inMenu, GApplication *inApp)
 		: MGtkMenuImpl(inMenu, g_menu_new(), inApp)
 	{
-		// GSimpleAction *act_quit = g_simple_action_new("quit", NULL);
-		// g_action_map_add_action(G_ACTION_MAP(inApp), G_ACTION(act_quit));
-		// g_signal_connect(act_quit, "activate", G_CALLBACK(quit_activated), inApp);
-
-		// GMenu *menubar = g_menu_new();
-		// GMenuItem *menu_item_menu = g_menu_item_new("Menu", NULL);
-		// GMenu *menu = g_menu_new();
-		// GMenuItem *menu_item_quit = g_menu_item_new("Quit", "app.quit");
-		// g_menu_append_item(menu, menu_item_quit);
-		// g_object_unref(menu_item_quit);
-		// g_menu_item_set_submenu(menu_item_menu, G_MENU_MODEL(menu));
-		// g_object_unref(menu);
-		// g_menu_append_item(menubar, menu_item_menu);
-		// g_object_unref(menu_item_menu);
-
 		gtk_application_set_menubar(GTK_APPLICATION(inApp), G_MENU_MODEL(mGMenu));
-
-		mGMenuBar = gtk_popover_menu_bar_new_from_model(G_MENU_MODEL(mGMenu));
-		// mGtkAccel = gtk_accel_group_new();
-		// mOnButtonPressEvent.Connect(mGMenu, "button-press-event");
 	}
 
 	virtual void AddToWindow(MWindowImpl *inWindow)
 	{
-		std::cerr << "Aantal items: " << g_menu_model_get_n_items(G_MENU_MODEL(mGMenu)) << "\n";
-
-		GtkWidget *win = static_cast<MGtkWindowImpl *>(inWindow)->operator GtkWidget *();
-
-		// const GActionEntry win_entries[] = {
-		// 	// { "save", save_activated, NULL, NULL, NULL },
-		// 	// { "saveas", saveas_activated, NULL, NULL, NULL },
-		// 	// { "close", close_activated, NULL, NULL, NULL },
-		// 	// { "fullscreen", NULL, NULL, "false", fullscreen_changed }
-		// };
-		// g_action_map_add_action_entries(G_ACTION_MAP(win), win_entries, G_N_ELEMENTS(win_entries), win);
-
-		gtk_application_window_set_show_menubar(GTK_APPLICATION_WINDOW(win), true);
+		auto impl = static_cast<MGtkWindowImpl *>(inWindow);
+		gtk_application_window_set_show_menubar(GTK_APPLICATION_WINDOW(impl->operator GtkWidget *()), true);
 	}
-
-	// bool OnButtonPress(GdkEventButton *inEvent);
-	// MSlot<bool(GdkEventButton *)> mOnButtonPressEvent;
-
-	GtkWidget *mGMenuBar;
 };
 
 MMenuImpl *MMenuImpl::CreateBar(MMenu *inMenu)

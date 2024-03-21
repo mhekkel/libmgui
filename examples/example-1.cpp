@@ -52,7 +52,9 @@ MApplication *MApplication::Create(MApplicationImpl *inImpl)
 
 int main(int argc, char *argv[])
 {
-	ExampleApp::Main("New", {});
+	std::vector<std::string> args;
+	for (int i = 0; i < argc; ++i)
+		args.emplace_back(argv[i]);
 
-	return 0;
+	return ExampleApp::Main(args);
 }

@@ -47,8 +47,9 @@ class MWindow;
 class MApplication : public MHandler
 {
   public:
-	static MApplication *Create(MApplicationImpl *inImpl);
 	static void Install(const std::string &inPrefix);
+	static MApplication *Create(MApplicationImpl *inImpl);
+	static int Main(const std::vector<std::string> &argv);
 
 	~MApplication();
 	virtual void Initialise();
@@ -73,7 +74,6 @@ class MApplication : public MHandler
 		mImpl->execute(std::move(handler));
 	}
 
-	virtual int RunEventLoop();
 	virtual void Pulse();
 
 	virtual bool AllowQuit(bool inLogOff);
@@ -82,9 +82,6 @@ class MApplication : public MHandler
 	bool IsQuitting() const { return mQuitPending; }
 	void CancelQuit() { mQuitPending = false; }
 
-	static int Main(const std::string &command,
-		const std::vector<std::string> &argv);
-	
 	MApplicationImpl *GetImpl() const { return mImpl; }
 
   protected:

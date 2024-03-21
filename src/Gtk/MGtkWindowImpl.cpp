@@ -130,7 +130,8 @@ void MGtkWindowImpl::AddMenubarWidget(GtkWidget *inWidget)
 	if (mMainVBox == nullptr)
 	{
 		mMainVBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-		gtk_box_append(GTK_BOX(GetWidget()), mMainVBox);
+		// gtk_box_append(GTK_BOX(GetWidget()), mMainVBox);
+		gtk_window_set_child(GTK_WINDOW(GetWidget()), mMainVBox);
 		gtk_widget_show(mMainVBox);
 	}
 

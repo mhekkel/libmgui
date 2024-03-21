@@ -40,8 +40,7 @@ class MGtkApplicationImpl : public MApplicationImpl
 	MGtkApplicationImpl(std::function<void()> inActivateCB);
 	virtual ~MGtkApplicationImpl();
 
-	static MGtkApplicationImpl *
-	GetInstance() { return sInstance; }
+	static MGtkApplicationImpl *GetInstance() { return sInstance; }
 
 	void Initialise();
 	virtual int RunEventLoop();
@@ -53,7 +52,6 @@ class MGtkApplicationImpl : public MApplicationImpl
 
   private:
 	static gboolean Timeout(gpointer inData);
-	static gboolean Idle(gpointer inData);
 	static gboolean HandleAsyncCallback(gpointer inData);
 
 	void ProcessAsyncTasks(GMainContext *context);
@@ -66,6 +64,9 @@ class MGtkApplicationImpl : public MApplicationImpl
 
 	MSlot<void()> mActivate;
 	void Activate();
+
+	MSlot<int(GApplicationCommandLine*)> mCommandLine;
+	int CommandLine(GApplicationCommandLine* inCommandLine);
 
 	guint mPulseID = 0;
 	std::thread mAsyncTaskThread;

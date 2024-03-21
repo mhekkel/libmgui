@@ -38,26 +38,36 @@
 
 #include <cstring>
 
+MGtkApplicationImpl *MGtkApplicationImpl::sInstance;
+
 MGtkApplicationImpl::MGtkApplicationImpl(std::function<void()> inActivateCB)
 	: mStartup(this, &MGtkApplicationImpl::Startup)
 	, mActivate(this, &MGtkApplicationImpl::Activate)
-	, mGtkApplication(gtk_application_new("com.hekkelman.mgui-dummy-app-id", G_APPLICATION_NON_UNIQUE))
+	, mCommandLine(this, &MGtkApplicationImpl::CommandLine)
+	, mGtkApplication(gtk_application_new("com.hekkelman.mgui-dummy-app-id", G_APPLICATION_HANDLES_COMMAND_LINE))
 	, mActivateCB(inActivateCB)
 {
 	sInstance = this;
 
 	mStartup.Connect(G_OBJECT(mGtkApplication), "startup");
 	mActivate.Connect(G_OBJECT(mGtkApplication), "activate");
+	mCommandLine.Connect(G_OBJECT(mGtkApplication), "command-line");
 }
 
 void MGtkApplicationImpl::Startup()
 {
+	mPulseID = g_timeout_add(100, &MGtkApplicationImpl::Timeout, nullptr);
+
+	// Start processing async tasks
+	mAsyncTaskThread = std::thread([this, context = g_main_context_get_thread_default()]()
+		{ ProcessAsyncTasks(context); });
+
 	gApp->Initialise();
 }
 
 void MGtkApplicationImpl::Activate()
 {
-	mActivateCB();
+	gApp->DoNew();
 }
 
 void MGtkApplicationImpl::Initialise()
@@ -104,6 +114,30 @@ void MGtkApplicationImpl::Initialise()
 	// gdk_notify_startup_complete();
 }
 
+int MGtkApplicationImpl::CommandLine(GApplicationCommandLine *inCommandLine)
+{
+	gchar **argv;
+	gint argc;
+	gint i;
+
+	argv = g_application_command_line_get_arguments(inCommandLine, &argc);
+
+	g_application_command_line_print(inCommandLine,
+		"This text is written back\n"
+		"to stdout of the caller\n");
+
+	for (i = 0; i < argc; i++)
+		g_print("argument %d: %s\n", i, argv[i]);
+
+	g_strfreev(argv);
+
+	if (argc <= 1)
+		gApp->DoNew();
+
+
+	return 0;
+}
+
 MGtkApplicationImpl::~MGtkApplicationImpl()
 {
 	mHandlerQueue.push_front(nullptr);
@@ -116,12 +150,6 @@ MGtkApplicationImpl::~MGtkApplicationImpl()
 
 int MGtkApplicationImpl::RunEventLoop()
 {
-	mPulseID = g_timeout_add(100, &MGtkApplicationImpl::Timeout, nullptr);
-
-	// Start processing async tasks
-	mAsyncTaskThread = std::thread([this, context = g_main_context_get_thread_default()]()
-		{ ProcessAsyncTasks(context); });
-
 	return g_application_run(G_APPLICATION(mGtkApplication), 0, nullptr);
 }
 
@@ -200,4 +228,43 @@ gboolean MGtkApplicationImpl::Timeout(gpointer inData)
 void MGtkApplicationImpl::ActionActivated(GSimpleAction *action, GVariant *parameter, GApplication *application)
 {
 	std::cerr << "Action: " << g_action_get_name(G_ACTION(action)) << "\n";
+}
+
+// --------------------------------------------------------------------
+
+int MApplication::Main(const std::vector<std::string> &argv)
+{
+	try
+	{
+		// First find out who we are. Uses proc filesystem to find out.
+		char exePath[PATH_MAX + 1];
+
+		int r = readlink("/proc/self/exe", exePath, PATH_MAX);
+		if (r > 0)
+		{
+			exePath[r] = 0;
+			gExecutablePath = fs::canonical(exePath);
+			gPrefixPath = gExecutablePath.parent_path();
+		}
+
+		MApplication *app = MApplication::Create(new MGtkApplicationImpl([]() {}));
+
+		std::vector<char *> args;
+		for (auto &a : argv)
+			args.emplace_back(const_cast<char *>(a.c_str()));
+		args.emplace_back(nullptr);
+
+		return g_application_run(G_APPLICATION(static_cast<MGtkApplicationImpl *>(app->GetImpl())->GetGtkApp()),
+			argv.size(), args.data());
+	}
+	catch (const std::exception &e)
+	{
+		std::cerr << e.what() << '\n';
+	}
+	catch (...)
+	{
+		std::cerr << "Exception caught\n";
+	}
+
+	return 0;
 }
