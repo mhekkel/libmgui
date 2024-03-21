@@ -184,7 +184,7 @@ target_sources(mgui
 
 target_include_directories(mgui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-target_link_libraries(mgui libmcfp::libmcfp Threads::Threads zeep::zeep)
+target_link_libraries(mgui Threads::Threads zeep::zeep)
 
 if(UNIX)
 	pkg_check_modules(GTK4 gtk4 REQUIRED IMPORTED_TARGET)
@@ -195,6 +195,6 @@ if(UNIX)
 	target_link_libraries(mgui PkgConfig::GTK4)
 endif()
 
-# install(TARGETS salt
-# RUNTIME DESTINATION ${BIN_INSTALL_DIR}
-# )
+if(PROJECT_IS_TOP_LEVEL)
+	add_subdirectory(examples)
+endif()

@@ -29,6 +29,7 @@
 #include "MApplication.hpp"
 #include "MError.hpp"
 
+#include "mrsrc.hpp"
 #include <zeep/xml/document.hpp>
 
 #include <cassert>
@@ -66,10 +67,6 @@ void my_signal_handler(int inSignal)
 }
 
 // --------------------------------------------------------------------
-
-#define MGDBUS_SERVER_NAME "com.hekkelman.GDBus.SaltServer"
-#define MGDBUS_SERVER_OBJECT_NAME "/com/hekkelman/GDBus/SaltObject"
-
 // bool gQuit = false;
 
 MGtkApplicationImpl *MGtkApplicationImpl::sInstance = nullptr;
@@ -87,40 +84,23 @@ class MGDbusServer
 	{
 		using namespace zeep::xml::literals;
 
-		auto my_server = R"(
-<node>
-  <interface>
-    <annotation name='org.gtk.GDBus.Annotation' value='OnInterface'/>
-    <annotation name='org.gtk.GDBus.Annotation' value='AlsoOnInterface'/>
-    <method name='New'>
-      <annotation name='org.gtk.GDBus.Annotation' value='OnMethod'/>
-      <arg type='i' name='result' direction='out'/>
-    </method>
-    <method name='Open'>
-      <annotation name='org.gtk.GDBus.Annotation' value='OnMethod'/>
-      <arg type='s' name='url' direction='in'/>
-      <arg type='i' name='result' direction='out'/>
-    </method>
-    <method name='Connect'>
-      <annotation name='org.gtk.GDBus.Annotation' value='OnMethod'/>
-      <arg type='i' name='result' direction='out'/>
-    </method>
-    <method name='Execute'>
-      <annotation name='org.gtk.GDBus.Annotation' value='OnMethod'/>
-      <arg type='as' name='argv' direction='in'/>
-      <arg type='i' name='result' direction='out'/>
-    </method>
-  </interface>
-</node>)"_xml;
+		mrsrc::rsrc my_server_xml_rsrc("dbus-interface.xml");
+		std::string my_server_xml(my_server_xml_rsrc.data(), my_server_xml_rsrc.size());
 
-		my_server.find_first("/node/interface")->set_attribute("name", MGDBUS_SERVER_NAME);
-		auto my_server_xml = (std::ostringstream() << my_server).str();
+		zeep::xml::document my_server(my_server_xml);
+		mServerName = my_server.find_first("/node/interface")->get_attribute("name");
+		mServerObjectName = "/" + mServerName + "Object";
+		for (auto &c : mServerObjectName)
+		{
+			if (c == '.')
+				c = '/';
+		}
 
 		mIntrospectionData = g_dbus_node_info_new_for_xml(my_server_xml.c_str(), nullptr);
 		if (mIntrospectionData == nullptr)
 			throw std::runtime_error("failed to parse introspection data");
 
-		mOwnerId = g_bus_own_name(G_BUS_TYPE_SESSION, MGDBUS_SERVER_NAME,
+		mOwnerId = g_bus_own_name(G_BUS_TYPE_SESSION, mServerName.c_str(),
 			G_BUS_NAME_OWNER_FLAGS_NONE, HandleBusAcquired, HandleNameAcquired, HandleNameLost,
 			this, nullptr);
 
@@ -152,7 +132,7 @@ class MGDbusServer
 	void BusAcquired(GDBusConnection *connection, const char *name)
 	{
 		mRegistrationID = g_dbus_connection_register_object(
-			connection, MGDBUS_SERVER_OBJECT_NAME,
+			connection, mServerObjectName.c_str(),
 			mIntrospectionData->interfaces[0],
 			&sInterfaceVTable, this, nullptr, nullptr);
 		assert(mRegistrationID > 0);
@@ -183,7 +163,7 @@ class MGDbusServer
 
 	void NameLost(GDBusConnection *connection, const char *name)
 	{
-		mWatcherID = g_bus_watch_name(G_BUS_TYPE_SESSION, MGDBUS_SERVER_NAME,
+		mWatcherID = g_bus_watch_name(G_BUS_TYPE_SESSION, mServerName.c_str(),
 			G_BUS_NAME_WATCHER_FLAGS_NONE, HandleNameAppeared, HandleNameVanished,
 			this, nullptr);
 	}
@@ -209,7 +189,7 @@ class MGDbusServer
 
 		g_dbus_connection_call(
 			connection,
-			MGDBUS_SERVER_NAME, MGDBUS_SERVER_OBJECT_NAME, MGDBUS_SERVER_NAME,
+			mServerName.c_str(), mServerObjectName.c_str(), mServerName.c_str(),
 			mMethod.c_str(),
 			params,
 			nullptr,
@@ -247,34 +227,28 @@ class MGDbusServer
 		const gchar *method_name, GVariant *parameters,
 		GDBusMethodInvocation *invocation)
 	{
+		std::vector<std::string> args;
+
+		if (g_variant_check_format_string(parameters, "(&s)", false))
+		{
+			const gchar *s;
+			g_variant_get(parameters, "(&s)", &s);
+			args.emplace_back(s ? s : "");
+		}
+		else if (g_variant_check_format_string(parameters, "(as)", true))
+		{
+			GVariantIter *iter;
+			gchar *str;
+
+			g_variant_get(parameters, "(as)", &iter);
+			while (g_variant_iter_loop(iter, "{s}", &str))
+				args.emplace_back(str);
+			g_variant_iter_free(iter);
+		}
+
 		try
 		{
-			if (strcmp(method_name, "Open") == 0)
-			{
-				const gchar *gurl;
-				g_variant_get(parameters, "(&s)", &gurl);
-				std::string url(gurl ? gurl : "");
-
-				gApp->Execute("Open", { url });
-			}
-			else if (strcmp(method_name, "Connect") == 0)
-				gApp->Execute("Connect", {});
-			else if (strcmp(method_name, "New") == 0)
-				gApp->Execute("New", {});
-			else if (strcmp(method_name, "Execute") == 0)
-			{
-				GVariantIter *iter;
-				gchar *str;
-
-				std::vector<std::string> args;
-
-				g_variant_get(parameters, "(as)", &iter);
-				while (g_variant_iter_loop(iter, "s", &str))
-					args.emplace_back(str);
-				g_variant_iter_free(iter);
-
-				gApp->Execute("Execute", args);
-			}
+			gApp->Execute(method_name, args);
 
 			g_dbus_method_invocation_return_value(invocation, g_variant_new("(i)", 0));
 		}
@@ -342,6 +316,7 @@ class MGDbusServer
 
 	GDBusNodeInfo *mIntrospectionData;
 	uint32_t mOwnerId, mRegistrationID, mWatcherID;
+	std::string mServerName, mServerObjectName;
 	std::string mMethod;
 	std::vector<std::string> mArguments;
 	GMainLoop *mLoop = nullptr;
