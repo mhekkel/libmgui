@@ -196,3 +196,8 @@ gboolean MGtkApplicationImpl::Timeout(gpointer inData)
 
 	return true;
 }
+
+void MGtkApplicationImpl::ActionActivated(GSimpleAction *action, GVariant *parameter, GApplication *application)
+{
+	std::cerr << "Action: " << g_action_get_name(G_ACTION(action)) << "\n";
+}

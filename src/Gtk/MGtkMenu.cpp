@@ -59,127 +59,96 @@ typedef list<MMenuItem *> MMenuItemList;
 struct MMenuItem
 {
   public:
-	MMenuItem(MMenu *inMenu, const string &inLabel, uint32_t inCommand);
+	MMenuItem(MMenu *inMenu, const string &inLabel, uint32_t inCommand, GApplication *app)
+		: mLabel(inLabel)
+		, mMenu(inMenu)
+	{
+		if (inCommand)
+		{
+			GSimpleAction *action = g_simple_action_new(MCommandToString(inCommand), NULL);
+			std::cout << "action name: " << g_action_get_name(G_ACTION(action)) << "\n";
+			std::cout << "enabled: " << std::boolalpha << g_action_get_enabled(G_ACTION(action)) << "\n";
+			g_action_map_add_action(G_ACTION_MAP(app), G_ACTION(action));
+			g_signal_connect(action, "activate", G_CALLBACK(MGtkApplicationImpl::ActionActivated), app);
 
-	void CreateWidget();                      // plain, simple item
-	void CreateWidget(GSList *&ioRadioGroup); // radio menu item
-	void CreateCheckWidget();
+			mGMenuItem = g_menu_item_new(_(mLabel.c_str()), MCommandToString(inCommand));
+		}
+		else
+			mGMenuItem = g_menu_item_new(_(mLabel.c_str()), nullptr);
+	}
+
+	~MMenuItem()
+	{
+		g_object_unref(mGMenuItem);
+	}
+
 	void SetChecked(bool inChecked);
-	void ItemCallback();
 	void ItemToggled();
-
-	MSlot<void()> mCallback;
 
 	GMenuItem *mGMenuItem;
 	string mLabel;
-	uint32_t mCommand;
-	uint32_t mIndex;
+	std::string mCommand;
+	uint32_t mIndex = 0;
 	MMenu *mMenu;
-	MMenu *mSubMenu;
-	bool mEnabled;
-	bool mCanCheck;
-	bool mChecked;
-	bool mInhibitCallBack;
+	MMenu *mSubMenu = nullptr;
+	bool mEnabled = true;
+	bool mCanCheck = false;
+	bool mChecked = false;
+	bool mInhibitCallBack = false;
 };
 
-MMenuItem::MMenuItem(MMenu *inMenu, const string &inLabel, uint32_t inCommand)
-	: mCallback(this, &MMenuItem::ItemCallback)
-	, mGMenuItem(nullptr)
-	, mLabel(inLabel)
-	, mCommand(inCommand)
-	, mIndex(0)
-	, mMenu(inMenu)
-	, mSubMenu(nullptr)
-	, mEnabled(true)
-	, mCanCheck(false)
-	, mChecked(false)
-	, mInhibitCallBack(false)
-{
-}
+// void MMenuItem::ItemCallback()
+// {
+// #warning FIXME
+// 	// try
+// 	// {
+// 	// 	if (mMenu != nullptr and
+// 	// 		mMenu->GetTarget() != nullptr and
+// 	// 		not mInhibitCallBack)
+// 	// 	{
+// 	// 		bool process = true;
 
-void MMenuItem::CreateWidget()
-{
-	mGMenuItem = g_menu_item_new(_(mLabel.c_str()), (std::string{ "app." } + (const char *)MCommandToString(mCommand)).c_str());
-	// if (mCommand != 0)
-	// 	mCallback.Connect(mGMenuItem, "activate");
-}
+// 	// 		if (mCanCheck)
+// 	// 		{
+// 	// 			mChecked = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(mGMenuItem));
+// 	// 			process = mChecked;
+// 	// 		}
 
-void MMenuItem::CreateWidget(GSList *&ioRadioGroup)
-{
-	// #warning FIXME
-	// 	// mGMenuItem = gtk_radio_menu_item_new_with_label(ioRadioGroup, _(mLabel.c_str()));
+// 	// 		uint32_t modifiers = 0;
+// 	// 		uint32_t gdkModifiers = 0;
 
-	// 	// ioRadioGroup = gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(mGMenuItem));
+// 	// 		auto keyMap = gdk_keymap_get_for_display(gdk_display_get_default());
+// 	// 		if (GDK_IS_KEYMAP(keyMap))
+// 	// 			gdkModifiers = gdk_keymap_get_modifier_state(keyMap);
 
-	// 	// if (mCommand != 0)
-	// 	// 	mCallback.Connect(mGMenuItem, "toggled");
+// 	// 		if (gdkModifiers & GDK_SHIFT_MASK)
+// 	// 			modifiers |= kShiftKey;
+// 	// 		if (gdkModifiers & GDK_CONTROL_MASK)
+// 	// 			modifiers |= kControlKey;
+// 	// 		if (gdkModifiers & GDK_MOD1_MASK)
+// 	// 			modifiers |= kOptionKey;
 
-	// 	// mCanCheck = true;
-}
+// 	// 		MHandler *target = mMenu->GetTarget();
+// 	// 		MWindow *window = dynamic_cast<MWindow *>(target);
+// 	// 		if (window != nullptr)
+// 	// 		{
+// 	// 			auto focus = window->FindFocus();
+// 	// 			if (focus != nullptr)
+// 	// 				target = focus;
+// 	// 		}
 
-void MMenuItem::CreateCheckWidget()
-{
-#warning FIXME
-	// mGMenuItem = gtk_check_menu_item_new_with_label(_(mLabel.c_str()));
-
-	// if (mCommand != 0)
-	// 	mCallback.Connect(mGMenuItem, "toggled");
-
-	// //	mCanCheck = true;
-}
-
-void MMenuItem::ItemCallback()
-{
-#warning FIXME
-	// try
-	// {
-	// 	if (mMenu != nullptr and
-	// 		mMenu->GetTarget() != nullptr and
-	// 		not mInhibitCallBack)
-	// 	{
-	// 		bool process = true;
-
-	// 		if (mCanCheck)
-	// 		{
-	// 			mChecked = gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(mGMenuItem));
-	// 			process = mChecked;
-	// 		}
-
-	// 		uint32_t modifiers = 0;
-	// 		uint32_t gdkModifiers = 0;
-
-	// 		auto keyMap = gdk_keymap_get_for_display(gdk_display_get_default());
-	// 		if (GDK_IS_KEYMAP(keyMap))
-	// 			gdkModifiers = gdk_keymap_get_modifier_state(keyMap);
-
-	// 		if (gdkModifiers & GDK_SHIFT_MASK)
-	// 			modifiers |= kShiftKey;
-	// 		if (gdkModifiers & GDK_CONTROL_MASK)
-	// 			modifiers |= kControlKey;
-	// 		if (gdkModifiers & GDK_MOD1_MASK)
-	// 			modifiers |= kOptionKey;
-
-	// 		MHandler *target = mMenu->GetTarget();
-	// 		MWindow *window = dynamic_cast<MWindow *>(target);
-	// 		if (window != nullptr)
-	// 		{
-	// 			auto focus = window->FindFocus();
-	// 			if (focus != nullptr)
-	// 				target = focus;
-	// 		}
-
-	// 		if (process and target != nullptr and not target->ProcessCommand(mCommand, mMenu, mIndex, modifiers))
-	// 			PRINT(("Unhandled command: %s", (const char *)MCommandToString(mCommand)));
-	// 	}
-	// }
-	// catch (const exception &e)
-	// {
-	// 	DisplayError(e);
-	// }
-	// catch (...)
-	// {
-	// }
-}
+// 	// 		if (process and target != nullptr and not target->ProcessCommand(mCommand, mMenu, mIndex, modifiers))
+// 	// 			PRINT(("Unhandled command: %s", (const char *)MCommandToString(mCommand)));
+// 	// 	}
+// 	// }
+// 	// catch (const exception &e)
+// 	// {
+// 	// 	DisplayError(e);
+// 	// }
+// 	// catch (...)
+// 	// {
+// 	// }
+// }
 
 void MMenuItem::SetChecked(bool inChecked)
 {
@@ -237,6 +206,7 @@ class MGtkMenuImpl : public MMenuImpl
 	}
 
 	GMenu *mGMenu = nullptr;
+	GMenu *mSection = nullptr;
 	GApplication *mApp;
 	std::string mLabel;
 	MMenuItemList mItems;
@@ -287,22 +257,28 @@ void MGtkMenuImpl::SetItemState(uint32_t inIndex, bool inEnabled, bool inChecked
 
 MMenuItem *MGtkMenuImpl::CreateNewItem(const string &inLabel, uint32_t inCommand, GSList **ioRadioGroup)
 {
-	MMenuItem *item = new MMenuItem(mMenu, inLabel, inCommand);
+	MMenuItem *item = new MMenuItem(mMenu, inLabel, inCommand, mApp);
 
-	if (ioRadioGroup != nullptr)
-		item->CreateWidget(*ioRadioGroup);
-	else
-	{
-		item->CreateWidget();
+	// if (ioRadioGroup != nullptr)
+	// 	item->CreateWidget(*ioRadioGroup);
+	// else
+	// {
+	// 	item->CreateWidget();
 
-		if (inLabel != "-")
-			mRadioGroup = nullptr;
-	}
+	// 	if (inLabel != "-")
+	// 		mRadioGroup = nullptr;
+	// }
 
 	item->mIndex = mItems.size();
 	mItems.push_back(item);
-#warning FIXME
-	// gtk_menu_shell_append(GTK_MENU_SHELL(mGtkMenu), item->mGMenuItem);
+
+	if (mSection == nullptr)
+	{
+		mSection = g_menu_new();
+		g_menu_append_section(mGMenu, nullptr, G_MENU_MODEL(mSection));
+	}
+
+	g_menu_append_item(mSection, item->mGMenuItem);
 
 	return item;
 }
@@ -314,16 +290,22 @@ void MGtkMenuImpl::AppendItem(const string &inLabel, uint32_t inCommand)
 
 void MGtkMenuImpl::AppendSubmenu(MMenu *inSubmenu)
 {
-	MMenuItem *item = CreateNewItem(inSubmenu->GetLabel(), 0, nullptr);
-	item->mSubMenu = inSubmenu;
 
 	//	if (inSubmenu->IsRecentMenu())
 	//		item->mRecentItemActivated.Connect(inSubmenu->GetGtkMenu(), "item-activated");
 
 	MGtkMenuImpl *subImpl = dynamic_cast<MGtkMenuImpl *>(inSubmenu->impl());
 
-#warning FIXME
-	g_menu_append_item(subImpl->mGMenu, item->mGMenuItem);
+	MMenuItem *item = new MMenuItem(mMenu, inSubmenu->GetLabel().c_str(), 0, mApp);
+	item->mSubMenu = inSubmenu;
+	g_menu_item_set_submenu(item->mGMenuItem, G_MENU_MODEL(subImpl->mGMenu));
+	g_menu_append_item(mGMenu, item->mGMenuItem);
+
+	std::cerr << "Aantal items in submenu: " << g_menu_model_get_n_items(G_MENU_MODEL(subImpl->mGMenu)) << "\n";
+
+	// g_menu_append_submenu(subImpl->mGMenu, inSubmenu->GetLabel().c_str(), G_MENU_MODEL(subImpl->mGMenu));
+
+	std::cerr << "Aantal items in dit menu: " << g_menu_model_get_n_items(G_MENU_MODEL(mGMenu)) << "\n";
 
 	// gtk_menu_item_set_submenu(GTK_MENU_ITEM(item->mGMenuItem), subImpl->mGtkMenu);
 
@@ -401,7 +383,7 @@ uint32_t MGtkMenuImpl::GetItemCommand(uint32_t inIndex) const
 	MMenuItemList::const_iterator i = mItems.begin();
 	advance(i, inIndex);
 
-	return (*i)->mCommand;
+	return 0;//(*i)->mCommand;
 }
 
 MMenu *MGtkMenuImpl::GetSubmenu(uint32_t inIndex) const
@@ -525,7 +507,19 @@ class MGtkMenuBarImpl : public MGtkMenuImpl
 
 	virtual void AddToWindow(MWindowImpl *inWindow)
 	{
-		gtk_application_window_set_show_menubar(GTK_APPLICATION_WINDOW(static_cast<MGtkWindowImpl *>(inWindow)->operator GtkWidget *()), true);
+		std::cerr << "Aantal items: " << g_menu_model_get_n_items(G_MENU_MODEL(mGMenu)) << "\n";
+
+		GtkWidget *win = static_cast<MGtkWindowImpl *>(inWindow)->operator GtkWidget *();
+
+		// const GActionEntry win_entries[] = {
+		// 	// { "save", save_activated, NULL, NULL, NULL },
+		// 	// { "saveas", saveas_activated, NULL, NULL, NULL },
+		// 	// { "close", close_activated, NULL, NULL, NULL },
+		// 	// { "fullscreen", NULL, NULL, "false", fullscreen_changed }
+		// };
+		// g_action_map_add_action_entries(G_ACTION_MAP(win), win_entries, G_N_ELEMENTS(win_entries), win);
+
+		gtk_application_window_set_show_menubar(GTK_APPLICATION_WINDOW(win), true);
 	}
 
 	// bool OnButtonPress(GdkEventButton *inEvent);

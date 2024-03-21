@@ -49,6 +49,8 @@ class MGtkApplicationImpl : public MApplicationImpl
 
 	GtkApplication *GetGtkApp() const { return mGtkApplication; }
 
+	static void ActionActivated(GSimpleAction *action, GVariant *parameter, GApplication *application);
+
   private:
 	static gboolean Timeout(gpointer inData);
 	static gboolean Idle(gpointer inData);
