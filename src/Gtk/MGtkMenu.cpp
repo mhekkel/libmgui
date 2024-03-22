@@ -9,6 +9,7 @@
 
 #include "MAcceleratorTable.hpp"
 #include "MApplication.hpp"
+#include "MCommand.hpp"
 #include "MError.hpp"
 #include "MFile.hpp"
 #include "MMenuImpl.hpp"
@@ -27,36 +28,21 @@
 using namespace std;
 namespace xml = zeep::xml;
 
-namespace
+// --------------------------------------------------------------------
+
+template <>
+void MCommand<void()>::RegisterCommand(MWindow *win, const std::string &action)
 {
+	auto impl = static_cast<MGtkWindowImpl *>(win->GetImpl());
+	impl->RegisterAction(action, *this);
+}
 
-struct MCommandToString
+template <>
+void MCommand<void()>::RegisterCommand(MApplication *app, const std::string &action)
 {
-	char mCommandString[10];
-
-	MCommandToString(
-		uint32_t inCommand)
-	{
-		strcpy(mCommandString, "xxxx");
-
-		mCommandString[0] = ((inCommand & 0xff000000) >> 24) & 0x000000ff;
-		mCommandString[1] = ((inCommand & 0x00ff0000) >> 16) & 0x000000ff;
-		mCommandString[2] = ((inCommand & 0x0000ff00) >> 8) & 0x000000ff;
-		mCommandString[3] = ((inCommand & 0x000000ff) >> 0) & 0x000000ff;
-
-
-		// strcpy(mCommandString, "MCmd_xxxx");
-
-		// mCommandString[5] = ((inCommand & 0xff000000) >> 24) & 0x000000ff;
-		// mCommandString[6] = ((inCommand & 0x00ff0000) >> 16) & 0x000000ff;
-		// mCommandString[7] = ((inCommand & 0x0000ff00) >> 8) & 0x000000ff;
-		// mCommandString[8] = ((inCommand & 0x000000ff) >> 0) & 0x000000ff;
-	}
-
-	operator const char *() const { return mCommandString; }
-};
-
-} // namespace
+	auto impl = static_cast<MGtkApplicationImpl *>(app->GetImpl());
+	impl->RegisterAction(action, *this);
+}
 
 // --------------------------------------------------------------------
 // MMenuItem
@@ -67,21 +53,25 @@ typedef list<MMenuItem *> MMenuItemList;
 struct MMenuItem
 {
   public:
-	MMenuItem(MMenu *inMenu, const string &inLabel, uint32_t inCommand, GApplication *app)
+	MMenuItem(MMenu *inMenu, const string &inLabel, const std::string &inAction, GApplication *app)
 		: mLabel(inLabel)
 		, mMenu(inMenu)
 	{
-		if (inCommand)
+		if (not inAction.empty())
 		{
-			GSimpleAction *action = g_simple_action_new(MCommandToString(inCommand), NULL);
+			// auto name = inAction;
+			// if (auto p = name.find('.'); p != std::string::npos)
+			// 	name.erase(0, p + 1);
 
-			g_action_map_add_action(G_ACTION_MAP(app), G_ACTION(action));
-			g_signal_connect(action, "activate", G_CALLBACK(MGtkApplicationImpl::ActionActivated), app);
+			// GSimpleAction *action = g_simple_action_new(name.c_str(), NULL);
 
-			std::cout << "action name: " << g_action_get_name(G_ACTION(action)) << "\n";
-			std::cout << "enabled: " << std::boolalpha << g_action_get_enabled(G_ACTION(action)) << "\n";
+			// g_action_map_add_action(G_ACTION_MAP(app), G_ACTION(action));
+			// g_signal_connect(action, "activate", G_CALLBACK(MGtkApplicationImpl::ActionActivated), app);
 
-			mGMenuItem = g_menu_item_new(_(mLabel.c_str()), (std::string{"app."} + MCommandToString(inCommand).operator const char *()).c_str());
+			// std::cout << "action name: " << g_action_get_name(G_ACTION(action)) << "\n";
+			// std::cout << "enabled: " << std::boolalpha << g_action_get_enabled(G_ACTION(action)) << "\n";
+
+			mGMenuItem = g_menu_item_new(_(mLabel.c_str()), inAction.c_str());
 		}
 		else
 			mGMenuItem = g_menu_item_new(_(mLabel.c_str()), nullptr);
@@ -180,33 +170,25 @@ class MGtkMenuImpl : public MMenuImpl
   public:
 	MGtkMenuImpl(MMenu *inMenu, GApplication *inApp);
 
-	virtual void SetTarget(MHandler *inHandler);
-	virtual void SetItemState(uint32_t inItem, bool inEnabled, bool inChecked);
-	virtual void AppendItem(const string &inLabel, uint32_t inCommand);
-	virtual void AppendSubmenu(MMenu *inSubmenu);
-	virtual void AppendSeparator();
-	virtual void AppendCheckbox(const string &inLabel, uint32_t inCommand);
-	virtual void AppendRadiobutton(const string &inLabel, uint32_t inCommand);
-	virtual uint32_t CountItems() const;
-	virtual void RemoveItems(uint32_t inFirstIndex, uint32_t inCount);
-	virtual string GetItemLabel(uint32_t inIndex) const;
-	virtual void SetItemCommand(uint32_t inIndex, uint32_t inCommand);
-	virtual uint32_t GetItemCommand(uint32_t inIndex) const;
-	virtual MMenu *GetSubmenu(uint32_t inIndex) const;
-	virtual void Popup(MWindow *inHandler, int32_t inX, int32_t inY, bool inBottomMenu);
-	virtual void AddToWindow(MWindowImpl *inWindow);
-	virtual void MenuUpdated();
-
-	// void SetAcceleratorGroup(GtkAccelGroup *inAcceleratorGroup);
-
-	virtual bool OnDestroy();
-	virtual void OnSelectionDone();
-
-	MSlot<bool()> mOnDestroy;
-	MSlot<void()> mOnSelectionDone;
+	void SetTarget(MHandler *inHandler) override;
+	void SetItemState(uint32_t inItem, bool inEnabled, bool inChecked) override;
+	void AppendItem(const string &inLabel, const std::string &inAction) override;
+	void AppendSubmenu(MMenu *inSubmenu) override;
+	void AppendSeparator() override;
+	void AppendCheckbox(const string &inLabel, const std::string &inAction) override;
+	void AppendRadiobutton(const string &inLabel, const std::string &inAction) override;
+	uint32_t CountItems() const override;
+	void RemoveItems(uint32_t inFirstIndex, uint32_t inCount) override;
+	string GetItemLabel(uint32_t inIndex) const override;
+	void SetItemCommand(uint32_t inIndex, const std::string &inAction) override;
+	uint32_t GetItemCommand(uint32_t inIndex) const override;
+	MMenu *GetSubmenu(uint32_t inIndex) const override;
+	void Popup(MWindow *inHandler, int32_t inX, int32_t inY, bool inBottomMenu) override;
+	void AddToWindow(MWindowImpl *inWindow) override;
+	void MenuUpdated() override;
 
   protected:
-	MMenuItem *CreateNewItem(const std::string &inLabel, uint32_t inCommand, GSList **ioRadioGroup);
+	MMenuItem *CreateNewItem(const std::string &inLabel, const std::string &inAction, GSList **ioRadioGroup);
 
 	// for the menubar
 	MGtkMenuImpl(MMenu *inMenu, GMenu *inGMenu, GApplication *inApp)
@@ -227,8 +209,6 @@ class MGtkMenuImpl : public MMenuImpl
 
 MGtkMenuImpl::MGtkMenuImpl(MMenu *inMenu, GApplication *inApp)
 	: MMenuImpl(inMenu)
-	, mOnDestroy(this, &MGtkMenuImpl::OnDestroy)
-	, mOnSelectionDone(this, &MGtkMenuImpl::OnSelectionDone)
 	, mGMenu(g_menu_new())
 	, mApp(inApp)
 	, mTarget(nullptr)
@@ -265,9 +245,9 @@ void MGtkMenuImpl::SetItemState(uint32_t inIndex, bool inEnabled, bool inChecked
 	// 	(*item)->SetChecked(inChecked);
 }
 
-MMenuItem *MGtkMenuImpl::CreateNewItem(const string &inLabel, uint32_t inCommand, GSList **ioRadioGroup)
+MMenuItem *MGtkMenuImpl::CreateNewItem(const string &inLabel, const std::string &inAction, GSList **ioRadioGroup)
 {
-	MMenuItem *item = new MMenuItem(mMenu, inLabel, inCommand, mApp);
+	MMenuItem *item = new MMenuItem(mMenu, inLabel, inAction, mApp);
 
 	// if (ioRadioGroup != nullptr)
 	// 	item->CreateWidget(*ioRadioGroup);
@@ -292,13 +272,12 @@ MMenuItem *MGtkMenuImpl::CreateNewItem(const string &inLabel, uint32_t inCommand
 
 	g_menu_append_item(mGMenu, item->mGMenuItem);
 
-
 	return item;
 }
 
-void MGtkMenuImpl::AppendItem(const string &inLabel, uint32_t inCommand)
+void MGtkMenuImpl::AppendItem(const string &inLabel, const std::string &inAction)
 {
-	CreateNewItem(inLabel, inCommand, nullptr);
+	CreateNewItem(inLabel, inAction, nullptr);
 }
 
 void MGtkMenuImpl::AppendSubmenu(MMenu *inSubmenu)
@@ -309,7 +288,7 @@ void MGtkMenuImpl::AppendSubmenu(MMenu *inSubmenu)
 
 	MGtkMenuImpl *subImpl = dynamic_cast<MGtkMenuImpl *>(inSubmenu->impl());
 
-	MMenuItem *item = new MMenuItem(mMenu, inSubmenu->GetLabel().c_str(), 0, mApp);
+	MMenuItem *item = new MMenuItem(mMenu, inSubmenu->GetLabel().c_str(), {}, mApp);
 	item->mSubMenu = inSubmenu;
 	g_menu_item_set_submenu(item->mGMenuItem, G_MENU_MODEL(subImpl->mGMenu));
 	g_menu_append_item(mGMenu, item->mGMenuItem);
@@ -331,11 +310,11 @@ void MGtkMenuImpl::AppendSeparator()
 	// CreateNewItem("-", 0, nullptr);
 }
 
-void MGtkMenuImpl::AppendCheckbox(const string &inLabel, uint32_t inCommand)
+void MGtkMenuImpl::AppendCheckbox(const string &inLabel, const std::string &inAction)
 {
 }
 
-void MGtkMenuImpl::AppendRadiobutton(const string &inLabel, uint32_t inCommand)
+void MGtkMenuImpl::AppendRadiobutton(const string &inLabel, const std::string &inAction)
 {
 }
 
@@ -377,7 +356,7 @@ string MGtkMenuImpl::GetItemLabel(uint32_t inIndex) const
 	return (*i)->mLabel;
 }
 
-void MGtkMenuImpl::SetItemCommand(uint32_t inIndex, uint32_t inCommand)
+void MGtkMenuImpl::SetItemCommand(uint32_t inIndex, const std::string &inAction)
 {
 	if (inIndex >= mItems.size())
 		THROW(("Item index out of range"));
@@ -385,7 +364,7 @@ void MGtkMenuImpl::SetItemCommand(uint32_t inIndex, uint32_t inCommand)
 	MMenuItemList::iterator i = mItems.begin();
 	advance(i, inIndex);
 
-	(*i)->mCommand = inCommand;
+	(*i)->mCommand = inAction;
 }
 
 uint32_t MGtkMenuImpl::GetItemCommand(uint32_t inIndex) const
@@ -396,7 +375,7 @@ uint32_t MGtkMenuImpl::GetItemCommand(uint32_t inIndex) const
 	MMenuItemList::const_iterator i = mItems.begin();
 	advance(i, inIndex);
 
-	return 0;//(*i)->mCommand;
+	return 0; //(*i)->mCommand;
 }
 
 MMenu *MGtkMenuImpl::GetSubmenu(uint32_t inIndex) const
@@ -426,15 +405,6 @@ void MGtkMenuImpl::MenuUpdated()
 	// gtk_widget_show_all(mGtkMenu);
 }
 
-bool MGtkMenuImpl::OnDestroy()
-{
-	return false;
-}
-
-void MGtkMenuImpl::OnSelectionDone()
-{
-}
-
 MMenuImpl *MMenuImpl::Create(MMenu *inMenu, bool inPopup)
 {
 	GApplication *app = G_APPLICATION(static_cast<MGtkApplicationImpl *>(gApp->GetImpl())->GetGtkApp());
@@ -452,11 +422,13 @@ class MGtkMenuBarImpl : public MGtkMenuImpl
 		gtk_application_set_menubar(GTK_APPLICATION(inApp), G_MENU_MODEL(mGMenu));
 	}
 
-	virtual void AddToWindow(MWindowImpl *inWindow)
+	void AddToWindow(MWindowImpl *inWindow) override
 	{
 		auto impl = static_cast<MGtkWindowImpl *>(inWindow);
-		gtk_application_window_set_show_menubar(GTK_APPLICATION_WINDOW(impl->operator GtkWidget *()), true);
+		gtk_application_window_set_show_menubar(GTK_APPLICATION_WINDOW(impl->GetWidget()), true);
 	}
+
+	GMenu *mGMenu;
 };
 
 MMenuImpl *MMenuImpl::CreateBar(MMenu *inMenu)

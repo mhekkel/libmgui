@@ -42,16 +42,16 @@ class MMenuImpl
 
 	virtual void SetItemState(uint32_t inItem, bool inEnabled, bool inChecked) = 0;
 
-	virtual void AppendItem(const std::string &inLabel, uint32_t inCommand) = 0;
+	virtual void AppendItem(const std::string &inLabel, const std::string &inAction) = 0;
 	virtual void AppendSubmenu(MMenu *inSubmenu) = 0;
 	virtual void AppendSeparator() = 0;
-	virtual void AppendCheckbox(const std::string &inLabel, uint32_t inCommand) = 0;
-	virtual void AppendRadiobutton(const std::string &inLabel, uint32_t inCommand) = 0;
+	virtual void AppendCheckbox(const std::string &inLabel, const std::string &inAction) = 0;
+	virtual void AppendRadiobutton(const std::string &inLabel, const std::string &inAction) = 0;
 	virtual uint32_t CountItems() const = 0;
 	virtual void RemoveItems(uint32_t inFirstIndex, uint32_t inCount) = 0;
 
 	virtual std::string GetItemLabel(uint32_t inIndex) const = 0;
-	virtual void SetItemCommand(uint32_t inIndex, uint32_t inCommand) = 0;
+	virtual void SetItemCommand(uint32_t inIndex, const std::string &inAction) = 0;
 	virtual uint32_t GetItemCommand(uint32_t inIndex) const = 0;
 	virtual MMenu *GetSubmenu(uint32_t inIndex) const = 0;
 

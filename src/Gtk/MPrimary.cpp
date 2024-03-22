@@ -196,6 +196,7 @@ MPrimary::~MPrimary()
 bool MPrimary::HasText()
 {
 	// return mImpl->HasText();
+	return false;
 }
 
 void MPrimary::GetText(std::string &text)

@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<interface>
+	<menu id='filemenu'>
+		<attribute name="label">File</attribute>
+		<section>
+			<item>
+				<attribute name="label">New</attribute>
+				<attribute name="action">app.new</attribute>
+			</item>
+			<item>
+				<attribute name="label">Close</attribute>
+				<attribute name="action">win.close</attribute>
+			</item>
+		</section>
+		<section>
+			<item>
+				<attribute name="label">Quit</attribute>
+				<attribute name="action">app.quit</attribute>
+			</item>
+		</section>
+	</menu>
+</interface>

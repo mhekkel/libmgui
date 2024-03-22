@@ -1,4 +1,5 @@
 #include "MApplication.hpp"
+#include "MCommand.hpp"
 #include "MMenu.hpp"
 #include "MWindow.hpp"
 
@@ -11,10 +12,17 @@ class ExampleWindow : public MWindow
   public:
 	ExampleWindow()
 		: MWindow("Example", MRect{}, kMPostionDefault | kMShowMenubar)
+		, cClose(this, "win.close", &ExampleWindow::Close)
 	{
 		SetTitle("window-" + std::to_string(++s_nr));
 	}
 
+	void Close()
+	{
+		MWindow::Close();
+	}
+
+	MCommand<void()> cClose;
 	static int s_nr;
 };
 
@@ -25,8 +33,9 @@ class ExampleApp : public MApplication
   public:
 	ExampleApp(MApplicationImpl *impl)
 		: MApplication(impl)
+		, cNew(this, "app.new", &ExampleApp::DoNew)
+		, cQuit(this, "app.quit", &ExampleApp::Quit)
 	{
-
 	}
 
 	void Initialise() override
@@ -46,6 +55,14 @@ class ExampleApp : public MApplication
 		auto w = new ExampleWindow();
 		w->Select();
 	}
+
+	void Quit()
+	{
+		MApplication::DoQuit();
+	}
+
+	MCommand<void()> cNew;
+	MCommand<void()> cQuit;
 };
 
 MApplication *MApplication::Create(MApplicationImpl *inImpl)

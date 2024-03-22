@@ -1,7 +1,7 @@
 /*-
  * SPDX-License-Identifier: BSD-2-Clause
  *
- * Copyright (c) 2023 Maarten L. Hekkelman
+ * Copyright (c) 2024 Maarten L. Hekkelman
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,56 +26,72 @@
 
 #pragma once
 
-#include "MApplicationImpl.hpp"
-#include "MGtkCommandEmitter.hpp"
+#include "MCommand.hpp"
 #include "MGtkWidgetMixin.hpp"
-
-#include <filesystem>
-#include <thread>
 
 #include <gtk/gtk.h>
 
-class MGtkApplicationImpl : public MApplicationImpl, public MGtkCommandEmitter
+#include <map>
+
+// --------------------------------------------------------------------
+
+class MGtkCommandEmitter
 {
-  public:
-	MGtkApplicationImpl(std::function<void()> inActivateCB);
-	virtual ~MGtkApplicationImpl();
-
-	static MGtkApplicationImpl *GetInstance() { return sInstance; }
-
-	void Initialise() override;
-	int RunEventLoop() override;
-	void Quit() override;
-
-	GtkApplication *GetGtkApp() const { return mGtkApplication; }
-
-	GObject *GetObject() override
+  private:
+	struct MActionHandlerBase
 	{
-		return G_OBJECT(mGtkApplication);
+		virtual ~MActionHandlerBase() = default;
+		virtual void ActionActivated(GVariant *param) = 0;
+	};
+
+	template <ImplementedSignature Sig>
+	struct MActionHandler;
+
+	template <>
+	struct MActionHandler<void()>
+	{
+		MActionHandler(MCommand<void()> &inCommand)
+			: mCommand(inCommand)
+		{
+		}
+
+		void ActionActivated(GVariant *param)
+		{
+			mCommand.Execute();
+		}
+
+		MCommand<void()> &mCommand;
+	};
+
+  public:
+	MGtkCommandEmitter()
+	{
+	}
+
+	virtual ~MGtkCommandEmitter()
+	{
+	}
+
+	virtual GObject *GetObject() = 0;
+
+	template <ImplementedSignature Sig>
+	void RegisterAction(const std::string &action, MCommand<Sig> &inCommand)
+	{
+		GSimpleAction *act = g_simple_action_new(action.c_str(), nullptr);
+		g_action_map_add_action(G_ACTION_MAP(GetObject()), G_ACTION(act));
+		g_signal_connect(act, "activate", G_CALLBACK(MGtkCommandEmitter::ActionActivated), this);
+	}
+
+	static void ActionActivated(GAction *action, GVariant *param, void *user_data)
+	{
+		auto self = static_cast<MGtkCommandEmitter *>(user_data);
+		auto h = self->mActionHandlers[action];
+		if (h)
+			h->ActionActivated(param);
 	}
 
   private:
-	static gboolean Timeout(gpointer inData);
-	static gboolean HandleAsyncCallback(gpointer inData);
+	std::map<GAction *, MActionHandlerBase *> mActionHandlers;
 
-	void ProcessAsyncTasks(GMainContext *context);
-	static void DeleteAsyncHandler(gpointer inData);
-
-	static MGtkApplicationImpl *sInstance;
-
-	MSlot<void()> mStartup;
-	void Startup();
-
-	MSlot<void()> mActivate;
-	void Activate();
-
-	MSlot<int(GApplicationCommandLine*)> mCommandLine;
-	int CommandLine(GApplicationCommandLine* inCommandLine);
-
-	guint mPulseID = 0;
-	std::thread mAsyncTaskThread;
-	GtkApplication *mGtkApplication = nullptr;
-	std::function<void()> mActivateCB;
+	// std::map<GAction *,
 };
-
-extern std::filesystem::path gExecutablePath, gPrefixPath;

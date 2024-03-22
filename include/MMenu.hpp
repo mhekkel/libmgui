@@ -49,9 +49,9 @@ class MMenu
 
 	static MMenu *CreateFromResource(const char *inResourceName, bool inPopup);
 
-	void AppendItem(const std::string &inLabel, uint32_t inCommand);
-	void AppendRadioItem(const std::string &inLabel, uint32_t inCommand);
-	void AppendCheckItem(const std::string &inLabel, uint32_t inCommand);
+	void AppendItem(const std::string &inLabel, const std::string &inAction);
+	void AppendRadioItem(const std::string &inLabel, const std::string &inAction);
+	void AppendCheckItem(const std::string &inLabel, const std::string &inAction);
 	void AppendSeparator();
 	virtual void AppendMenu(MMenu *inMenu);
 	uint32_t CountItems();
@@ -59,7 +59,7 @@ class MMenu
 
 	std::string GetItemLabel(uint32_t inIndex) const;
 
-	void SetItemCommand(uint32_t inIndex, uint32_t inCommand);
+	void SetItemCommand(uint32_t inIndex, const std::string &inAction);
 	uint32_t GetItemCommand(uint32_t inIndex) const;
 
 	void SetTarget(MHandler *inHandler);

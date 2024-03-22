@@ -48,28 +48,6 @@
 using namespace std;
 namespace xml = zeep::xml;
 
-namespace
-{
-
-struct MCommandToString
-{
-	char mCommandString[10];
-
-	MCommandToString(uint32_t inCommand)
-	{
-		strcpy(mCommandString, "MCmd_xxxx");
-
-		mCommandString[5] = ((inCommand & 0xff000000) >> 24) & 0x000000ff;
-		mCommandString[6] = ((inCommand & 0x00ff0000) >> 16) & 0x000000ff;
-		mCommandString[7] = ((inCommand & 0x0000ff00) >> 8) & 0x000000ff;
-		mCommandString[8] = ((inCommand & 0x000000ff) >> 0) & 0x000000ff;
-	}
-
-	operator const char *() const { return mCommandString; }
-};
-
-} // namespace
-
 // --------------------------------------------------------------------
 
 MMenu::MMenu(const string &inLabel, bool inPopup)
@@ -134,21 +112,14 @@ MMenu *MMenu::Create(xml::element *inXMLNode, bool inPopup)
 				menu->AppendSeparator();
 			else
 			{
-				string cs = item.get_attribute("cmd").c_str();
-
-				if (cs.length() != 4)
-					THROW(("Invalid menu item specification, cmd is not correct"));
-
-				uint32_t cmd = 0;
-				for (int i = 0; i < 4; ++i)
-					cmd |= cs[i] << ((3 - i) * 8);
+				string action = item.get_attribute("cmd").c_str();
 
 				if (item.get_attribute("check") == "radio")
-					menu->AppendRadioItem(label, cmd);
+					menu->AppendRadioItem(label, action);
 				else if (item.get_attribute("check") == "checkbox")
-					menu->AppendCheckItem(label, cmd);
+					menu->AppendCheckItem(label, action);
 				else
-					menu->AppendItem(label, cmd);
+					menu->AppendItem(label, action);
 			}
 		}
 		else if (item.name() == "menu")
@@ -158,19 +129,19 @@ MMenu *MMenu::Create(xml::element *inXMLNode, bool inPopup)
 	return menu;
 }
 
-void MMenu::AppendItem(const string &inLabel, uint32_t inCommand)
+void MMenu::AppendItem(const string &inLabel, const std::string &inAction)
 {
-	mImpl->AppendItem(inLabel, inCommand);
+	mImpl->AppendItem(inLabel, inAction);
 }
 
-void MMenu::AppendRadioItem(const string &inLabel, uint32_t inCommand)
+void MMenu::AppendRadioItem(const string &inLabel, const std::string &inAction)
 {
-	mImpl->AppendRadiobutton(inLabel, inCommand);
+	mImpl->AppendRadiobutton(inLabel, inAction);
 }
 
-void MMenu::AppendCheckItem(const string &inLabel, uint32_t inCommand)
+void MMenu::AppendCheckItem(const string &inLabel, const std::string &inAction)
 {
-	mImpl->AppendCheckbox(inLabel, inCommand);
+	mImpl->AppendCheckbox(inLabel, inAction);
 }
 
 void MMenu::AppendSeparator()
@@ -198,9 +169,9 @@ string MMenu::GetItemLabel(uint32_t inIndex) const
 	return mImpl->GetItemLabel(inIndex);
 }
 
-void MMenu::SetItemCommand(uint32_t inIndex, uint32_t inCommand)
+void MMenu::SetItemCommand(uint32_t inIndex, const std::string &inAction)
 {
-	mImpl->SetItemCommand(inIndex, inCommand);
+	mImpl->SetItemCommand(inIndex, inAction);
 }
 
 uint32_t MMenu::GetItemCommand(uint32_t inIndex) const

@@ -26,17 +26,18 @@
 
 #pragma once
 
+#include "MGtkCommandEmitter.hpp"
 #include "MGtkWidgetMixin.hpp"
 #include "MMenu.hpp"
 #include "MWindowImpl.hpp"
 
 #include <list>
 
-class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin
+class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin, public MGtkCommandEmitter
 {
   public:
 	MGtkWindowImpl(MWindowFlags inFlags, MWindow *inWindow);
-	virtual ~MGtkWindowImpl();
+	~MGtkWindowImpl();
 
 	static void RecycleWindows();
 
@@ -46,43 +47,48 @@ class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin
 	// (in the right order, please!)
 	virtual void AddMenubarWidget(GtkWidget *inWidget);
 	virtual void AddStatusbarWidget(MGtkWidgetMixin *inChild);
-	virtual void Append(MGtkWidgetMixin *inChild, MControlPacking inPacking,
-		bool inExpand, bool inFill, uint32_t inPadding);
+	void Append(MGtkWidgetMixin *inChild, MControlPacking inPacking,
+		bool inExpand, bool inFill, uint32_t inPadding) override;
 
-	virtual void SetTitle(std::string inTitle);
+	void SetTitle(std::string inTitle) override;
 
-	virtual void Show();
-	virtual void Hide();
+	void Show() override;
+	void Hide() override;
 
-	virtual void SetTransientFor(MWindow *inWindow);
+	void SetTransientFor(MWindow *inWindow) override;
 
-	virtual bool Visible() const;
+	bool Visible() const override;
 
-	virtual void Select();
-	virtual void Close();
+	void Select() override;
+	void Close() override;
 
-	virtual void ResizeWindow(int32_t inWidthDelta, int32_t inHeightDelta);
+	void ResizeWindow(int32_t inWidthDelta, int32_t inHeightDelta) override;
 
-	virtual void SetWindowPosition(MRect inBounds, bool inTransition);
-	virtual void GetWindowPosition(MRect &outBounds) const;
+	void SetWindowPosition(MRect inBounds, bool inTransition) override;
+	void GetWindowPosition(MRect &outBounds) const override;
 
-	virtual void UpdateNow();
+	void UpdateNow() override;
 
-	virtual void SetCursor(MCursor inCursor);
-	virtual void ObscureCursor();
+	void SetCursor(MCursor inCursor) override;
+	void ObscureCursor() override;
 
-	virtual void ConvertToScreen(int32_t &ioX, int32_t &ioY) const;
-	virtual void ConvertFromScreen(int32_t &ioX, int32_t &ioY) const;
+	void ConvertToScreen(int32_t &ioX, int32_t &ioY) const override;
+	void ConvertFromScreen(int32_t &ioX, int32_t &ioY) const override;
 
 	MWindow *GetWindow() const { return mWindow; }
 
-	virtual MHandler *GetFocus();
+	MHandler *GetFocus() override;
+
+	GObject *GetObject() override
+	{
+		return G_OBJECT(GetWidget());
+	}
 
   protected:
-	virtual bool DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, const std::string &inText);
+	// bool DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, const std::string &inText) override;
 
-	virtual bool OnDestroy();
-	virtual bool OnDelete(GdkEvent *inEvent);
+	bool OnDestroy() override;
+	// bool OnDelete(GdkEvent *inEvent) override;
 
 	bool ChildFocus(GdkEvent *inEvent);
 	MSlot<bool(GdkEvent *)> mChildFocus;
@@ -90,7 +96,7 @@ class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin
 	bool OnMapEvent(GdkEvent *inEvent);
 	MSlot<bool(GdkEvent *)> mMapEvent;
 
-	virtual bool OnConfigureEvent(GdkEvent *inEvent);
+	bool OnConfigureEvent(GdkEvent *inEvent) override;
 
 	//	void			Changed();
 	//	MSlot<void()>	mChanged;

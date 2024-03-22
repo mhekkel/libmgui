@@ -122,9 +122,9 @@ int MGtkApplicationImpl::CommandLine(GApplicationCommandLine *inCommandLine)
 
 	argv = g_application_command_line_get_arguments(inCommandLine, &argc);
 
-	g_application_command_line_print(inCommandLine,
-		"This text is written back\n"
-		"to stdout of the caller\n");
+	// g_application_command_line_print(inCommandLine,
+	// 	"This text is written back\n"
+	// 	"to stdout of the caller\n");
 
 	for (i = 0; i < argc; i++)
 		g_print("argument %d: %s\n", i, argv[i]);
@@ -133,7 +133,6 @@ int MGtkApplicationImpl::CommandLine(GApplicationCommandLine *inCommandLine)
 
 	if (argc <= 1)
 		gApp->DoNew();
-
 
 	return 0;
 }
@@ -223,11 +222,6 @@ gboolean MGtkApplicationImpl::Timeout(gpointer inData)
 	}
 
 	return true;
-}
-
-void MGtkApplicationImpl::ActionActivated(GSimpleAction *action, GVariant *parameter, GApplication *application)
-{
-	std::cerr << "Action: " << g_action_get_name(G_ACTION(action)) << "\n";
 }
 
 // --------------------------------------------------------------------

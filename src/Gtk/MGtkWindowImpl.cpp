@@ -414,15 +414,6 @@ bool MGtkWindowImpl::OnDestroy()
 	return true;
 }
 
-bool MGtkWindowImpl::OnDelete(GdkEvent *inEvent)
-{
-	bool result = true;
-
-	if (mWindow->AllowClose(false))
-		result = false;
-
-	return result;
-}
 
 bool MGtkWindowImpl::OnMapEvent(GdkEvent *inEvent)
 {
@@ -522,11 +513,6 @@ bool MGtkWindowImpl::ChildFocus(GdkEvent *inEvent)
 MHandler *MGtkWindowImpl::GetFocus()
 {
 	return nullptr;
-}
-
-bool MGtkWindowImpl::DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, const string &inText)
-{
-	return false;
 }
 
 void MGtkWindowImpl::UpdateNow()

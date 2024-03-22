@@ -1,6 +1,8 @@
 <?xml version="1.0" standalone="yes"?>
 <menubar>
 	<menu id='filemenu' label="File">
-		<item label="Quit" cmd='quit'/>
+		<item label="New" cmd="app.new"/>
+		<item label="Close" cmd="win.close"/>
+		<item label="Quit" cmd="app.quit"/>
 	</menu>
 </menubar>

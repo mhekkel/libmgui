@@ -174,6 +174,7 @@ list(APPEND sources
 
 add_library(mgui STATIC)
 add_library(mgui::mgui ALIAS mgui)
+target_compile_features(mgui PUBLIC cxx_std_20)
 
 target_sources(mgui
 	PRIVATE ${sources}
