@@ -100,7 +100,5 @@ class MCommand<R(Args...)>
 		F mMethod;
 	};
 
-
-
 	std::unique_ptr<MCommandHandlerBase> mHandler;
 };

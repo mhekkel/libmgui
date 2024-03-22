@@ -427,8 +427,6 @@ class MGtkMenuBarImpl : public MGtkMenuImpl
 		auto impl = static_cast<MGtkWindowImpl *>(inWindow);
 		gtk_application_window_set_show_menubar(GTK_APPLICATION_WINDOW(impl->GetWidget()), true);
 	}
-
-	GMenu *mGMenu;
 };
 
 MMenuImpl *MMenuImpl::CreateBar(MMenu *inMenu)

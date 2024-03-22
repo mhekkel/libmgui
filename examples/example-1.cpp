@@ -12,7 +12,7 @@ class ExampleWindow : public MWindow
   public:
 	ExampleWindow()
 		: MWindow("Example", MRect{}, kMPostionDefault | kMShowMenubar)
-		, cClose(this, "win.close", &ExampleWindow::Close)
+		, cClose(this, "close", &ExampleWindow::Close)
 	{
 		SetTitle("window-" + std::to_string(++s_nr));
 	}
@@ -33,8 +33,8 @@ class ExampleApp : public MApplication
   public:
 	ExampleApp(MApplicationImpl *impl)
 		: MApplication(impl)
-		, cNew(this, "app.new", &ExampleApp::DoNew)
-		, cQuit(this, "app.quit", &ExampleApp::Quit)
+		, cNew(this, "new", &ExampleApp::DoNew)
+		, cQuit(this, "quit", &ExampleApp::Quit)
 	{
 	}
 

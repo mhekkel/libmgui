@@ -374,7 +374,7 @@ void MGtkWindowImpl::Select()
 void MGtkWindowImpl::Close()
 {
 	if (mWindow->AllowClose(false))
-		g_object_unref(GetWidget());
+		gtk_window_close(GTK_WINDOW(GetWidget()));
 }
 
 void MGtkWindowImpl::SetTitle(string inTitle)

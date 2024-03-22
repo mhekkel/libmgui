@@ -48,7 +48,7 @@ class MGtkCommandEmitter
 	struct MActionHandler;
 
 	template <>
-	struct MActionHandler<void()>
+	struct MActionHandler<void()> : public MActionHandlerBase
 	{
 		MActionHandler(MCommand<void()> &inCommand)
 			: mCommand(inCommand)
@@ -70,6 +70,11 @@ class MGtkCommandEmitter
 
 	virtual ~MGtkCommandEmitter()
 	{
+		for (auto &&[action, handler] : mActionHandlers)
+		{
+			g_object_unref(action);
+			delete handler;
+		}
 	}
 
 	virtual GObject *GetObject() = 0;
@@ -80,6 +85,7 @@ class MGtkCommandEmitter
 		GSimpleAction *act = g_simple_action_new(action.c_str(), nullptr);
 		g_action_map_add_action(G_ACTION_MAP(GetObject()), G_ACTION(act));
 		g_signal_connect(act, "activate", G_CALLBACK(MGtkCommandEmitter::ActionActivated), this);
+		mActionHandlers[G_ACTION(act)] = new MActionHandler<Sig>(inCommand);
 	}
 
 	static void ActionActivated(GAction *action, GVariant *param, void *user_data)
