@@ -54,9 +54,9 @@ class MGtkCanvasImpl : public MGtkControlImpl<MCanvas>
 
 	void Invalidate();
 
-	// MCanvasImpl overrides
-	virtual void AcceptDragAndDrop(bool inFiles, bool inText);
-	virtual void StartDrag();
+	// // MCanvasImpl overrides
+	// virtual void AcceptDragAndDrop(bool inFiles, bool inText);
+	// virtual void StartDrag();
 
   protected:
 	virtual bool OnDrawEvent(cairo_t *inCairo);

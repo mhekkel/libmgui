@@ -36,32 +36,32 @@ class MGtkControlImpl : public CONTROL::MImpl, public MGtkWidgetMixin
 {
   public:
 	MGtkControlImpl(CONTROL *inControl, const std::string &inLabel);
-	virtual ~MGtkControlImpl();
+	~MGtkControlImpl();
 
-	virtual bool IsFocus() const;
-	virtual void SetFocus();
+	bool IsFocus() const override;
+	void SetFocus() override;
 
-	virtual void AddedToWindow();
-	virtual void FrameMoved();
-	virtual void FrameResized();
-	virtual void MarginsChanged();
-	virtual void EnableSelf();
-	virtual void DisableSelf();
-	virtual void ShowSelf();
-	virtual void HideSelf();
-	virtual std::string
-	GetText() const;
-	virtual void SetText(const std::string &inText);
+	void AddedToWindow() override;
+	void FrameMoved() override;
+	void FrameResized() override;
+	void MarginsChanged() override;
+	void EnableSelf() override;
+	void DisableSelf() override;
+	void ShowSelf() override;
+	void HideSelf() override;
+
+	std::string GetText() const override;
+	void SetText(const std::string &inText) override;
 
   protected:
 	void GetParentAndBounds(MGtkWidgetMixin *&outParent, MRect &outBounds);
 
 	virtual void CreateWidget() = 0;
 
-	virtual bool OnDestroy();
+	bool OnDestroy() override;
 
-	virtual bool OnKeyPressEvent(GdkEvent *inEvent);
-	virtual void OnPopupMenu();
+	bool OnKeyPressEvent(GdkEvent *inEvent) override;
+	void OnPopupMenu() override;
 
 	virtual void OnChanged();
 	MSlot<void()> mChanged;
@@ -75,7 +75,7 @@ class MGtkSimpleControlImpl : public MGtkControlImpl<MSimpleControl>
 {
   public:
 	MGtkSimpleControlImpl(MSimpleControl *inControl);
-	virtual void CreateWidget();
+	void CreateWidget() override;
 };
 
 class MGtkButtonImpl : public MGtkControlImpl<MButton>
@@ -84,15 +84,15 @@ class MGtkButtonImpl : public MGtkControlImpl<MButton>
 	MGtkButtonImpl(MButton *inButton, const std::string &inLabel,
 		MButtonFlags inFlags);
 
-	virtual void SimulateClick();
-	virtual void MakeDefault(bool inDefault);
+	void SimulateClick() override;
+	void MakeDefault(bool inDefault) override;
 
-	virtual void SetText(const std::string &inText);
+	void SetText(const std::string &inText) override;
 
-	virtual void CreateWidget();
-	virtual void GetIdealSize(int32_t &outWidth, int32_t &outHeight);
+	void CreateWidget() override;
+	void GetIdealSize(int32_t &outWidth, int32_t &outHeight) override;
 
-	virtual void AddedToWindow();
+	void AddedToWindow() override;
 
 	MSlot<void()> mClicked;
 	void Clicked();
@@ -107,7 +107,7 @@ class MGtkButtonImpl : public MGtkControlImpl<MButton>
 //   public:
 //					MGtkImageButtonImpl(MImageButton* inButton, const std::string& inImageResource);
 //
-//	virtual void	CreateWidget();
+//	void	CreateWidget() override;
 //
 //	MSlot<void()>	mClicked;
 //	void			Clicked();
@@ -119,16 +119,15 @@ class MGtkExpanderImpl : public MGtkControlImpl<MExpander>
 {
   public:
 	MGtkExpanderImpl(MExpander *inExpander, const std::string &inLabel);
-	virtual ~MGtkExpanderImpl();
+	~MGtkExpanderImpl();
 
-	virtual void SetOpen(bool inOpen);
-	virtual bool IsOpen() const;
+	void SetOpen(bool inOpen) override;
+	bool IsOpen() const override;
 
-	virtual void CreateWidget();
-	virtual void AddedToWindow();
+	void CreateWidget() override;
+	void AddedToWindow() override;
 
-	virtual void Append(MGtkWidgetMixin *inChild, MControlPacking inPacking,
-		bool inExpand, bool inFill, uint32_t inPadding);
+	void Append(MGtkWidgetMixin *inChild, bool inExpand, MRect inMargins) override;
 
   private:
 	bool mIsOpen;
@@ -143,25 +142,25 @@ class MGtkScrollbarImpl : public MGtkControlImpl<MScrollbar>
   public:
 	MGtkScrollbarImpl(MScrollbar *inScrollbar);
 
-	virtual void CreateWidget();
+	void CreateWidget() override;
 
-	//	virtual void	ShowSelf();
-	//	virtual void	HideSelf();
+	//	void	ShowSelf() override;
+	//	void	HideSelf() override;
 
-	virtual int32_t GetValue() const;
-	virtual void SetValue(int32_t inValue);
+	int32_t GetValue() const override;
+	void SetValue(int32_t inValue) override;
 
-	virtual int32_t GetTrackValue() const;
+	int32_t GetTrackValue() const override;
 
-	virtual void SetAdjustmentValues(int32_t inMinValue, int32_t inMaxValue,
-		int32_t inScrollUnit, int32_t inPageSize, int32_t inValue);
+	void SetAdjustmentValues(int32_t inMinValue, int32_t inMaxValue,
+		int32_t inScrollUnit, int32_t inPageSize, int32_t inValue) override;
 
-	virtual int32_t GetMinValue() const;
-	//	virtual void	SetMinValue(int32_t inValue);
-	virtual int32_t GetMaxValue() const;
-	//	virtual void	SetMaxValue(int32_t inValue);
+	int32_t GetMinValue() const override;
+	//	void	SetMinValue(int32_t inValue) override;
+	int32_t GetMaxValue() const override;
+	//	void	SetMaxValue(int32_t inValue) override;
 	//
-	//	virtual void	SetViewSize(int32_t inValue);
+	//	void	SetViewSize(int32_t inValue) override;
 
 	MSlot<void()> eValueChanged;
 	void ValueChanged();
@@ -172,9 +171,9 @@ class MGtkStatusbarImpl : public MGtkControlImpl<MStatusbar>
   public:
 	MGtkStatusbarImpl(MStatusbar *inControl, uint32_t inPartCount, MStatusBarElement inParts[]);
 
-	virtual void CreateWidget();
-	virtual void SetStatusText(uint32_t inPartNr, const std::string &inText, bool inBorder);
-	virtual void AddedToWindow();
+	void CreateWidget() override;
+	void SetStatusText(uint32_t inPartNr, const std::string &inText, bool inBorder) override;
+	void AddedToWindow() override;
 
   private:
 	std::vector<MStatusBarElement> mParts;
@@ -211,19 +210,18 @@ class MGtkPopupImpl : public MGtkControlImpl<MPopup>
   public:
 	MGtkPopupImpl(MPopup *inPopup);
 
-	virtual void SetChoices(const std::vector<std::string> &inChoices);
+	void SetChoices(const std::vector<std::string> &inChoices) override;
 
-	virtual int32_t GetValue() const;
-	virtual void SetValue(int32_t inValue);
+	int32_t GetValue() const override;
+	void SetValue(int32_t inValue) override;
 
-	virtual void SetText(const std::string &inText);
-	virtual std::string
-	GetText() const;
+	void SetText(const std::string &inText) override;
+	std::string GetText() const override;
 
-	virtual void CreateWidget();
-	virtual void AddedToWindow();
+	void CreateWidget() override;
+	void AddedToWindow() override;
 
-	virtual bool DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat);
+	// bool DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat) override;
 
   private:
 	std::vector<std::string>
@@ -258,16 +256,16 @@ class MGtkCaptionImpl : public MGtkControlImpl<MCaption>
   public:
 	MGtkCaptionImpl(MCaption *inControl, const std::string &inText);
 
-	virtual void CreateWidget();
+	void CreateWidget() override;
 
-	virtual void SetText(const std::string &inText);
+	void SetText(const std::string &inText) override;
 };
 
 class MGtkSeparatorImpl : public MGtkControlImpl<MSeparator>
 {
   public:
 	MGtkSeparatorImpl(MSeparator *inControl);
-	virtual void CreateWidget();
+	void CreateWidget() override;
 };
 
 class MGtkCheckboxImpl : public MGtkControlImpl<MCheckbox>
@@ -275,11 +273,11 @@ class MGtkCheckboxImpl : public MGtkControlImpl<MCheckbox>
   public:
 	MGtkCheckboxImpl(MCheckbox *inControl, const std::string &inText);
 
-	virtual void CreateWidget();
+	void CreateWidget() override;
 
-	//	virtual void	SubClass();
-	virtual bool IsChecked() const;
-	virtual void SetChecked(bool inChecked);
+	//	void	SubClass() override;
+	bool IsChecked() const override;
+	void SetChecked(bool inChecked) override;
 
   private:
 	bool mChecked;
@@ -290,12 +288,12 @@ class MGtkRadiobuttonImpl : public MGtkControlImpl<MRadiobutton>
   public:
 	MGtkRadiobuttonImpl(MRadiobutton *inControl, const std::string &inText);
 
-	virtual void CreateWidget();
+	void CreateWidget() override;
 
-	virtual bool IsChecked() const;
-	virtual void SetChecked(bool inChecked);
+	bool IsChecked() const override;
+	void SetChecked(bool inChecked) override;
 
-	virtual void SetGroup(const std::list<MRadiobutton *> &inButtons);
+	void SetGroup(const std::list<MRadiobutton *> &inButtons) override;
 
   private:
 	std::list<MRadiobutton *> mGroup;
@@ -306,12 +304,12 @@ class MGtkColorSwatchImpl : public MGtkControlImpl<MColorSwatch>
   public:
 	MGtkColorSwatchImpl(MColorSwatch *inColorSwatch, MColor inColor);
 
-	virtual void CreateWidget();
+	void CreateWidget() override;
 
-	virtual MColor GetColor() const;
-	virtual void SetColor(MColor inColor);
+	MColor GetColor() const override;
+	void SetColor(MColor inColor) override;
 
-	virtual void SetPalette(const std::vector<MColor> &colors);
+	void SetPalette(const std::vector<MColor> &colors) override;
 
   private:
 	MEventIn<void(MColor)> eSelectedColor;
@@ -332,13 +330,13 @@ class MGtkListBoxImpl : public MGtkControlImpl<MListBox>
   public:
 	MGtkListBoxImpl(MListBox *inListBox);
 
-	virtual void CreateWidget();
-	virtual void AddedToWindow();
+	void CreateWidget() override;
+	void AddedToWindow() override;
 
-	virtual void AddItem(const std::string &inLabel);
+	void AddItem(const std::string &inLabel) override;
 
-	virtual int32_t GetValue() const;
-	virtual void SetValue(int32_t inValue);
+	int32_t GetValue() const override;
+	void SetValue(int32_t inValue) override;
 
   private:
 	MSlot<void()> mSelectionChanged;
@@ -357,10 +355,9 @@ class MGtkBoxControlImpl : public MGtkControlImpl<MBoxControl>
 		bool inHorizontal, bool inHomogeneous, bool inExpand, bool inFill,
 		uint32_t inSpacing, uint32_t inPadding);
 
-	virtual void CreateWidget();
+	void CreateWidget() override;
 
-	virtual void Append(MGtkWidgetMixin *inChild, MControlPacking inPacking,
-		bool inExpand, bool inFill, uint32_t inPadding);
+	void Append(MGtkWidgetMixin *inChild, bool inExpand, MRect inMargins) override;
 
 	bool mHorizontal, mHomogeneous, mExpand, mFill;
 	uint32_t mSpacing, mPadding;

@@ -41,9 +41,8 @@ class MCanvasImpl : public MControlImpl<MCanvas>
 
 	virtual void Invalidate() { mControl->MView::Invalidate(); }
 
-	virtual void AcceptDragAndDrop(bool inFiles, bool inText) = 0;
-	virtual void StartDrag() = 0;
+	// virtual void AcceptDragAndDrop(bool inFiles, bool inText) = 0;
+	// virtual void StartDrag() = 0;
 
-	static MCanvasImpl *
-	Create(MCanvas *inCanvas, uint32_t inWidth, uint32_t inHeight);
+	static MCanvasImpl *Create(MCanvas *inCanvas, uint32_t inWidth, uint32_t inHeight);
 };

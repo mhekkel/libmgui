@@ -38,8 +38,6 @@ class MMenuImpl
 
 	virtual ~MMenuImpl() = default;
 
-	virtual void SetTarget(MHandler *inHandler) = 0;
-
 	virtual void SetItemState(uint32_t inItem, bool inEnabled, bool inChecked) = 0;
 
 	virtual void AppendItem(const std::string &inLabel, const std::string &inAction) = 0;

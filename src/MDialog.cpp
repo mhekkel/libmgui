@@ -115,7 +115,7 @@ void MDialog::RecalculateLayout()
 {
 	//	assert(mChildren.size() == 1);
 	assert(mChildren.size() >= 1);
-	mChildren.front()->GetFrame(mBounds);
+	mBounds = mChildren.front()->GetFrame();
 	mFrame = mBounds;
 	mBounds.x += mLeftMargin;
 	mBounds.y += mTopMargin;
@@ -128,7 +128,7 @@ void MDialog::ChildResized()
 	MRect frame = mFrame;
 
 	assert(mChildren.size() == 1);
-	mChildren.front()->GetFrame(mBounds);
+	mBounds = mChildren.front()->GetFrame();
 	mFrame = mBounds;
 	mBounds.x += mLeftMargin;
 	mBounds.y += mTopMargin;

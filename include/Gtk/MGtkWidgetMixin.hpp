@@ -38,8 +38,6 @@
 #include <string>
 #include <vector>
 
-class MHandler;
-
 typedef std::vector<std::pair<GObject *, std::string>> MSignalHandlerArray;
 
 template <class CallbackIn, typename Function>
@@ -290,7 +288,6 @@ class MGtkWidgetMixin
 	MGtkWidgetMixin &operator=(const MGtkWidgetMixin &) = delete;
 
 	MGtkWidgetMixin();
-	//	MGtkWidgetMixin(GtkWidget* inWidget);
 	virtual ~MGtkWidgetMixin();
 
 	void RequestSize(int32_t inWidth, int32_t inHeight);
@@ -307,8 +304,7 @@ class MGtkWidgetMixin
 	GtkWidget *GetWidget() const { return mWidget; }
 	void SetWidget(GtkWidget *inWidget);
 
-	virtual void Append(MGtkWidgetMixin *inChild, MControlPacking inPacking,
-		bool inExpand, bool inFill, uint32_t inPadding);
+	virtual void Append(MGtkWidgetMixin *inChild, bool inExpand, MRect inMargins);
 
   protected:
 	virtual bool OnDestroy();

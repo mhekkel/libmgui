@@ -40,9 +40,7 @@
 class MWindow;
 class MDevice;
 class MView;
-// class MViewScroller;
 class MScrollbar;
-class MHandler;
 
 typedef std::list<MView *> MViewList;
 
@@ -55,12 +53,6 @@ enum MCursor
 	eBlankCursor,
 
 	eCursorCount
-};
-
-enum MControlPacking
-{
-	ePackStart,
-	ePackEnd
 };
 
 /**
@@ -95,9 +87,12 @@ class MView
 	virtual void AddedToWindow();
 	virtual MWindow *GetWindow() const;
 	// virtual void SetViewScroller(MViewScroller *inScroller);
-	virtual void GetBounds(MRect &outBounds) const;
-	virtual void GetFrame(MRect &outFrame) const;
+
+	virtual MRect GetBounds() const;
+
+	virtual MRect GetFrame() const;
 	virtual void SetFrame(const MRect &inFrame);
+
 	virtual void MoveFrame(int32_t inXDelta, int32_t inYDelta);
 	virtual void ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta);
 	virtual void GetBindings(bool &outFollowLeft, bool &outFollowTop, bool &outFollowRight, bool &outFollowBottom) const;
@@ -147,8 +142,6 @@ class MView
 	virtual uint32_t CountPages(MDevice &inDevice);
 	MView *FindSubView(int32_t inX, int32_t inY) const;
 	virtual MView *FindSubViewByID(const std::string &inID) const;
-
-	virtual MHandler *FindFocus();
 
 	virtual void ConvertToParent(int32_t &ioX, int32_t &ioY) const;
 	virtual void ConvertFromParent(int32_t &ioX, int32_t &ioY) const;

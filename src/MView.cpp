@@ -32,7 +32,6 @@
 #include "MControls.hpp"
 #include "MDevice.hpp"
 #include "MError.hpp"
-#include "MHandler.hpp"
 #include "MUtils.hpp"
 #include "MWindow.hpp"
 
@@ -41,8 +40,7 @@
 
 using namespace std;
 
-MView::MView(const string &inID,
-	MRect inBounds)
+MView::MView(const string &inID, MRect inBounds)
 	: mID(inID)
 	, mBounds(0, 0, inBounds.width, inBounds.height)
 	, mFrame(inBounds)
@@ -81,8 +79,7 @@ MView *MView::GetParent() const
 	return mParent;
 }
 
-void MView::SetParent(
-	MView *inParent)
+void MView::SetParent(MView *inParent)
 {
 	mParent = inParent;
 }
@@ -115,20 +112,20 @@ void MView::AddChild(MView *inView)
 
 void MView::AddedToWindow()
 {
-	MHandler *thisHandler = dynamic_cast<MHandler *>(this);
+	// MHandler *thisHandler = dynamic_cast<MHandler *>(this);
 
-	if (thisHandler != nullptr and thisHandler->GetSuper() == nullptr)
-	{
-		for (MView *parent = GetParent(); parent != nullptr; parent = parent->GetParent())
-		{
-			MHandler *super = dynamic_cast<MHandler *>(parent);
-			if (super != nullptr)
-			{
-				thisHandler->SetSuper(super);
-				break;
-			}
-		}
-	}
+	// if (thisHandler != nullptr and thisHandler->GetSuper() == nullptr)
+	// {
+	// 	for (MView *parent = GetParent(); parent != nullptr; parent = parent->GetParent())
+	// 	{
+	// 		MHandler *super = dynamic_cast<MHandler *>(parent);
+	// 		if (super != nullptr)
+	// 		{
+	// 			thisHandler->SetSuper(super);
+	// 			break;
+	// 		}
+	// 	}
+	// }
 
 	if (mVisible == eTriStateOn and not GetParent()->IsVisible())
 		mVisible = eTriStateLatent;
@@ -162,20 +159,17 @@ MWindow *MView::GetWindow() const
 // 	mScroller = inScroller;
 // }
 
-void MView::GetBounds(
-	MRect &outBounds) const
+MRect MView::GetBounds() const
 {
-	outBounds = mBounds;
+	return mBounds;
 }
 
-void MView::GetFrame(
-	MRect &outFrame) const
+MRect MView::GetFrame() const
 {
-	outFrame = mFrame;
+	return mFrame;
 }
 
-void MView::SetFrame(
-	const MRect &inFrame)
+void MView::SetFrame(const MRect &inFrame)
 {
 	if (inFrame != mFrame)
 	{
@@ -203,11 +197,7 @@ void MView::SetFrame(
 	}
 }
 
-void MView::GetBindings(
-	bool &outFollowLeft,
-	bool &outFollowTop,
-	bool &outFollowRight,
-	bool &outFollowBottom) const
+void MView::GetBindings(bool &outFollowLeft, bool &outFollowTop, bool &outFollowRight, bool &outFollowBottom) const
 {
 	outFollowLeft = mBindLeft;
 	outFollowTop = mBindTop;
@@ -215,11 +205,7 @@ void MView::GetBindings(
 	outFollowBottom = mBindBottom;
 }
 
-void MView::SetBindings(
-	bool inFollowLeft,
-	bool inFollowTop,
-	bool inFollowRight,
-	bool inFollowBottom)
+void MView::SetBindings(bool inFollowLeft, bool inFollowTop, bool inFollowRight, bool inFollowBottom)
 {
 	mBindLeft = inFollowLeft;
 	mBindTop = inFollowTop;
@@ -227,9 +213,7 @@ void MView::SetBindings(
 	mBindBottom = inFollowBottom;
 }
 
-void MView::MoveFrame(
-	int32_t inXDelta,
-	int32_t inYDelta)
+void MView::MoveFrame(int32_t inXDelta, int32_t inYDelta)
 {
 	if (mWillDraw)
 		Invalidate();
@@ -247,9 +231,7 @@ void MView::MoveFrame(
 		Invalidate();
 }
 
-void MView::ResizeFrame(
-	int32_t inWidthDelta,
-	int32_t inHeightDelta)
+void MView::ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta)
 {
 	if (mWillDraw)
 		Invalidate();
@@ -308,11 +290,7 @@ void MView::ResizeFrame(
 		Invalidate();
 }
 
-void MView::GetMargins(
-	int32_t &outLeftMargin,
-	int32_t &outTopMargin,
-	int32_t &outRightMargin,
-	int32_t &outBottomMargin) const
+void MView::GetMargins(int32_t &outLeftMargin, int32_t &outTopMargin, int32_t &outRightMargin, int32_t &outBottomMargin) const
 {
 	outLeftMargin = mLeftMargin;
 	outTopMargin = mTopMargin;
@@ -320,11 +298,7 @@ void MView::GetMargins(
 	outBottomMargin = mBottomMargin;
 }
 
-void MView::SetMargins(
-	int32_t inLeftMargin,
-	int32_t inTopMargin,
-	int32_t inRightMargin,
-	int32_t inBottomMargin)
+void MView::SetMargins(int32_t inLeftMargin, int32_t inTopMargin, int32_t inRightMargin, int32_t inBottomMargin)
 {
 	int32_t dx = inLeftMargin - mLeftMargin;
 	int32_t dy = inTopMargin - mTopMargin;
@@ -359,9 +333,7 @@ void MView::RecalculateLayout()
 		if (not child->IsVisible())
 			continue;
 
-		MRect f;
-		child->GetFrame(f);
-		b |= f;
+		b |= child->GetFrame();
 	}
 
 	mFrame.width = b.width + mLeftMargin + mRightMargin;
@@ -386,17 +358,13 @@ void MView::UpdateNow()
 		mParent->UpdateNow();
 }
 
-void MView::SetCursor(
-	MCursor inCursor)
+void MView::SetCursor(MCursor inCursor)
 {
 	if (mParent != nullptr)
 		mParent->SetCursor(inCursor);
 }
 
-void MView::AdjustCursor(
-	int32_t inX,
-	int32_t inY,
-	uint32_t inModifiers)
+void MView::AdjustCursor(int32_t inX, int32_t inY, uint32_t inModifiers)
 {
 	if (mParent != nullptr)
 	{
@@ -422,18 +390,11 @@ void MView::TrackMouse(bool inTrackMove, bool inTrackExit)
 {
 }
 
-void MView::MouseDown(
-	int32_t inX,
-	int32_t inY,
-	uint32_t inClickCount,
-	uint32_t inModifiers)
+void MView::MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, uint32_t inModifiers)
 {
 }
 
-void MView::MouseMove(
-	int32_t inX,
-	int32_t inY,
-	uint32_t inModifiers)
+void MView::MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers)
 {
 }
 
@@ -441,19 +402,11 @@ void MView::MouseExit()
 {
 }
 
-void MView::MouseUp(
-	int32_t inX,
-	int32_t inY,
-	uint32_t inModifiers)
+void MView::MouseUp(int32_t inX, int32_t inY, uint32_t inModifiers)
 {
 }
 
-void MView::MouseWheel(
-	int32_t inX,
-	int32_t inY,
-	int32_t inDeltaX,
-	int32_t inDeltaY,
-	uint32_t inModifiers)
+void MView::MouseWheel(int32_t inX, int32_t inY, int32_t inDeltaX, int32_t inDeltaY, uint32_t inModifiers)
 {
 	if (mParent != nullptr)
 	{
@@ -462,9 +415,7 @@ void MView::MouseWheel(
 	}
 }
 
-void MView::ShowContextMenu(
-	int32_t inX,
-	int32_t inY)
+void MView::ShowContextMenu(int32_t inX, int32_t inY)
 {
 	if (mParent != nullptr)
 	{
@@ -633,25 +584,24 @@ bool MView::IsEnabled() const
 	return (mEnabled == eTriStateOn) and IsVisible();
 }
 
-uint32_t MView::CountPages(
-	MDevice &inDevice)
+uint32_t MView::CountPages(MDevice &inDevice)
 {
 	return 1;
 }
 
-MHandler *MView::FindFocus()
-{
-	MHandler *result = nullptr;
+// MHandler *MView::FindFocus()
+// {
+// 	MHandler *result = nullptr;
 
-	for (MView *view : mChildren)
-	{
-		result = view->FindFocus();
-		if (result != nullptr)
-			break;
-	}
+// 	for (MView *view : mChildren)
+// 	{
+// 		result = view->FindFocus();
+// 		if (result != nullptr)
+// 			break;
+// 	}
 
-	return result;
-}
+// 	return result;
+// }
 
 MView *MView::FindSubView(int32_t inX, int32_t inY) const
 {
@@ -1565,11 +1515,7 @@ void MPager::RecalculateLayout()
 	MRect b = mBounds;
 
 	for (MView *child : mChildren)
-	{
-		MRect f;
-		child->GetFrame(f);
-		b |= f;
-	}
+		b |= child->GetFrame();
 
 	mBounds.x = mLeftMargin;
 	mBounds.y = mTopMargin;

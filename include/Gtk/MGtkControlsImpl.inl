@@ -180,7 +180,7 @@ void MGtkControlImpl<CONTROL>::GetParentAndBounds(MGtkWidgetMixin *&outParent, M
 	MView *view = this->mControl;
 	MView *parent = view->GetParent();
 
-	view->GetBounds(outBounds);
+	outBounds = view->GetBounds();
 
 	while (parent != nullptr)
 	{
@@ -228,7 +228,7 @@ void MGtkControlImpl<CONTROL>::AddedToWindow()
 	GetParentAndBounds(parent, bounds);
 
 	MControlBase *control = this->mControl;
-	parent->Append(this, control->GetPacking(), control->GetExpand(), control->GetFill(), control->GetPadding());
+	parent->Append(this, control->GetExpand(), control->GetMargins());
 }
 
 template <class CONTROL>
@@ -243,21 +243,21 @@ bool MGtkControlImpl<CONTROL>::OnKeyPressEvent(GdkEvent *inEvent)
 
 	bool result = MGtkWidgetMixin::OnKeyPressEvent(inEvent);
 
-	if (not result)
-	{
-		const uint32_t kValidModifiersMask = gtk_accelerator_get_default_mod_mask();
+	// if (not result)
+	// {
+	// 	const uint32_t kValidModifiersMask = gtk_accelerator_get_default_mod_mask();
 
-		uint32_t modifiers = MapModifier(gdk_event_get_modifier_state(inEvent) & kValidModifiersMask);
-		uint32_t keyValue = MapKeyCode(gdk_key_event_get_keyval(inEvent));
-		uint32_t cmd;
+	// 	uint32_t modifiers = MapModifier(gdk_event_get_modifier_state(inEvent) & kValidModifiersMask);
+	// 	uint32_t keyValue = MapKeyCode(gdk_key_event_get_keyval(inEvent));
+	// 	uint32_t cmd;
 
-		if (MAcceleratorTable::Instance().IsAcceleratorKey(keyValue, modifiers, cmd))
-		{
-			bool enabled = true, checked = false;
-			if (this->mControl->UpdateCommandStatus(cmd, nullptr, 0, enabled, checked) and enabled)
-				result = this->mControl->ProcessCommand(cmd, nullptr, 0, 0);
-		}
-	}
+	// 	if (MAcceleratorTable::Instance().IsAcceleratorKey(keyValue, modifiers, cmd))
+	// 	{
+	// 		bool enabled = true, checked = false;
+	// 		if (this->mControl->UpdateCommandStatus(cmd, nullptr, 0, enabled, checked) and enabled)
+	// 			result = this->mControl->ProcessCommand(cmd, nullptr, 0, 0);
+	// 	}
+	// }
 
 	// PRINT(("OnKeyPressEvent returns %d", result));
 	return result;

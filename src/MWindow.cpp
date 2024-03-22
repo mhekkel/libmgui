@@ -52,7 +52,6 @@ list<MWindow *> MWindow::sWindowList;
 
 MWindow::MWindow(const string &inTitle, const MRect &inBounds, MWindowFlags inFlags)
 	: MView("window", inBounds)
-	, MHandler(gApp)
 	, mImpl(MWindowImpl::Create(inTitle, inBounds, inFlags, this))
 	, mModified(false)
 {
@@ -67,7 +66,6 @@ MWindow::MWindow(const string &inTitle, const MRect &inBounds, MWindowFlags inFl
 
 MWindow::MWindow(MWindowImpl *inImpl)
 	: MView("window", MRect(0, 0, 100, 100))
-	, MHandler(gApp)
 	, mImpl(inImpl)
 {
 	SetBindings(true, true, true, true);
@@ -213,51 +211,45 @@ void MWindow::SetTransparency(float inAlpha)
 	mImpl->SetTransparency(inAlpha);
 }
 
-bool MWindow::UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked)
-{
-	bool result = true;
+// bool MWindow::UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked)
+// {
+// 	bool result = true;
 
-	switch (inCommand)
-	{
-		case cmd_Close:
-			outEnabled = true;
-			break;
+// 	switch (inCommand)
+// 	{
+// 		case cmd_Close:
+// 			outEnabled = true;
+// 			break;
 
-		default:
-			result = MHandler::UpdateCommandStatus(inCommand, inMenu, inItemIndex, outEnabled, outChecked);
-	}
+// 		default:
+// 			result = MHandler::UpdateCommandStatus(inCommand, inMenu, inItemIndex, outEnabled, outChecked);
+// 	}
 
-	return result;
-}
+// 	return result;
+// }
 
-bool MWindow::ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers)
-{
-	bool result = true;
+// bool MWindow::ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers)
+// {
+// 	bool result = true;
 
-	switch (inCommand)
-	{
-		case cmd_Close:
-			if (AllowClose(false))
-				Close();
-			break;
+// 	switch (inCommand)
+// 	{
+// 		case cmd_Close:
+// 			if (AllowClose(false))
+// 				Close();
+// 			break;
 
-		default:
-			result = MHandler::ProcessCommand(inCommand, inMenu, inItemIndex, inModifiers);
-			break;
-	}
+// 		default:
+// 			result = MHandler::ProcessCommand(inCommand, inMenu, inItemIndex, inModifiers);
+// 			break;
+// 	}
 
-	return result;
-}
+// 	return result;
+// }
 
 void MWindow::ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta)
 {
 	ResizeWindow(inWidthDelta, inHeightDelta);
-	// MView::ResizeFrame(0, 0);
-
-	// MRect frame;
-	// CalculateFrame(frame);
-	// if (frame != mFrame)
-	// mImpl->ResizeWindow(frame.width - mFrame.width, frame.height - mFrame.height);
 }
 
 void MWindow::ResizeWindow(int32_t inWidthDelta, int32_t inHeightDelta)

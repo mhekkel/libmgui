@@ -149,8 +149,7 @@ void MGtkExpanderImpl::CreateWidget()
 	SetWidget(gtk_expander_new(mLabel.c_str()));
 }
 
-void MGtkExpanderImpl::Append(MGtkWidgetMixin *inChild, MControlPacking inPacking,
-	bool inExpand, bool inFill, uint32_t inPadding)
+void MGtkExpanderImpl::Append(MGtkWidgetMixin *inChild, bool inExpand, MRect inMargins)
 {
 	// assert(GTK_IS_CONTAINER(GetWidget()));
 	// gtk_container_add(GTK_CONTAINER(GetWidget()), inChild->GetWidget());
@@ -195,8 +194,7 @@ MGtkScrollbarImpl::MGtkScrollbarImpl(MScrollbar *inScrollbar)
 
 void MGtkScrollbarImpl::CreateWidget()
 {
-	MRect bounds;
-	mControl->GetBounds(bounds);
+	MRect bounds = mControl->GetBounds();
 
 	GtkAdjustment *adjustment = GTK_ADJUSTMENT(gtk_adjustment_new(0, 0, 1, 1, 1, 1));
 
@@ -552,22 +550,6 @@ std::string MGtkPopupImpl::GetText() const
 	return s ? s : "";
 }
 
-bool MGtkPopupImpl::DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat)
-{
-	bool result = false;
-
-	if (inKeyCode == kReturnKeyCode or
-		inKeyCode == kEnterKeyCode or
-		inKeyCode == kTabKeyCode or
-		inKeyCode == kEscapeKeyCode or
-		(inModifiers & ~kShiftKey) != 0)
-	{
-		//		result = MGtkControlImpl::DispatchKeyDown(inKeyCode, inModifiers, inRepeat);
-	}
-
-	return result;
-}
-
 MPopupImpl *MPopupImpl::Create(MPopup *inPopup)
 {
 	return new MGtkPopupImpl(inPopup);
@@ -629,16 +611,17 @@ void MGtkEdittextImpl::SetPasswordChar(uint32_t inUnicode)
 bool MGtkEdittextImpl::OnKeyPressEvent(GdkEvent *inEvent)
 {
 
-	const uint32_t kValidModifiersMask = gtk_accelerator_get_default_mod_mask();
-	uint32_t modifiers = MapModifier(gdk_event_get_modifier_state(inEvent) & kValidModifiersMask);
-	uint32_t keyValue = MapKeyCode(gdk_key_event_get_keyval(inEvent));
+#warning FIXME
+	// const uint32_t kValidModifiersMask = gtk_accelerator_get_default_mod_mask();
+	// uint32_t modifiers = MapModifier(gdk_event_get_modifier_state(inEvent) & kValidModifiersMask);
+	// uint32_t keyValue = MapKeyCode(gdk_key_event_get_keyval(inEvent));
 
-	bool result = mControl->HandleKeyDown(keyValue, modifiers, false);
+	// // bool result = mControl->HandleKeyDown(keyValue, modifiers, false);
 
-	if (not result)
-		result = MGtkControlImpl::OnKeyPressEvent(inEvent);
+	// if (not result)
+	// 	result = MGtkControlImpl::OnKeyPressEvent(inEvent);
 
-	return result;
+	// return result;
 }
 
 MEdittextImpl *MEdittextImpl::Create(MEdittext *inEdittext, uint32_t inFlags)
@@ -987,16 +970,15 @@ MBoxControlImpl *MBoxControlImpl::Create(MBoxControl *inControl, bool inHorizont
 	return new MGtkBoxControlImpl(inControl, inHorizontal, inHomogeneous, inExpand, inFill, inSpacing, inPadding);
 }
 
-void MGtkBoxControlImpl::Append(MGtkWidgetMixin *inChild, MControlPacking inPacking,
-	bool inExpand, bool inFill, uint32_t inPadding)
+void MGtkBoxControlImpl::Append(MGtkWidgetMixin *inChild, bool inExpand, MRect inMargins)
 {
 	assert(GTK_IS_BOX(GetWidget()));
 
 	auto childWidget = inChild->GetWidget();
-	gtk_widget_set_margin_top(childWidget, inPadding);
-	gtk_widget_set_margin_bottom(childWidget, inPadding);
-	gtk_widget_set_margin_start(childWidget, inPadding);
-	gtk_widget_set_margin_end(childWidget, inPadding);
+	gtk_widget_set_margin_top(childWidget, inMargins.y);
+	gtk_widget_set_margin_bottom(childWidget, inMargins.height);
+	gtk_widget_set_margin_start(childWidget, inMargins.x);
+	gtk_widget_set_margin_end(childWidget, inMargins.width);
 
 	gtk_box_append(GTK_BOX(GetWidget()), childWidget);
 	

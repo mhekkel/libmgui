@@ -62,9 +62,6 @@ class MWindowImpl
 	virtual void Select() = 0;
 	virtual void Close() = 0;
 
-	//	virtual void		SetFocus(MView* inFocus) {}
-	virtual MHandler *GetFocus() = 0;
-
 	virtual void ResizeWindow(int32_t inWidthDelta, int32_t inHeightDelta) = 0;
 
 	virtual void SetWindowPosition(MRect inBounds, bool inTransition) = 0;

@@ -27,7 +27,6 @@
 #pragma once
 
 #include "MControls.hpp"
-#include "MHandler.hpp"
 
 #include <filesystem>
 
@@ -38,26 +37,26 @@ class MCanvas : public MControl<MCanvasImpl>
   public:
 	typedef MCanvasImpl MImpl;
 
-	MCanvas(const std::string &inID, MRect inBounds, bool inAcceptDropFiles, bool inAcceptDropText);
-	virtual ~MCanvas();
+	MCanvas(const std::string &inID, MRect inBounds/* , bool inAcceptDropFiles, bool inAcceptDropText */);
+	~MCanvas();
 
-	virtual void AddedToWindow();
+	// void AddedToWindow() override;
 
-	virtual void Invalidate();
+	void Invalidate() override;
 
-	virtual void DragEnter();
-	virtual bool DragWithin(int32_t inX, int32_t inY);
-	virtual void DragLeave();
-	virtual bool Drop(bool inMove, int32_t inX, int32_t inY,
-		const std::string &inText);
-	virtual bool Drop(int32_t inX, int32_t inY,
-		const std::filesystem::path &inFile);
+	// void DragEnter() override;
+	// bool DragWithin(int32_t inX, int32_t inY) override;
+	// void DragLeave() override;
+	// bool Drop(bool inMove, int32_t inX, int32_t inY override,
+	// 	const std::string &inText);
+	// bool Drop(int32_t inX, int32_t inY override,
+	// 	const std::filesystem::path &inFile);
 
-	virtual void StartDrag();
-	virtual void DragSendData(std::string &outData);
-	virtual void DragDeleteData();
+	// void StartDrag() override;
+	// void DragSendData(std::string &outData) override;
+	// void DragDeleteData() override;
 
   protected:
-	bool mAcceptDropFiles;
-	bool mAcceptDropText;
+	// bool mAcceptDropFiles;
+	// bool mAcceptDropText;
 };

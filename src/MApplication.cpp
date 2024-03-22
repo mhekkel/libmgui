@@ -64,8 +64,7 @@ void MAsyncHandlerBase::execute()
 // --------------------------------------------------------------------
 
 MApplication::MApplication(MApplicationImpl *inImpl)
-	: MHandler(nullptr)
-	, mImpl(inImpl)
+	: mImpl(inImpl)
 	, mQuit(false)
 	, mQuitPending(false)
 {
@@ -103,58 +102,6 @@ void MApplication::DoOpen()
 void MApplication::Execute(const std::string &inCommand,
 		const std::vector<std::string> &inArguments)
 {
-}
-
-bool MApplication::ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers)
-{
-	bool result = true;
-
-	switch (inCommand)
-	{
-		case cmd_New:
-			DoNew();
-			break;
-
-		case cmd_Open:
-			DoOpen();
-			break;
-
-		case cmd_SelectWindowFromMenu:
-			DoSelectWindowFromWindowMenu(inItemIndex - 2);
-			break;
-
-		case cmd_Quit:
-			if (AllowQuit(false))
-				DoQuit();
-			break;
-
-		default:
-			result = false;
-			break;
-	}
-
-	return result;
-}
-
-bool MApplication::UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked)
-{
-	bool result = true;
-
-	switch (inCommand)
-	{
-		case cmd_New:
-		case cmd_Open:
-		case cmd_SelectWindowFromMenu:
-		case cmd_Quit:
-			outEnabled = true;
-			break;
-
-		default:
-			result = false;
-			break;
-	}
-
-	return result;
 }
 
 void MApplication::UpdateSpecialMenu(const std::string &inName, MMenu *inMenu)

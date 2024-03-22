@@ -77,8 +77,7 @@ class MGtkDialogImpl : public MGtkWindowImpl
 
 	virtual bool OnKeyPressEvent(GdkEvent *inEvent);
 
-	virtual void Append(MGtkWidgetMixin *inChild, MControlPacking inPacking,
-		bool inExpand, bool inFill, uint32_t inPadding);
+	void Append(MGtkWidgetMixin *inChild, bool inExpand, MRect inMargins) override;
 
 	void GetMargins(xml::element *inTemplate,
 		int32_t &outLeftMargin, int32_t &outTopMargin, int32_t &outRightMargin, int32_t &outBottomMargin);
@@ -293,17 +292,16 @@ void MGtkDialogImpl::Finish()
 	}
 }
 
-void MGtkDialogImpl::Append(MGtkWidgetMixin *inChild, MControlPacking inPacking,
-	bool inExpand, bool inFill, uint32_t inPadding)
+void MGtkDialogImpl::Append(MGtkWidgetMixin *inChild, bool inExpand, MRect inMargins)
 {
 	GtkWidget *box =
 		gtk_dialog_get_content_area(GTK_DIALOG(GetWidget()));
 
 	auto childWidget = inChild->GetWidget();
-	gtk_widget_set_margin_top(childWidget, inPadding);
-	gtk_widget_set_margin_bottom(childWidget, inPadding);
-	gtk_widget_set_margin_start(childWidget, inPadding);
-	gtk_widget_set_margin_end(childWidget, inPadding);
+	gtk_widget_set_margin_top(childWidget, inMargins.y);
+	gtk_widget_set_margin_bottom(childWidget, inMargins.height);
+	gtk_widget_set_margin_start(childWidget, inMargins.x);
+	gtk_widget_set_margin_end(childWidget, inMargins.width);
 
 #warning FIXME
 	// if (inPacking == ePackStart)
@@ -529,9 +527,7 @@ MView *MGtkDialogImpl::CreatePager(xml::element *inTemplate, int32_t inX, int32_
 
 		control->RecalculateLayout();
 
-		MRect f;
-		control->GetFrame(f);
-		b |= f;
+		b |= control->GetFrame();;
 	}
 
 	r.width = b.width;
@@ -760,11 +756,9 @@ MView *MGtkDialogImpl::CreateControls(xml::element *inTemplate, int32_t inX, int
 
 	if (control != nullptr)
 	{
-		control->SetLayout(
-			inTemplate->get_attribute("packing") == "end" ? ePackEnd : ePackStart,
-			inTemplate->get_attribute("expand") == "true" ? true : false,
-			inTemplate->get_attribute("fill") == "true" ? true : false,
-			get_attribute_int(inTemplate, "padding"));
+		auto x = get_attribute_int(inTemplate, "padding");
+		MRect m{ x, x, x, x };
+		control->SetLayout(inTemplate->get_attribute("expand") == "true", m);
 	}
 
 	return result;

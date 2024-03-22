@@ -34,7 +34,6 @@
 #include <list>
 #include <memory>
 
-class MHandler;
 class MWindow;
 class MWindowImpl;
 class MFile;
@@ -62,12 +61,9 @@ class MMenu
 	void SetItemCommand(uint32_t inIndex, const std::string &inAction);
 	uint32_t GetItemCommand(uint32_t inIndex) const;
 
-	void SetTarget(MHandler *inHandler);
-
 	void UpdateCommandStatus();
 
 	std::string GetLabel() { return mLabel; }
-	MHandler *GetTarget() { return mTarget; }
 
 	void Popup(MWindow *inTarget, int32_t inX, int32_t inY, bool inBottomMenu);
 
@@ -81,7 +77,6 @@ class MMenu
 	MMenuImpl *mImpl;
 	std::string mLabel;
 	std::string mSpecial;
-	MHandler *mTarget;
 };
 
 // Menu bars are global objects

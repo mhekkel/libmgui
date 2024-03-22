@@ -27,9 +27,9 @@
 #pragma once
 
 #include "MApplicationImpl.hpp"
-#include "MHandler.hpp"
 #include "MP2PEvents.hpp"
 #include "MTypes.hpp"
+#include "MMenu.hpp"
 
 #include <chrono>
 #include <filesystem>
@@ -44,7 +44,7 @@ class MWindow;
 
 // ===========================================================================
 
-class MApplication : public MHandler
+class MApplication
 {
   public:
 	static void Install(const std::string &inPrefix);
@@ -57,11 +57,7 @@ class MApplication : public MHandler
 	virtual void DoNew();
 	virtual void DoOpen();
 	// virtual void Open(const std::string &inURL);
-	virtual void Execute(const std::string &inCommand,
-		const std::vector<std::string> &inArguments);
-
-	virtual bool UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked);
-	virtual bool ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers);
+	virtual void Execute(const std::string &inCommand, const std::vector<std::string> &inArguments);
 
 	virtual void UpdateSpecialMenu(const std::string &inMenuKind, MMenu *inMenu);
 	virtual void UpdateWindowMenu(MMenu *inMenu);

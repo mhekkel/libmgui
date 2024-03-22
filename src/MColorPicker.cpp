@@ -60,7 +60,7 @@ class MColorSquare : public MCanvas
 };
 
 MColorSquare::MColorSquare(const std::string &inID, MRect inBounds, MColorPicker &inPicker)
-	: MCanvas(inID, inBounds, false, false)
+	: MCanvas(inID, inBounds)
 	, eChangedColor(this, &MColorSquare::SetColor)
 	, eChangedMode(this, &MColorSquare::SetMode)
 	, mMouseDown(false)
@@ -72,8 +72,7 @@ void MColorSquare::Draw()
 {
 	MDevice dev(this);
 
-	MRect bounds;
-	GetBounds(bounds);
+	MRect bounds = GetBounds();
 
 	dev.EraseRect(bounds);
 
@@ -184,8 +183,7 @@ void MColorSquare::MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers)
 {
 	if (mMouseDown)
 	{
-		MRect bounds;
-		GetBounds(bounds);
+		MRect bounds = GetBounds();
 
 		bounds.PinPoint(inX, inY);
 
@@ -255,7 +253,7 @@ class MColorSlider : public MCanvas
 };
 
 MColorSlider::MColorSlider(const std::string &inID, MRect inBounds, MColorPicker &inPicker)
-	: MCanvas(inID, inBounds, false, false)
+	: MCanvas(inID, inBounds)
 	, eChangedColor(this, &MColorSlider::SetColor)
 	, eChangedMode(this, &MColorSlider::SetMode)
 	, mMouseDown(false)
@@ -267,8 +265,7 @@ void MColorSlider::Draw()
 {
 	MDevice dev(this);
 
-	MRect bounds;
-	GetBounds(bounds);
+	MRect bounds = GetBounds();
 
 	dev.EraseRect(bounds);
 
@@ -364,8 +361,7 @@ void MColorSlider::MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers)
 {
 	if (mMouseDown)
 	{
-		MRect bounds;
-		GetBounds(bounds);
+		MRect bounds = GetBounds();
 
 		bounds.PinPoint(inX, inY);
 
@@ -431,7 +427,7 @@ class MColorSample : public MCanvas
 };
 
 MColorSample::MColorSample(const std::string &inID, MRect inBounds, MColorPicker &inPicker, MColor &inColor)
-	: MCanvas(inID, inBounds, false, false)
+	: MCanvas(inID, inBounds)
 	, eChangedColor(this, &MColorSample::SetColor)
 	, mPicker(inPicker)
 	, mColor(inColor)
@@ -444,8 +440,7 @@ void MColorSample::Draw()
 
 	dev.SetForeColor(mColor);
 
-	MRect bounds;
-	GetBounds(bounds);
+	MRect bounds = GetBounds();
 
 	dev.FillRect(bounds);
 }
@@ -490,29 +485,29 @@ MColorPicker::MColorPicker(
 
 	MView *placeholder = FindSubViewByID("square");
 	MRect bounds;
-	placeholder->GetBounds(bounds);
+	bounds = placeholder->GetBounds();
 
 	// correct the size
 	int32_t dx = 256 - bounds.width;
 	int32_t dy = 256 - bounds.height;
 	ResizeWindow(dx, dy);
 
-	placeholder->GetBounds(bounds);
+	bounds = placeholder->GetBounds();
 	MColorSquare *square = new MColorSquare("square-control", bounds, *this);
 	placeholder->AddChild(square);
 
 	placeholder = FindSubViewByID("slider");
-	placeholder->GetBounds(bounds);
+	bounds = placeholder->GetBounds();
 	MColorSlider *slider = new MColorSlider("slider-control", bounds, *this);
 	placeholder->AddChild(slider);
 
 	placeholder = FindSubViewByID("sample-before");
-	placeholder->GetBounds(bounds);
+	bounds = placeholder->GetBounds();
 	MColorSample *sample = new MColorSample("sample-control", bounds, *this, inColor);
 	placeholder->AddChild(sample);
 
 	placeholder = FindSubViewByID("sample-after");
-	placeholder->GetBounds(bounds);
+	bounds = placeholder->GetBounds();
 	sample = new MColorSample("sample-control", bounds, *this, inColor);
 	placeholder->AddChild(sample);
 

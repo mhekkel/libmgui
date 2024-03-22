@@ -53,13 +53,11 @@ namespace xml = zeep::xml;
 MMenu::MMenu(const string &inLabel, bool inPopup)
 	: mImpl(MMenuImpl::Create(this, inPopup))
 	, mLabel(inLabel)
-	, mTarget(nullptr)
 {
 }
 
 MMenu::MMenu(MMenuImpl *inImpl)
 	: mImpl(inImpl)
-	, mTarget(nullptr)
 {
 }
 
@@ -177,47 +175,6 @@ void MMenu::SetItemCommand(uint32_t inIndex, const std::string &inAction)
 uint32_t MMenu::GetItemCommand(uint32_t inIndex) const
 {
 	return mImpl->GetItemCommand(inIndex);
-}
-
-void MMenu::SetTarget(MHandler *inTarget)
-{
-	mTarget = inTarget;
-	mImpl->SetTarget(inTarget);
-
-	for (uint32_t i = 0; i < CountItems(); ++i)
-	{
-		MMenu *subMenu = mImpl->GetSubmenu(i);
-		if (subMenu != nullptr)
-			subMenu->SetTarget(inTarget);
-	}
-}
-
-void MMenu::UpdateCommandStatus()
-{
-	if (not mSpecial.empty())
-		gApp->UpdateSpecialMenu(mSpecial, this);
-
-	for (uint32_t i = 0; i < CountItems(); ++i)
-	{
-		MMenu *subMenu = mImpl->GetSubmenu(i);
-		if (subMenu != nullptr)
-			subMenu->UpdateCommandStatus();
-		else
-		{
-			bool enabled = false, checked = false;
-			if (mTarget != nullptr)
-			{
-				MWindow *window = dynamic_cast<MWindow *>(mTarget);
-				if (window != nullptr and window->FindFocus() != nullptr)
-					window->FindFocus()->UpdateCommandStatus(GetItemCommand(i), this, i, enabled, checked);
-				else
-					mTarget->UpdateCommandStatus(GetItemCommand(i), this, i, enabled, checked);
-			}
-			mImpl->SetItemState(i, enabled, checked);
-		}
-	}
-
-	mImpl->MenuUpdated();
 }
 
 void MMenu::Popup(MWindow *inHandler, int32_t inX, int32_t inY, bool inBottomMenu)

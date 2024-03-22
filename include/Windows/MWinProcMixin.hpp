@@ -9,8 +9,6 @@
 #include <map>
 #include <functional>
 
-class MHandler;
-
 class MWinProcMixin
 {
   public:

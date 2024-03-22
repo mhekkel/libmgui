@@ -170,7 +170,6 @@ class MGtkMenuImpl : public MMenuImpl
   public:
 	MGtkMenuImpl(MMenu *inMenu, GApplication *inApp);
 
-	void SetTarget(MHandler *inHandler) override;
 	void SetItemState(uint32_t inItem, bool inEnabled, bool inChecked) override;
 	void AppendItem(const string &inLabel, const std::string &inAction) override;
 	void AppendSubmenu(MMenu *inSubmenu) override;
@@ -202,7 +201,6 @@ class MGtkMenuImpl : public MMenuImpl
 	GApplication *mApp;
 	std::string mLabel;
 	MMenuItemList mItems;
-	MHandler *mTarget;
 	GSList *mRadioGroup;
 	int32_t mPopupX, mPopupY;
 };
@@ -211,21 +209,20 @@ MGtkMenuImpl::MGtkMenuImpl(MMenu *inMenu, GApplication *inApp)
 	: MMenuImpl(inMenu)
 	, mGMenu(g_menu_new())
 	, mApp(inApp)
-	, mTarget(nullptr)
 	, mRadioGroup(nullptr)
 {
 }
 
-void MGtkMenuImpl::SetTarget(MHandler *inHandler)
-{
-	mTarget = inHandler;
+// void MGtkMenuImpl::SetTarget(MHandler *inHandler)
+// {
+// 	mTarget = inHandler;
 
-	for (auto mi : mItems)
-	{
-		if (mi->mSubMenu != nullptr)
-			mi->mSubMenu->SetTarget(inHandler);
-	}
-}
+// 	for (auto mi : mItems)
+// 	{
+// 		if (mi->mSubMenu != nullptr)
+// 			mi->mSubMenu->SetTarget(inHandler);
+// 	}
+// }
 
 void MGtkMenuImpl::SetItemState(uint32_t inIndex, bool inEnabled, bool inChecked)
 {

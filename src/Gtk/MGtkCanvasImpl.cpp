@@ -123,9 +123,7 @@ bool MGtkCanvasImpl::OnConfigureEvent(GdkEvent *inEvent)
 {
 	// PRINT(("MGtkCanvasImpl::OnConfigureEvent"));
 
-	MRect frame;
-	mControl->GetFrame(frame);
-
+	MRect frame = mControl->GetFrame();
 	MRect bounds;
 
 	GtkWidget *parent = gtk_widget_get_parent(GetWidget());
@@ -273,13 +271,13 @@ bool MGtkCanvasImpl::OnScrollEvent(GdkEvent *inEvent)
 	return true;
 }
 
-void MGtkCanvasImpl::AcceptDragAndDrop(bool inFiles, bool inText)
-{
-}
+// void MGtkCanvasImpl::AcceptDragAndDrop(bool inFiles, bool inText)
+// {
+// }
 
-void MGtkCanvasImpl::StartDrag()
-{
-}
+// void MGtkCanvasImpl::StartDrag()
+// {
+// }
 
 MCanvasImpl *MCanvasImpl::Create(MCanvas *inCanvas, uint32_t inWidth, uint32_t inHeight)
 {

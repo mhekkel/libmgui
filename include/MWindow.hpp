@@ -29,7 +29,6 @@
 #include <list>
 
 #include "MColor.hpp"
-#include "MHandler.hpp"
 #include "MView.hpp"
 
 #include "MP2PEvents.hpp"
@@ -51,7 +50,7 @@ enum MWindowFlags
 	kMShowMenubar = (1 << 8)
 };
 
-class MWindow : public MView, public MHandler
+class MWindow : public MView
 {
   public:
 	MWindow(const std::string &inTitle,
@@ -87,12 +86,7 @@ class MWindow : public MView, public MHandler
 	// 0.0 is fully transparent, 1.0 is fully opaque
 	void SetTransparency(float inAlpha);
 
-	virtual bool UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked);
-
-	virtual bool ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers);
-
 	virtual void ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta);
-
 	virtual void ResizeWindow(int32_t inWidthDelta, int32_t inHeightDelta);
 
 	void GetWindowPosition(MRect &outPosition);

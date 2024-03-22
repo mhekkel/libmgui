@@ -27,22 +27,17 @@
 #pragma once
 
 #include "MColor.hpp"
-#include "MHandler.hpp"
 #include "MP2PEvents.hpp"
 #include "MView.hpp"
 
 struct MControlImplBase;
 
-class MControlBase : public MView, public MHandler
+class MControlBase : public MView
 {
   public:
 	MControlBase(const std::string &inID, MRect inBounds)
 		: MView(inID, inBounds)
-		, MHandler(nullptr)
-		, mPacking(ePackStart)
-		, mPadding(0)
 		, mExpand(false)
-		, mFill(false)
 	{
 	}
 
@@ -50,36 +45,23 @@ class MControlBase : public MView, public MHandler
 
 	virtual bool IsFocus() const = 0;
 	virtual void SetFocus() = 0;
-	virtual MHandler *FindFocus() { return IsFocus() ? this : MView::FindFocus(); }
 
-	// for auto layout of controls
-	MControlPacking GetPacking() const { return mPacking; }
-	void SetPacking(MControlPacking inPacking)
+	MRect GetMargins() const
 	{
-		mPacking = inPacking;
+		return MRect(mLeftMargin, mTopMargin, mRightMargin, mBottomMargin);
 	}
-
-	uint32_t GetPadding() const { return mPadding; }
-	void SetPadding(uint32_t inPadding) { mPadding = inPadding; }
 
 	bool GetExpand() const { return mExpand; }
 	void SetExpand(bool inExpand) { mExpand = inExpand; }
 
-	bool GetFill() const { return mFill; }
-	void SetFill(bool inFill) { mFill = inFill; }
-
-	void SetLayout(MControlPacking inPacking, bool inExpand, bool inFill, uint32_t inPadding)
+	void SetLayout(bool inExpand, MRect inMargins)
 	{
-		mPacking = inPacking;
 		mExpand = inExpand;
-		mFill = inFill;
-		mPadding = inPadding;
+		SetMargins(inMargins.x, inMargins.y, inMargins.width, inMargins.height);
 	}
 
   protected:
-	MControlPacking mPacking;
-	uint32_t mPadding;
-	bool mExpand, mFill;
+	bool mExpand;
 };
 
 template <class I>
@@ -93,8 +75,17 @@ class MControl : public MControlBase
 	virtual void ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta);
 	virtual void SetMargins(int32_t inLeftMargin, int32_t inTopMargin, int32_t inRightMargin, int32_t inBottomMargin);
 
-	// virtual void	Draw(MRect inUpdate);
 	virtual void Draw();
+
+	virtual bool HandleKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat)
+	{
+		return false;
+	}
+
+	virtual bool HandleCharacter(const std::string &inText, bool inRepeat)
+	{
+		return false;
+	}
 
 	virtual bool IsFocus() const;
 	virtual void SetFocus();
@@ -226,9 +217,7 @@ class MStatusbarImpl;
 struct MStatusBarElement
 {
 	uint32_t width;
-	MControlPacking packing;
-	uint32_t padding;
-	bool fill;
+	MRect margins;
 	bool expand;
 };
 
@@ -260,8 +249,7 @@ class MCombobox : public MControl<MComboboxImpl>
 		eValueChanged;
 
 	virtual void SetText(const std::string &inText);
-	virtual std::string
-	GetText() const;
+	virtual std::string GetText() const;
 
 	virtual void SetChoices(const std::vector<std::string> &inChoices);
 
@@ -287,8 +275,7 @@ class MPopup : public MControl<MPopupImpl>
 	virtual int32_t GetValue() const;
 
 	virtual void SetText(const std::string &inText);
-	virtual std::string
-	GetText() const;
+	virtual std::string GetText() const;
 
 	virtual void SetChoices(const std::vector<std::string> &inChoices);
 };
@@ -333,8 +320,7 @@ class MEdittext : public MControl<MEdittextImpl>
 	MEventOut<void(uint32_t inKeyCode, uint32_t inModifiers)> eKeyDown;
 
 	virtual void SetText(const std::string &inText);
-	virtual std::string
-	GetText() const;
+	virtual std::string GetText() const;
 
 	uint32_t GetFlags() const;
 

@@ -54,7 +54,6 @@ class MDialog : public MWindow
 
 	MWindow *GetParentWindow() const { return mParentWindow; }
 
-	using MHandler::SetFocus;
 	void SetFocus(const std::string &inID);
 
 	std::string GetText(const std::string &inID) const;

@@ -145,7 +145,7 @@ void MGtkWindowImpl::AddStatusbarWidget(MGtkWidgetMixin *inChild)
 	if (mMainVBox == nullptr)
 	{
 		mMainVBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-		gtk_box_append(GTK_BOX(GetWidget()), mMainVBox);
+		gtk_window_set_child(GTK_WINDOW(GetWidget()), mMainVBox);
 		gtk_widget_show(mMainVBox);
 	}
 
@@ -153,21 +153,23 @@ void MGtkWindowImpl::AddStatusbarWidget(MGtkWidgetMixin *inChild)
 	// gtk_widget_show_all(inChild->GetWidget());
 }
 
-void MGtkWindowImpl::Append(MGtkWidgetMixin *inChild, MControlPacking inPacking,
-	bool inExpand, bool inFill, uint32_t inPadding)
+void MGtkWindowImpl::Append(MGtkWidgetMixin *inChild, bool inExpand, MRect inMargins)
 {
 	if (mMainVBox == nullptr)
 	{
 		mMainVBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-		gtk_box_append(GTK_BOX(GetWidget()), mMainVBox);
+		gtk_window_set_child(GTK_WINDOW(GetWidget()), mMainVBox);
 		gtk_widget_show(mMainVBox);
 	}
 
 	auto childWidget = inChild->GetWidget();
-	gtk_widget_set_margin_top(childWidget, inPadding);
-	gtk_widget_set_margin_bottom(childWidget, inPadding);
-	gtk_widget_set_margin_start(childWidget, inPadding);
-	gtk_widget_set_margin_end(childWidget, inPadding);
+	gtk_widget_set_margin_top(childWidget, inMargins.y);
+	gtk_widget_set_margin_bottom(childWidget, inMargins.height);
+	gtk_widget_set_margin_start(childWidget, inMargins.x);
+	gtk_widget_set_margin_end(childWidget, inMargins.width);
+
+	gtk_widget_set_hexpand(childWidget, inExpand);
+
 
 #warning FIXME
 	gtk_box_append(GTK_BOX(mMainVBox), childWidget);
@@ -364,11 +366,11 @@ void MGtkWindowImpl::Select()
 	// 	gdk_window_focus(gdkWindow, GDK_CURRENT_TIME);
 
 	if (Visible())
-		gtk_window_present_with_time(GTK_WINDOW(GetWidget()), 0);
+		gtk_window_present_with_time(GTK_WINDOW(GetWidget()), GDK_CURRENT_TIME);
 	else
 		Show();
 
-	mWindow->BeFocus();
+	// mWindow->BeFocus();
 }
 
 void MGtkWindowImpl::Close()
@@ -419,7 +421,7 @@ bool MGtkWindowImpl::OnMapEvent(GdkEvent *inEvent)
 {
 	DoForEach(GetWidget());
 
-	mWindow->BeFocus();
+	// mWindow->BeFocus();
 
 	return false;
 }
@@ -500,20 +502,20 @@ bool MGtkWindowImpl::ChildFocus(GdkEvent *inEvent)
 {
 	//	PRINT(("focus-in-event"));
 
-	try
-	{
-		mWindow->BeFocus();
-	}
-	catch (...)
-	{
-	}
+	// try
+	// {
+	// 	mWindow->BeFocus();
+	// }
+	// catch (...)
+	// {
+	// }
 	return false;
 }
 
-MHandler *MGtkWindowImpl::GetFocus()
-{
-	return nullptr;
-}
+// MHandler *MGtkWindowImpl::GetFocus()
+// {
+// 	return nullptr;
+// }
 
 void MGtkWindowImpl::UpdateNow()
 {

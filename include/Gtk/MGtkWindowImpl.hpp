@@ -47,8 +47,7 @@ class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin, public MGtkCo
 	// (in the right order, please!)
 	virtual void AddMenubarWidget(GtkWidget *inWidget);
 	virtual void AddStatusbarWidget(MGtkWidgetMixin *inChild);
-	void Append(MGtkWidgetMixin *inChild, MControlPacking inPacking,
-		bool inExpand, bool inFill, uint32_t inPadding) override;
+	void Append(MGtkWidgetMixin *inChild, bool inExpand, MRect inMargins) override;
 
 	void SetTitle(std::string inTitle) override;
 
@@ -76,8 +75,6 @@ class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin, public MGtkCo
 	void ConvertFromScreen(int32_t &ioX, int32_t &ioY) const override;
 
 	MWindow *GetWindow() const { return mWindow; }
-
-	MHandler *GetFocus() override;
 
 	GObject *GetObject() override
 	{

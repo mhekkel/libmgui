@@ -146,8 +146,7 @@ void MGtkWidgetMixin::SetWidget(GtkWidget *inWidget)
 	}
 }
 
-void MGtkWidgetMixin::Append(MGtkWidgetMixin *inChild, MControlPacking inPacking,
-	bool inExpand, bool inFill, uint32_t inPadding)
+void MGtkWidgetMixin::Append(MGtkWidgetMixin *inChild, bool inExpand, MRect inMargins)
 {
 	assert(false);
 }

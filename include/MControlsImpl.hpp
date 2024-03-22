@@ -57,13 +57,15 @@ class MControlImpl : public MControlImplBase
 	virtual void FrameMoved() {}
 	virtual void FrameResized() {}
 	virtual void MarginsChanged() {}
-	// virtual void	Draw(MRect inBounds)						{}
 	virtual void Draw() {}
 	virtual void Click(int32_t inX, int32_t inY) {}
 	virtual void EnableSelf() {}
 	virtual void DisableSelf() {}
 	virtual void ShowSelf() {}
 	virtual void HideSelf() {}
+
+	virtual std::string GetText() const { return {}; }
+	virtual void SetText(const std::string &) {}
 
   protected:
 	CONTROL *mControl;
@@ -176,8 +178,7 @@ class MComboboxImpl : public MControlImpl<MCombobox>
 	}
 
 	virtual void SetText(const std::string &inText) = 0;
-	virtual std::string
-	GetText() const = 0;
+	virtual std::string GetText() const = 0;
 
 	virtual void SetChoices(const std::vector<std::string> &inChoices) = 0;
 
@@ -200,8 +201,7 @@ class MPopupImpl : public MControlImpl<MPopup>
 	virtual int32_t GetValue() const = 0;
 
 	virtual void SetText(const std::string &inText) = 0;
-	virtual std::string
-	GetText() const = 0;
+	virtual std::string GetText() const = 0;
 
 	virtual void SetChoices(const std::vector<std::string> &inChoices) = 0;
 
@@ -218,8 +218,7 @@ class MEdittextImpl : public MControlImpl<MEdittext>
 	}
 
 	virtual void SetText(const std::string &inText) = 0;
-	virtual std::string
-	GetText() const = 0;
+	virtual std::string GetText() const = 0;
 
 	virtual uint32_t GetFlags() const = 0;
 
