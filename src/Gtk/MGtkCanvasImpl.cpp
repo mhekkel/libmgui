@@ -79,11 +79,7 @@ bool MGtkCanvasImpl::OnMouseDown(int32_t inX, int32_t inY, uint32_t inButtonNr, 
 
 		case 2:
 			if (MPrimary::Instance().HasText())
-			{
-				std::string text;
-				MPrimary::Instance().GetText(text);
-				result = mControl->PastePrimaryBuffer(text);
-			}
+				result = mControl->PastePrimaryBuffer(MPrimary::Instance().GetText());
 			break;
 
 		case 3:

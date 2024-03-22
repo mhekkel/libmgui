@@ -39,16 +39,12 @@ class MPrimary
 	static MPrimary &Instance();
 
 	bool HasText();
-	void GetText(std::string &text);
+	std::string GetText();
 	void SetText(const std::string &text);
-	void SetText(std::function<void(std::string &)> provider);
 
   private:
 	MPrimary();
 	~MPrimary();
-
-	MPrimary(const MPrimary &);
-	MPrimary &operator=(const MPrimary &);
 
 	struct MPrimaryImpl *mImpl;
 };

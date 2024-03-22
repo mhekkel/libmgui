@@ -34,50 +34,44 @@
 
 // --------------------------------------------------------------------
 
-// struct MPrimaryImpl
-// {
-// 	MPrimaryImpl();
-// 	~MPrimaryImpl();
+struct MPrimaryImpl
+{
+	MPrimaryImpl();
+	~MPrimaryImpl();
 
-// 	bool HasText();
-// 	void GetText(std::string &outText);
-// 	void SetText(const std::string &inText);
-// 	void SetText(std::function<void(std::string &)> provider);
-// 	void LoadClipboardIfNeeded();
+	bool HasText();
+	std::string GetText();
+	void SetText(const std::string &inText);
+	void LoadClipboardIfNeeded();
 
-// 	static void GtkClipboardGet(GtkClipboard *inClipboard, GtkSelectionData *inSelectionData, guint inInfo, gpointer inUserDataOrOwner);
-// 	static void GtkClipboardClear(GtkClipboard *inClipboard, gpointer inUserDataOrOwner);
-// 	void OnOwnerChange(GdkEventOwnerChange *inEvent);
+	// static void GdkClipboardGet(GdkClipboard *inClipboard, GtkSelectionData *inSelectionData, guint inInfo, gpointer inUserDataOrOwner);
+	// static void GdkClipboardClear(GdkClipboard *inClipboard, gpointer inUserDataOrOwner);
+	void OnOwnerChange();
 
-// 	std::string mText;
-// 	std::function<void(std::string &)> mProvider;
-// 	MSlot<void(GdkEventOwnerChange *)> mOwnerChange;
-// 	GtkClipboard *mGtkClipboard;
-// 	bool mClipboardIsMine;
-// 	bool mOwnerChanged;
-// 	bool mSettingOwner;
-// };
+	std::string mText;
+	MSlot<void()> mOwnerChange;
+	GdkClipboard *mGdkClipboard;
+	bool mClipboardIsMine;
+	bool mOwnerChanged;
+	bool mSettingOwner;
+};
 
-// MPrimaryImpl::MPrimaryImpl()
-// 	: mOwnerChange(this, &MPrimaryImpl::OnOwnerChange)
-// 	, mGtkClipboard(gtk_clipboard_get_for_display(gdk_display_get_default(), GDK_SELECTION_PRIMARY))
-// 	, mClipboardIsMine(false)
-// 	, mOwnerChanged(true)
-// {
-// 	mOwnerChange.Connect(G_OBJECT(mGtkClipboard), "owner-change");
-// }
+MPrimaryImpl::MPrimaryImpl()
+	: mOwnerChange(this, &MPrimaryImpl::OnOwnerChange)
+	, mGdkClipboard(gdk_display_get_primary_clipboard(gdk_display_get_default()))
+	, mClipboardIsMine(false)
+	, mOwnerChanged(true)
+{
+	mOwnerChange.Connect(G_OBJECT(mGdkClipboard), "owner-change");
+}
 
-// MPrimaryImpl::~MPrimaryImpl()
-// {
-// 	if (mClipboardIsMine)
-// 		gtk_clipboard_store(mGtkClipboard);
-// }
+MPrimaryImpl::~MPrimaryImpl()
+{
+	// if (mClipboardIsMine)
+	// 	gtk_clipboard_store(mGdkClipboard);
+}
 
-// void MPrimaryImpl::GtkClipboardGet(
-// 	GtkClipboard *inClipboard,
-// 	GtkSelectionData *inSelectionData,
-// 	guint inInfo,
-// 	gpointer inUserDataOrOwner)
+// void MPrimaryImpl::GdkClipboardGet(GdkClipboard *inClipboard, GtkSelectionData *inSelectionData, guint inInfo, gpointer inUserDataOrOwner)
 // {
 // 	MPrimaryImpl *self = reinterpret_cast<MPrimaryImpl *>(inUserDataOrOwner);
 
@@ -90,9 +84,7 @@
 // 	gtk_selection_data_set_text(inSelectionData, self->mText.c_str(), self->mText.length());
 // }
 
-// void MPrimaryImpl::GtkClipboardClear(
-// 	GtkClipboard *inClipboard,
-// 	gpointer inUserDataOrOwner)
+// void MPrimaryImpl::GdkClipboardClear(GdkClipboard *inClipboard, gpointer inUserDataOrOwner)
 // {
 // 	MPrimaryImpl *self = reinterpret_cast<MPrimaryImpl *>(inUserDataOrOwner);
 
@@ -105,74 +97,59 @@
 // 	}
 // }
 
-// void MPrimaryImpl::OnOwnerChange(
-// 	GdkEventOwnerChange *inEvent)
-// {
-// 	if (not mClipboardIsMine and not mSettingOwner)
-// 	{
-// 		mOwnerChanged = true;
-// 		mText.clear();
-// 		mProvider = {};
-// 	}
-// }
+void MPrimaryImpl::OnOwnerChange()
+{
+	if (not mClipboardIsMine and not mSettingOwner)
+	{
+		mOwnerChanged = true;
+		mText.clear();
+	}
+}
 
-// void MPrimaryImpl::LoadClipboardIfNeeded()
-// {
-// 	if (not mClipboardIsMine and
-// 		mOwnerChanged and
-// 		gtk_clipboard_wait_is_text_available(mGtkClipboard))
-// 	{
-// 		gchar *text = gtk_clipboard_wait_for_text(mGtkClipboard);
-// 		if (text != nullptr)
-// 		{
-// 			SetText(std::string(text));
-// 			g_free(text);
-// 		}
-// 		mOwnerChanged = false;
-// 	}
-// }
+void MPrimaryImpl::LoadClipboardIfNeeded()
+{
+#warning FIXME
+	// if (not mClipboardIsMine and
+	// 	mOwnerChanged and
+	// 	gtk_clipboard_wait_is_text_available(mGdkClipboard))
+	// {
+	// 	gchar *text = gtk_clipboard_wait_for_text(mGdkClipboard);
+	// 	if (text != nullptr)
+	// 	{
+	// 		SetText(std::string(text));
+	// 		g_free(text);
+	// 	}
+	// 	mOwnerChanged = false;
+	// }
+}
 
-// bool MPrimaryImpl::HasText()
-// {
-// 	LoadClipboardIfNeeded();
-// 	return not(mText.empty() and not mProvider);
-// }
+bool MPrimaryImpl::HasText()
+{
+	LoadClipboardIfNeeded();
+	return not mText.empty();
+}
 
-// void MPrimaryImpl::GetText(std::string &outText)
-// {
-// 	if (not mText.empty())
-// 		outText = mText;
-// 	else if (mProvider)
-// 		mProvider(outText);
-// }
+std::string MPrimaryImpl::GetText()
+{
+	return mText;
+}
 
-// void MPrimaryImpl::SetText(const std::string &inText)
-// {
-// 	mText = inText;
-// 	mProvider = {};
+void MPrimaryImpl::SetText(const std::string &inText)
+{
+	mText = inText;
 
-// 	GtkTargetEntry targets[] = {
-// 		{ const_cast<gchar *>("UTF8_STRING"), 0, 0 },
-// 		{ const_cast<gchar *>("COMPOUND_TEXT"), 0, 0 },
-// 		{ const_cast<gchar *>("TEXT"), 0, 0 },
-// 		{ const_cast<gchar *>("STRING"), 0, 0 },
-// 	};
+	gdk_clipboard_set_text(mGdkClipboard, inText.c_str());
 
-// 	mSettingOwner = true;
-// 	gtk_clipboard_set_with_data(mGtkClipboard,
-// 		targets, sizeof(targets) / sizeof(GtkTargetEntry),
-// 		&MPrimaryImpl::GtkClipboardGet, &MPrimaryImpl::GtkClipboardClear, this);
+	// GtkTargetEntry targets[] = {
+	// 	{ const_cast<gchar *>("UTF8_STRING"), 0, 0 }, 	{ const_cast<gchar *>("COMPOUND_TEXT"), 0, 0 }, 	{ const_cast<gchar *>("TEXT"), 0, 0 }, 	{ const_cast<gchar *>("STRING"), 0, 0 }, };
 
-// 	mSettingOwner = false;
-// 	mOwnerChanged = false;
-// 	mClipboardIsMine = true;
-// }
+	// mSettingOwner = true;
+	// gtk_clipboard_set_with_data(mGdkClipboard, 	targets, sizeof(targets) / sizeof(GtkTargetEntry), 	&MPrimaryImpl::GdkClipboardGet, &MPrimaryImpl::GdkClipboardClear, this);
 
-// void MPrimaryImpl::SetText(std::function<void(std::string &)> provider)
-// {
-// 	SetText(std::string(""));
-// 	mProvider = provider;
-// }
+	mSettingOwner = false;
+	mOwnerChanged = false;
+	mClipboardIsMine = true;
+}
 
 // --------------------------------------------------------------------
 
@@ -184,7 +161,7 @@ MPrimary &MPrimary::Instance()
 
 #warning FIXME
 MPrimary::MPrimary()
-	: mImpl(nullptr/* new MPrimaryImpl */)
+	: mImpl(new MPrimaryImpl)
 {
 }
 
@@ -195,21 +172,15 @@ MPrimary::~MPrimary()
 
 bool MPrimary::HasText()
 {
-	// return mImpl->HasText();
-	return false;
+	return mImpl->HasText();
 }
 
-void MPrimary::GetText(std::string &text)
+std::string MPrimary::GetText()
 {
-	// mImpl->GetText(text);
+	return mImpl->GetText();
 }
 
 void MPrimary::SetText(const std::string &text)
 {
-	// mImpl->SetText(text);
-}
-
-void MPrimary::SetText(std::function<void(std::string &)> provider)
-{
-	// mImpl->SetText(provider);
+	mImpl->SetText(text);
 }

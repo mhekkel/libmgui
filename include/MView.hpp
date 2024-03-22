@@ -40,7 +40,6 @@
 class MWindow;
 class MDevice;
 class MView;
-class MScrollbar;
 
 typedef std::list<MView *> MViewList;
 
@@ -70,23 +69,19 @@ enum MCursor
 class MView
 {
   public:
-	friend class MViewScroller;
-
 	MView(const std::string &inID, MRect inBounds);
 	virtual ~MView();
 
 	std::string GetID() const { return mID; }
 
 	virtual MView *GetParent() const;
-	virtual const MViewList &
-	GetChildren() const { return mChildren; }
+	virtual const MViewList &GetChildren() const { return mChildren; }
 
 	virtual void SetParent(MView *inParent);
 	virtual void AddChild(MView *inChild);
 	virtual void RemoveChild(MView *inChild);
 	virtual void AddedToWindow();
 	virtual MWindow *GetWindow() const;
-	// virtual void SetViewScroller(MViewScroller *inScroller);
 
 	virtual MRect GetBounds() const;
 
@@ -106,7 +101,6 @@ class MView
 	// used in automatic layout
 	virtual void RecalculateLayout();
 	virtual void ChildResized();
-	// virtual bool ActivateOnClick(int32_t inX, int32_t inY, uint32_t inModifiers);
 
 	virtual void MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, uint32_t inModifiers);
 	virtual void MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers);
@@ -131,8 +125,6 @@ class MView
 	virtual void SetCursor(MCursor inCursor);
 	virtual void ObscureCursor();
 
-	// called for printing
-	virtual uint32_t CountPages(MDevice &inDevice);
 	MView *FindSubView(int32_t inX, int32_t inY) const;
 	virtual MView *FindSubViewByID(const std::string &inID) const;
 

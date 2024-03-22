@@ -112,21 +112,6 @@ void MView::AddChild(MView *inView)
 
 void MView::AddedToWindow()
 {
-	// MHandler *thisHandler = dynamic_cast<MHandler *>(this);
-
-	// if (thisHandler != nullptr and thisHandler->GetSuper() == nullptr)
-	// {
-	// 	for (MView *parent = GetParent(); parent != nullptr; parent = parent->GetParent())
-	// 	{
-	// 		MHandler *super = dynamic_cast<MHandler *>(parent);
-	// 		if (super != nullptr)
-	// 		{
-	// 			thisHandler->SetSuper(super);
-	// 			break;
-	// 		}
-	// 	}
-	// }
-
 	if (mVisible == eTriStateOn and not GetParent()->IsVisible())
 		mVisible = eTriStateLatent;
 
@@ -153,12 +138,6 @@ MWindow *MView::GetWindow() const
 	return result;
 }
 
-// void MView::SetViewScroller(
-// 	MViewScroller *inScroller)
-// {
-// 	mScroller = inScroller;
-// }
-
 MRect MView::GetBounds() const
 {
 	return mBounds;
@@ -175,25 +154,10 @@ void MView::SetFrame(const MRect &inFrame)
 	{
 		mFrame = inFrame;
 
-		// if (mScroller != nullptr)
-		// {
-		// 	int32_t minWidth, minHeight;
-		// 	mScroller->GetTargetMinimalDimensions(minWidth, minHeight);
-
-		// 	if (mFrame.width < minWidth)
-		// 		mFrame.width = minWidth;
-
-		// 	if (mFrame.height < minHeight)
-		// 		mFrame.height = minHeight;
-		// }
-
 		mBounds.x = mLeftMargin;
 		mBounds.y = mTopMargin;
 		mBounds.width = mFrame.width - mLeftMargin - mRightMargin;
 		mBounds.height = mFrame.height - mTopMargin - mBottomMargin;
-
-		// if (mScroller != nullptr)
-		// 	mScroller->AdjustScrollbars();
 	}
 }
 
@@ -224,9 +188,6 @@ void MView::MoveFrame(int32_t inXDelta, int32_t inYDelta)
 	for (MView *child : mChildren)
 		child->MoveFrame(0, 0);
 
-	// if (mScroller != nullptr)
-	// 	mScroller->AdjustScrollbars();
-
 	if (mWillDraw)
 		Invalidate();
 }
@@ -239,24 +200,8 @@ void MView::ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta)
 	mFrame.width += inWidthDelta;
 	mFrame.height += inHeightDelta;
 
-	// if (mScroller == nullptr)
-	// {
-		mBounds.width += inWidthDelta;
-		mBounds.height += inHeightDelta;
-	// }
-	// else
-	// {
-	// 	int32_t minWidth, minHeight;
-	// 	mScroller->GetTargetMinimalDimensions(minWidth, minHeight);
-
-	// 	if (mFrame.width < minWidth)
-	// 		mFrame.width = minWidth;
-
-	// 	if (mFrame.height < minHeight)
-	// 		mFrame.height = minHeight;
-
-	// 	mScroller->AdjustScrollbars();
-	// }
+	mBounds.width += inWidthDelta;
+	mBounds.height += inHeightDelta;
 
 	for (MView *child : mChildren)
 	{
@@ -303,9 +248,6 @@ void MView::SetMargins(int32_t inLeftMargin, int32_t inTopMargin, int32_t inRigh
 	int32_t dx = inLeftMargin - mLeftMargin;
 	int32_t dy = inTopMargin - mTopMargin;
 
-	// int32_t dw = (mLeftMargin + mRightMargin) - (inLeftMargin + inRightMargin);
-	// int32_t dh = (mTopMargin + mBottomMargin) - (inTopMargin + inBottomMargin);
-
 	mLeftMargin = inLeftMargin;
 	mTopMargin = inTopMargin;
 	mRightMargin = inRightMargin;
@@ -319,9 +261,6 @@ void MView::SetMargins(int32_t inLeftMargin, int32_t inTopMargin, int32_t inRigh
 
 	for (MView *child : mChildren)
 		child->MoveFrame(dx, dy);
-
-	// for (MView* child: mChildren)
-	//	child->ResizeFrame(dw, dh);
 }
 
 void MView::RecalculateLayout()
@@ -574,25 +513,6 @@ bool MView::IsEnabled() const
 {
 	return (mEnabled == eTriStateOn) and IsVisible();
 }
-
-uint32_t MView::CountPages(MDevice &inDevice)
-{
-	return 1;
-}
-
-// MHandler *MView::FindFocus()
-// {
-// 	MHandler *result = nullptr;
-
-// 	for (MView *view : mChildren)
-// 	{
-// 		result = view->FindFocus();
-// 		if (result != nullptr)
-// 			break;
-// 	}
-
-// 	return result;
-// }
 
 MView *MView::FindSubView(int32_t inX, int32_t inY) const
 {
