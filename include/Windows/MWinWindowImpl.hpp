@@ -19,8 +19,6 @@ class MWinWindowImpl : public MWindowImpl, public MWinProcMixin
 
 	virtual void Create(MRect inBounds, const std::wstring &inTitle);
 
-	virtual void SetTransparency(float inAlpha);
-
 	virtual void SetTitle(std::string inTitle);
 
 	virtual void Show();

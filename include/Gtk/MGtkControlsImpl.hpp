@@ -221,8 +221,6 @@ class MGtkPopupImpl : public MGtkControlImpl<MPopup>
 	void CreateWidget() override;
 	void AddedToWindow() override;
 
-	// bool DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat) override;
-
   private:
 	std::vector<std::string>
 		mChoices;
@@ -275,7 +273,6 @@ class MGtkCheckboxImpl : public MGtkControlImpl<MCheckbox>
 
 	void CreateWidget() override;
 
-	//	void	SubClass() override;
 	bool IsChecked() const override;
 	void SetChecked(bool inChecked) override;
 

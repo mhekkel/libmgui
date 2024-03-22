@@ -295,30 +295,6 @@ void MWinWindowImpl::Create(MRect inBounds, const wstring& inTitle)
 		mMenubar->SetTarget(mWindow);
 }
 
-void MWinWindowImpl::SetTransparency(float inAlpha)
-{
-	LONG style = ::GetWindowLong(GetHandle(), GWL_EXSTYLE);
-	
-	if (inAlpha == 1.0f)
-		::SetWindowLong(GetHandle(), GWL_EXSTYLE, style & ~WS_EX_LAYERED);
-	else
-	{
-		::SetWindowLong(GetHandle(), GWL_EXSTYLE, style | WS_EX_LAYERED);
-		::SetLayeredWindowAttributes(GetHandle(), 0, static_cast<uint8_t>(inAlpha * 255), LWA_ALPHA);
-	}
-
-	//DWM_BLURBEHIND bb = {0};
-
- //   // Specify blur-behind and blur region.
- //   bb.dwFlags = DWM_BB_ENABLE;
- //   bb.fEnable = true;
- //   bb.hRgnBlur = NULL;
-
- //   // Enable blur-behind.
- //   HRESULT hr = DwmEnableBlurBehindWindow(GetHandle(), &bb);
-
-}
-
 bool MWinWindowImpl::IsDialogMessage(MSG& inMessage)
 {
 	return false;

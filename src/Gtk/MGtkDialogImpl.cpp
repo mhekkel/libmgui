@@ -70,12 +70,12 @@ class MGtkDialogImpl : public MGtkWindowImpl
 	{
 	}
 
-	virtual bool ShowModal();
+	bool ShowModal() override;
 
-	virtual void Create(MRect inBounds, const std::string &inTitle);
-	virtual void Finish();
+	void Create(MRect inBounds, const std::string &inTitle) override;
+	void Finish() override;
 
-	virtual bool OnKeyPressEvent(GdkEvent *inEvent);
+	bool OnKeyPressEvent(GdkEvent *inEvent) override;
 
 	void Append(MGtkWidgetMixin *inChild, bool inExpand, MRect inMargins) override;
 

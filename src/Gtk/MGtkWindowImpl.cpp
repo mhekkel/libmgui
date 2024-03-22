@@ -170,13 +170,7 @@ void MGtkWindowImpl::Append(MGtkWidgetMixin *inChild, bool inExpand, MRect inMar
 
 	gtk_widget_set_hexpand(childWidget, inExpand);
 
-
-#warning FIXME
 	gtk_box_append(GTK_BOX(mMainVBox), childWidget);
-	// if (inPacking == ePackStart)
-	// 	gtk_box_pack_start(GTK_BOX(mMainVBox), childWidget, inExpand, inFill, 0);
-	// else
-	// 	gtk_box_pack_end(GTK_BOX(mMainVBox), childWidget, inExpand, inFill, 0);
 }
 
 void MGtkWindowImpl::SetTransientFor(MWindow *inWindow)

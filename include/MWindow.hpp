@@ -83,9 +83,6 @@ class MWindow : public MView
 
 	void SetModifiedMarkInTitle(bool inModified);
 
-	// 0.0 is fully transparent, 1.0 is fully opaque
-	void SetTransparency(float inAlpha);
-
 	virtual void ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta);
 	virtual void ResizeWindow(int32_t inWidthDelta, int32_t inHeightDelta);
 

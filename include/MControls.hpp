@@ -107,8 +107,8 @@ class MControl : public MControlBase
 	virtual void AddedToWindow();
 
   protected:
-	MControl(const MControl &);
-	MControl &operator=(const MControl &);
+	MControl(const MControl &) = delete;
+	MControl &operator=(const MControl &) = delete;
 
 	I *mImpl;
 };

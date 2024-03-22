@@ -106,17 +106,15 @@ class MView
 	// used in automatic layout
 	virtual void RecalculateLayout();
 	virtual void ChildResized();
-	virtual bool ActivateOnClick(int32_t inX, int32_t inY, uint32_t inModifiers);
-	virtual void TrackMouse(bool inTrackMove, bool inTrackExit);
+	// virtual bool ActivateOnClick(int32_t inX, int32_t inY, uint32_t inModifiers);
+
 	virtual void MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, uint32_t inModifiers);
 	virtual void MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers);
 	virtual void MouseExit();
 	virtual void MouseUp(int32_t inX, int32_t inY, uint32_t inModifiers);
 	virtual void MouseWheel(int32_t inX, int32_t inY, int32_t inDeltaX, int32_t inDeltaY, uint32_t inModifiers);
+
 	virtual void ShowContextMenu(int32_t inX, int32_t inY);
-	virtual void RedrawAll(MRect inUpdate);
-	// virtual void	Draw(MRect inUpdate);
-	virtual void Draw();
 
 	virtual void Enable();
 	virtual void Disable();
@@ -128,11 +126,6 @@ class MView
 
 	virtual void Invalidate();
 
-	MEventOut<void()> eScrolled;
-
-	// virtual void ScrollBy(int32_t inDeltaX, int32_t inDeltaY);
-	// virtual void ScrollTo(int32_t inX, int32_t inY);
-	// virtual void GetScrollPosition(int32_t &outX, int32_t &outY) const;
 	virtual void UpdateNow();
 	virtual void AdjustCursor(int32_t inX, int32_t inY, uint32_t inModifiers);
 	virtual void SetCursor(MCursor inCursor);
@@ -175,110 +168,6 @@ class MView
 	MTriState mVisible;
 	MTriState mEnabled;
 };
-
-// class MHBox : public MView
-// {
-//   public:
-// 	MHBox(const std::string &inID, MRect inBounds, uint32_t inSpacing)
-// 		: MView(inID, inBounds)
-// 		, mSpacing(inSpacing)
-// 	{
-// 	}
-// 	//
-// 	//	virtual void	AddChild(// MView* inChild);
-
-// 	virtual void ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta);
-
-// 	virtual void SetSpacing(int32_t inSpacing) { mSpacing = inSpacing; }
-// 	virtual void SetLeftMargin(int32_t inMargin) { mLeftMargin = inMargin; }
-// 	virtual void SetRightMargin(int32_t inMargin) { mRightMargin = inMargin; }
-
-//   protected:
-// 	virtual void RecalculateLayout();
-
-// 	uint32_t mSpacing;
-// };
-
-// class MVBox : public MView
-// {
-//   public:
-// 	MVBox(const std::string &inID, MRect inBounds, uint32_t inSpacing)
-// 		: MView(inID, inBounds)
-// 		, mSpacing(inSpacing)
-// 	{
-// 	}
-
-// 	//	virtual void	AddChild(// MView* inChild);
-
-// 	virtual void ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta);
-
-// 	virtual void SetSpacing(int32_t inSpacing) { mSpacing = inSpacing; }
-// 	virtual void SetTopMargin(int32_t inMargin) { mTopMargin = inMargin; }
-// 	virtual void SetBottomMargin(int32_t inMargin) { mBottomMargin = inMargin; }
-
-//   protected:
-// 	virtual void RecalculateLayout();
-
-// 	uint32_t mSpacing;
-// };
-
-// class MTable : public MView
-// {
-//   public:
-// 	MTable(const std::string &inID, MRect inBounds,
-// 		MView *inChildren[],
-// 		uint32_t inColumns, uint32_t inRows,
-// 		int32_t inHSpacing, int32_t inVSpacing);
-
-// 	virtual void ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta);
-
-// 	using MView::AddChild;
-// 	virtual void AddChild(MView *inView, uint32_t inColumn, uint32_t inRow, int32_t inColumnSpan = 1, int32_t inRowSpan = 1);
-
-//   private:
-// 	virtual void RecalculateLayout();
-
-// 	uint32_t mColumns, mRows;
-// 	int32_t mHSpacing, mVSpacing;
-// 	std::vector<MView *>
-// 		mGrid;
-// };
-
-// class MViewScroller : public MView
-// {
-//   public:
-// 	MViewScroller(const std::string &inID, MView *inTarget,
-// 		bool inHScrollbar, bool inVScrollbar);
-
-// 	virtual void AdjustScrollbars();
-
-// 	MScrollbar *GetHScrollbar() const { return mHScrollbar; }
-// 	MScrollbar *GetVScrollbar() const { return mVScrollbar; }
-
-// 	virtual void MoveFrame(int32_t inXDelta, int32_t inYDelta);
-
-// 	virtual void ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta);
-
-// 	void SetTargetScrollUnit(int32_t inScrollUnitX, int32_t inScrollUnitY);
-
-// 	void GetTargetScrollUnit(int32_t &outScrollUnitX, int32_t &outScrollUnitY) const;
-
-// 	void GetTargetMinimalDimensions(int32_t &outMinWidth, int32_t &outMinHeight) const;
-
-// 	virtual void MouseWheel(int32_t inX, int32_t inY, int32_t inDeltaX, int32_t inDeltaY, uint32_t inModifiers);
-
-//   protected:
-// 	MView *mTarget;
-// 	MScrollbar *mHScrollbar;
-// 	MScrollbar *mVScrollbar;
-// 	int32_t mScrollUnitX, mScrollUnitY;
-
-// 	virtual void VScroll(MScrollMessage inScrollMsg);
-// 	virtual void HScroll(MScrollMessage inScrollMsg);
-
-// 	MEventIn<void(MScrollMessage)> eVScroll;
-// 	MEventIn<void(MScrollMessage)> eHScroll;
-// };
 
 // --------------------------------------------------------------------
 

@@ -44,8 +44,6 @@ class MWindowImpl
 
 	MWindowFlags GetFlags() const { return mFlags; }
 
-	virtual void SetTransparency(float inAlpha) {}
-
 	virtual void Finish() {}
 
 	virtual void SetTitle(std::string inTitle) = 0;
