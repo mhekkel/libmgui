@@ -22,7 +22,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.28)
 
 # set the project name
 project(libmgui VERSION 1.0.0 LANGUAGES CXX)
@@ -33,6 +33,7 @@ include(CheckIncludeFiles)
 include(CheckLibraryExists)
 include(CMakePackageConfigHelpers)
 include(GenerateExportHeader)
+include(FindPkgConfig)
 
 if(WIN32)
 	if(${CMAKE_SYSTEM_VERSION} GREATER_EQUAL 10) # Windows 10
@@ -163,7 +164,7 @@ list(APPEND sources
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MLib.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MMenu.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MPreferences.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/src/MStrings.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MStrings.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MTypes.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MUnicode.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MUtils.cpp

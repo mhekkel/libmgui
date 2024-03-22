@@ -12,8 +12,13 @@ class ExampleWindow : public MWindow
 	ExampleWindow()
 		: MWindow("Example", MRect{}, kMPostionDefault | kMShowMenubar)
 	{
+		SetTitle("window-" + std::to_string(++s_nr));
 	}
+
+	static int s_nr;
 };
+
+int ExampleWindow::s_nr;
 
 class ExampleApp : public MApplication
 {

@@ -443,12 +443,6 @@ MMenuImpl *MMenuImpl::Create(MMenu *inMenu, bool inPopup)
 
 // --------------------------------------------------------------------
 
-static void
-quit_activated(GSimpleAction *action, GVariant *parameter, GApplication *application)
-{
-	g_application_quit(application);
-}
-
 class MGtkMenuBarImpl : public MGtkMenuImpl
 {
   public:
