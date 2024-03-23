@@ -1,13 +1,33 @@
 <?xml version="1.0" standalone="yes"?>
 <menubar>
 	<menu id='file' label="File">
-		<item label="New" cmd="app.new"/>
-		<item label="Close" cmd="win.close"/>
-		<item label="Quit" cmd="app.quit"/>
+		<section id="1">
+			<item label="New" cmd="app.new"/>
+			<item label="Close" cmd="win.close"/>
+		</section>
+		<section id="2">
+			<item label="Quit" cmd="app.quit"/>
+		</section>
+	</menu>
+	<menu id='edit' label="Edit">
+		<section id="1">
+			<item label="Cut" cmd="win.cut"/>
+			<item label="Copy" cmd="win.copy"/>
+			<item label="Paste" cmd="win.paste"/>
+		</section>
+		<section id="2">
+			<item label="Select All" cmd="win.select-all"/>
+		</section>
 	</menu>
 	<menu id='window' label="Window">
-		<item label="Next Window" cmd="app.next-window"/>
-		<item label="Previous Window" cmd="win.previous-window"/>
-		<item label="-"/>
+		<section id="1">
+			<item label="Next Window" cmd="app.next-window"/>
+			<item label="Previous Window" cmd="app.previous-window"/>
+		</section>
+		<section id="2">
+			<radio-item cmd="app.select-window">
+				<item label="First" />
+			</radio-item>
+		</section>
 	</menu>
 </menubar>

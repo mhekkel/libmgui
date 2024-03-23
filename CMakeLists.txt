@@ -115,7 +115,6 @@ list(APPEND headers
 	# include/MHandler.hpp
 	include/MLib.hpp
 	include/MMenu.hpp
-	include/MMenuImpl.hpp
 	include/MP2PEvents.hpp
 	include/MPreferences.hpp
 	include/mrsrc.hpp

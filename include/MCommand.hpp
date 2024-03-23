@@ -50,6 +50,12 @@ concept ImplementedSignature = (
 	std::is_same_v<Sig, void(int)>
 );
 
+struct MCommandImpl
+{
+	virtual ~MCommandImpl() = default;
+	virtual void SetEnabled(bool inEnabled) = 0;
+};
+
 template <typename R, typename... Args>
 	requires ImplementedSignature<R(Args...)>
 class MCommand<R(Args...)>
@@ -60,8 +66,8 @@ class MCommand<R(Args...)>
 	template <CommandEmitter C>
 	MCommand(C *owner, const std::string &action, R (C::*callback)(Args...))
 		: mHandler(new MCommandHandler<C>(owner, callback))
+		, mImpl(RegisterCommand(owner, action))
 	{
-		RegisterCommand(owner, action);
 	}
 
 	R Execute(Args... args)
@@ -69,10 +75,15 @@ class MCommand<R(Args...)>
 		return mHandler->execute(std::forward<Args>(args)...);
 	}
 
+	void SetEnabled(bool inEnabled)
+	{
+		mImpl->SetEnabled(inEnabled);
+	}
+
   private:
 
-	void RegisterCommand(MApplication *app, const std::string &action);
-	void RegisterCommand(MWindow *win, const std::string &action);
+	MCommandImpl *RegisterCommand(MApplication *app, const std::string &action);
+	MCommandImpl *RegisterCommand(MWindow *win, const std::string &action);
 
 	struct MCommandHandlerBase
 	{
@@ -101,4 +112,5 @@ class MCommand<R(Args...)>
 	};
 
 	std::unique_ptr<MCommandHandlerBase> mHandler;
+	std::unique_ptr<MCommandImpl> mImpl;
 };

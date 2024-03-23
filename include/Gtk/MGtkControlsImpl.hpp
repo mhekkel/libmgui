@@ -60,7 +60,7 @@ class MGtkControlImpl : public CONTROL::MImpl, public MGtkWidgetMixin
 
 	bool OnDestroy() override;
 
-	bool OnKeyPressEvent(GdkEvent *inEvent) override;
+	// bool OnKeyPressEvent(GdkEvent *inEvent) override;
 	void OnPopupMenu() override;
 
 	virtual void OnChanged();

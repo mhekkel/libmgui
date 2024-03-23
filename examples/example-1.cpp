@@ -14,6 +14,10 @@ class ExampleWindow : public MWindow
 	ExampleWindow()
 		: MWindow("Example", MRect{0, 0, 400, 400}, kMPostionDefault | kMShowMenubar)
 		, cClose(this, "close", &ExampleWindow::Close)
+		, cCut(this, "cut", &ExampleWindow::Cut)
+		, cCopy(this, "copy", &ExampleWindow::Copy)
+		, cPaste(this, "paste", &ExampleWindow::Paste)
+		, cSelectAll(this, "select-all", &ExampleWindow::SelectAll)
 		, eClicked(this, &ExampleWindow::Clicked)
 	{
 		SetTitle("window-" + std::to_string(++s_nr));
@@ -25,6 +29,8 @@ class ExampleWindow : public MWindow
 		AddRoute(btn->eClicked, eClicked);
 		AddChild(btn);
 
+		cCut.SetEnabled(mHasSelection);
+		cCopy.SetEnabled(mHasSelection);
 	}
 
 	void Close()
@@ -34,12 +40,27 @@ class ExampleWindow : public MWindow
 
 	void Clicked(const std::string &id)
 	{
+		mHasSelection = not mHasSelection;
+
+		cCut.SetEnabled(mHasSelection);
+		cCopy.SetEnabled(mHasSelection);
+
 		std::cout << id << " clicked!\n";
 	}
 
+	void Cut() {}
+	void Copy() {}
+	void Paste() {}
+	void SelectAll() {}
+
 	MCommand<void()> cClose;
+
+	MCommand<void()> cCut, cCopy, cPaste, cSelectAll;
+
 	MEventIn<void(const std::string &)> eClicked;
 	static int s_nr;
+
+	bool mHasSelection = false;
 };
 
 int ExampleWindow::s_nr;

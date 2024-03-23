@@ -35,6 +35,23 @@
 
 // --------------------------------------------------------------------
 
+struct MGtkCommandImpl : public MCommandImpl
+{
+	MGtkCommandImpl(GSimpleAction *inAction)
+		: mAction(inAction)
+	{
+	}
+
+	void SetEnabled(bool inEnabled) override
+	{
+		g_simple_action_set_enabled(mAction, inEnabled);
+	}
+
+	GSimpleAction *mAction;
+};
+
+// --------------------------------------------------------------------
+
 class MGtkCommandEmitter
 {
   private:
@@ -80,12 +97,13 @@ class MGtkCommandEmitter
 	virtual GObject *GetObject() = 0;
 
 	template <ImplementedSignature Sig>
-	void RegisterAction(const std::string &action, MCommand<Sig> &inCommand)
+	MCommandImpl *RegisterAction(const std::string &action, MCommand<Sig> &inCommand)
 	{
 		GSimpleAction *act = g_simple_action_new(action.c_str(), nullptr);
 		g_action_map_add_action(G_ACTION_MAP(GetObject()), G_ACTION(act));
 		g_signal_connect(act, "activate", G_CALLBACK(MGtkCommandEmitter::ActionActivated), this);
 		mActionHandlers[G_ACTION(act)] = new MActionHandler<Sig>(inCommand);
+		return new MGtkCommandImpl(act);
 	}
 
 	static void ActionActivated(GAction *action, GVariant *param, void *user_data)

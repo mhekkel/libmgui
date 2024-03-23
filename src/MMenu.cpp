@@ -29,7 +29,6 @@
 #include "MApplication.hpp"
 #include "MError.hpp"
 #include "MFile.hpp"
-#include "MMenuImpl.hpp"
 #include "MPreferences.hpp"
 #include "MStrings.hpp"
 #include "MUtils.hpp"
@@ -43,28 +42,11 @@
 #include <cstring>
 #include <iostream>
 
-#undef AppendMenu
+#undef AppendSubmenu
 
-using namespace std;
 namespace xml = zeep::xml;
 
 // --------------------------------------------------------------------
-
-MMenu::MMenu(const string &inLabel, bool inPopup)
-	: mImpl(MMenuImpl::Create(this, inPopup))
-	, mLabel(inLabel)
-{
-}
-
-MMenu::MMenu(MMenuImpl *inImpl)
-	: mImpl(inImpl)
-{
-}
-
-MMenu::~MMenu()
-{
-	delete mImpl;
-}
 
 MMenu *MMenu::CreateFromResource(const char *inResourceName, bool inPopup)
 {
@@ -86,7 +68,7 @@ MMenu *MMenu::CreateFromResource(const char *inResourceName, bool inPopup)
 
 MMenu *MMenu::Create(xml::element *inXMLNode, bool inPopup)
 {
-	string label;
+	std::string label;
 
 	if (inXMLNode->name() == "menu")
 	{
@@ -95,86 +77,39 @@ MMenu *MMenu::Create(xml::element *inXMLNode, bool inPopup)
 			THROW(("Invalid menu specification, label is missing"));
 	}
 
-	string special = inXMLNode->get_attribute("special");
-
 	MMenu *menu = new MMenu(label, inPopup);
-	menu->mSpecial = special;
+	menu->mID = inXMLNode->get_attribute("id");
 
-	for (auto item : *inXMLNode)
+	for (auto &item : *inXMLNode)
 	{
-		if (item.name() == "item")
+		if (item.name() == "section")
 		{
-			label = GetLocalisedStringForContext("menu", item.get_attribute("label"));
+			std::string section_id = item.get_attribute("id");
 
-			if (label == "-")
-				menu->AppendSeparator();
-			else
+			for (auto &subitem : item)
 			{
-				string action = item.get_attribute("cmd").c_str();
-
-				if (item.get_attribute("check") == "radio")
-					menu->AppendRadioItem(label, action);
-				else if (item.get_attribute("check") == "checkbox")
-					menu->AppendCheckItem(label, action);
-				else
-					menu->AppendItem(label, action);
+				if (subitem.name() == "item")
+				{
+					label = GetLocalisedStringForContext("menu", subitem.get_attribute("label"));
+					menu->AppendItem(label, section_id,
+						subitem.get_attribute("cmd"), subitem.get_attribute("check") == "check");
+				}
+				if (subitem.name() == "radio-item")
+				{
+					std::vector<std::string> channels;
+					for (auto &channel : subitem)
+						channels.emplace_back(channel.get_attribute("label"));
+					menu->AppendRadioItems(channels, section_id, subitem.get_attribute("action"));
+				}
+				else if (subitem.name() == "menu")
+					menu->AppendSubmenu(Create(&item, false), section_id);
 			}
 		}
 		else if (item.name() == "menu")
-			menu->AppendMenu(Create(&item, false));
+			menu->AppendSubmenu(Create(&item, false), "");
 	}
 
 	return menu;
-}
-
-void MMenu::AppendItem(const string &inLabel, const std::string &inAction)
-{
-	mImpl->AppendItem(inLabel, inAction);
-}
-
-void MMenu::AppendRadioItem(const string &inLabel, const std::string &inAction)
-{
-	mImpl->AppendRadiobutton(inLabel, inAction);
-}
-
-void MMenu::AppendCheckItem(const string &inLabel, const std::string &inAction)
-{
-	mImpl->AppendCheckbox(inLabel, inAction);
-}
-
-void MMenu::AppendSeparator()
-{
-	mImpl->AppendSeparator();
-}
-
-void MMenu::AppendMenu(MMenu *inMenu)
-{
-	mImpl->AppendSubmenu(inMenu);
-}
-
-uint32_t MMenu::CountItems()
-{
-	return mImpl->CountItems();
-}
-
-void MMenu::RemoveItems(uint32_t inFromIndex, uint32_t inCount)
-{
-	mImpl->RemoveItems(inFromIndex, inCount);
-}
-
-string MMenu::GetItemLabel(uint32_t inIndex) const
-{
-	return mImpl->GetItemLabel(inIndex);
-}
-
-void MMenu::SetItemCommand(uint32_t inIndex, const std::string &inAction)
-{
-	mImpl->SetItemCommand(inIndex, inAction);
-}
-
-uint32_t MMenu::GetItemCommand(uint32_t inIndex) const
-{
-	return mImpl->GetItemCommand(inIndex);
 }
 
 void MMenu::Popup(MWindow *inHandler, int32_t inX, int32_t inY, bool inBottomMenu)
@@ -206,7 +141,7 @@ void MMenuBar::Init(const std::string &inMenuResourceName)
 	for (auto item : *node)
 	{
 		if (item.name() == "menu")
-			sInstance->AppendMenu(MMenu::Create(&item, false));
+			sInstance->AppendSubmenu(MMenu::Create(&item, false), "");
 	}
 }
 

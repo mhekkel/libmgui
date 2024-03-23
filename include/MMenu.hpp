@@ -43,38 +43,83 @@ class MMenuBar;
 class MMenu
 {
   public:
-	MMenu(const std::string &inLabel, bool inPopup);
-	virtual ~MMenu();
+	class MMenuImpl
+	{
+	  public:
+		MMenuImpl(MMenu *inMenu)
+			: mMenu(inMenu)
+		{
+		}
+
+		virtual ~MMenuImpl() = default;
+
+		virtual void AppendItem(const std::string &inLabel, const std::string &inSection, const std::string &inAction, bool inStateful) = 0;
+		virtual void AppendRadioItems(const std::vector<std::string> &inLabels, const std::string &inSection, const std::string &inAction) = 0;
+		virtual void AppendSubmenu(MMenu *inMenu, const std::string &inSection) = 0;
+
+		virtual void RemoveItemsFromSection(const std::string &inSection) = 0;
+
+		virtual MMenu *GetSubmenu(uint32_t inIndex) const = 0;
+
+		virtual void Popup(MWindow *inHandler, int32_t inX, int32_t inY, bool inBottomMenu) = 0;
+		virtual void AddToWindow(MWindowImpl *inWindow) = 0;
+
+		static MMenuImpl *Create(MMenu *inMenu, bool inPopup);
+		static MMenuImpl *CreateBar(MMenu *inMenu);
+
+	  protected:
+		MMenu *mMenu;
+	};
+
+	MMenu(const std::string &inLabel, bool inPopup)
+		: mImpl(MMenuImpl::Create(this, inPopup))
+		, mLabel(inLabel)
+	{
+	}
+
+	virtual ~MMenu() = default;
 
 	static MMenu *CreateFromResource(const char *inResourceName, bool inPopup);
+	static MMenu *Create(zeep::xml::element *inXMLNode, bool inPopup);
 
-	void AppendItem(const std::string &inLabel, const std::string &inAction);
-	void AppendRadioItem(const std::string &inLabel, const std::string &inAction);
-	void AppendCheckItem(const std::string &inLabel, const std::string &inAction);
-	void AppendSeparator();
-	virtual void AppendMenu(MMenu *inMenu);
-	uint32_t CountItems();
-	void RemoveItems(uint32_t inFromIndex, uint32_t inCount);
+	void AppendItem(const std::string &inLabel, const std::string &inSection, const std::string &inAction, bool inStateful = false)
+	{
+		mImpl->AppendItem(inLabel, inSection, inAction, inStateful);
+	}
 
-	std::string GetItemLabel(uint32_t inIndex) const;
+	void AppendRadioItems(const std::vector<std::string> &inLabels, const std::string &inSection, const std::string &inAction)
+	{
+		mImpl->AppendRadioItems(inLabels, inSection, inAction);
+	}
 
-	void SetItemCommand(uint32_t inIndex, const std::string &inAction);
-	uint32_t GetItemCommand(uint32_t inIndex) const;
+	void AppendSubmenu(MMenu *inMenu, const std::string &inSection)
+	{
+		mImpl->AppendSubmenu(inMenu, inSection);
+	}
 
-	std::string GetLabel() { return mLabel; }
+	void RemoveItemsFromSection(const std::string &inSection)
+	{
+		mImpl->RemoveItemsFromSection(inSection);
+	}
 
 	void Popup(MWindow *inTarget, int32_t inX, int32_t inY, bool inBottomMenu);
 
-	static MMenu *Create(zeep::xml::element *inXMLNode, bool inPopup);
+	MMenuImpl *impl() const { return mImpl.get(); }
 
-	MMenuImpl *impl() const { return mImpl; }
+	std::string GetLabel() const
+	{
+		return mLabel;
+	}
 
   protected:
-	MMenu(MMenuImpl *inImpl);
+	MMenu(MMenuImpl *inImpl)
+		: mImpl(inImpl)
+	{
+	}
 
-	MMenuImpl *mImpl;
+	std::unique_ptr<MMenuImpl> mImpl;
+	std::string mID;
 	std::string mLabel;
-	std::string mSpecial;
 };
 
 // --------------------------------------------------------------------
