@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <interface>
-	<menu id='filemenu'>
+	<menu id='file'>
 		<attribute name="label">File</attribute>
 		<section>
 			<item>
@@ -17,6 +17,21 @@
 				<attribute name="label">Quit</attribute>
 				<attribute name="action">app.quit</attribute>
 			</item>
+		</section>
+	</menu>
+	<menu id="windows">
+		<section>
+			<item>
+				<attribute name="label">Next Window</attribute>
+				<attribute name="action">app.next-window</attribute>
+			</item>
+			<item>
+				<attribute name="label">Previous Window</attribute>
+				<attribute name="action">app.prev-window</attribute>
+			</item>
+		</section>
+		<section>
+			
 		</section>
 	</menu>
 </interface>

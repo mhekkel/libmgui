@@ -304,7 +304,7 @@ void MGtkMenuImpl::AppendSubmenu(MMenu *inSubmenu)
 
 void MGtkMenuImpl::AppendSeparator()
 {
-	// CreateNewItem("-", 0, nullptr);
+	CreateNewItem("-", 0, nullptr);
 }
 
 void MGtkMenuImpl::AppendCheckbox(const string &inLabel, const std::string &inAction)
@@ -432,11 +432,3 @@ MMenuImpl *MMenuImpl::CreateBar(MMenu *inMenu)
 	return new MGtkMenuBarImpl(inMenu, app);
 }
 
-// bool MGtkMenuBarImpl::OnButtonPress(GdkEvent *inEvent)
-// {
-// 	mMenu->UpdateCommandStatus();
-
-// 	//	gtk_widget_show_all(mGtkMenu);
-
-// 	return false;
-// }

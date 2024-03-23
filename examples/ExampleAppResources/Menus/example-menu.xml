@@ -1,8 +1,13 @@
 <?xml version="1.0" standalone="yes"?>
 <menubar>
-	<menu id='filemenu' label="File">
+	<menu id='file' label="File">
 		<item label="New" cmd="app.new"/>
 		<item label="Close" cmd="win.close"/>
 		<item label="Quit" cmd="app.quit"/>
+	</menu>
+	<menu id='window' label="Window">
+		<item label="Next Window" cmd="app.next-window"/>
+		<item label="Previous Window" cmd="win.previous-window"/>
+		<item label="-"/>
 	</menu>
 </menubar>

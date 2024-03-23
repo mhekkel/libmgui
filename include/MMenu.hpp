@@ -61,8 +61,6 @@ class MMenu
 	void SetItemCommand(uint32_t inIndex, const std::string &inAction);
 	uint32_t GetItemCommand(uint32_t inIndex) const;
 
-	void UpdateCommandStatus();
-
 	std::string GetLabel() { return mLabel; }
 
 	void Popup(MWindow *inTarget, int32_t inX, int32_t inY, bool inBottomMenu);
@@ -79,12 +77,15 @@ class MMenu
 	std::string mSpecial;
 };
 
-// Menu bars are global objects
+// --------------------------------------------------------------------
+// Menu bars are global objects, there is now only one for each application
 
 class MMenuBar : public MMenu
 {
   public:
 	static void Init(const std::string &inMenuResourceName);
+
+	MMenu *FindMenuByID(const std::string &inMenuID);
 
 	static MMenuBar &instance()
 	{

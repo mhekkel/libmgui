@@ -237,33 +237,6 @@ void MGtkControlImpl<CONTROL>::OnChanged()
 }
 
 template <class CONTROL>
-bool MGtkControlImpl<CONTROL>::OnKeyPressEvent(GdkEvent *inEvent)
-{
-	// PRINT(("OnKeyPressEvent for %s", this->mControl->GetID().c_str()));
-
-	bool result = MGtkWidgetMixin::OnKeyPressEvent(inEvent);
-
-	// if (not result)
-	// {
-	// 	const uint32_t kValidModifiersMask = gtk_accelerator_get_default_mod_mask();
-
-	// 	uint32_t modifiers = MapModifier(gdk_event_get_modifier_state(inEvent) & kValidModifiersMask);
-	// 	uint32_t keyValue = MapKeyCode(gdk_key_event_get_keyval(inEvent));
-	// 	uint32_t cmd;
-
-	// 	if (MAcceleratorTable::Instance().IsAcceleratorKey(keyValue, modifiers, cmd))
-	// 	{
-	// 		bool enabled = true, checked = false;
-	// 		if (this->mControl->UpdateCommandStatus(cmd, nullptr, 0, enabled, checked) and enabled)
-	// 			result = this->mControl->ProcessCommand(cmd, nullptr, 0, 0);
-	// 	}
-	// }
-
-	// PRINT(("OnKeyPressEvent returns %d", result));
-	return result;
-}
-
-template <class CONTROL>
 void MGtkControlImpl<CONTROL>::OnPopupMenu()
 {
 	// PRINT(("OnPopupMenu for %s", this->mControl->GetID().c_str()));
