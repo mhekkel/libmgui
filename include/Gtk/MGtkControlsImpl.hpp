@@ -231,8 +231,6 @@ class MGtkEdittextImpl : public MGtkControlImpl<MEdittext>
 
 	void CreateWidget() override;
 
-	void SetFocus() override;
-
 	std::string GetText() const override;
 	void SetText(const std::string &inText) override;
 

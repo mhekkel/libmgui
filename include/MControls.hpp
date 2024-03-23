@@ -148,10 +148,8 @@ class MButton : public MControl<MButtonImpl>
 
 	virtual void SetText(const std::string &inText);
 
-	MEventOut<void(const std::string &)>
-		eClicked;
-	MEventOut<void(const std::string &, int32_t, int32_t)>
-		eDropDown;
+	MEventOut<void(const std::string &)> eClicked;
+	MEventOut<void(const std::string &, int32_t, int32_t)> eDropDown;
 };
 
 //// --------------------------------------------------------------------
@@ -181,8 +179,7 @@ class MExpander : public MControl<MExpanderImpl>
 	void SetOpen(bool inOpen);
 	bool IsOpen() const;
 
-	MEventOut<void(const std::string &)>
-		eClicked;
+	MEventOut<void(const std::string &)> eClicked;
 };
 
 // --------------------------------------------------------------------
@@ -245,8 +242,7 @@ class MCombobox : public MControl<MComboboxImpl>
 
 	MCombobox(const std::string &inID, MRect inBounds);
 
-	MEventOut<void(const std::string &, int)>
-		eValueChanged;
+	MEventOut<void(const std::string &, int)> eValueChanged;
 
 	virtual void SetText(const std::string &inText);
 	virtual std::string GetText() const;
@@ -268,8 +264,7 @@ class MPopup : public MControl<MPopupImpl>
 
 	MPopup(const std::string &inID, MRect inBounds);
 
-	MEventOut<void(const std::string &, int32_t)>
-		eValueChanged;
+	MEventOut<void(const std::string &, int32_t)> eValueChanged;
 
 	virtual void SetValue(int32_t inValue);
 	virtual int32_t GetValue() const;
@@ -354,8 +349,7 @@ class MCheckbox : public MControl<MCheckboxImpl>
 	bool IsChecked() const;
 	void SetChecked(bool inChecked);
 
-	MEventOut<void(const std::string &, bool)>
-		eValueChanged;
+	MEventOut<void(const std::string &, bool)> eValueChanged;
 };
 
 // --------------------------------------------------------------------
@@ -375,8 +369,7 @@ class MRadiobutton : public MControl<MRadiobuttonImpl>
 
 	void SetGroup(const std::list<MRadiobutton *> &inButtons);
 
-	MEventOut<void(const std::string &, bool)>
-		eValueChanged;
+	MEventOut<void(const std::string &, bool)> eValueChanged;
 };
 
 // --------------------------------------------------------------------

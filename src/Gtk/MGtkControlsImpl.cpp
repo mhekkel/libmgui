@@ -591,13 +591,6 @@ void MGtkEdittextImpl::CreateWidget()
 	gtk_widget_set_focus_on_click(entry, true);
 }
 
-void MGtkEdittextImpl::SetFocus()
-{
-	MGtkControlImpl::SetFocus();
-	//
-	//	::SendMessage(GetWidget(), EM_SETSEL, 0, -1);
-}
-
 std::string MGtkEdittextImpl::GetText() const
 {
 	const char *result = nullptr;
@@ -700,19 +693,21 @@ MGtkCheckboxImpl::MGtkCheckboxImpl(MCheckbox *inControl, const std::string &inTe
 void MGtkCheckboxImpl::CreateWidget()
 {
 	SetWidget(gtk_check_button_new_with_label(mLabel.c_str()));
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(GetWidget()), mChecked);
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(GetWidget()), mChecked);
+
+	mChanged.Connect(GetWidget(), "toggled");
 }
 
 bool MGtkCheckboxImpl::IsChecked() const
 {
-	return gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(GetWidget()));
+	return gtk_check_button_get_active(GTK_CHECK_BUTTON(GetWidget()));
 }
 
 void MGtkCheckboxImpl::SetChecked(bool inChecked)
 {
 	mChecked = inChecked;
 	if (GetWidget())
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(GetWidget()), mChecked);
+		gtk_check_button_set_active(GTK_CHECK_BUTTON(GetWidget()), mChecked);
 }
 
 MCheckboxImpl *MCheckboxImpl::Create(MCheckbox *inCheckbox, const std::string &inText)
@@ -738,17 +733,19 @@ void MGtkRadiobuttonImpl::CreateWidget()
 			GTK_CHECK_BUTTON(first->GetWidget()));
 	}
 
+	mChanged.Connect(wdgt, "activate");
+	
 	SetWidget(wdgt);
 }
 
 bool MGtkRadiobuttonImpl::IsChecked() const
 {
-	return gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(GetWidget()));
+	return gtk_check_button_get_active(GTK_CHECK_BUTTON(GetWidget()));
 }
 
 void MGtkRadiobuttonImpl::SetChecked(bool inChecked)
 {
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(GetWidget()), inChecked);
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(GetWidget()), inChecked);
 }
 
 void MGtkRadiobuttonImpl::SetGroup(const std::list<MRadiobutton *> &inButtons)

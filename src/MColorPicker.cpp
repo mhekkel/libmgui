@@ -488,9 +488,9 @@ MColorPicker::MColorPicker(
 	bounds = placeholder->GetBounds();
 
 	// correct the size
-	int32_t dx = 256 - bounds.width;
-	int32_t dy = 256 - bounds.height;
-	ResizeWindow(dx, dy);
+	// int32_t dx = 256 - bounds.width;
+	// int32_t dy = 256 - bounds.height;
+	// ResizeWindow(dx, dy);
 
 	bounds = placeholder->GetBounds();
 	MColorSquare *square = new MColorSquare("square-control", bounds, *this);
@@ -601,6 +601,9 @@ void MColorPicker::TextChanged(const std::string &inID, const std::string &inTex
 
 void MColorPicker::SetMode(MPickerMode inMode)
 {
+	if (inMode == mMode)
+		return;
+
 	mMode = inMode;
 	eChangedMode(inMode);
 

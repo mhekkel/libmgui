@@ -20,6 +20,7 @@ class ExampleWindow : public MWindow
 		, cPaste(this, "paste", &ExampleWindow::Paste)
 		, cSelectAll(this, "select-all", &ExampleWindow::SelectAll)
 		, eClicked(this, &ExampleWindow::Clicked)
+		, eChanged(this, &ExampleWindow::Changed)
 		, eColour(this, &ExampleWindow::Colour)
 	{
 		SetTitle("window-" + std::to_string(++s_nr));
@@ -35,6 +36,13 @@ class ExampleWindow : public MWindow
 		cbtn->SetLayout(false, MRect{4, 4, 4, 4});
 		AddChild(cbtn);
 		AddRoute(cbtn->eColorChanged, eColour);
+
+		MCheckbox *cb = new MCheckbox("checkbox", MRect{}, "Een checkbox");
+		cb->SetMargins(4, 4, 4, 4);
+		AddRoute(cb->eValueChanged, eChanged);
+		AddChild(cb);
+
+
 
 		cCut.SetEnabled(mHasSelection);
 		cCopy.SetEnabled(mHasSelection);
@@ -58,7 +66,12 @@ class ExampleWindow : public MWindow
 		cCut.SetEnabled(mHasSelection);
 		cCopy.SetEnabled(mHasSelection);
 
-		std::cout << id << " clicked!\n";
+		std::cout << id << " clicked\n";
+	}
+
+	void Changed(const std::string &id, bool inState)
+	{
+		std::cout << id << " changed, status is nu " << std::boolalpha << inState << "\n";
 	}
 
 	void Cut() {}
@@ -72,6 +85,8 @@ class ExampleWindow : public MWindow
 
 	MEventIn<void(const std::string &)> eClicked;
 	MEventIn<void(const std::string &, MColor)> eColour;
+
+	MEventIn<void(const std::string &, bool)> eChanged;
 
 	static int s_nr;
 

@@ -63,8 +63,8 @@ MGtkWidgetMixin::MGtkWidgetMixin()
 
 MGtkWidgetMixin::~MGtkWidgetMixin()
 {
-	if (mWidget != nullptr)
-		PRINT(("mWidget != null!"));
+	// if (mWidget != nullptr)
+	// 	PRINT(("mWidget != null!"));
 }
 
 void MGtkWidgetMixin::SetWidget(GtkWidget *inWidget)
