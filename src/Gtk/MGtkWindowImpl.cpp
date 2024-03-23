@@ -163,6 +163,9 @@ void MGtkWindowImpl::Append(MGtkWidgetMixin *inChild, bool inExpand, MRect inMar
 	}
 
 	auto childWidget = inChild->GetWidget();
+
+	assert(GTK_IS_WIDGET(childWidget));
+
 	gtk_widget_set_margin_top(childWidget, inMargins.y);
 	gtk_widget_set_margin_bottom(childWidget, inMargins.height);
 	gtk_widget_set_margin_start(childWidget, inMargins.x);
@@ -408,24 +411,15 @@ void MGtkWindowImpl::OnDestroy()
 	sRecycle.push_back(mWindow);
 }
 
+void MGtkWindowImpl::OnMap()
+{
+	mWindow->Mapped();
+}
 
-// bool MGtkWindowImpl::OnMapEvent(GdkEvent *inEvent)
-// {
-// 	DoForEach(GetWidget());
-
-// 	// mWindow->BeFocus();
-
-// 	return false;
-// }
-
-// bool MGtkWindowImpl::OnConfigureEvent(GdkEvent *inEvent)
-// {
-// 	if (not mConfigured)
-// 		mWindow->Mapped();
-// 	mConfigured = true;
-
-// 	return MGtkWidgetMixin::OnConfigureEvent(inEvent);
-// }
+void MGtkWindowImpl::OnUnmap()
+{
+	mWindow->Unmapped();
+}
 
 void MGtkWindowImpl::ResizeWindow(int32_t inWidthDelta, int32_t inHeightDelta)
 {
@@ -470,49 +464,8 @@ void MGtkWindowImpl::SetWindowPosition(MRect inPosition, bool inTransition)
 	// }
 }
 
-void MGtkWindowImpl::DoForEachCallBack(GtkWidget *inWidget, gpointer inUserData)
-{
-	MGtkWindowImpl *w = reinterpret_cast<MGtkWindowImpl *>(inUserData);
-	w->DoForEach(inWidget);
-}
-
-void MGtkWindowImpl::DoForEach(GtkWidget *inWidget)
-{
-// 	gboolean canFocus = false;
-
-// 	g_object_get(G_OBJECT(inWidget), "can-focus", &canFocus, NULL);
-
-// 	if (canFocus)
-// 		mChildFocus.Connect(inWidget, "focus-in-event");
-
-// #warning FIXME
-// 	// if (GTK_IS_CONTAINER(inWidget))
-// 	// 	gtk_container_foreach(GTK_CONTAINER(inWidget), &MGtkWindowImpl::DoForEachCallBack, this);
-}
-
-// bool MGtkWindowImpl::ChildFocus(GdkEvent *inEvent)
-// {
-// 	//	PRINT(("focus-in-event"));
-
-// 	// try
-// 	// {
-// 	// 	mWindow->BeFocus();
-// 	// }
-// 	// catch (...)
-// 	// {
-// 	// }
-// 	return false;
-// }
-
-// MHandler *MGtkWindowImpl::GetFocus()
-// {
-// 	return nullptr;
-// }
-
 void MGtkWindowImpl::UpdateNow()
 {
-	// if (GTK_IS_WINDOW(GetWidget()))
-	// 	gdk_window_process_updates(gtk_widget_get_window(GetWidget()), true);
 }
 
 void MGtkWindowImpl::SetCursor(MCursor inCursor)
@@ -544,18 +497,19 @@ MWindowImpl *MWindowImpl::Create(const string &inTitle, MRect inBounds,
 void MWindow::GetMainScreenBounds(MRect &outRect)
 {
 	GdkDisplay *display = gdk_display_get_default();
+
 	GdkSeat *seat = gdk_display_get_default_seat(display);
 	GdkDevice *device = gdk_seat_get_pointer(seat);
+	auto surface = gdk_device_get_surface_at_position(device, nullptr, nullptr);
 
-	gint x, y;
-#warning FIXME
-	// gdk_device_get_position(device, nullptr, &x, &y);
+	double x, y;
+	gdk_surface_get_device_position(surface, device, &x, &y, nullptr);
 
-	// auto monitor = gdk_display_get_monitor_at_point(display, x, y);
-	// GdkRectangle r{ 0, 0, 1024, 768 };
+	auto monitor = gdk_display_get_monitor_at_surface(display, surface);
+	GdkRectangle r{ 0, 0, 1024, 768 };
 
-	// if (GDK_IS_MONITOR(monitor))
-	// 	gdk_monitor_get_workarea(monitor, &r);
+	if (GDK_IS_MONITOR(monitor))
+		gdk_monitor_get_geometry(monitor, &r);
 
-	// outRect = MRect(r.x, r.y, r.width, r.height);
+	outRect = MRect(r.x, r.y, r.width, r.height);
 }

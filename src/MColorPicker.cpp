@@ -530,6 +530,8 @@ MColorPicker::MColorPicker(
 		RadiobuttonChanged(mode, true);
 	}
 
+	RecalculateLayout();
+
 	Select();
 }
 

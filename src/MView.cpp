@@ -110,7 +110,7 @@ void MView::AddChild(MView *inView)
 
 void MView::AddedToWindow()
 {
-	if (mVisible == eTriStateOn and not GetParent()->IsVisible())
+	if (mVisible == eTriStateOn and mParent->mVisible == eTriStateOff)
 		mVisible = eTriStateLatent;
 
 	for (MView *child : mChildren)
@@ -194,7 +194,7 @@ void MView::ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta)
 
 	for (MView *child : mChildren)
 	{
-		if (not child->IsVisible())
+		if (child->mVisible == eTriStateOff)
 			continue;
 
 		int32_t dx = 0, dy = 0, dw = 0, dh = 0;
@@ -255,7 +255,7 @@ void MView::RecalculateLayout()
 
 	for (MView *child : mChildren)
 	{
-		if (not child->IsVisible())
+		if (child->mVisible == eTriStateOff)
 			continue;
 
 		b |= child->GetFrame();
@@ -344,7 +344,7 @@ void MView::Show()
 {
 	if (mVisible != eTriStateOn)
 	{
-		if (mParent and mParent->IsVisible())
+		if (mParent and mParent->mVisible != eTriStateOff)
 		{
 			mVisible = eTriStateOn;
 			Invalidate();

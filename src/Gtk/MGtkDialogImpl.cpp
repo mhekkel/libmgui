@@ -29,6 +29,7 @@
 #include "Gtk/MGtkWindowImpl.hpp"
 
 #include "MAcceleratorTable.hpp"
+#include "MCanvas.hpp"
 #include "MControls.hpp"
 #include "MDevice.hpp"
 #include "MDialog.hpp"
@@ -92,14 +93,16 @@ class MGtkDialogImpl : public MGtkWindowImpl
 	MView *CreateExpander(xml::element *inTemplate, int32_t inX, int32_t inY);
 	MView *CreateCombobox(xml::element *inTemplate, int32_t inX, int32_t inY);
 	MView *CreateEdittext(xml::element *inTemplate, int32_t inX, int32_t inY);
+	MView *CreateFiller(xml::element *inTemplate, int32_t inX, int32_t inY);
 	MView *CreatePopup(xml::element *inTemplate, int32_t inX, int32_t inY);
 	MView *CreateScrollbar(xml::element *inTemplate, int32_t inX, int32_t inY);
 	MView *CreateSeparator(xml::element *inTemplate, int32_t inX, int32_t inY);
 	MView *CreateBox(xml::element *inTemplate, int32_t inX, int32_t inY, bool inHorizontal);
-	MView *CreateTable(xml::element *inTemplate, int32_t inX, int32_t inY);
+	// MView *CreateTable(xml::element *inTemplate, int32_t inX, int32_t inY);
 	MView *CreatePager(xml::element *inTemplate, int32_t inX, int32_t inY);
 	MView *CreateListBox(xml::element *inTemplate, int32_t inX, int32_t inY);
 	// MView *CreateListView(xml::element *inTemplate, int32_t inX, int32_t inY);
+	MView *CreateCanvas(xml::element *inTemplate, int32_t inX, int32_t inY);
 
 	uint32_t GetTextWidth(const string &inText, const wchar_t *inClass, int inPartID, int inStateID);
 
@@ -251,6 +254,8 @@ void MGtkDialogImpl::Finish()
 	if (padding == 0)
 		padding = 4;
 
+	assert(GTK_IS_WIDGET(dlogBox));
+
 	gtk_widget_set_margin_top(dlogBox, padding * mDLUY);
 	gtk_widget_set_margin_bottom(dlogBox, padding * mDLUY);
 	gtk_widget_set_margin_start(dlogBox, padding * mDLUX);
@@ -281,10 +286,15 @@ void MGtkDialogImpl::Finish()
 			GtkWidget *wdgt = gtk_dialog_add_button(GTK_DIALOG(GetWidget()),
 				l(button.get_attribute("title")).c_str(), response);
 
+			assert(GTK_IS_WIDGET(wdgt));
+
+			// gtk_widget_set_margin_start(wdgt, 4 * mDLUX);
+			gtk_widget_set_margin_end(wdgt, 4 * mDLUX);
+			gtk_widget_set_margin_top(wdgt, 4 * mDLUY);
+			gtk_widget_set_margin_bottom(wdgt, 4 * mDLUY);
+
 			if (button.get_attribute("default") == "true")
 			{
-#warning FIXME
-				// gtk_widget_grab_default(wdgt);
 				gtk_dialog_set_default_response(GTK_DIALOG(GetWidget()), response);
 				mDefaultResponse = response;
 			}
@@ -298,10 +308,10 @@ void MGtkDialogImpl::Append(MGtkWidgetMixin *inChild, bool inExpand, MRect inMar
 		gtk_dialog_get_content_area(GTK_DIALOG(GetWidget()));
 
 	auto childWidget = inChild->GetWidget();
-	gtk_widget_set_margin_top(childWidget, inMargins.y);
-	gtk_widget_set_margin_bottom(childWidget, inMargins.height);
-	gtk_widget_set_margin_start(childWidget, inMargins.x);
-	gtk_widget_set_margin_end(childWidget, inMargins.width);
+	// gtk_widget_set_margin_top(childWidget, inMargins.y);
+	// gtk_widget_set_margin_bottom(childWidget, inMargins.height);
+	// gtk_widget_set_margin_start(childWidget, inMargins.x);
+	// gtk_widget_set_margin_end(childWidget, inMargins.width);
 
 #warning FIXME
 	// if (inPacking == ePackStart)
@@ -398,6 +408,12 @@ MView *MGtkDialogImpl::CreateExpander(xml::element *inTemplate, int32_t inX, int
 	return expander;
 }
 
+MView *MGtkDialogImpl::CreateCanvas(xml::element *inTemplate, int32_t inX, int32_t inY)
+{
+	string id = inTemplate->get_attribute("id");
+	return new MCanvas(id, { inX, inY, 2, 2 });
+}
+
 MView *MGtkDialogImpl::CreateCaption(xml::element *inTemplate, int32_t inX, int32_t inY)
 {
 	string id = inTemplate->get_attribute("id");
@@ -480,6 +496,12 @@ MView *MGtkDialogImpl::CreateEdittext(xml::element *inTemplate, int32_t inX, int
 	return edittext;
 }
 
+MView *MGtkDialogImpl::CreateFiller(xml::element *inTemplate, int32_t inX, int32_t inY)
+{
+	string id = inTemplate->get_attribute("id");
+	return new MSimpleControl(id, { inX, inY, 0, 0 });
+}
+
 MView *MGtkDialogImpl::CreatePopup(xml::element *inTemplate, int32_t inX, int32_t inY)
 {
 	string id = inTemplate->get_attribute("id");
@@ -527,7 +549,7 @@ MView *MGtkDialogImpl::CreatePager(xml::element *inTemplate, int32_t inX, int32_
 
 		control->RecalculateLayout();
 
-		b |= control->GetFrame();;
+		b |= control->GetFrame();
 	}
 
 	r.width = b.width;
@@ -680,6 +702,8 @@ MView *MGtkDialogImpl::CreateControls(xml::element *inTemplate, int32_t inX, int
 
 	if (name == "button")
 		result = CreateButton(inTemplate, inX, inY);
+	else if (name == "canvas")
+		result = CreateCanvas(inTemplate, inX, inY);
 	else if (name == "caption")
 		result = CreateCaption(inTemplate, inX, inY);
 	else if (name == "checkbox")
@@ -713,7 +737,7 @@ MView *MGtkDialogImpl::CreateControls(xml::element *inTemplate, int32_t inX, int
 	// else if (name == "listview")
 	// 	result = CreateListView(inTemplate, inX, inY);
 	else if (name == "filler")
-		result = new MView(inTemplate->get_attribute("id"), MRect(inX, inY, 0, 0));
+		result = CreateFiller(inTemplate, inX, inY);
 	else
 		throw std::logic_error("This element is not defined: " + name);
 
@@ -721,7 +745,7 @@ MView *MGtkDialogImpl::CreateControls(xml::element *inTemplate, int32_t inX, int
 
 	int32_t marginLeft, marginTop, marginRight, marginBottom;
 	GetMargins(inTemplate, marginLeft, marginTop, marginRight, marginBottom);
-	//	result->SetMargins(marginLeft, marginTop, marginRight, marginBottom);
+	result->SetMargins(marginLeft, marginTop, marginRight, marginBottom);
 
 	if (not inTemplate->get_attribute("width").empty())
 	{
@@ -733,33 +757,38 @@ MView *MGtkDialogImpl::CreateControls(xml::element *inTemplate, int32_t inX, int
 			//			width += static_cast<int32_t>(std::stoi(inTemplate->get_attribute("width")) * mDLUX);
 			width += get_attribute_int(inTemplate, "width");
 
-		MGtkWidgetMixin *impl = dynamic_cast<MGtkWidgetMixin *>(control->GetControlImplBase());
-		if (impl != nullptr)
-			impl->RequestSize(width * mDLUX, -1);
+		MRect frame = result->GetFrame();
+		if (frame.width < width)
+			result->ResizeFrame(width - frame.width, 0);
+
+		if (control != nullptr)
+		{
+			if (auto impl = dynamic_cast<MGtkWidgetMixin *>(control->GetControlImplBase()); impl != nullptr)
+				impl->RequestSize(width * mDLUX, -1);
+		}
 	}
 
-	//	if (not inTemplate->get_attribute("height").empty())
-	//	{
-	//		int32_t height = marginTop + marginBottom;
-	//
-	//		if (inTemplate->get_attribute("height") == "scrollbarheight")
-	//			height += kScrollbarWidth;
-	//		else
-	////			height += static_cast<int32_t>(std::stoi(inTemplate->get_attribute("height")) * mDLUY);
-	//			height += static_cast<int32_t>(std::stoi(inTemplate->get_attribute("height")));
-	//
-	//		MRect frame;
-	//		result->GetFrame(frame);
-	//		if (frame.height < height)
-	//			result->ResizeFrame(0, height - frame.height);
-	//	}
-
-	if (control != nullptr)
+	if (not inTemplate->get_attribute("height").empty())
 	{
-		auto x = get_attribute_int(inTemplate, "padding");
-		MRect m{ x, x, x, x };
-		control->SetLayout(inTemplate->get_attribute("expand") == "true", m);
+		int32_t height = marginTop + marginBottom;
+
+		if (inTemplate->get_attribute("height") == "scrollbarheight")
+			height += kScrollbarWidth;
+		else
+			//			height += static_cast<int32_t>(std::stoi(inTemplate->get_attribute("height")) * mDLUY);
+			height += static_cast<int32_t>(std::stoi(inTemplate->get_attribute("height")));
+
+		MRect frame = result->GetFrame();
+		if (frame.height < height)
+			result->ResizeFrame(0, height - frame.height);
 	}
+
+	// if (control != nullptr)
+	// {
+	// 	auto x = get_attribute_int(inTemplate, "padding");
+	// 	MRect m{ x, x, x, x };
+	// 	control->SetLayout(inTemplate->get_attribute("expand") == "true", m);
+	// }
 
 	return result;
 }

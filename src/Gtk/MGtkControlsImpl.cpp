@@ -46,6 +46,22 @@ void MGtkSimpleControlImpl::CreateWidget()
 	SetWidget(gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0));
 }
 
+void MGtkSimpleControlImpl::Append(MGtkWidgetMixin *inChild, bool inExpand, MRect inMargins)
+{
+	assert(GTK_IS_BOX(GetWidget()));
+
+	auto childWidget = inChild->GetWidget();
+
+	assert(GTK_IS_WIDGET(childWidget));
+
+	gtk_widget_set_margin_top(childWidget, inMargins.y);
+	gtk_widget_set_margin_bottom(childWidget, inMargins.height);
+	gtk_widget_set_margin_start(childWidget, inMargins.x);
+	gtk_widget_set_margin_end(childWidget, inMargins.width);
+
+	gtk_box_append(GTK_BOX(GetWidget()), childWidget);
+}
+
 MSimpleControlImpl *MSimpleControlImpl::Create(MSimpleControl *inControl)
 {
 	return new MGtkSimpleControlImpl(inControl);
@@ -713,15 +729,16 @@ MGtkRadiobuttonImpl::MGtkRadiobuttonImpl(MRadiobutton *inControl, const std::str
 
 void MGtkRadiobuttonImpl::CreateWidget()
 {
-	// if (mGroup.empty() or mGroup.front() == mControl)
-	// 	SetWidget(gtk_radio_button_new_with_label(nullptr, mLabel.c_str()));
-	// else if (not mGroup.empty())
-	// {
-	// 	MGtkRadiobuttonImpl *first = dynamic_cast<MGtkRadiobuttonImpl *>(mGroup.front()->GetImpl());
+	auto wdgt = gtk_check_button_new_with_label(mLabel.c_str());
 
-	// 	SetWidget(gtk_radio_button_new_with_label_from_widget(
-	// 		GTK_RADIO_BUTTON(first->GetWidget()), mLabel.c_str()));
-	// }
+	if (not (mGroup.empty() or mGroup.front() == mControl))
+	{
+		MGtkRadiobuttonImpl *first = dynamic_cast<MGtkRadiobuttonImpl *>(mGroup.front()->GetImpl());
+		gtk_check_button_set_group(GTK_CHECK_BUTTON(wdgt),
+			GTK_CHECK_BUTTON(first->GetWidget()));
+	}
+
+	SetWidget(wdgt);
 }
 
 bool MGtkRadiobuttonImpl::IsChecked() const
@@ -794,6 +811,8 @@ void MGtkColorSwatchImpl::OnColorSet()
 	mColor.red = static_cast<uint8_t>(255 * color.red);
 	mColor.green = static_cast<uint8_t>(255 * color.green);
 	mColor.blue = static_cast<uint8_t>(255 * color.blue);
+
+	mControl->eColorChanged(mControl->GetID(), mColor);
 }
 
 void MGtkColorSwatchImpl::SelectedColor(MColor inColor)
@@ -975,6 +994,9 @@ void MGtkBoxControlImpl::Append(MGtkWidgetMixin *inChild, bool inExpand, MRect i
 	assert(GTK_IS_BOX(GetWidget()));
 
 	auto childWidget = inChild->GetWidget();
+
+	assert(GTK_IS_WIDGET(childWidget));
+
 	gtk_widget_set_margin_top(childWidget, inMargins.y);
 	gtk_widget_set_margin_bottom(childWidget, inMargins.height);
 	gtk_widget_set_margin_start(childWidget, inMargins.x);

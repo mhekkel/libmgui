@@ -114,6 +114,10 @@ void MDialog::RecalculateLayout()
 {
 	//	assert(mChildren.size() == 1);
 	assert(mChildren.size() >= 1);
+
+	for (auto child : mChildren)
+		child->RecalculateLayout();
+
 	mBounds = mChildren.front()->GetFrame();
 	mFrame = mBounds;
 	mBounds.x += mLeftMargin;
@@ -148,8 +152,7 @@ bool MDialog::CancelClicked()
 	return true;
 }
 
-void MDialog::ButtonClicked(
-	const string &inID)
+void MDialog::ButtonClicked(const string &inID)
 {
 	if (inID == "ok")
 	{
@@ -163,27 +166,19 @@ void MDialog::ButtonClicked(
 	}
 }
 
-void MDialog::CheckboxChanged(
-	const string &inID,
-	bool inChecked)
+void MDialog::CheckboxChanged(const string &inID, bool inChecked)
 {
 }
 
-void MDialog::RadiobuttonChanged(
-	const string &inID,
-	bool inChecked)
+void MDialog::RadiobuttonChanged(const string &inID, bool inChecked)
 {
 }
 
-void MDialog::TextChanged(
-	const string &inID,
-	const string &inText)
+void MDialog::TextChanged(const string &inID, const string &inText)
 {
 }
 
-void MDialog::ValueChanged(
-	const string &inID,
-	int32_t inValue)
+void MDialog::ValueChanged(const string &inID, int32_t inValue)
 {
 }
 

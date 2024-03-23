@@ -37,7 +37,6 @@ MCanvas::MCanvas(const std::string &inID, MRect inBounds/* , bool inAcceptDropFi
 
 MCanvas::~MCanvas()
 {
-	delete mImpl;
 }
 
 // void MCanvas::AddedToWindow()

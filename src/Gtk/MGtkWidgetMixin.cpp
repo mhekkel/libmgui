@@ -109,8 +109,7 @@ void MGtkWidgetMixin::CreateIMContext()
 
 void MGtkWidgetMixin::OnDestroy()
 {
-	g_object_unref(mWidget);
-	mWidget = nullptr;
+	SetWidget(nullptr);
 }
 
 void MGtkWidgetMixin::OnDirectionChanged(GtkTextDirection previous_direction)

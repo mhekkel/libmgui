@@ -73,6 +73,7 @@ class MGtkSimpleControlImpl : public MGtkControlImpl<MSimpleControl>
   public:
 	MGtkSimpleControlImpl(MSimpleControl *inControl);
 	void CreateWidget() override;
+	void Append(MGtkWidgetMixin *inChild, bool inExpand, MRect inMargins) override;
 };
 
 class MGtkButtonImpl : public MGtkControlImpl<MButton>

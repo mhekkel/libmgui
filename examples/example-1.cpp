@@ -1,4 +1,5 @@
 #include "MApplication.hpp"
+#include "MColorPicker.hpp"
 #include "MCommand.hpp"
 #include "MControls.hpp"
 #include "MMenu.hpp"
@@ -19,6 +20,7 @@ class ExampleWindow : public MWindow
 		, cPaste(this, "paste", &ExampleWindow::Paste)
 		, cSelectAll(this, "select-all", &ExampleWindow::SelectAll)
 		, eClicked(this, &ExampleWindow::Clicked)
+		, eColour(this, &ExampleWindow::Colour)
 	{
 		SetTitle("window-" + std::to_string(++s_nr));
 
@@ -29,6 +31,11 @@ class ExampleWindow : public MWindow
 		AddRoute(btn->eClicked, eClicked);
 		AddChild(btn);
 
+		MColorSwatch *cbtn = new MColorSwatch("kleur", MRect{0, 0, 100, 20}, kBlack);
+		cbtn->SetLayout(false, MRect{4, 4, 4, 4});
+		AddChild(cbtn);
+		AddRoute(cbtn->eColorChanged, eColour);
+
 		cCut.SetEnabled(mHasSelection);
 		cCopy.SetEnabled(mHasSelection);
 	}
@@ -36,6 +43,12 @@ class ExampleWindow : public MWindow
 	void Close()
 	{
 		MWindow::Close();
+	}
+
+	void Colour(const std::string &id, MColor inColor)
+	{
+		auto dlog = new MColorPicker(this, inColor);
+		dlog->Show();
 	}
 
 	void Clicked(const std::string &id)
@@ -58,6 +71,8 @@ class ExampleWindow : public MWindow
 	MCommand<void()> cCut, cCopy, cPaste, cSelectAll;
 
 	MEventIn<void(const std::string &)> eClicked;
+	MEventIn<void(const std::string &, MColor)> eColour;
+
 	static int s_nr;
 
 	bool mHasSelection = false;

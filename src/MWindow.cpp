@@ -85,15 +85,15 @@ void MWindow::SetImpl(MWindowImpl *inImpl)
 	mImpl = inImpl;
 }
 
-// void MWindow::Mapped()
-// {
-// 	SuperShow();
-// }
+void MWindow::Mapped()
+{
+	SuperShow();
+}
 
-// void MWindow::Unmapped()
-// {
-// 	SuperHide();
-// }
+void MWindow::Unmapped()
+{
+	SuperHide();
+}
 
 MWindowFlags MWindow::GetFlags() const
 {

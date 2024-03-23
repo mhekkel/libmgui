@@ -85,10 +85,8 @@ class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin, public MGtkCo
 	// bool DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, const std::string &inText) override;
 
 	void OnDestroy() override;
-	// bool OnConfigureEvent(GdkEvent *inEvent) override;
-
-	virtual void DoForEach(GtkWidget *inWidget);
-	static void DoForEachCallBack(GtkWidget *inWidget, gpointer inUserData);
+	void OnMap() override;
+	void OnUnmap() override;
 
 	GtkWidget *mMainVBox;
 	MGtkWidgetMixin *mFocus;

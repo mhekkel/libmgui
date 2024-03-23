@@ -41,18 +41,16 @@ MGtkControlImpl<CONTROL>::MGtkControlImpl(CONTROL *inControl, const std::string 
 template <class CONTROL>
 MGtkControlImpl<CONTROL>::~MGtkControlImpl()
 {
-	if (GetWidget() != nullptr)
-		g_object_unref(GetWidget());
 }
 
 template <class CONTROL>
 void MGtkControlImpl<CONTROL>::OnDestroy()
 {
+	SetWidget(nullptr);
+
 	if (this->mControl != nullptr)
 	{
-		SetWidget(nullptr);
 		this->mControl->SetImpl(nullptr);
-
 		delete this;
 	}
 }

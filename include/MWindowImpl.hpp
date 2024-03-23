@@ -26,51 +26,62 @@
 
 #pragma once
 
-#include "MGtkControlsImpl.hpp"
+#include "MWindow.hpp"
 
-#include "MCanvasImpl.hpp"
+#undef CreateDialog
 
-#include <cassert>
+class MMenuBar;
 
-
-class MGtkCanvasImpl : public MGtkControlImpl<MCanvas>
+class MWindowImpl
 {
   public:
-	MGtkCanvasImpl(MCanvas *inCanvas, uint32_t inWidth, uint32_t inHeight);
-	~MGtkCanvasImpl();
+	static MWindowImpl *Create(const std::string &inTitle, MRect inBounds,
+		MWindowFlags inFlags, MWindow *inWindow);
 
-	cairo_t *GetCairo() const
-	{
-		assert(mCurrentCairo);
-		return mCurrentCairo;
-	}
+	static MWindowImpl *CreateDialog(const std::string &inResource, MWindow *inWindow);
 
-	void CreateWidget() override;
+	virtual ~MWindowImpl() {}
 
-	// bool OnMouseDown(int32_t inX, int32_t inY, uint32_t inButtonNr, uint32_t inClickCount, uint32_t inModifiers) override;
-	// bool OnMouseMove(int32_t inX, int32_t inY, uint32_t inModifiers) override;
-	// bool OnMouseUp(int32_t inX, int32_t inY, uint32_t inModifiers) override;
-	// bool OnMouseExit() override;
+	MWindowFlags GetFlags() const { return mFlags; }
 
-	void Invalidate() override;
+	virtual void Finish() {}
 
-	// // MCanvasImpl overrides
-	// virtual void AcceptDragAndDrop(bool inFiles, bool inText);
-	// virtual void StartDrag();
+	virtual void SetTitle(std::string inTitle) = 0;
+	// virtual std::string	GetTitle() const = 0;
+
+	virtual void Show() = 0;
+	virtual void Hide() = 0;
+
+	virtual bool ShowModal() { return false; }
+	virtual void SetTransientFor(MWindow *inWindow) {}
+
+	virtual bool Visible() const = 0;
+
+	virtual void Select() = 0;
+	virtual void Close() = 0;
+
+	virtual void ResizeWindow(int32_t inWidthDelta, int32_t inHeightDelta) = 0;
+
+	virtual void SetWindowPosition(MRect inBounds, bool inTransition) = 0;
+	virtual void GetWindowPosition(MRect &outBounds) const = 0;
+
+	virtual void UpdateNow() = 0;
+
+	virtual void SetCursor(MCursor inCursor) = 0;
+	virtual void ObscureCursor() = 0;
+
+	virtual void ConvertToScreen(int32_t &ioX, int32_t &ioY) const = 0;
+	virtual void ConvertFromScreen(int32_t &ioX, int32_t &ioY) const = 0;
 
   protected:
-	// bool OnDrawEvent(cairo_t *inCairo) override;
-	// bool OnConfigureEvent(GdkEvent *inEvent) override;
+	MWindowImpl(MWindowFlags inFlags, MWindow *inWindow)
+		: mWindow(inWindow)
+		, mFlags(inFlags)
+	{
+	}
 
-	// bool OnKeyPressEvent(GdkEvent *inEvent) override;
-	void OnCommit(char *inText) override;
+	MMenuBar *CreateMenu(const std::string &inMenu);
 
-	// bool OnScrollEvent(GdkEvent *inEvent) override;
-
-	static void Draw(GtkDrawingArea *area, cairo_t *cr, int width, int height, gpointer data);
-
-	MSlot<void(int, int)> mResize;
-	void Resize(int width, int height);
-
-	cairo_t *mCurrentCairo = nullptr;
+	MWindow *mWindow;
+	MWindowFlags mFlags;
 };

@@ -127,7 +127,8 @@ class MWindow : public MView
 	virtual MWindow *GetWindow() const;
 	MWindowFlags GetFlags() const;
 
-	// virtual void Activated();
+	virtual void Mapped();
+	virtual void Unmapped();
 
 	virtual void Show();
 	virtual void Select();
