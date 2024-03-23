@@ -126,7 +126,6 @@ list(APPEND headers
 	include/MUtils.hpp
 	include/MView.hpp
 	include/MWindow.hpp
-	include/MWindowImpl.hpp
 )
 
 list(APPEND sources

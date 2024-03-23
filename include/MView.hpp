@@ -156,7 +156,6 @@ class MView
 	bool mBindLeft, mBindTop, mBindRight, mBindBottom;
 	MView *mParent;
 	MViewList mChildren;
-	bool mWillDraw;
 	MTriState mVisible;
 	MTriState mEnabled;
 };

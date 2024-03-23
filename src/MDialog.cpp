@@ -33,7 +33,6 @@
 #include "MControls.hpp"
 #include "MError.hpp"
 #include "MPreferences.hpp"
-#include "MWindowImpl.hpp"
 
 #include <cassert>
 

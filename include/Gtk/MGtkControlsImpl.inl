@@ -46,7 +46,7 @@ MGtkControlImpl<CONTROL>::~MGtkControlImpl()
 }
 
 template <class CONTROL>
-bool MGtkControlImpl<CONTROL>::OnDestroy()
+void MGtkControlImpl<CONTROL>::OnDestroy()
 {
 	if (this->mControl != nullptr)
 	{
@@ -55,8 +55,6 @@ bool MGtkControlImpl<CONTROL>::OnDestroy()
 
 		delete this;
 	}
-
-	return true;
 }
 
 template <class CONTROL>
@@ -236,29 +234,29 @@ void MGtkControlImpl<CONTROL>::OnChanged()
 {
 }
 
-template <class CONTROL>
-void MGtkControlImpl<CONTROL>::OnPopupMenu()
-{
-	// PRINT(("OnPopupMenu for %s", this->mControl->GetID().c_str()));
+// template <class CONTROL>
+// void MGtkControlImpl<CONTROL>::OnPopupMenu()
+// {
+// 	// PRINT(("OnPopupMenu for %s", this->mControl->GetID().c_str()));
 
-	int32_t x = 0, y = 0;
+// 	int32_t x = 0, y = 0;
 
-#if GTK_CHECK_VERSION(3, 20, 0)
-	auto seat = gdk_display_get_default_seat(gdk_display_get_default());
-	auto mouse_device = gdk_seat_get_pointer(seat);
-#else
-	auto devman = gdk_display_get_device_manager(gdk_display_get_default());
-	auto mouse_device = gdk_device_manager_get_client_pointer(devman);
-#endif
+// #if GTK_CHECK_VERSION(3, 20, 0)
+// 	auto seat = gdk_display_get_default_seat(gdk_display_get_default());
+// 	auto mouse_device = gdk_seat_get_pointer(seat);
+// #else
+// 	auto devman = gdk_display_get_device_manager(gdk_display_get_default());
+// 	auto mouse_device = gdk_device_manager_get_client_pointer(devman);
+// #endif
 
-#warning "FIXME"
-	// auto window = gdk_display_get_default_group(gdk_display_get_default());
+// #warning "FIXME"
+// 	// auto window = gdk_display_get_default_group(gdk_display_get_default());
 
-	// if (window == nullptr)
-	// 	window = gtk_widget_get_window(GetWidget());
+// 	// if (window == nullptr)
+// 	// 	window = gtk_widget_get_window(GetWidget());
 
-	// gdk_window_get_device_position(window, mouse_device, &x, &y, NULL);
-	// g_message ("pointer: %i %i", x, y);
+// 	// gdk_window_get_device_position(window, mouse_device, &x, &y, NULL);
+// 	// g_message ("pointer: %i %i", x, y);
 
-	this->mControl->ShowContextMenu(x, y);
-}
+// 	this->mControl->ShowContextMenu(x, y);
+// }

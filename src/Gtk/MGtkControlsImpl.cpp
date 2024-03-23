@@ -608,21 +608,21 @@ void MGtkEdittextImpl::SetPasswordChar(uint32_t inUnicode)
 		THROW(("item is not an entry"));
 }
 
-bool MGtkEdittextImpl::OnKeyPressEvent(GdkEvent *inEvent)
-{
+// bool MGtkEdittextImpl::OnKeyPressEvent(GdkEvent *inEvent)
+// {
 
-#warning FIXME
-	// const uint32_t kValidModifiersMask = gtk_accelerator_get_default_mod_mask();
-	// uint32_t modifiers = MapModifier(gdk_event_get_modifier_state(inEvent) & kValidModifiersMask);
-	// uint32_t keyValue = MapKeyCode(gdk_key_event_get_keyval(inEvent));
+// #warning FIXME
+// 	// const uint32_t kValidModifiersMask = gtk_accelerator_get_default_mod_mask();
+// 	// uint32_t modifiers = MapModifier(gdk_event_get_modifier_state(inEvent) & kValidModifiersMask);
+// 	// uint32_t keyValue = MapKeyCode(gdk_key_event_get_keyval(inEvent));
 
-	// // bool result = mControl->HandleKeyDown(keyValue, modifiers, false);
+// 	// // bool result = mControl->HandleKeyDown(keyValue, modifiers, false);
 
-	// if (not result)
-	// 	result = MGtkControlImpl::OnKeyPressEvent(inEvent);
+// 	// if (not result)
+// 	// 	result = MGtkControlImpl::OnKeyPressEvent(inEvent);
 
-	// return result;
-}
+// 	// return result;
+// }
 
 MEdittextImpl *MEdittextImpl::Create(MEdittext *inEdittext, uint32_t inFlags)
 {

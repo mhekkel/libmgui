@@ -52,8 +52,8 @@ MGtkWindowImpl::MGtkWindowImpl(MWindowFlags inFlags, MWindow *inWindow)
 	: MWindowImpl(inFlags, inWindow)
 	//	, mModified(false)
     //	, mTransitionThread(nullptr)
-	, mChildFocus(this, &MGtkWindowImpl::ChildFocus)
-	, mMapEvent(this, &MGtkWindowImpl::OnMapEvent)
+	// , mChildFocus(this, &MGtkWindowImpl::ChildFocus)
+	// , mMapEvent(this, &MGtkWindowImpl::OnMapEvent)
 	//	, mChanged(this, &MGtkWindowImpl::Changed)
 	, mMainVBox(nullptr)
 	, mFocus(this)
@@ -401,33 +401,31 @@ void MGtkWindowImpl::RecycleWindows()
 	sRecycle.clear();
 }
 
-bool MGtkWindowImpl::OnDestroy()
+void MGtkWindowImpl::OnDestroy()
 {
 	SetWidget(nullptr);
 
 	sRecycle.push_back(mWindow);
-
-	return true;
 }
 
 
-bool MGtkWindowImpl::OnMapEvent(GdkEvent *inEvent)
-{
-	DoForEach(GetWidget());
+// bool MGtkWindowImpl::OnMapEvent(GdkEvent *inEvent)
+// {
+// 	DoForEach(GetWidget());
 
-	// mWindow->BeFocus();
+// 	// mWindow->BeFocus();
 
-	return false;
-}
+// 	return false;
+// }
 
-bool MGtkWindowImpl::OnConfigureEvent(GdkEvent *inEvent)
-{
-	if (not mConfigured)
-		mWindow->Mapped();
-	mConfigured = true;
+// bool MGtkWindowImpl::OnConfigureEvent(GdkEvent *inEvent)
+// {
+// 	if (not mConfigured)
+// 		mWindow->Mapped();
+// 	mConfigured = true;
 
-	return MGtkWidgetMixin::OnConfigureEvent(inEvent);
-}
+// 	return MGtkWidgetMixin::OnConfigureEvent(inEvent);
+// }
 
 void MGtkWindowImpl::ResizeWindow(int32_t inWidthDelta, int32_t inHeightDelta)
 {
@@ -480,31 +478,31 @@ void MGtkWindowImpl::DoForEachCallBack(GtkWidget *inWidget, gpointer inUserData)
 
 void MGtkWindowImpl::DoForEach(GtkWidget *inWidget)
 {
-	gboolean canFocus = false;
+// 	gboolean canFocus = false;
 
-	g_object_get(G_OBJECT(inWidget), "can-focus", &canFocus, NULL);
+// 	g_object_get(G_OBJECT(inWidget), "can-focus", &canFocus, NULL);
 
-	if (canFocus)
-		mChildFocus.Connect(inWidget, "focus-in-event");
+// 	if (canFocus)
+// 		mChildFocus.Connect(inWidget, "focus-in-event");
 
-#warning FIXME
-	// if (GTK_IS_CONTAINER(inWidget))
-	// 	gtk_container_foreach(GTK_CONTAINER(inWidget), &MGtkWindowImpl::DoForEachCallBack, this);
+// #warning FIXME
+// 	// if (GTK_IS_CONTAINER(inWidget))
+// 	// 	gtk_container_foreach(GTK_CONTAINER(inWidget), &MGtkWindowImpl::DoForEachCallBack, this);
 }
 
-bool MGtkWindowImpl::ChildFocus(GdkEvent *inEvent)
-{
-	//	PRINT(("focus-in-event"));
+// bool MGtkWindowImpl::ChildFocus(GdkEvent *inEvent)
+// {
+// 	//	PRINT(("focus-in-event"));
 
-	// try
-	// {
-	// 	mWindow->BeFocus();
-	// }
-	// catch (...)
-	// {
-	// }
-	return false;
-}
+// 	// try
+// 	// {
+// 	// 	mWindow->BeFocus();
+// 	// }
+// 	// catch (...)
+// 	// {
+// 	// }
+// 	return false;
+// }
 
 // MHandler *MGtkWindowImpl::GetFocus()
 // {

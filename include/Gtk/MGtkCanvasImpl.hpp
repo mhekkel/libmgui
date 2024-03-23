@@ -45,7 +45,7 @@ class MGtkCanvasImpl : public MGtkControlImpl<MCanvas>
 		return mCurrentCairo;
 	}
 
-	virtual void CreateWidget();
+	void CreateWidget() override;
 
 	virtual bool OnMouseDown(int32_t inX, int32_t inY, uint32_t inButtonNr, uint32_t inClickCount, uint32_t inModifiers);
 	virtual bool OnMouseMove(int32_t inX, int32_t inY, uint32_t inModifiers);
@@ -62,8 +62,8 @@ class MGtkCanvasImpl : public MGtkControlImpl<MCanvas>
 	virtual bool OnDrawEvent(cairo_t *inCairo);
 	virtual bool OnConfigureEvent(GdkEvent *inEvent);
 
-	virtual bool OnKeyPressEvent(GdkEvent *inEvent);
-	virtual bool OnCommit(gchar *inText);
+	// virtual bool OnKeyPressEvent(GdkEvent *inEvent);
+	void OnCommit(char *inText) override;
 
 	virtual bool OnScrollEvent(GdkEvent *inEvent);
 

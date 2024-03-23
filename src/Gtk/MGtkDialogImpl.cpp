@@ -75,7 +75,7 @@ class MGtkDialogImpl : public MGtkWindowImpl
 	void Create(MRect inBounds, const std::string &inTitle) override;
 	void Finish() override;
 
-	bool OnKeyPressEvent(GdkEvent *inEvent) override;
+	// bool OnKeyPressEvent(GdkEvent *inEvent) override;
 
 	void Append(MGtkWidgetMixin *inChild, bool inExpand, MRect inMargins) override;
 
@@ -143,28 +143,28 @@ class MGtkDialogImpl : public MGtkWindowImpl
 	bool mResultIsOK;
 };
 
-bool MGtkDialogImpl::OnKeyPressEvent(GdkEvent *inEvent)
-{
-	// PRINT(("MGtkDialogImpl::OnKeyPressEvent"));
+// bool MGtkDialogImpl::OnKeyPressEvent(GdkEvent *inEvent)
+// {
+// 	// PRINT(("MGtkDialogImpl::OnKeyPressEvent"));
 
-	bool result = MGtkWidgetMixin::OnKeyPressEvent(inEvent);
+// 	bool result = MGtkWidgetMixin::OnKeyPressEvent(inEvent);
 
-	if (not result)
-	{
-		uint32_t keyCode = MapKeyCode(gdk_key_event_get_keyval(inEvent));
-		uint32_t modifiers = MapModifier(gdk_event_get_modifier_state(inEvent));
+// 	if (not result)
+// 	{
+// 		uint32_t keyCode = MapKeyCode(gdk_key_event_get_keyval(inEvent));
+// 		uint32_t modifiers = MapModifier(gdk_event_get_modifier_state(inEvent));
 
-		if ((keyCode == kEnterKeyCode or keyCode == kReturnKeyCode) and modifiers == 0)
-		{
-			OnResponse(mDefaultResponse);
-			result = true;
-		}
-	}
+// 		if ((keyCode == kEnterKeyCode or keyCode == kReturnKeyCode) and modifiers == 0)
+// 		{
+// 			OnResponse(mDefaultResponse);
+// 			result = true;
+// 		}
+// 	}
 
-	// PRINT(("MGtkDialogImpl::OnKeyPressEvent => %d", result));
+// 	// PRINT(("MGtkDialogImpl::OnKeyPressEvent => %d", result));
 
-	return result;
-}
+// 	return result;
+// }
 
 bool MGtkDialogImpl::ShowModal()
 {
@@ -184,7 +184,7 @@ void MGtkDialogImpl::Create(MRect inBounds, const std::string &inTitle)
 
 	SetWidget(widget);
 
-	mMapEvent.Connect(widget, "map-event");
+	// mMapEvent.Connect(widget, "map-event");
 	mResponse.Connect(widget, "response");
 }
 

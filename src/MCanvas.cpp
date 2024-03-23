@@ -33,7 +33,6 @@ MCanvas::MCanvas(const std::string &inID, MRect inBounds/* , bool inAcceptDropFi
 	// , mAcceptDropFiles(inAcceptDropFiles)
 	// , mAcceptDropText(inAcceptDropText)
 {
-	mWillDraw = true;
 }
 
 MCanvas::~MCanvas()

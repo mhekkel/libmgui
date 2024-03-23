@@ -29,7 +29,7 @@
 #include "MGtkCommandEmitter.hpp"
 #include "MGtkWidgetMixin.hpp"
 #include "MMenu.hpp"
-#include "MWindowImpl.hpp"
+#include "MWindow.hpp"
 
 #include <list>
 
@@ -84,19 +84,8 @@ class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin, public MGtkCo
   protected:
 	// bool DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, const std::string &inText) override;
 
-	bool OnDestroy() override;
-	// bool OnDelete(GdkEvent *inEvent) override;
-
-	bool ChildFocus(GdkEvent *inEvent);
-	MSlot<bool(GdkEvent *)> mChildFocus;
-
-	bool OnMapEvent(GdkEvent *inEvent);
-	MSlot<bool(GdkEvent *)> mMapEvent;
-
-	bool OnConfigureEvent(GdkEvent *inEvent) override;
-
-	//	void			Changed();
-	//	MSlot<void()>	mChanged;
+	void OnDestroy() override;
+	// bool OnConfigureEvent(GdkEvent *inEvent) override;
 
 	virtual void DoForEach(GtkWidget *inWidget);
 	static void DoForEachCallBack(GtkWidget *inWidget, gpointer inUserData);

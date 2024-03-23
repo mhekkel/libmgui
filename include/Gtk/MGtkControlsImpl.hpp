@@ -58,10 +58,7 @@ class MGtkControlImpl : public CONTROL::MImpl, public MGtkWidgetMixin
 
 	virtual void CreateWidget() = 0;
 
-	bool OnDestroy() override;
-
-	// bool OnKeyPressEvent(GdkEvent *inEvent) override;
-	void OnPopupMenu() override;
+	void OnDestroy() override;
 
 	virtual void OnChanged();
 	MSlot<void()> mChanged;
@@ -241,8 +238,6 @@ class MGtkEdittextImpl : public MGtkControlImpl<MEdittext>
 	uint32_t GetFlags() const override { return mFlags; }
 
 	void SetPasswordChar(uint32_t inUnicode) override;
-
-	bool OnKeyPressEvent(GdkEvent *inEvent) override;
 
   protected:
 	GtkEntryBuffer *mBuffer;

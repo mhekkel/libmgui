@@ -157,46 +157,46 @@ bool MGtkCanvasImpl::OnConfigureEvent(GdkEvent *inEvent)
 	return false;
 }
 
-bool MGtkCanvasImpl::OnKeyPressEvent(GdkEvent *inEvent)
-{
-	bool result = MGtkControlImpl<MCanvas>::OnKeyPressEvent(inEvent);
+// bool MGtkCanvasImpl::OnKeyPressEvent(GdkEvent *inEvent)
+// {
+// 	bool result = MGtkControlImpl<MCanvas>::OnKeyPressEvent(inEvent);
 
-	if (not result)
-	{
-		const uint32_t kValidModifiersMask = gtk_accelerator_get_default_mod_mask();
+// 	if (not result)
+// 	{
+// 		const uint32_t kValidModifiersMask = gtk_accelerator_get_default_mod_mask();
 
-		// PRINT(("OnKeyPressEvent(keyval=0x%x)", inEvent->keyval));
+// 		// PRINT(("OnKeyPressEvent(keyval=0x%x)", inEvent->keyval));
 
-		uint32_t modifiers = MapModifier(gdk_event_get_modifier_state(inEvent) & kValidModifiersMask);
-		uint32_t keyValue = MapKeyCode(gdk_key_event_get_keyval(inEvent));
+// 		uint32_t modifiers = MapModifier(gdk_event_get_modifier_state(inEvent) & kValidModifiersMask);
+// 		uint32_t keyValue = MapKeyCode(gdk_key_event_get_keyval(inEvent));
 
-		if (keyValue >= 0x60 and keyValue <= 0x7f and modifiers == kControlKey)
-		{
-			char ch = static_cast<char>(keyValue) - 0x60;
-			std::string text(&ch, 1);
-			result = mControl->HandleCharacter(text, mAutoRepeat);
-		}
-		else
-			result = mControl->HandleKeyDown(keyValue, modifiers, mAutoRepeat);
+// 		if (keyValue >= 0x60 and keyValue <= 0x7f and modifiers == kControlKey)
+// 		{
+// 			char ch = static_cast<char>(keyValue) - 0x60;
+// 			std::string text(&ch, 1);
+// 			result = mControl->HandleCharacter(text, mAutoRepeat);
+// 		}
+// 		else
+// 			result = mControl->HandleKeyDown(keyValue, modifiers, mAutoRepeat);
 
-		if (not result and modifiers == 0)
-		{
-			unicode ch = gdk_keyval_to_unicode(keyValue);
+// 		if (not result and modifiers == 0)
+// 		{
+// 			unicode ch = gdk_keyval_to_unicode(keyValue);
 
-			if (ch != 0)
-			{
-				char s[8] = {};
-				char *sp = s;
-				uint32_t length = MEncodingTraits<kEncodingUTF8>::WriteUnicode(sp, ch);
+// 			if (ch != 0)
+// 			{
+// 				char s[8] = {};
+// 				char *sp = s;
+// 				uint32_t length = MEncodingTraits<kEncodingUTF8>::WriteUnicode(sp, ch);
 
-				std::string text(s, length);
-				result = mControl->HandleCharacter(text, mAutoRepeat);
-			}
-		}
-	}
+// 				std::string text(s, length);
+// 				result = mControl->HandleCharacter(text, mAutoRepeat);
+// 			}
+// 		}
+// 	}
 
-	return result;
-}
+// 	return result;
+// }
 
 // bool MGtkCanvasImpl::OnExposeEvent(GdkEventExpose* inEvent)
 // {
@@ -225,10 +225,9 @@ bool MGtkCanvasImpl::OnDrawEvent(cairo_t *inCairo)
 	return true;
 }
 
-bool MGtkCanvasImpl::OnCommit(gchar *inText)
+void MGtkCanvasImpl::OnCommit(char *inText)
 {
-	std::string text(inText);
-	return mControl->HandleCharacter(text, mAutoRepeat);
+	mControl->HandleCharacter({ inText }, mAutoRepeat);
 }
 
 bool MGtkCanvasImpl::OnScrollEvent(GdkEvent *inEvent)

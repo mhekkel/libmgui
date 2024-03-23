@@ -53,8 +53,6 @@ MView::MView(const string &inID, MRect inBounds)
 	, mBindRight(false)
 	, mBindBottom(false)
 	, mParent(nullptr)
-	// , mScroller(nullptr)
-	, mWillDraw(false)
 	, mVisible(eTriStateLatent)
 	, mEnabled(eTriStateOn)
 {
@@ -179,24 +177,15 @@ void MView::SetBindings(bool inFollowLeft, bool inFollowTop, bool inFollowRight,
 
 void MView::MoveFrame(int32_t inXDelta, int32_t inYDelta)
 {
-	if (mWillDraw)
-		Invalidate();
-
 	mFrame.x += inXDelta;
 	mFrame.y += inYDelta;
 
 	for (MView *child : mChildren)
 		child->MoveFrame(0, 0);
-
-	if (mWillDraw)
-		Invalidate();
 }
 
 void MView::ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta)
 {
-	if (mWillDraw)
-		Invalidate();
-
 	mFrame.width += inWidthDelta;
 	mFrame.height += inHeightDelta;
 
@@ -230,9 +219,6 @@ void MView::ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta)
 			child->MoveFrame(dx, dy);
 		child->ResizeFrame(dw, dh);
 	}
-
-	if (mWillDraw)
-		Invalidate();
 }
 
 void MView::GetMargins(int32_t &outLeftMargin, int32_t &outTopMargin, int32_t &outRightMargin, int32_t &outBottomMargin) const
