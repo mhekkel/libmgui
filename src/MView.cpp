@@ -306,31 +306,6 @@ void MView::ObscureCursor()
 		mParent->ObscureCursor();
 }
 
-void MView::MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, uint32_t inModifiers)
-{
-}
-
-void MView::MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers)
-{
-}
-
-void MView::MouseExit()
-{
-}
-
-void MView::MouseUp(int32_t inX, int32_t inY, uint32_t inModifiers)
-{
-}
-
-void MView::MouseWheel(int32_t inX, int32_t inY, int32_t inDeltaX, int32_t inDeltaY, uint32_t inModifiers)
-{
-	if (mParent != nullptr)
-	{
-		ConvertToParent(inX, inY);
-		mParent->MouseWheel(inX, inY, inDeltaX, inDeltaY, inModifiers);
-	}
-}
-
 void MView::ShowContextMenu(int32_t inX, int32_t inY)
 {
 	if (mParent != nullptr)

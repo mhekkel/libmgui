@@ -40,23 +40,5 @@ class MCanvas : public MControl<MCanvasImpl>
 	MCanvas(const std::string &inID, MRect inBounds/* , bool inAcceptDropFiles, bool inAcceptDropText */);
 	~MCanvas();
 
-	// void AddedToWindow() override;
-
 	void Invalidate() override;
-
-	// void DragEnter() override;
-	// bool DragWithin(int32_t inX, int32_t inY) override;
-	// void DragLeave() override;
-	// bool Drop(bool inMove, int32_t inX, int32_t inY override,
-	// 	const std::string &inText);
-	// bool Drop(int32_t inX, int32_t inY override,
-	// 	const std::filesystem::path &inFile);
-
-	// void StartDrag() override;
-	// void DragSendData(std::string &outData) override;
-	// void DragDeleteData() override;
-
-  protected:
-	// bool mAcceptDropFiles;
-	// bool mAcceptDropText;
 };

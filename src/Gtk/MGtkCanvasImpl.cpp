@@ -59,6 +59,7 @@ MGtkCanvasImpl::~MGtkCanvasImpl()
 
 void MGtkCanvasImpl::CreateWidget()
 {
+	SetEventMask(MEventMask::All);
 	SetWidget(gtk_drawing_area_new());
 
 	gtk_widget_set_can_focus(GetWidget(), true);
@@ -66,6 +67,48 @@ void MGtkCanvasImpl::CreateWidget()
 	// g_object_set_data(G_OBJECT(GetWidget()), "m-canvas", this);
 	gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA(GetWidget()), &MGtkCanvasImpl::Draw, this, nullptr);
 }
+
+void MGtkCanvasImpl::OnGestureClickPressed(double inX, double inY, gint inClickCount)
+{
+	mControl->ClickPressed(inX, inY, inClickCount);
+}
+
+void MGtkCanvasImpl::OnGestureClickReleased(double inX, double inY, gint inClickCount)
+{
+	mControl->ClickReleased(inX, inY, inClickCount);
+}
+
+void MGtkCanvasImpl::OnGestureClickStopped()
+{
+}
+
+void MGtkCanvasImpl::OnPointerEnter(double inX, double inY)
+{
+	mControl->PointerEnter(inX, inY);
+}
+
+void MGtkCanvasImpl::OnPointerMotion(double inX, double inY)
+{
+	mControl->PointerMotion(inX, inY);
+}
+
+void MGtkCanvasImpl::OnPointerLeave()
+{
+	mControl->PointerLeave();
+}
+
+void MGtkCanvasImpl::OnKeyPressed(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers)
+{
+}
+
+void MGtkCanvasImpl::OnKeyReleased(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers)
+{
+}
+
+void MGtkCanvasImpl::OnKeyModifiers(GdkModifierType inModifiers)
+{
+}
+
 
 // bool MGtkCanvasImpl::OnMouseDown(int32_t inX, int32_t inY, uint32_t inButtonNr, uint32_t inClickCount, uint32_t inModifiers)
 // {

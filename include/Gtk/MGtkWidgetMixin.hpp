@@ -39,8 +39,6 @@
 #include <string>
 #include <vector>
 
-typedef std::vector<std::pair<GObject *, std::string>> MSignalHandlerArray;
-
 template <class CallbackIn, typename Function>
 struct MGtkCallbackOutHandler
 {
@@ -282,14 +280,44 @@ class MSlot : public MakeGtkCallbackHandler<Function>::type
 	ulong mID = 0;
 };
 
+// --------------------------------------------------------------------
+
+enum class MEventMask
+{
+	None = 0,
+	Focus = (1 << 0),
+	GestureClick = (1 << 1),
+	Key = (1 << 2),
+	Pointer = (1 << 3),
+
+	All = (Focus | GestureClick | Key | Pointer)
+};
+
+constexpr MEventMask operator|(MEventMask a, MEventMask b)
+{
+	return static_cast<MEventMask>(int(a) | int(b));
+}
+
+constexpr bool operator&(MEventMask a, MEventMask b)
+{
+	return (int(a) & int(b)) != 0;
+}
+
+// --------------------------------------------------------------------
+
 class MGtkWidgetMixin
 {
   public:
 	MGtkWidgetMixin(const MGtkWidgetMixin &) = delete;
 	MGtkWidgetMixin &operator=(const MGtkWidgetMixin &) = delete;
 
-	MGtkWidgetMixin();
+	MGtkWidgetMixin(MEventMask inEvents = MEventMask::None);
 	virtual ~MGtkWidgetMixin();
+
+	void SetEventMask(MEventMask inEvents)
+	{
+		mEvents = inEvents;
+	}
 
 	void RequestSize(int32_t inWidth, int32_t inHeight);
 
@@ -308,7 +336,6 @@ class MGtkWidgetMixin
 	virtual void Append(MGtkWidgetMixin *inChild, bool inExpand, MRect inMargins);
 
   protected:
-
 	GtkWidget *mWidget;
 
 	// --------------------------------------------------------------------
@@ -321,7 +348,7 @@ class MGtkWidgetMixin
 	virtual void OnMap();
 	virtual bool OnMnemonicActivate(gboolean group_cycling);
 	virtual void OnMoveFocus(GtkDirectionType direction);
-	virtual bool OnQueryTooltip(gint x, gint y, gboolean keyboard_mode, GtkTooltip* tooltip);
+	virtual bool OnQueryTooltip(gint x, gint y, gboolean keyboard_mode, GtkTooltip *tooltip);
 	virtual void OnRealize();
 	virtual void OnShow();
 	virtual void OnStateFlagsChanged(GtkStateFlags flags);
@@ -335,7 +362,7 @@ class MGtkWidgetMixin
 	MSlot<void()> mMap;
 	MSlot<bool(gboolean)> mMnemonicActivate;
 	MSlot<void(GtkDirectionType)> mMoveFocus;
-	MSlot<bool(gint, gint, gboolean, GtkTooltip*)> mQueryTooltip;
+	MSlot<bool(gint, gint, gboolean, GtkTooltip *)> mQueryTooltip;
 	MSlot<void()> mRealize;
 	MSlot<void()> mShow;
 	MSlot<void(GtkStateFlags)> mStateFlagsChanged;
@@ -359,6 +386,39 @@ class MGtkWidgetMixin
 	MSlot<void()> mPreeditStart;
 	MSlot<bool()> mRetrieveSurrounding;
 
+	// --------------------------------------------------------------------
+	// Event handling
+
+	virtual void OnFocusEnter() {}
+	virtual void OnFocusLeave() {}
+
+	virtual void OnGestureClickPressed(double inX, double inY, gint inClickCount) {}
+	virtual void OnGestureClickReleased(double inX, double inY, gint inClickCount) {}
+	virtual void OnGestureClickStopped() {}
+
+	virtual void OnPointerEnter(double inX, double inY) {}
+	virtual void OnPointerMotion(double inX, double inY) {}
+	virtual void OnPointerLeave() {}
+
+	virtual void OnKeyPressed(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers) {}
+	virtual void OnKeyReleased(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers) {}
+	virtual void OnKeyModifiers(GdkModifierType inModifiers) {}
+
+	MSlot<void()> mFocusEnter;
+	MSlot<void()> mFocusLeave;
+
+	MSlot<void(double, double, gint)> mGestureClickPressed;
+	MSlot<void(double, double, gint)> mGestureClickReleased;
+	MSlot<void()> mGestureClickStopped;
+
+	MSlot<void(double, double)> mPointerEnter;
+	MSlot<void(double, double)> mPointerMotion;
+	MSlot<void()> mPointerLeave;
+
+	MSlot<void(guint, guint, GdkModifierType)> mKeyPressed;
+	MSlot<void(guint, guint, GdkModifierType)> mKeyReleased;
+	MSlot<void(GdkModifierType)> mKeyModifiers;
+
   protected:
 	int32_t mRequestedWidth, mRequestedHeight;
 	bool mAutoRepeat;
@@ -366,6 +426,7 @@ class MGtkWidgetMixin
   private:
 	GtkIMContext *mIMContext;
 	bool mNextKeyPressIsAutoRepeat;
+	MEventMask mEvents;
 
 	std::optional<std::chrono::time_point<std::chrono::steady_clock>> mGainedFocusAt;
 };

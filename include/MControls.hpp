@@ -87,6 +87,17 @@ class MControl : public MControlBase
 		return false;
 	}
 
+	virtual void ClickPressed(int32_t inX, int32_t inY, int32_t inClickCount) {}
+	virtual void ClickReleased(int32_t inX, int32_t inY, int32_t inClickCount) {}
+
+	virtual void PointerEnter(int32_t inX, int32_t inY) {}
+	virtual void PointerMotion(int32_t inX, int32_t inY) {}
+	virtual void PointerLeave() {}
+
+	virtual void KeyPressed(uint32_t inKeyValue, uint32_t inKeyCode, uint32_t inModifiers) {}
+	virtual void KeyReleased(uint32_t inKeyValue, uint32_t inKeyCode, uint32_t inModifiers) {}
+	virtual void Modifiers(uint32_t inModifiers) {}
+
 	virtual bool IsFocus() const;
 	virtual void SetFocus();
 

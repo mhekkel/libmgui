@@ -102,12 +102,6 @@ class MView
 	virtual void RecalculateLayout();
 	virtual void ChildResized();
 
-	virtual void MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, uint32_t inModifiers);
-	virtual void MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers);
-	virtual void MouseExit();
-	virtual void MouseUp(int32_t inX, int32_t inY, uint32_t inModifiers);
-	virtual void MouseWheel(int32_t inX, int32_t inY, int32_t inDeltaX, int32_t inDeltaY, uint32_t inModifiers);
-
 	virtual void ShowContextMenu(int32_t inX, int32_t inY);
 
 	virtual void Enable();

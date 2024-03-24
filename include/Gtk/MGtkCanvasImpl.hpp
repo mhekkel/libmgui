@@ -47,11 +47,6 @@ class MGtkCanvasImpl : public MGtkControlImpl<MCanvas>
 
 	void CreateWidget() override;
 
-	// bool OnMouseDown(int32_t inX, int32_t inY, uint32_t inButtonNr, uint32_t inClickCount, uint32_t inModifiers) override;
-	// bool OnMouseMove(int32_t inX, int32_t inY, uint32_t inModifiers) override;
-	// bool OnMouseUp(int32_t inX, int32_t inY, uint32_t inModifiers) override;
-	// bool OnMouseExit() override;
-
 	void Invalidate() override;
 
 	// // MCanvasImpl overrides
@@ -59,10 +54,19 @@ class MGtkCanvasImpl : public MGtkControlImpl<MCanvas>
 	// virtual void StartDrag();
 
   protected:
-	// bool OnDrawEvent(cairo_t *inCairo) override;
-	// bool OnConfigureEvent(GdkEvent *inEvent) override;
 
-	// bool OnKeyPressEvent(GdkEvent *inEvent) override;
+	void OnGestureClickPressed(double inX, double inY, gint inClickCount) override;
+	void OnGestureClickReleased(double inX, double inY, gint inClickCount) override;
+	void OnGestureClickStopped() override;
+
+	void OnPointerEnter(double inX, double inY) override;
+	void OnPointerMotion(double inX, double inY) override;
+	void OnPointerLeave() override;
+
+	void OnKeyPressed(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers) override;
+	void OnKeyReleased(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers) override;
+	void OnKeyModifiers(GdkModifierType inModifiers) override;
+
 	void OnCommit(char *inText) override;
 
 	// bool OnScrollEvent(GdkEvent *inEvent) override;

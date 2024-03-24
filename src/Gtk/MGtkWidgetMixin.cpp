@@ -30,7 +30,7 @@
 
 using namespace std;
 
-MGtkWidgetMixin::MGtkWidgetMixin()
+MGtkWidgetMixin::MGtkWidgetMixin(MEventMask inEvents)
 	: mWidget(nullptr)
 	, mDestroy(this, &MGtkWidgetMixin::OnDestroy)
 	, mDirectionChanged(this, &MGtkWidgetMixin::OnDirectionChanged)
@@ -53,11 +53,27 @@ MGtkWidgetMixin::MGtkWidgetMixin()
 	, mPreeditStart(this, &MGtkWidgetMixin::OnPreeditStart)
 	, mRetrieveSurrounding(this, &MGtkWidgetMixin::OnRetrieveSurrounding)
 
+	, mFocusEnter(this, &MGtkWidgetMixin::OnFocusEnter)
+	, mFocusLeave(this, &MGtkWidgetMixin::OnFocusLeave)
+
+	, mGestureClickPressed(this, &MGtkWidgetMixin::OnGestureClickPressed)
+	, mGestureClickReleased(this, &MGtkWidgetMixin::OnGestureClickReleased)
+	, mGestureClickStopped(this, &MGtkWidgetMixin::OnGestureClickStopped)
+
+	, mPointerEnter(this, &MGtkWidgetMixin::OnPointerEnter)
+	, mPointerMotion(this, &MGtkWidgetMixin::OnPointerMotion)
+	, mPointerLeave(this, &MGtkWidgetMixin::OnPointerLeave)
+
+	, mKeyPressed(this, &MGtkWidgetMixin::OnKeyPressed)
+	, mKeyReleased(this, &MGtkWidgetMixin::OnKeyReleased)
+	, mKeyModifiers(this, &MGtkWidgetMixin::OnKeyModifiers)
+
 	, mRequestedWidth(-1)
 	, mRequestedHeight(-1)
 	, mAutoRepeat(false)
 	, mIMContext(nullptr)
 	, mNextKeyPressIsAutoRepeat(false)
+	, mEvents(inEvents)
 {
 }
 
@@ -87,6 +103,45 @@ void MGtkWidgetMixin::SetWidget(GtkWidget *inWidget)
 		mUnmap.Connect(inWidget, "unmap");
 		mUnrealize.Connect(inWidget, "unrealize");
 
+		if (mEvents & MEventMask::Focus)
+		{
+			auto cntrl = gtk_event_controller_focus_new();
+			gtk_widget_add_controller(GetWidget(), cntrl);
+
+			mFocusEnter.Connect(G_OBJECT(cntrl), "enter");
+			mFocusLeave.Connect(G_OBJECT(cntrl), "leave");
+		}
+
+		if (mEvents & MEventMask::GestureClick)
+		{
+			auto cntrl = gtk_gesture_click_new();
+			gtk_widget_add_controller(GetWidget(), GTK_EVENT_CONTROLLER(cntrl));
+
+			mGestureClickPressed.Connect(G_OBJECT(cntrl), "pressed");
+			mGestureClickReleased.Connect(G_OBJECT(cntrl), "released");
+			mGestureClickStopped.Connect(G_OBJECT(cntrl), "stopped");
+		}
+
+		if (mEvents & MEventMask::Pointer)
+		{
+			auto cntrl = gtk_event_controller_motion_new();
+			gtk_widget_add_controller(GetWidget(), cntrl);
+
+			mPointerEnter.Connect(G_OBJECT(cntrl), "enter");
+			mPointerMotion.Connect(G_OBJECT(cntrl), "motion");
+			mPointerLeave.Connect(G_OBJECT(cntrl), "leave");
+		}
+
+		if (mEvents & MEventMask::Key)
+		{
+			auto cntrl = gtk_event_controller_key_new();
+			gtk_widget_add_controller(GetWidget(), cntrl);
+
+			mKeyPressed.Connect(G_OBJECT(cntrl), "key-pressed");
+			mKeyReleased.Connect(G_OBJECT(cntrl), "key-released");
+			mKeyModifiers.Connect(G_OBJECT(cntrl), "modifiers");
+		}
+
 		if (mRequestedWidth >= 0 or mRequestedHeight >= 0)
 			gtk_widget_set_size_request(inWidget, mRequestedWidth, mRequestedHeight);
 	}
@@ -114,12 +169,10 @@ void MGtkWidgetMixin::OnDestroy()
 
 void MGtkWidgetMixin::OnDirectionChanged(GtkTextDirection previous_direction)
 {
-
 }
 
 void MGtkWidgetMixin::OnHide()
 {
-
 }
 
 bool MGtkWidgetMixin::OnKeynavFailed(GtkDirectionType direction)
@@ -129,7 +182,6 @@ bool MGtkWidgetMixin::OnKeynavFailed(GtkDirectionType direction)
 
 void MGtkWidgetMixin::OnMap()
 {
-
 }
 
 bool MGtkWidgetMixin::OnMnemonicActivate(gboolean group_cycling)
@@ -139,10 +191,9 @@ bool MGtkWidgetMixin::OnMnemonicActivate(gboolean group_cycling)
 
 void MGtkWidgetMixin::OnMoveFocus(GtkDirectionType direction)
 {
-
 }
 
-bool MGtkWidgetMixin::OnQueryTooltip(gint x, gint y, gboolean keyboard_mode, GtkTooltip* tooltip)
+bool MGtkWidgetMixin::OnQueryTooltip(gint x, gint y, gboolean keyboard_mode, GtkTooltip *tooltip)
 {
 	return false;
 }
@@ -155,7 +206,6 @@ void MGtkWidgetMixin::OnRealize()
 
 void MGtkWidgetMixin::OnShow()
 {
-
 }
 
 void MGtkWidgetMixin::OnStateFlagsChanged(GtkStateFlags flags)
@@ -181,12 +231,10 @@ void MGtkWidgetMixin::OnStateFlagsChanged(GtkStateFlags flags)
 
 void MGtkWidgetMixin::OnUnmap()
 {
-
 }
 
 void MGtkWidgetMixin::OnUnrealize()
 {
-
 }
 
 void MGtkWidgetMixin::RequestSize(int32_t inWidth, int32_t inHeight)
