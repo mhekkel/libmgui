@@ -280,7 +280,7 @@ class MRadiobuttonImpl : public MControlImpl<MRadiobutton>
 	virtual bool IsChecked() const = 0;
 	virtual void SetChecked(bool inChecked) = 0;
 
-	virtual void SetGroup(const std::list<MRadiobutton *> &inButtons) = 0;
+	virtual void SetGroup(MRadiobuttonImpl *inButton) = 0;
 
 	static MRadiobuttonImpl *
 	Create(MRadiobutton *inRadiobutton, const std::string &inTitle);

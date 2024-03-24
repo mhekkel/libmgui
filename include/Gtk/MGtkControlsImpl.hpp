@@ -272,6 +272,9 @@ class MGtkCheckboxImpl : public MGtkControlImpl<MCheckbox>
 
   private:
 	bool mChecked;
+
+	MSlot<void()> mToggled;
+	void Toggled();
 };
 
 class MGtkRadiobuttonImpl : public MGtkControlImpl<MRadiobutton>
@@ -281,13 +284,21 @@ class MGtkRadiobuttonImpl : public MGtkControlImpl<MRadiobutton>
 
 	void CreateWidget() override;
 
+	void SetGroup(MRadiobuttonImpl *inGroup) override
+	{
+		mGroup = static_cast<MGtkRadiobuttonImpl *>(inGroup);
+	}
+
 	bool IsChecked() const override;
 	void SetChecked(bool inChecked) override;
 
-	void SetGroup(const std::list<MRadiobutton *> &inButtons) override;
-
   private:
-	std::list<MRadiobutton *> mGroup;
+	bool mChecked;
+
+	MSlot<void()> mToggled;
+	void Toggled();
+
+	MGtkRadiobuttonImpl *mGroup = nullptr;
 };
 
 class MGtkColorSwatchImpl : public MGtkControlImpl<MColorSwatch>

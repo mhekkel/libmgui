@@ -1409,7 +1409,7 @@ void MWinRadiobuttonImpl::SetChecked(bool inChecked)
 	::UpdateWindow(GetHandle());
 }
 
-void MWinRadiobuttonImpl::SetGroup(const list<MRadiobutton*>& inButtons)
+void MWinRadiobuttonImpl::SetGroup(MRadiobutton *inButtons)
 {
 	mGroup = inButtons;
 }

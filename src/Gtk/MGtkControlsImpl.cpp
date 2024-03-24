@@ -687,6 +687,7 @@ MSeparatorImpl *MSeparatorImpl::Create(MSeparator *inSeparator)
 MGtkCheckboxImpl::MGtkCheckboxImpl(MCheckbox *inControl, const std::string &inText)
 	: MGtkControlImpl(inControl, inText)
 	, mChecked(false)
+	, mToggled(this, &MGtkCheckboxImpl::Toggled)
 {
 }
 
@@ -694,8 +695,12 @@ void MGtkCheckboxImpl::CreateWidget()
 {
 	SetWidget(gtk_check_button_new_with_label(mLabel.c_str()));
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(GetWidget()), mChecked);
+	mToggled.Connect(GetWidget(), "toggled");
+}
 
-	mChanged.Connect(GetWidget(), "toggled");
+void MGtkCheckboxImpl::Toggled()
+{
+	mControl->eValueChanged(mControl->GetID(), IsChecked());
 }
 
 bool MGtkCheckboxImpl::IsChecked() const
@@ -719,23 +724,28 @@ MCheckboxImpl *MCheckboxImpl::Create(MCheckbox *inCheckbox, const std::string &i
 
 MGtkRadiobuttonImpl::MGtkRadiobuttonImpl(MRadiobutton *inControl, const std::string &inText)
 	: MGtkControlImpl(inControl, inText)
+	, mChecked(false)
+	, mToggled(this, &MGtkRadiobuttonImpl::Toggled)
 {
 }
 
 void MGtkRadiobuttonImpl::CreateWidget()
 {
-	auto wdgt = gtk_check_button_new_with_label(mLabel.c_str());
+	SetWidget(gtk_check_button_new_with_label(mLabel.c_str()));
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(GetWidget()), mChecked);
 
-	if (not (mGroup.empty() or mGroup.front() == mControl))
+	if (mGroup != nullptr)
 	{
-		MGtkRadiobuttonImpl *first = dynamic_cast<MGtkRadiobuttonImpl *>(mGroup.front()->GetImpl());
-		gtk_check_button_set_group(GTK_CHECK_BUTTON(wdgt),
-			GTK_CHECK_BUTTON(first->GetWidget()));
+		gtk_check_button_set_group(GTK_CHECK_BUTTON(GetWidget()),
+			GTK_CHECK_BUTTON(mGroup->GetWidget()));
 	}
 
-	mChanged.Connect(wdgt, "activate");
-	
-	SetWidget(wdgt);
+	mToggled.Connect(GetWidget(), "toggled");
+}
+
+void MGtkRadiobuttonImpl::Toggled()
+{
+	mControl->eValueChanged(mControl->GetID(), IsChecked());
 }
 
 bool MGtkRadiobuttonImpl::IsChecked() const
@@ -745,32 +755,12 @@ bool MGtkRadiobuttonImpl::IsChecked() const
 
 void MGtkRadiobuttonImpl::SetChecked(bool inChecked)
 {
-	gtk_check_button_set_active(GTK_CHECK_BUTTON(GetWidget()), inChecked);
+	mChecked = inChecked;
+	if (GetWidget())
+		gtk_check_button_set_active(GTK_CHECK_BUTTON(GetWidget()), mChecked);
 }
 
-void MGtkRadiobuttonImpl::SetGroup(const std::list<MRadiobutton *> &inButtons)
-{
-	mGroup = inButtons;
-}
 
-// bool MGtkRadiobuttonImpl::WMCommand(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)
-//{
-//	bool result = false;
-//
-//	if (inUMsg == BN_CLICKED)
-//	{
-//		bool checked = not IsChecked();
-//
-//		SetChecked(checked);
-//		mControl->eValueChanged(mControl->GetID(), checked);
-//
-//		outResult = 1;
-//		result = true;
-//	}
-//
-//	return result;
-// }
-//
 MRadiobuttonImpl *MRadiobuttonImpl::Create(MRadiobutton *inRadiobutton, const std::string &inText)
 {
 	return new MGtkRadiobuttonImpl(inRadiobutton, inText);

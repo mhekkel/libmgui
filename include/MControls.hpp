@@ -367,7 +367,7 @@ class MRadiobutton : public MControl<MRadiobuttonImpl>
 	bool IsChecked() const;
 	void SetChecked(bool inChecked);
 
-	void SetGroup(const std::list<MRadiobutton *> &inButtons);
+	void SetGroup(MRadiobutton *inButton);
 
 	MEventOut<void(const std::string &, bool)> eValueChanged;
 };

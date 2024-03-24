@@ -295,7 +295,7 @@ class MWinRadiobuttonImpl : public MWinControlImpl<MRadiobutton>
 	virtual bool IsChecked() const;
 	virtual void SetChecked(bool inChecked);
 
-	virtual void SetGroup(const std::list<MRadiobutton *> &inButtons);
+	virtual void SetGroup(MRadiobutton *inButton);
 
 	virtual void CreateParams(DWORD &outStyle, DWORD &outExStyle,
 		std::wstring &outClassName, HMENU &outMenu);

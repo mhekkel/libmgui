@@ -240,7 +240,7 @@ void MWinDialogImpl::Finish()
 	content->SetBindings(true, true, true, true);
 
 	for (MRadiobutton *radiobutton : mRadioGroup)
-		radiobutton->SetGroup(mRadioGroup);
+		radiobutton->SetGroup(mRadioGroup.front());
 
 	RECT cr;
 	::GetClientRect(GetHandle(), &cr);

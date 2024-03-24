@@ -287,9 +287,9 @@ void MRadiobutton::SetChecked(bool inChecked)
 	mImpl->SetChecked(inChecked);
 }
 
-void MRadiobutton::SetGroup(const std::list<MRadiobutton*>& inButtons)
+void MRadiobutton::SetGroup(MRadiobutton *inButton)
 {
-	mImpl->SetGroup(inButtons);
+	mImpl->SetGroup(inButton->GetImpl());
 }
 
 // --------------------------------------------------------------------
