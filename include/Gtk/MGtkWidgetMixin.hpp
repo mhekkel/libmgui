@@ -400,7 +400,7 @@ class MGtkWidgetMixin
 	virtual void OnPointerMotion(double inX, double inY) {}
 	virtual void OnPointerLeave() {}
 
-	virtual void OnKeyPressed(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers) {}
+	virtual bool OnKeyPressed(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers) { return false; }
 	virtual void OnKeyReleased(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers) {}
 	virtual void OnKeyModifiers(GdkModifierType inModifiers) {}
 
@@ -415,7 +415,7 @@ class MGtkWidgetMixin
 	MSlot<void(double, double)> mPointerMotion;
 	MSlot<void()> mPointerLeave;
 
-	MSlot<void(guint, guint, GdkModifierType)> mKeyPressed;
+	MSlot<bool(guint, guint, GdkModifierType)> mKeyPressed;
 	MSlot<void(guint, guint, GdkModifierType)> mKeyReleased;
 	MSlot<void(GdkModifierType)> mKeyModifiers;
 

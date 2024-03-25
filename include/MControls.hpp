@@ -94,8 +94,8 @@ class MControl : public MControlBase
 	virtual void PointerMotion(int32_t inX, int32_t inY) {}
 	virtual void PointerLeave() {}
 
-	virtual void KeyPressed(uint32_t inKeyValue, uint32_t inKeyCode, uint32_t inModifiers) {}
-	virtual void KeyReleased(uint32_t inKeyValue, uint32_t inKeyCode, uint32_t inModifiers) {}
+	virtual void KeyPressed(uint32_t inKeyValue, uint32_t inModifiers) {}
+	virtual void KeyReleased(uint32_t inKeyValue, uint32_t inModifiers) {}
 	virtual void Modifiers(uint32_t inModifiers) {}
 
 	virtual bool IsFocus() const;

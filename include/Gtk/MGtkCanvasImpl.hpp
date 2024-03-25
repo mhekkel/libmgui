@@ -63,7 +63,7 @@ class MGtkCanvasImpl : public MGtkControlImpl<MCanvas>
 	void OnPointerMotion(double inX, double inY) override;
 	void OnPointerLeave() override;
 
-	void OnKeyPressed(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers) override;
+	bool OnKeyPressed(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers) override;
 	void OnKeyReleased(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers) override;
 	void OnKeyModifiers(GdkModifierType inModifiers) override;
 

@@ -159,7 +159,6 @@ MPrimary &MPrimary::Instance()
 	return sInstance;
 }
 
-#warning FIXME
 MPrimary::MPrimary()
 	: mImpl(new MPrimaryImpl)
 {

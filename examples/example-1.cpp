@@ -14,11 +14,11 @@ class ExampleWindow : public MWindow
   public:
 	ExampleWindow()
 		: MWindow("Example", MRect{0, 0, 400, 400}, kMPostionDefault | kMShowMenubar)
-		, cClose(this, "close", &ExampleWindow::Close)
-		, cCut(this, "cut", &ExampleWindow::Cut)
-		, cCopy(this, "copy", &ExampleWindow::Copy)
-		, cPaste(this, "paste", &ExampleWindow::Paste)
-		, cSelectAll(this, "select-all", &ExampleWindow::SelectAll)
+		, cClose(this, "close", &ExampleWindow::Close, 'w', kControlKey | kShiftKey)
+		, cCut(this, "cut", &ExampleWindow::Cut, 'x', kControlKey | kShiftKey)
+		, cCopy(this, "copy", &ExampleWindow::Copy, 'c', kControlKey | kShiftKey)
+		, cPaste(this, "paste", &ExampleWindow::Paste, 'v', kControlKey | kShiftKey)
+		, cSelectAll(this, "select-all", &ExampleWindow::SelectAll, 'a', kControlKey | kShiftKey)
 		, eClicked(this, &ExampleWindow::Clicked)
 		, eChanged(this, &ExampleWindow::Changed)
 		, eColour(this, &ExampleWindow::Colour)
@@ -32,7 +32,7 @@ class ExampleWindow : public MWindow
 		AddRoute(btn->eClicked, eClicked);
 		AddChild(btn);
 
-		MColorSwatch *cbtn = new MColorSwatch("kleur", MRect{0, 0, 100, 20}, kBlack);
+		MColorSwatch *cbtn = new MColorSwatch("kleur", MRect{0, 0, 100, 20}, MColor("ffa348"));
 		cbtn->SetLayout(false, MRect{4, 4, 4, 4});
 		AddChild(cbtn);
 		AddRoute(cbtn->eColorChanged, eColour);
@@ -100,8 +100,8 @@ class ExampleApp : public MApplication
   public:
 	ExampleApp(MApplicationImpl *impl)
 		: MApplication(impl)
-		, cNew(this, "new", &ExampleApp::DoNew)
-		, cQuit(this, "quit", &ExampleApp::Quit)
+		, cNew(this, "new", &ExampleApp::DoNew, 'n', kControlKey | kShiftKey)
+		, cQuit(this, "quit", &ExampleApp::Quit, 'q', kControlKey | kShiftKey)
 	{
 	}
 

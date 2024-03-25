@@ -238,7 +238,16 @@ class MGtkEdittextImpl : public MGtkControlImpl<MEdittext>
 
 	void SetPasswordChar(uint32_t inUnicode) override;
 
+	bool OnKeyPressed(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers) override;
+
   protected:
+
+	MSlot<void(guint, gchar*, guint)> mTextInserted;
+	MSlot<void(guint, guint)> mTextDeleted;
+
+	void TextInserted(guint, gchar*, guint);
+	void TextDeleted(guint, guint);
+
 	GtkEntryBuffer *mBuffer;
 	uint32_t mFlags;
 };

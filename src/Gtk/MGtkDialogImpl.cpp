@@ -28,7 +28,6 @@
 #include "Gtk/MGtkControlsImpl.hpp"
 #include "Gtk/MGtkWindowImpl.hpp"
 
-#include "MAcceleratorTable.hpp"
 #include "MCanvas.hpp"
 #include "MControls.hpp"
 #include "MDevice.hpp"

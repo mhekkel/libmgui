@@ -81,6 +81,19 @@ class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin, public MGtkCo
 		return G_OBJECT(GetWidget());
 	}
 
+	void AddShortcut(GtkShortcut *inShortcut)
+	{
+		if (mShortcutController == nullptr)
+		{
+			mShortcutController = gtk_shortcut_controller_new();
+			gtk_widget_add_controller(GetWidget(), mShortcutController);
+			
+		}
+		
+		gtk_shortcut_controller_add_shortcut(
+			GTK_SHORTCUT_CONTROLLER(mShortcutController), inShortcut);
+	}
+
   protected:
 	// bool DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, const std::string &inText) override;
 
@@ -88,9 +101,13 @@ class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin, public MGtkCo
 	void OnMap() override;
 	void OnUnmap() override;
 
+	MSlot<bool()> mCloseRequest;
+	bool OnCloseRequest();
+
 	GtkWidget *mMainVBox;
 	MGtkWidgetMixin *mFocus;
 	bool mConfigured;
-
+	GtkEventController *mShortcutController = nullptr;
+	
 	static std::list<MWindow *> sRecycle;
 };

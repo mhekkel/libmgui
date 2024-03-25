@@ -7,7 +7,6 @@
 #include "Gtk/MGtkWidgetMixin.hpp"
 #include "Gtk/MGtkWindowImpl.hpp"
 
-#include "MAcceleratorTable.hpp"
 #include "MApplication.hpp"
 #include "MCommand.hpp"
 #include "MError.hpp"
@@ -30,18 +29,75 @@ namespace xml = zeep::xml;
 
 // --------------------------------------------------------------------
 
+struct MAccel
+{
+	MAccel(char32_t inAcceleratorKeyCode, uint32_t inAcceleratorModifiers)
+	{
+		std::ostringstream os;
+
+		if (inAcceleratorKeyCode != 0)
+		{
+			if (inAcceleratorModifiers & kControlKey)
+				os << "<Control>";
+			if (inAcceleratorModifiers & kShiftKey)
+				os << "<Shift>";
+			if (inAcceleratorModifiers & kOptionKey)
+				os << "<Alt>";
+			os << char(inAcceleratorKeyCode);
+		}
+
+		mStr = os.str();
+		mAccel[0] = mStr.c_str();
+	}
+
+	std::string mStr;
+	const char *mAccel[2]{};
+};
+
 template <>
-MCommandImpl *MCommand<void()>::RegisterCommand(MWindow *win, const std::string &action)
+MCommandImpl *MCommand<void()>::RegisterCommand(MWindow *win, const std::string &inAction,
+	char32_t inAcceleratorKeyCode, uint32_t inAcceleratorModifiers)
 {
 	auto impl = static_cast<MGtkWindowImpl *>(win->GetImpl());
-	return impl->RegisterAction(action, *this);
+	auto result = impl->RegisterAction(inAction, *this);
+
+	if (inAcceleratorKeyCode)
+	{
+		auto action = gtk_named_action_new(("win." + inAction).c_str());
+		auto trigger = gtk_keyval_trigger_new(inAcceleratorKeyCode,
+			GdkModifierType((inAcceleratorModifiers & kControlKey ? GDK_CONTROL_MASK : 0) |
+			(inAcceleratorModifiers & kShiftKey ? GDK_SHIFT_MASK : 0) |
+			(inAcceleratorModifiers & kOptionKey ? GDK_ALT_MASK : 0)));
+		auto shortcut = gtk_shortcut_new(trigger, action);
+		impl->AddShortcut(shortcut);
+		// g_object_unref(shortcut);
+
+		// gtk_widget_class_add_binding_action(GTK_WIDGET_CLASS(impl->GetWidget()),
+		// 	inAcceleratorKeyCode,
+		// 	GdkModifierType((inAcceleratorModifiers & kControlKey ? GDK_CONTROL_MASK : 0) |
+		// 					(inAcceleratorModifiers & kShiftKey ? GDK_SHIFT_MASK : 0) |
+		// 					(inAcceleratorModifiers & kOptionKey ? GDK_ALT_MASK : 0)),
+		// 	("win." + inAction).c_str(), nullptr);
+	}
+
+	return result;
 }
 
 template <>
-MCommandImpl *MCommand<void()>::RegisterCommand(MApplication *app, const std::string &action)
+MCommandImpl *MCommand<void()>::RegisterCommand(MApplication *app, const std::string &action,
+	char32_t inAcceleratorKeyCode, uint32_t inAcceleratorModifiers)
 {
 	auto impl = static_cast<MGtkApplicationImpl *>(app->GetImpl());
-	return impl->RegisterAction(action, *this);
+
+	auto result = impl->RegisterAction(action, *this);
+
+	if (inAcceleratorKeyCode != 0)
+	{
+		MAccel accel(inAcceleratorKeyCode, inAcceleratorModifiers);
+		gtk_application_set_accels_for_action(impl->GetGtkApp(), ("app." + action).c_str(), accel.mAccel);
+	}
+
+	return result;
 }
 
 // --------------------------------------------------------------------
@@ -112,12 +168,11 @@ void MGtkMenuImpl::AppendRadioItems(const std::vector<std::string> &inLabels, co
 void MGtkMenuImpl::AppendSubmenu(MMenu *inMenu, const std::string &inSection)
 {
 	g_menu_append_submenu(mGMenu, inMenu->GetLabel().c_str(),
-		G_MENU_MODEL(static_cast<MGtkMenuImpl* >(inMenu->impl())->mGMenu));
+		G_MENU_MODEL(static_cast<MGtkMenuImpl *>(inMenu->impl())->mGMenu));
 }
 
 void MGtkMenuImpl::RemoveItemsFromSection(const std::string &inSection)
 {
-
 }
 
 MMenu *MGtkMenuImpl::GetSubmenu(uint32_t inIndex) const
@@ -127,12 +182,10 @@ MMenu *MGtkMenuImpl::GetSubmenu(uint32_t inIndex) const
 
 void MGtkMenuImpl::Popup(MWindow *inHandler, int32_t inX, int32_t inY, bool inBottomMenu)
 {
-
 }
 
 void MGtkMenuImpl::AddToWindow(MWindowImpl *inWindow)
 {
-
 }
 
 // --------------------------------------------------------------------

@@ -26,21 +26,87 @@
 
 #pragma once
 
-#include "MApplicationImpl.hpp"
+#include "MMenu.hpp"
 #include "MP2PEvents.hpp"
 #include "MTypes.hpp"
-#include "MMenu.hpp"
+#include "MWindow.hpp"
 
 #include <chrono>
+#include <condition_variable>
+#include <deque>
 #include <filesystem>
 #include <list>
+#include <mutex>
 #include <vector>
+
+// --------------------------------------------------------------------
 
 extern const char kAppName[], kVersionString[];
 
 extern std::filesystem::path gExecutablePath;
 
-class MWindow;
+// --------------------------------------------------------------------
+
+class MAsyncHandlerBase
+{
+  public:
+	MAsyncHandlerBase() {}
+	MAsyncHandlerBase(const MAsyncHandlerBase &) = delete;
+	MAsyncHandlerBase &operator=(const MAsyncHandlerBase &) = delete;
+
+	virtual ~MAsyncHandlerBase() {}
+
+	void execute();
+
+  protected:
+	virtual void execute_self() = 0;
+};
+
+template <typename Handler>
+class MAsyncHandler : public MAsyncHandlerBase
+{
+  public:
+	MAsyncHandler(Handler &&handler)
+		: mHandler(std::move(handler))
+	{
+	}
+
+	virtual void execute_self() override
+	{
+		mHandler();
+	}
+
+	Handler mHandler;
+};
+
+class MApplicationImpl
+{
+  public:
+	MApplicationImpl() {}
+	virtual ~MApplicationImpl() {}
+
+	virtual void Initialise() = 0;
+	virtual int RunEventLoop() = 0;
+	virtual void Quit() = 0;
+
+	virtual void InhibitQuit(bool inInhibit, const std::string &inReason, MWindowImpl *inImpl) = 0;
+
+	// virtual void RegisterAccelerator(const std::string &inAction, char32_t inKeyCode, uint32_t inModifiers) = 0;
+
+	template <typename Handler>
+	void execute(Handler &&h)
+	{
+		std::unique_lock lock(mMutex);
+
+		mHandlerQueue.push_back(new MAsyncHandler{ std::move(h) });
+
+		mCV.notify_one();
+	}
+
+	std::deque<MAsyncHandlerBase *> mHandlerQueue;
+	std::mutex mMutex;
+	std::condition_variable mCV;
+};
 
 // ===========================================================================
 
@@ -78,10 +144,20 @@ class MApplication
 	bool IsQuitting() const { return mQuitPending; }
 	void CancelQuit() { mQuitPending = false; }
 
+	void InhibitQuit(bool inInhibit, const std::string &inReason, MWindow *inWindow = nullptr)
+	{
+		mImpl->InhibitQuit(inInhibit, inReason, inWindow ? inWindow->GetImpl() : nullptr);
+	}
+
 	MApplicationImpl *GetImpl() const { return mImpl; }
 
   protected:
 	MApplication(MApplicationImpl *inImpl);
+
+	// void RegisterAccelerator(const std::string &inAction, char32_t inKeyCode, uint32_t inModifiers)
+	// {
+	// 	mImpl->RegisterAccelerator(inAction, inKeyCode, inModifiers);
+	// }
 
 	typedef std::list<MWindow *> MWindowList;
 

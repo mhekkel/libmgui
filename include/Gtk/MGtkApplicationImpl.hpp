@@ -26,7 +26,7 @@
 
 #pragma once
 
-#include "MApplicationImpl.hpp"
+#include "MApplication.hpp"
 #include "MGtkCommandEmitter.hpp"
 #include "MGtkWidgetMixin.hpp"
 
@@ -54,6 +54,8 @@ class MGtkApplicationImpl : public MApplicationImpl, public MGtkCommandEmitter
 		return G_OBJECT(mGtkApplication);
 	}
 
+	void InhibitQuit(bool inInhibit, const std::string &inReason, MWindowImpl *inImpl) override;
+
   private:
 	static gboolean Timeout(gpointer inData);
 	static gboolean HandleAsyncCallback(gpointer inData);
@@ -69,10 +71,14 @@ class MGtkApplicationImpl : public MApplicationImpl, public MGtkCommandEmitter
 	MSlot<void()> mActivate;
 	void Activate();
 
+	MSlot<void()> mQueryEnd;
+	void OnQueryEnd();
+
 	MSlot<int(GApplicationCommandLine*)> mCommandLine;
 	int CommandLine(GApplicationCommandLine* inCommandLine);
 
 	guint mPulseID = 0;
+	guint mInhibitCookie = 0;
 	std::thread mAsyncTaskThread;
 	GtkApplication *mGtkApplication = nullptr;
 	std::function<void()> mActivateCB;

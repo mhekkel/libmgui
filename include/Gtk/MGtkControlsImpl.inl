@@ -28,8 +28,6 @@
 
 #include "Gtk/MGtkWindowImpl.hpp"
 
-#include "MAcceleratorTable.hpp"
-
 template <class CONTROL>
 MGtkControlImpl<CONTROL>::MGtkControlImpl(CONTROL *inControl, const std::string &inLabel)
 	: CONTROL::MImpl(inControl)

@@ -24,11 +24,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "MAcceleratorTable.hpp"
 #include "MAlerts.hpp"
 #include "MApplication.hpp"
 #include "MDialog.hpp"
 #include "MError.hpp"
+#include "MStrings.hpp"
 #include "MUtils.hpp"
 
 #include "Gtk/MGtkApplicationImpl.hpp"
@@ -46,12 +46,19 @@ MGtkApplicationImpl::MGtkApplicationImpl(std::function<void()> inActivateCB)
 	, mCommandLine(this, &MGtkApplicationImpl::CommandLine)
 	, mGtkApplication(gtk_application_new("com.hekkelman.mgui-dummy-app-id", G_APPLICATION_HANDLES_COMMAND_LINE))
 	, mActivateCB(inActivateCB)
+	, mQueryEnd(this, &MGtkApplicationImpl::OnQueryEnd)
 {
 	sInstance = this;
 
 	mStartup.Connect(G_OBJECT(mGtkApplication), "startup");
 	mActivate.Connect(G_OBJECT(mGtkApplication), "activate");
 	mCommandLine.Connect(G_OBJECT(mGtkApplication), "command-line");
+	mQueryEnd.Connect(G_OBJECT(mGtkApplication), "query-end");
+
+	GValue gv{ G_TYPE_BOOLEAN };
+	g_value_set_boolean(&gv, true);
+	g_object_set_property(G_OBJECT(mGtkApplication), "register-session", &gv);
+	g_value_unset(&gv);
 }
 
 void MGtkApplicationImpl::Startup()
@@ -150,6 +157,32 @@ MGtkApplicationImpl::~MGtkApplicationImpl()
 int MGtkApplicationImpl::RunEventLoop()
 {
 	return g_application_run(G_APPLICATION(mGtkApplication), 0, nullptr);
+}
+
+void MGtkApplicationImpl::OnQueryEnd()
+{
+	if (not gApp->AllowQuit(true))
+		InhibitQuit(true, _("There are open windows"), nullptr);
+}
+
+void MGtkApplicationImpl::InhibitQuit(bool inInhibit, const std::string &inReason, MWindowImpl *inImpl)
+{
+	if (inInhibit)
+	{
+		if (not mInhibitCookie)
+		{
+			if (auto w = MWindow::GetFirstWindow(); inImpl == nullptr and w != nullptr)
+				inImpl = w->GetImpl();
+
+			GtkWindow *gw = inImpl ? GTK_WINDOW(static_cast<MGtkWindowImpl *>(inImpl)->GetWidget()) : nullptr;
+			mInhibitCookie = gtk_application_inhibit(mGtkApplication, gw, GTK_APPLICATION_INHIBIT_LOGOUT, inReason.c_str());
+		}
+	}
+	else
+	{
+		if (mInhibitCookie)
+			gtk_application_uninhibit(mGtkApplication, mInhibitCookie);
+	}
 }
 
 void MGtkApplicationImpl::Quit()

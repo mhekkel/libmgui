@@ -28,7 +28,6 @@
 #include "Gtk/MGtkApplicationImpl.hpp"
 
 #include "MApplication.hpp"
-#include "MCommands.hpp"
 #include "MError.hpp"
 #include "MMenu.hpp"
 #include "MWindow.hpp"
@@ -55,6 +54,7 @@ MGtkWindowImpl::MGtkWindowImpl(MWindowFlags inFlags, MWindow *inWindow)
 	// , mChildFocus(this, &MGtkWindowImpl::ChildFocus)
 	// , mMapEvent(this, &MGtkWindowImpl::OnMapEvent)
 	//	, mChanged(this, &MGtkWindowImpl::Changed)
+	, mCloseRequest(this, &MGtkWindowImpl::OnCloseRequest)
 	, mMainVBox(nullptr)
 	, mFocus(this)
 	, mConfigured(false)
@@ -74,6 +74,8 @@ void MGtkWindowImpl::Create(MRect inBounds, const std::string &inTitle)
 	gtk_window_set_title(GTK_WINDOW(widget), inTitle.c_str());
 
 	SetWidget(widget);
+
+	mCloseRequest.Connect(GetWidget(), "close-request");
 
 	// GList *iconList = nullptr;
 
@@ -181,6 +183,11 @@ void MGtkWindowImpl::SetTransientFor(MWindow *inWindow)
 	gtk_window_set_transient_for(
 		GTK_WINDOW(GetWidget()),
 		GTK_WINDOW(static_cast<MGtkWindowImpl *>(inWindow->GetImpl())->GetWidget()));
+}
+
+bool MGtkWindowImpl::OnCloseRequest()
+{
+	return mWindow->AllowClose(false);
 }
 
 void MGtkWindowImpl::Show()

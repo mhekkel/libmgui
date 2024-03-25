@@ -93,18 +93,15 @@ list(APPEND headers
 	include/Gtk/MPrimary.hpp
 	include/Gtk/MGtkApplicationImpl.hpp
 
-	include/MAcceleratorTable.hpp
 	include/MAlerts.hpp
 	include/MAnimation.hpp
 	include/MApplication.hpp
-	include/MApplicationImpl.hpp
 	include/MCanvas.hpp
 	include/MCanvasImpl.hpp
 	include/MClipboard.hpp
 	include/MClipboardImpl.hpp
 	include/MColor.hpp
 	include/MColorPicker.hpp
-	include/MCommands.hpp
 	include/MControls.hpp
 	include/MControlsImpl.hpp
 	include/MDevice.hpp
@@ -143,10 +140,8 @@ list(APPEND sources
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkDialogImpl.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkWidgetMixin.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkApplicationImpl.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkMain.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkWindowImpl.cpp
 
-	${CMAKE_CURRENT_SOURCE_DIR}/src/MAcceleratorTable.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MAlerts.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MAnimation.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MApplication.cpp

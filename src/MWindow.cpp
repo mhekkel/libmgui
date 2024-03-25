@@ -26,7 +26,6 @@
 
 #include "MWindow.hpp"
 #include "MApplication.hpp"
-#include "MCommands.hpp"
 #include "MError.hpp"
 #include "MMenu.hpp"
 #include "MUtils.hpp"

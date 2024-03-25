@@ -576,6 +576,8 @@ MPopupImpl *MPopupImpl::Create(MPopup *inPopup)
 MGtkEdittextImpl::MGtkEdittextImpl(MEdittext *inEdittext, uint32_t inFlags)
 	: MGtkControlImpl(inEdittext, "")
 	, mFlags(inFlags)
+	, mTextInserted(this, &MGtkEdittextImpl::TextInserted)
+	, mTextDeleted(this, &MGtkEdittextImpl::TextDeleted)
 {
 }
 
@@ -583,9 +585,13 @@ void MGtkEdittextImpl::CreateWidget()
 {
 	mBuffer = gtk_entry_buffer_new(nullptr, 0);
 
+	mTextInserted.Connect(G_OBJECT(mBuffer), "inserted-text");
+	mTextDeleted.Connect(G_OBJECT(mBuffer), "deleted-text");
+
 	auto entry = gtk_entry_new();
 	gtk_entry_set_buffer(GTK_ENTRY(entry), mBuffer);
 
+	SetEventMask(MEventMask::Key);
 	SetWidget(entry);
 
 	gtk_widget_set_focus_on_click(entry, true);
@@ -617,21 +623,28 @@ void MGtkEdittextImpl::SetPasswordChar(uint32_t inUnicode)
 		THROW(("item is not an entry"));
 }
 
-// bool MGtkEdittextImpl::OnKeyPressEvent(GdkEvent *inEvent)
-// {
+bool MGtkEdittextImpl::OnKeyPressed(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers)
+{
+	const uint32_t
+		kValidModifiersMask = kControlKey | kShiftKey | kOptionKey;
 
-// #warning FIXME
-// 	// const uint32_t kValidModifiersMask = gtk_accelerator_get_default_mod_mask();
-// 	// uint32_t modifiers = MapModifier(gdk_event_get_modifier_state(inEvent) & kValidModifiersMask);
-// 	// uint32_t keyValue = MapKeyCode(gdk_key_event_get_keyval(inEvent));
+	uint32_t modifiers = MapModifier(inModifiers & kValidModifiersMask);
+	uint32_t keyValue = MapKeyCode(inKeyValue);
 
-// 	// // bool result = mControl->HandleKeyDown(keyValue, modifiers, false);
+	mControl->eKeyDown(keyValue, modifiers);
 
-// 	// if (not result)
-// 	// 	result = MGtkControlImpl::OnKeyPressEvent(inEvent);
+	return false;
+}
 
-// 	// return result;
-// }
+void MGtkEdittextImpl::TextInserted(guint, gchar*, guint)
+{
+	mControl->eValueChanged(mControl->GetID(), GetText());
+}
+
+void MGtkEdittextImpl::TextDeleted(guint, guint)
+{
+	mControl->eValueChanged(mControl->GetID(), GetText());
+}
 
 MEdittextImpl *MEdittextImpl::Create(MEdittext *inEdittext, uint32_t inFlags)
 {
@@ -734,7 +747,7 @@ void MGtkRadiobuttonImpl::CreateWidget()
 	SetWidget(gtk_check_button_new_with_label(mLabel.c_str()));
 	gtk_check_button_set_active(GTK_CHECK_BUTTON(GetWidget()), mChecked);
 
-	if (mGroup != nullptr)
+	if (mGroup != nullptr and mGroup != this)
 	{
 		gtk_check_button_set_group(GTK_CHECK_BUTTON(GetWidget()),
 			GTK_CHECK_BUTTON(mGroup->GetWidget()));

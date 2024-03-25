@@ -63,8 +63,6 @@ void MGtkCanvasImpl::CreateWidget()
 	SetWidget(gtk_drawing_area_new());
 
 	gtk_widget_set_can_focus(GetWidget(), true);
-
-	// g_object_set_data(G_OBJECT(GetWidget()), "m-canvas", this);
 	gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA(GetWidget()), &MGtkCanvasImpl::Draw, this, nullptr);
 }
 
@@ -97,8 +95,9 @@ void MGtkCanvasImpl::OnPointerLeave()
 	mControl->PointerLeave();
 }
 
-void MGtkCanvasImpl::OnKeyPressed(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers)
+bool MGtkCanvasImpl::OnKeyPressed(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers)
 {
+	return false;
 }
 
 void MGtkCanvasImpl::OnKeyReleased(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers)

@@ -52,7 +52,10 @@ concept ImplementedSignature = (
 
 struct MCommandImpl
 {
-	virtual ~MCommandImpl() = default;
+	virtual ~MCommandImpl()
+	{
+		
+	}
 	virtual void SetEnabled(bool inEnabled) = 0;
 };
 
@@ -64,9 +67,10 @@ class MCommand<R(Args...)>
 
   public:
 	template <CommandEmitter C>
-	MCommand(C *owner, const std::string &action, R (C::*callback)(Args...))
+	MCommand(C *owner, const std::string &action, R (C::*callback)(Args...)
+		, char32_t inAcceleratorKeyCode = 0, uint32_t inAcceleratorModifiers = 0)
 		: mHandler(new MCommandHandler<C>(owner, callback))
-		, mImpl(RegisterCommand(owner, action))
+		, mImpl(RegisterCommand(owner, action, inAcceleratorKeyCode, inAcceleratorModifiers))
 	{
 	}
 
@@ -82,8 +86,10 @@ class MCommand<R(Args...)>
 
   private:
 
-	MCommandImpl *RegisterCommand(MApplication *app, const std::string &action);
-	MCommandImpl *RegisterCommand(MWindow *win, const std::string &action);
+	MCommandImpl *RegisterCommand(MApplication *app, const std::string &action,
+		char32_t inAcceleratorKeyCode, uint32_t inAcceleratorModifiers);
+	MCommandImpl *RegisterCommand(MWindow *win, const std::string &action,
+		char32_t inAcceleratorKeyCode, uint32_t inAcceleratorModifiers);
 
 	struct MCommandHandlerBase
 	{
@@ -113,4 +119,5 @@ class MCommand<R(Args...)>
 
 	std::unique_ptr<MCommandHandlerBase> mHandler;
 	std::unique_ptr<MCommandImpl> mImpl;
+	std::string mAcceleratorString;
 };

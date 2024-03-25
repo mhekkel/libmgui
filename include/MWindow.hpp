@@ -108,8 +108,6 @@ class MWindowImpl
 	{
 	}
 
-	MMenuBar *CreateMenu(const std::string &inMenu);
-
 	MWindow *mWindow;
 	MWindowFlags mFlags;
 };

@@ -25,7 +25,6 @@
  */
 
 #include "MMenu.hpp"
-#include "MAcceleratorTable.hpp"
 #include "MApplication.hpp"
 #include "MError.hpp"
 #include "MFile.hpp"
