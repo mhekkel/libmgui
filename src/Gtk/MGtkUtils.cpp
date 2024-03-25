@@ -24,7 +24,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Gtk/MGtkLib.hpp"
+#include "MGtkLib.hpp"
 
 #include "MApplication.hpp"
 #include "MError.hpp"
@@ -175,11 +175,13 @@ uint32_t MapModifier(uint32_t inModifier)
 		result |= kShiftKey;
 	if (inModifier & GDK_CONTROL_MASK)
 		result |= kControlKey;
+	if (inModifier & GDK_ALT_MASK)
+		result |= kOptionKey;
 
 	return result;
 }
 
-uint32_t MapKeyCode(uint32_t inKeyValue)
+uint32_t MapToKeyCode(uint32_t inKeyValue)
 {
 	uint32_t result;
 

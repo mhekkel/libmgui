@@ -83,16 +83,7 @@ if(NOT TARGET zeep AND NOT zeep_FOUND)
 endif()
 
 # The salt executable
-list(APPEND headers
-	include/Gtk/MGtkCanvasImpl.hpp
-	include/Gtk/MGtkControlsImpl.hpp
-	include/Gtk/MGtkDeviceImpl.hpp
-	include/Gtk/MGtkLib.hpp
-	include/Gtk/MGtkWidgetMixin.hpp
-	include/Gtk/MGtkWindowImpl.hpp
-	include/Gtk/MPrimary.hpp
-	include/Gtk/MGtkApplicationImpl.hpp
-
+list(APPEND public_headers
 	include/MAlerts.hpp
 	include/MAnimation.hpp
 	include/MApplication.hpp
@@ -123,6 +114,17 @@ list(APPEND headers
 	include/MUtils.hpp
 	include/MView.hpp
 	include/MWindow.hpp
+)
+
+list(APPEND private_headers
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkCanvasImpl.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkControlsImpl.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkDeviceImpl.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkLib.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkWidgetMixin.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkWindowImpl.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MPrimary.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkApplicationImpl.hpp	
 )
 
 list(APPEND sources
@@ -171,8 +173,8 @@ target_compile_features(mgui PUBLIC cxx_std_20)
 
 target_sources(mgui
 	PRIVATE ${sources}
-	PUBLIC
-	FILE_SET headers TYPE HEADERS
+	PRIVATE FILE_SET private_headers TYPE HEADERS
+	PUBLIC FILE_SET public_headers TYPE HEADERS
 	BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include
 	FILES ${headers}
 )

@@ -24,8 +24,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Gtk/MGtkDeviceImpl.hpp"
-#include "Gtk/MGtkCanvasImpl.hpp"
+#include "MGtkDeviceImpl.hpp"
+#include "MGtkCanvasImpl.hpp"
 
 #include "MError.hpp"
 #include "MUnicode.hpp"

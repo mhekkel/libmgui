@@ -35,4 +35,4 @@
 // gtk utils
 
 uint32_t MapModifier(uint32_t inModifier);
-uint32_t MapKeyCode(uint32_t inKeyValue);
+uint32_t MapToKeyCode(uint32_t inKeyValue);

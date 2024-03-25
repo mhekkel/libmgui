@@ -3,9 +3,9 @@
 //    (See accompanying file LICENSE_1_0.txt or copy at
 //          http://www.boost.org/LICENSE_1_0.txt)
 
-#include "Gtk/MGtkApplicationImpl.hpp"
-#include "Gtk/MGtkWidgetMixin.hpp"
-#include "Gtk/MGtkWindowImpl.hpp"
+#include "MGtkApplicationImpl.hpp"
+#include "MGtkWidgetMixin.hpp"
+#include "MGtkWindowImpl.hpp"
 
 #include "MApplication.hpp"
 #include "MCommand.hpp"

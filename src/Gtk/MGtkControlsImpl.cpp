@@ -24,10 +24,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Gtk/MGtkControlsImpl.hpp"
-#include "Gtk/MGtkCanvasImpl.hpp"
-#include "Gtk/MGtkControlsImpl.inl"
-#include "Gtk/MGtkWindowImpl.hpp"
+#include "MGtkControlsImpl.hpp"
+#include "MGtkCanvasImpl.hpp"
+#include "MGtkControlsImpl.inl"
+#include "MGtkWindowImpl.hpp"
 
 #include "MColorPicker.hpp"
 #include "MUtils.hpp"
@@ -629,7 +629,7 @@ bool MGtkEdittextImpl::OnKeyPressed(guint inKeyValue, guint inKeyCode, GdkModifi
 		kValidModifiersMask = kControlKey | kShiftKey | kOptionKey;
 
 	uint32_t modifiers = MapModifier(inModifiers & kValidModifiersMask);
-	uint32_t keyValue = MapKeyCode(inKeyValue);
+	uint32_t keyValue = MapToKeyCode(inKeyValue);
 
 	mControl->eKeyDown(keyValue, modifiers);
 

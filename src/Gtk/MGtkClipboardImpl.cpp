@@ -26,7 +26,7 @@
 
 #include "MClipboardImpl.hpp"
 
-#include "Gtk/MGtkWidgetMixin.hpp"
+#include "MGtkWidgetMixin.hpp"
 
 #include "MUtils.hpp"
 

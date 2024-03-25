@@ -24,8 +24,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Gtk/MGtkWidgetMixin.hpp"
-#include "Gtk/MGtkWindowImpl.hpp"
+#include "MGtkWidgetMixin.hpp"
+#include "MGtkWindowImpl.hpp"
 
 #include "MApplication.hpp"
 #include "MError.hpp"

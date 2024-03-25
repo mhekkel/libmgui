@@ -98,6 +98,11 @@ class MControl : public MControlBase
 	virtual void KeyReleased(uint32_t inKeyValue, uint32_t inModifiers) {}
 	virtual void Modifiers(uint32_t inModifiers) {}
 
+	virtual void ScrollDecelerate(double inVelX, double inVelY) {}
+	virtual bool Scroll(double inX, double inY) { return false; }
+	virtual void ScrollBegin() {}
+	virtual void ScrollEnd() {}
+
 	virtual bool IsFocus() const;
 	virtual void SetFocus();
 

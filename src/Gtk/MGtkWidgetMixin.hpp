@@ -289,8 +289,9 @@ enum class MEventMask
 	GestureClick = (1 << 1),
 	Key = (1 << 2),
 	Pointer = (1 << 3),
+	Scroll = (1 << 4),
 
-	All = (Focus | GestureClick | Key | Pointer)
+	All = (Focus | GestureClick | Key | Pointer | Scroll)
 };
 
 constexpr MEventMask operator|(MEventMask a, MEventMask b)
@@ -404,6 +405,11 @@ class MGtkWidgetMixin
 	virtual void OnKeyReleased(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers) {}
 	virtual void OnKeyModifiers(GdkModifierType inModifiers) {}
 
+	virtual void OnDecelerate(double inVelX, double inVelY);
+	virtual bool OnScroll(double inX, double inY);
+	virtual void OnScrollBegin();
+	virtual void OnScrollEnd();
+
 	MSlot<void()> mFocusEnter;
 	MSlot<void()> mFocusLeave;
 
@@ -418,6 +424,11 @@ class MGtkWidgetMixin
 	MSlot<bool(guint, guint, GdkModifierType)> mKeyPressed;
 	MSlot<void(guint, guint, GdkModifierType)> mKeyReleased;
 	MSlot<void(GdkModifierType)> mKeyModifiers;
+
+	MSlot<void(double, double)> mDecelerate;
+	MSlot<bool(double, double)> mScroll;
+	MSlot<void()> mScrollBegin;
+	MSlot<void()> mScrollEnd;
 
   protected:
 	int32_t mRequestedWidth, mRequestedHeight;

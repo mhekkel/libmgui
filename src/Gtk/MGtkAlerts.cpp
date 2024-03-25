@@ -24,7 +24,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Gtk/MGtkWindowImpl.hpp"
+#include "MGtkWindowImpl.hpp"
 
 #include "MAlerts.hpp"
 #include "MError.hpp"

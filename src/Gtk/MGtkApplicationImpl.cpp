@@ -31,8 +31,8 @@
 #include "MStrings.hpp"
 #include "MUtils.hpp"
 
-#include "Gtk/MGtkApplicationImpl.hpp"
-#include "Gtk/MGtkWindowImpl.hpp"
+#include "MGtkApplicationImpl.hpp"
+#include "MGtkWindowImpl.hpp"
 
 #include "mrsrc.hpp"
 

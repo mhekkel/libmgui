@@ -24,7 +24,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Gtk/MGtkLib.hpp"
+#include "MGtkLib.hpp"
 
 #include "MError.hpp"
 #include "MFile.hpp"

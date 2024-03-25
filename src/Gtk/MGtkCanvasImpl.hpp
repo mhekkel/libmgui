@@ -67,6 +67,11 @@ class MGtkCanvasImpl : public MGtkControlImpl<MCanvas>
 	void OnKeyReleased(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers) override;
 	void OnKeyModifiers(GdkModifierType inModifiers) override;
 
+	void OnDecelerate(double inVelX, double inVelY) override;
+	bool OnScroll(double inX, double inY) override;
+	void OnScrollBegin() override;
+	void OnScrollEnd() override;
+
 	void OnCommit(char *inText) override;
 
 	// bool OnScrollEvent(GdkEvent *inEvent) override;

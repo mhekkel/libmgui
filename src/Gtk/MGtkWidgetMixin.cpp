@@ -24,7 +24,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Gtk/MGtkWidgetMixin.hpp"
+#include "MGtkWidgetMixin.hpp"
 
 #include <cassert>
 
@@ -65,6 +65,11 @@ MGtkWidgetMixin::MGtkWidgetMixin(MEventMask inEvents)
 	, mKeyPressed(this, &MGtkWidgetMixin::OnKeyPressed)
 	, mKeyReleased(this, &MGtkWidgetMixin::OnKeyReleased)
 	, mKeyModifiers(this, &MGtkWidgetMixin::OnKeyModifiers)
+
+	, mDecelerate(this, &MGtkWidgetMixin::OnDecelerate)
+	, mScroll(this, &MGtkWidgetMixin::OnScroll)
+	, mScrollBegin(this, &MGtkWidgetMixin::OnScrollBegin)
+	, mScrollEnd(this, &MGtkWidgetMixin::OnScrollEnd)
 
 	, mRequestedWidth(-1)
 	, mRequestedHeight(-1)
@@ -133,6 +138,17 @@ void MGtkWidgetMixin::SetWidget(GtkWidget *inWidget)
 		if (mEvents & MEventMask::Key)
 		{
 			auto cntrl = gtk_event_controller_key_new();
+			gtk_widget_add_controller(GetWidget(), cntrl);
+
+			mKeyPressed.Connect(G_OBJECT(cntrl), "key-pressed");
+			mKeyReleased.Connect(G_OBJECT(cntrl), "key-released");
+			mKeyModifiers.Connect(G_OBJECT(cntrl), "modifiers");
+		}
+
+		if (mEvents & MEventMask::Scroll)
+		{
+			auto cntrl = gtk_event_controller_scroll_new(
+				GtkEventControllerScrollFlags(GTK_EVENT_CONTROLLER_SCROLL_BOTH_AXES | GTK_EVENT_CONTROLLER_SCROLL_DISCRETE));
 			gtk_widget_add_controller(GetWidget(), cntrl);
 
 			mKeyPressed.Connect(G_OBJECT(cntrl), "key-pressed");
@@ -294,4 +310,21 @@ void MGtkWidgetMixin::OnPreeditStart()
 bool MGtkWidgetMixin::OnRetrieveSurrounding()
 {
 	return false;
+}
+
+void MGtkWidgetMixin::OnDecelerate(double inVelX, double inVelY)
+{
+}
+
+bool MGtkWidgetMixin::OnScroll(double inX, double inY)
+{
+	return false;
+}
+
+void MGtkWidgetMixin::OnScrollBegin()
+{
+}
+
+void MGtkWidgetMixin::OnScrollEnd()
+{
 }

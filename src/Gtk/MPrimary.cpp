@@ -24,9 +24,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Gtk/MPrimary.hpp"
-#include "Gtk/MGtkLib.hpp"
-#include "Gtk/MGtkWidgetMixin.hpp"
+#include "MPrimary.hpp"
+#include "MGtkLib.hpp"
+#include "MGtkWidgetMixin.hpp"
 
 #include "MError.hpp"
 #include "MTypes.hpp"

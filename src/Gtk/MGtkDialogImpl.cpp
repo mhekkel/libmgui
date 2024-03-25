@@ -24,9 +24,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Gtk/MGtkApplicationImpl.hpp"
-#include "Gtk/MGtkControlsImpl.hpp"
-#include "Gtk/MGtkWindowImpl.hpp"
+#include "MGtkApplicationImpl.hpp"
+#include "MGtkControlsImpl.hpp"
+#include "MGtkWindowImpl.hpp"
 
 #include "MCanvas.hpp"
 #include "MControls.hpp"
