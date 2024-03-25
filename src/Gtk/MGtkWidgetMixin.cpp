@@ -28,8 +28,6 @@
 
 #include <cassert>
 
-using namespace std;
-
 MGtkWidgetMixin::MGtkWidgetMixin(MEventMask inEvents)
 	: mWidget(nullptr)
 	, mDestroy(this, &MGtkWidgetMixin::OnDestroy)

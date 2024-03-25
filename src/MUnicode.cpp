@@ -53,8 +53,6 @@ const bool kCharBreakTable[10][10] = {
 
 #include "MUnicodeTables.hpp"
 
-using namespace std;
-
 const unicode kMacOSRomanChars[] = {
 	0x0000,  0x0001,  0x0002,  0x0003,  0x0004,  0x0005,  0x0006,  0x0007,  
 	0x0008,  0x0009,  0x000A,  0x000B,  0x000C,  0x000D,  0x000E,  0x000F,  
@@ -309,12 +307,12 @@ class MEncoderImpl : public MEncoder
 	
 	virtual void	WriteUnicode(unicode inUnicode)
 					{
-						back_insert_iterator<vector<char> > iter(mBuffer);
+						std::back_insert_iterator<std::vector<char> > iter(mBuffer);
 						traits::WriteUnicode(iter, inUnicode);
 					}
 };
 
-void MEncoder::SetText(const string& inText)
+void MEncoder::SetText(const std::string& inText)
 {
 	MDecoder* decoder = MDecoder::GetDecoder(kEncodingUTF8,
 		inText.c_str(), inText.length());
@@ -324,9 +322,9 @@ void MEncoder::SetText(const string& inText)
 		WriteUnicode(uc);
 }
 
-void MEncoder::SetText(const wstring& inText)
+void MEncoder::SetText(const std::wstring& inText)
 {
-	for (wstring::const_iterator ch = inText.begin(); ch != inText.end(); ++ch)
+	for (std::wstring::const_iterator ch = inText.begin(); ch != inText.end(); ++ch)
 		WriteUnicode(*ch);
 }
 
@@ -438,12 +436,12 @@ MDecoder* MDecoder::GetDecoder(MEncoding inEncoding, const void* inBuffer, uint3
 	return decoder;
 }
 
-void MDecoder::GetText(string& outText)
+void MDecoder::GetText(std::string& outText)
 {
 	unicode uc;
 	
-	vector<char> b;
-	back_insert_iterator<vector<char> > i(b);
+	std::vector<char> b;
+	std::back_insert_iterator<std::vector<char> > i(b);
 	
 	while (ReadUnicode(uc))
 		MEncodingTraits<kEncodingUTF8>::WriteUnicode(i, uc);
@@ -451,7 +449,7 @@ void MDecoder::GetText(string& outText)
 	outText.assign(b.begin(), b.end());
 }
 
-void MDecoder::GetText(wstring& outText)
+void MDecoder::GetText(std::wstring& outText)
 {
 	unicode uc;
 	
@@ -461,11 +459,11 @@ void MDecoder::GetText(wstring& outText)
 		outText += uc;
 }
 
-string::iterator next_cursor_position(
-	string::iterator	inStart,
-	string::iterator	inEnd)
+std::string::iterator next_cursor_position(
+	std::string::iterator	inStart,
+	std::string::iterator	inEnd)
 {
-	string::iterator result = inEnd;
+	std::string::iterator result = inEnd;
 
 	uint32_t length;
 	unicode ch;
@@ -608,9 +606,9 @@ ustring::iterator next_cursor_position(ustring::iterator inStart, ustring::itera
 //	return result;
 //}
 
-string::iterator next_line_break(
-	string::iterator	text,
-	string::iterator	end)
+std::string::iterator next_line_break(
+	std::string::iterator	text,
+	std::string::iterator	end)
 {
 	if (text == end)
 		return text;

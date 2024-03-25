@@ -34,8 +34,6 @@
 #include <cmath>
 #include <cstring>
 
-using namespace std;
-
 // -------------------------------------------------------------------
 
 MGeometry::MGeometry(MDevice &inDevice, MGeometryFillMode inMode)
@@ -201,14 +199,12 @@ MRect MDevice::GetBounds() const
 	return mImpl->GetBounds();
 }
 
-void MDevice::SetFont(
-	const string &inFont)
+void MDevice::SetFont(const std::string &inFont)
 {
 	mImpl->SetFont(inFont);
 }
 
-void MDevice::SetForeColor(
-	MColor inColor)
+void MDevice::SetForeColor(MColor inColor)
 {
 	mImpl->SetForeColor(inColor);
 }
@@ -218,8 +214,7 @@ MColor MDevice::GetForeColor() const
 	return mImpl->GetForeColor();
 }
 
-void MDevice::SetBackColor(
-	MColor inColor)
+void MDevice::SetBackColor(MColor inColor)
 {
 	mImpl->SetBackColor(inColor);
 }
@@ -229,8 +224,7 @@ MColor MDevice::GetBackColor() const
 	return mImpl->GetBackColor();
 }
 
-void MDevice::ClipRect(
-	MRect inRect)
+void MDevice::ClipRect(MRect inRect)
 {
 	mImpl->ClipRect(inRect);
 }
@@ -241,58 +235,42 @@ void MDevice::ClipRect(
 //	mImpl->ClipRegion(inRegion);
 // }
 
-void MDevice::EraseRect(
-	MRect inRect)
+void MDevice::EraseRect(MRect inRect)
 {
 	mImpl->EraseRect(inRect);
 }
 
-void MDevice::FillRect(
-	MRect inRect)
+void MDevice::FillRect(MRect inRect)
 {
 	mImpl->FillRect(inRect);
 }
 
-void MDevice::StrokeRect(
-	MRect inRect,
-	uint32_t inLineWidth)
+void MDevice::StrokeRect(MRect inRect, uint32_t inLineWidth)
 {
 	mImpl->StrokeRect(inRect, inLineWidth);
 }
 
-void MDevice::StrokeLine(
-	float inFromX,
-	float inFromY,
-	float inToX,
-	float inToY,
-	uint32_t inLineWidth)
+void MDevice::StrokeLine(float inFromX, float inFromY, float inToX, float inToY, uint32_t inLineWidth)
 {
 	mImpl->StrokeLine(inFromX, inFromY, inToX, inToY, inLineWidth);
 }
 
-void MDevice::StrokeGeometry(
-	MGeometry &inGeometry,
-	float inLineWidth)
+void MDevice::StrokeGeometry(MGeometry &inGeometry, float inLineWidth)
 {
 	mImpl->StrokeGeometry(*inGeometry.mImpl, inLineWidth);
 }
 
-void MDevice::FillGeometry(
-	MGeometry &inGeometry)
+void MDevice::FillGeometry(MGeometry &inGeometry)
 {
 	mImpl->FillGeometry(*inGeometry.mImpl);
 }
 
-void MDevice::FillEllipse(
-	MRect inRect)
+void MDevice::FillEllipse(MRect inRect)
 {
 	mImpl->FillEllipse(inRect);
 }
 
-void MDevice::DrawBitmap(
-	const MBitmap &inBitmap,
-	float inX,
-	float inY)
+void MDevice::DrawBitmap(const MBitmap &inBitmap, float inX, float inY)
 {
 	mImpl->DrawBitmap(inBitmap, inX, inY);
 }
@@ -331,89 +309,57 @@ float MDevice::GetXWidth() const
 	return mImpl->GetXWidth();
 }
 
-void MDevice::DrawString(
-	const string &inText,
-	float inX,
-	float inY,
-	uint32_t inTruncateWidth,
-	MAlignment inAlign)
+void MDevice::DrawString(const std::string &inText, float inX, float inY, uint32_t inTruncateWidth, MAlignment inAlign)
 {
 	mImpl->DrawString(inText, inX, inY, inTruncateWidth, inAlign);
 }
 
-void MDevice::DrawString(
-	const string &inText,
-	MRect inBounds,
-	MAlignment inAlign)
+void MDevice::DrawString(const std::string &inText, MRect inBounds, MAlignment inAlign)
 {
 	mImpl->DrawString(inText, inBounds, inAlign);
 }
 
-void MDevice::SetText(
-	const string &inText)
+void MDevice::SetText(const std::string &inText)
 {
 	mImpl->SetText(inText);
 }
 
-void MDevice::SetTabStops(
-	float inTabWidth)
+void MDevice::SetTabStops(float inTabWidth)
 {
 	mImpl->SetTabStops(inTabWidth);
 }
 
-void MDevice::SetTextColors(
-	uint32_t inColorCount,
-	uint32_t inColorIndices[],
-	uint32_t inOffsets[],
-	MColor inColors[])
+void MDevice::SetTextColors(uint32_t inColorCount, uint32_t inColorIndices[], uint32_t inOffsets[], MColor inColors[])
 {
 	mImpl->SetTextColors(inColorCount, inColorIndices, inOffsets, inColors);
 }
 
-void MDevice::SetTextStyles(
-	uint32_t inStyleCount,
-	uint32_t inStyles[],
-	uint32_t inOffsets[])
+void MDevice::SetTextStyles(uint32_t inStyleCount, uint32_t inStyles[], uint32_t inOffsets[])
 {
 	mImpl->SetTextStyles(inStyleCount, inStyles, inOffsets);
 }
 
-void MDevice::RenderTextBackground(
-	float inX,
-	float inY,
-	uint32_t inStart,
-	uint32_t inLength,
-	MColor inColor)
+void MDevice::RenderTextBackground(float inX, float inY, uint32_t inStart, uint32_t inLength, MColor inColor)
 {
 	mImpl->RenderTextBackground(inX, inY, inStart, inLength, inColor);
 }
 
-void MDevice::SetTextSelection(
-	uint32_t inStart,
-	uint32_t inLength,
-	MColor inSelectionColor)
+void MDevice::SetTextSelection(uint32_t inStart, uint32_t inLength, MColor inSelectionColor)
 {
 	mImpl->SetTextSelection(inStart, inLength, inSelectionColor);
 }
 
-void MDevice::IndexToPosition(
-	uint32_t inIndex,
-	bool inTrailing,
-	int32_t &outPosition)
+void MDevice::IndexToPosition(uint32_t inIndex, bool inTrailing, int32_t &outPosition)
 {
 	mImpl->IndexToPosition(inIndex, inTrailing, outPosition);
 }
 
-bool MDevice::PositionToIndex(
-	int32_t inPosition,
-	uint32_t &outIndex)
+bool MDevice::PositionToIndex(int32_t inPosition, uint32_t &outIndex)
 {
 	return mImpl->PositionToIndex(inPosition, outIndex);
 }
 
-void MDevice::RenderText(
-	float inX,
-	float inY)
+void MDevice::RenderText(float inX, float inY)
 {
 	mImpl->RenderText(inX, inY);
 }
@@ -423,9 +369,7 @@ float MDevice::GetTextWidth() const
 	return mImpl->GetTextWidth();
 }
 
-void MDevice::BreakLines(
-	uint32_t inWidth,
-	vector<uint32_t> &outBreaks)
+void MDevice::BreakLines(uint32_t inWidth, std::vector<uint32_t> &outBreaks)
 {
 	mImpl->BreakLines(inWidth, outBreaks);
 }

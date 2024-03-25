@@ -64,22 +64,6 @@ class MGtkCommandEmitter
 	template <ImplementedSignature Sig>
 	struct MActionHandler;
 
-	template <>
-	struct MActionHandler<void()> : public MActionHandlerBase
-	{
-		MActionHandler(MCommand<void()> &inCommand)
-			: mCommand(inCommand)
-		{
-		}
-
-		void ActionActivated(GVariant *param)
-		{
-			mCommand.Execute();
-		}
-
-		MCommand<void()> &mCommand;
-	};
-
   public:
 	MGtkCommandEmitter()
 	{
@@ -118,4 +102,20 @@ class MGtkCommandEmitter
 	std::map<GAction *, MActionHandlerBase *> mActionHandlers;
 
 	// std::map<GAction *,
+};
+
+template <>
+struct MGtkCommandEmitter::MActionHandler<void()> : public MActionHandlerBase
+{
+	MActionHandler(MCommand<void()> &inCommand)
+		: mCommand(inCommand)
+	{
+	}
+
+	void ActionActivated(GVariant *param)
+	{
+		mCommand.Execute();
+	}
+
+	MCommand<void()> &mCommand;
 };

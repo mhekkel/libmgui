@@ -32,8 +32,6 @@
 #include <stack>
 #include <string>
 
-using namespace std;
-
 uint16_t CalculateCRC(const void *inData, uint32_t inLength, uint16_t inCRC)
 {
 	const uint8_t *p = reinterpret_cast<const uint8_t *>(inData);
@@ -53,11 +51,11 @@ uint16_t CalculateCRC(const void *inData, uint32_t inLength, uint16_t inCRC)
 	return inCRC;
 }
 
-string Escape(string inString)
+std::string Escape(std::string inString)
 {
-	string result;
+	std::string result;
 
-	for (string::iterator c = inString.begin(); c != inString.end(); ++c)
+	for (std::string::iterator c = inString.begin(); c != inString.end(); ++c)
 	{
 		if (*c == '\n')
 		{
@@ -81,11 +79,11 @@ string Escape(string inString)
 	return result;
 }
 
-string Unescape(string inString)
+std::string Unescape(std::string inString)
 {
-	string result;
+	std::string result;
 
-	for (string::iterator c = inString.begin(); c != inString.end(); ++c)
+	for (std::string::iterator c = inString.begin(); c != inString.end(); ++c)
 	{
 		if (*c == '\\')
 		{
@@ -120,7 +118,7 @@ string Unescape(string inString)
 void HexDump(
 	const void *inBuffer,
 	uint32_t inLength,
-	ostream &outStream)
+	std::ostream &outStream)
 {
 	const char kHex[] = "0123456789abcdef";
 	char s[] = "xxxxxxxx  cccc cccc cccc cccc  cccc cccc cccc cccc  |................|";

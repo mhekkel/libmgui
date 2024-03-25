@@ -38,7 +38,6 @@
 
 #undef GetNextWindow
 
-using namespace std;
 using namespace zeep;
 
 // --------------------------------------------------------------------
@@ -46,9 +45,9 @@ using namespace zeep;
 //	MWindow
 //
 
-list<MWindow *> MWindow::sWindowList;
+std::list<MWindow *> MWindow::sWindowList;
 
-MWindow::MWindow(const string &inTitle, const MRect &inBounds, MWindowFlags inFlags)
+MWindow::MWindow(const std::string &inTitle, const MRect &inBounds, MWindowFlags inFlags)
 	: MView("window", inBounds)
 	, mImpl(MWindowImpl::Create(inTitle, inBounds, inFlags, this))
 	, mModified(false)
@@ -111,7 +110,7 @@ MWindow *MWindow::GetNextWindow() const
 {
 	MWindow *result = nullptr;
 
-	list<MWindow *>::const_iterator w =
+	std::list<MWindow *>::const_iterator w =
 		find(sWindowList.begin(), sWindowList.end(), this);
 
 	if (w != sWindowList.end())
@@ -180,7 +179,7 @@ void MWindow::Close()
 		mImpl->Close();
 }
 
-void MWindow::SetTitle(const string &inTitle)
+void MWindow::SetTitle(const std::string &inTitle)
 {
 	mTitle = inTitle;
 
@@ -190,7 +189,7 @@ void MWindow::SetTitle(const string &inTitle)
 		mImpl->SetTitle(mTitle);
 }
 
-string MWindow::GetTitle() const
+std::string MWindow::GetTitle() const
 {
 	return mTitle;
 }

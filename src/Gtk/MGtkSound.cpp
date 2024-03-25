@@ -37,7 +37,6 @@
 #include <iostream>
 #include <map>
 
-using namespace std;
 namespace fs = std::filesystem;
 
 // namespace
@@ -48,7 +47,7 @@ namespace fs = std::filesystem;
 //   public:
 // 	static MAudioSocket &Instance();
 
-// 	void Play(const string &inPath);
+// 	void Play(const std::string &inPath);
 
 //   private:
 // 	MAudioSocket();
@@ -85,7 +84,7 @@ namespace fs = std::filesystem;
 // 		cerr << "Error playing sound using canberra: " << ca_strerror(inErrorCode) << '\n';
 // }
 
-// void MAudioSocket::Play(const string &inFile)
+// void MAudioSocket::Play(const std::string &inFile)
 // {
 // 	if (mCAContext != nullptr)
 // 	{
@@ -119,7 +118,7 @@ namespace fs = std::filesystem;
 
 // } // namespace
 
-void PlaySound(const string &inSoundName)
+void PlaySound(const std::string &inSoundName)
 {
 	// //	if (not gPlaySounds)
 	// //		return;
@@ -127,7 +126,7 @@ void PlaySound(const string &inSoundName)
 	// try
 	// {
 	// 	StOKToThrow ok;
-	// 	string filename;
+	// 	std::string filename;
 
 	// 	if (inSoundName == "success")
 	// 		filename = Preferences::GetString("success sound", "info.wav");

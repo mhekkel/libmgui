@@ -38,9 +38,7 @@
 #include <cassert>
 #include <iostream>
 
-using namespace std;
-
-MView::MView(const string &inID, MRect inBounds)
+MView::MView(const std::string &inID, MRect inBounds)
 	: mID(inID)
 	, mBounds(0, 0, inBounds.width, inBounds.height)
 	, mFrame(inBounds)
@@ -493,7 +491,7 @@ MView *MView::FindSubView(int32_t inX, int32_t inY) const
 	return const_cast<MView *>(result);
 }
 
-MView *MView::FindSubViewByID(const string &inID) const
+MView *MView::FindSubViewByID(const std::string &inID) const
 {
 	const MView *result = nullptr;
 
@@ -552,14 +550,14 @@ void MView::ConvertFromScreen(int32_t &ioX, int32_t &ioY) const
 	ConvertFromParent(ioX, ioY);
 }
 
-bool MView::PastePrimaryBuffer(const string &inText)
+bool MView::PastePrimaryBuffer(const std::string &inText)
 {
 	return false;
 }
 
 // --------------------------------------------------------------------
 
-MPager::MPager(const string &inID, MRect inBounds)
+MPager::MPager(const std::string &inID, MRect inBounds)
 	: MView(inID, inBounds)
 {
 }

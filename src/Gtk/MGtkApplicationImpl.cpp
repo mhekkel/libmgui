@@ -245,8 +245,6 @@ gboolean MGtkApplicationImpl::Timeout(gpointer inData)
 {
 	try
 	{
-		MGtkWindowImpl::RecycleWindows();
-
 		gApp->Pulse();
 	}
 	catch (const std::exception &e)

@@ -24,7 +24,6 @@
 #include <cstring>
 #include <iostream>
 
-using namespace std;
 namespace xml = zeep::xml;
 
 // --------------------------------------------------------------------

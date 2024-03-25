@@ -36,8 +36,6 @@
 #include <cstring>
 #include <iostream>
 
-using namespace std;
-
 #ifndef NDEBUG
 int StOKToThrow::sOkToThrow = 0;
 #endif

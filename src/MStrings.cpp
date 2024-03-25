@@ -35,14 +35,13 @@
 
 #include <map>
 
-using namespace std;
 namespace xml = zeep::xml;
 
 struct ls
 {
-	string context;
-	string key;
-	string value;
+	std::string context;
+	std::string key;
+	std::string value;
 
 	template <class Archive>
 	void serialize(Archive &ar, const unsigned int version)
@@ -56,8 +55,8 @@ class MLocalisedStringTable
   public:
 	static MLocalisedStringTable &Instance();
 
-	string Map(const string &inString);
-	string Map(const string &inContext, const string &inString);
+	std::string Map(const std::string &inString);
+	std::string Map(const std::string &inContext, const std::string &inString);
 	const char *Map(const char *inString);
 
 	template <class Archive>
@@ -69,8 +68,8 @@ class MLocalisedStringTable
 	MLocalisedStringTable() {}
 	MLocalisedStringTable(int);
 
-	map<string, string> mMappedStrings;
-	vector<ls> mLocalStrings;
+	std::map<std::string, std::string> mMappedStrings;
+	std::vector<ls> mLocalStrings;
 };
 
 MLocalisedStringTable::MLocalisedStringTable(int)
@@ -108,18 +107,18 @@ MLocalisedStringTable::MLocalisedStringTable(int)
 	}
 }
 
-string MLocalisedStringTable::Map(const string &inString)
+std::string MLocalisedStringTable::Map(const std::string &inString)
 {
-	string result = inString;
-	map<string, string>::iterator m = mMappedStrings.find(inString);
+	std::string result = inString;
+	std::map<std::string, std::string>::iterator m = mMappedStrings.find(inString);
 	if (m != mMappedStrings.end())
 		result = m->second;
 	return result;
 }
 
-string MLocalisedStringTable::Map(const string &inContext, const string &inString)
+std::string MLocalisedStringTable::Map(const std::string &inContext, const std::string &inString)
 {
-	string result;
+	std::string result;
 	bool found = false;
 
 	for (ls &s : mLocalStrings)
@@ -141,7 +140,7 @@ string MLocalisedStringTable::Map(const string &inContext, const string &inStrin
 const char *MLocalisedStringTable::Map(const char *inString)
 {
 	const char *result = inString;
-	map<string, string>::iterator m = mMappedStrings.find(inString);
+	std::map<std::string, std::string>::iterator m = mMappedStrings.find(inString);
 	if (m != mMappedStrings.end())
 		result = m->second.c_str();
 	return result;
@@ -158,28 +157,28 @@ const char *GetLocalisedString(const char *inString)
 	return MLocalisedStringTable::Instance().Map(inString);
 }
 
-string GetLocalisedString(const string &inString)
+std::string GetLocalisedString(const std::string &inString)
 {
 	return MLocalisedStringTable::Instance().Map(inString);
 }
 
-string GetLocalisedStringForContext(const string &inContext, const string &inString)
+std::string GetLocalisedStringForContext(const std::string &inContext, const std::string &inString)
 {
 	return MLocalisedStringTable::Instance().Map(inContext, inString);
 }
 
-string GetFormattedLocalisedStringWithArguments(
-	const string &inString,
-	const vector<string> &inArgs)
+std::string GetFormattedLocalisedStringWithArguments(
+	const std::string &inString,
+	const std::vector<std::string> &inArgs)
 {
-	string result = GetLocalisedString(inString.c_str());
+	std::string result = GetLocalisedString(inString.c_str());
 
 	char s[] = "^0";
 
-	for (vector<string>::const_iterator a = inArgs.begin(); a != inArgs.end(); ++a)
+	for (std::vector<std::string>::const_iterator a = inArgs.begin(); a != inArgs.end(); ++a)
 	{
-		string::size_type p = result.find(s);
-		if (p != string::npos)
+		std::string::size_type p = result.find(s);
+		if (p != std::string::npos)
 			result.replace(p, 2, *a);
 		++s[1];
 	}

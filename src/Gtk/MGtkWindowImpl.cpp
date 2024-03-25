@@ -38,9 +38,62 @@
 
 #include <iostream>
 
-using namespace std;
+// --------------------------------------------------------------------
 
-list<MWindow *> MGtkWindowImpl::sRecycle;
+G_BEGIN_DECLS
+
+#define MY_GTK_TYPE_WINDOW (mgtk_window_get_type())
+
+G_DECLARE_FINAL_TYPE(MyGtkWindow, mgtk_window, MY_GTK, WINDOW, GtkApplicationWindow)
+
+struct _MyGtkWindow
+{
+	GtkApplicationWindow parent_instance;
+
+	MGtkWindowImpl *m_impl;
+};
+
+typedef struct _MyGtkWindow MyGtkWindow;
+
+G_DEFINE_FINAL_TYPE(MyGtkWindow, mgtk_window, GTK_TYPE_APPLICATION_WINDOW)
+
+G_END_DECLS
+
+// --------------------------------------------------------------------
+
+static void mgtk_window_finalize(GObject *object)
+{
+	MyGtkWindow *self = MY_GTK_WINDOW(object);
+	delete self->m_impl->GetWindow();
+
+	G_OBJECT_CLASS(mgtk_window_parent_class)->finalize(object);
+}
+
+static void mgtk_window_class_init(MyGtkWindowClass *klass)
+{
+	GObjectClass *object_class = G_OBJECT_CLASS(klass);
+	GtkWidgetClass *widget_class = GTK_WIDGET_CLASS(klass);
+	GtkWindowClass *window_class = GTK_WINDOW_CLASS(klass);
+
+	object_class->finalize = mgtk_window_finalize;
+}
+
+static void mgtk_window_init(MyGtkWindow *self)
+{
+}
+
+MyGtkWindow *mgtk_window_new(GtkApplication *app, MGtkWindowImpl *impl)
+{
+	GtkWindowGroup *group = gtk_window_group_new();
+
+	MyGtkWindow *result = static_cast<MyGtkWindow *>(g_object_new(MY_GTK_TYPE_WINDOW, "application", app, nullptr));
+	gtk_window_group_add_window(group, GTK_WINDOW(result));
+	g_object_unref(group);
+
+	result->m_impl = impl;
+
+	return result;
+}
 
 // --------------------------------------------------------------------
 //
@@ -51,9 +104,9 @@ MGtkWindowImpl::MGtkWindowImpl(MWindowFlags inFlags, MWindow *inWindow)
 	: MWindowImpl(inFlags, inWindow)
 	//	, mModified(false)
     //	, mTransitionThread(nullptr)
-	// , mChildFocus(this, &MGtkWindowImpl::ChildFocus)
-	// , mMapEvent(this, &MGtkWindowImpl::OnMapEvent)
-	//	, mChanged(this, &MGtkWindowImpl::Changed)
+    // , mChildFocus(this, &MGtkWindowImpl::ChildFocus)
+    // , mMapEvent(this, &MGtkWindowImpl::OnMapEvent)
+    //	, mChanged(this, &MGtkWindowImpl::Changed)
 	, mCloseRequest(this, &MGtkWindowImpl::OnCloseRequest)
 	, mMainVBox(nullptr)
 	, mFocus(this)
@@ -67,7 +120,10 @@ MGtkWindowImpl::~MGtkWindowImpl()
 
 void MGtkWindowImpl::Create(MRect inBounds, const std::string &inTitle)
 {
-	GtkWidget *widget = gtk_application_window_new(static_cast<MGtkApplicationImpl *>(gApp->GetImpl())->GetGtkApp());
+	auto w = mgtk_window_new(static_cast<MGtkApplicationImpl *>(gApp->GetImpl())->GetGtkApp(), this);
+	// auto w = gtk_application_window_new(static_cast<MGtkApplicationImpl *>(gApp->GetImpl())->GetGtkApp());
+
+	GtkWidget *widget = GTK_WIDGET(w);
 	THROW_IF_NIL(widget);
 
 	gtk_window_set_default_size(GTK_WINDOW(widget), inBounds.width, inBounds.height);
@@ -187,7 +243,7 @@ void MGtkWindowImpl::SetTransientFor(MWindow *inWindow)
 
 bool MGtkWindowImpl::OnCloseRequest()
 {
-	return mWindow->AllowClose(false);
+	return mWindow->AllowClose(false) ? false : true;
 }
 
 void MGtkWindowImpl::Show()
@@ -383,7 +439,7 @@ void MGtkWindowImpl::Close()
 		gtk_window_close(GTK_WINDOW(GetWidget()));
 }
 
-void MGtkWindowImpl::SetTitle(string inTitle)
+void MGtkWindowImpl::SetTitle(std::string inTitle)
 {
 	gtk_window_set_title(GTK_WINDOW(GetWidget()), inTitle.c_str());
 }
@@ -404,18 +460,9 @@ void MGtkWindowImpl::SetTitle(string inTitle)
 //	}
 // }
 
-void MGtkWindowImpl::RecycleWindows()
-{
-	for (MWindow *w : sRecycle)
-		delete w;
-	sRecycle.clear();
-}
-
 void MGtkWindowImpl::OnDestroy()
 {
 	SetWidget(nullptr);
-
-	sRecycle.push_back(mWindow);
 }
 
 void MGtkWindowImpl::OnMap()
@@ -493,7 +540,7 @@ void MGtkWindowImpl::ConvertFromScreen(int32_t &ioX, int32_t &ioY) const
 
 // --------------------------------------------------------------------
 
-MWindowImpl *MWindowImpl::Create(const string &inTitle, MRect inBounds,
+MWindowImpl *MWindowImpl::Create(const std::string &inTitle, MRect inBounds,
 	MWindowFlags inFlags, MWindow *inWindow)
 {
 	MGtkWindowImpl *result = new MGtkWindowImpl(inFlags, inWindow);

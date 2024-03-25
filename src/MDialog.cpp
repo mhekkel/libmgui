@@ -38,11 +38,9 @@
 
 #include <sstream>
 
-using namespace std;
-
 MDialog *MDialog::sFirst;
 
-MDialog::MDialog(const string &inDialogResource)
+MDialog::MDialog(const std::string &inDialogResource)
 	: MWindow(MWindowImpl::CreateDialog(inDialogResource, this))
 	, eButtonClicked(this, &MDialog::ButtonClicked)
 	, eCheckboxClicked(this, &MDialog::CheckboxChanged)
@@ -152,7 +150,7 @@ bool MDialog::CancelClicked()
 	return true;
 }
 
-void MDialog::ButtonClicked(const string &inID)
+void MDialog::ButtonClicked(const std::string &inID)
 {
 	if (inID == "ok")
 	{
@@ -166,23 +164,23 @@ void MDialog::ButtonClicked(const string &inID)
 	}
 }
 
-void MDialog::CheckboxChanged(const string &inID, bool inChecked)
+void MDialog::CheckboxChanged(const std::string &inID, bool inChecked)
 {
 }
 
-void MDialog::RadiobuttonChanged(const string &inID, bool inChecked)
+void MDialog::RadiobuttonChanged(const std::string &inID, bool inChecked)
 {
 }
 
-void MDialog::TextChanged(const string &inID, const string &inText)
+void MDialog::TextChanged(const std::string &inID, const std::string &inText)
 {
 }
 
-void MDialog::ValueChanged(const string &inID, int32_t inValue)
+void MDialog::ValueChanged(const std::string &inID, int32_t inValue)
 {
 }
 
-void MDialog::ColorChanged(const string &inID, MColor inColor)
+void MDialog::ColorChanged(const std::string &inID, MColor inColor)
 {
 }
 
@@ -207,7 +205,7 @@ void MDialog::SavePosition(const char *inName)
 	MRect r;
 	GetWindowPosition(r);
 
-	stringstream s;
+	std::stringstream s;
 	s << r.x << ' ' << r.y << ' ' << r.width << ' ' << r.height;
 
 	Preferences::SetString(inName, s.str());
@@ -215,12 +213,12 @@ void MDialog::SavePosition(const char *inName)
 
 void MDialog::RestorePosition(const char *inName)
 {
-	string s = Preferences::GetString(inName, "");
+	std::string s = Preferences::GetString(inName, "");
 	if (s.length() > 0)
 	{
 		MRect r;
 
-		stringstream ss(s);
+		std::stringstream ss(s);
 		ss >> r.x >> r.y >> r.width >> r.height;
 
 		if (GetFlags() & kMFixedSize)
@@ -235,9 +233,9 @@ void MDialog::RestorePosition(const char *inName)
 	}
 }
 
-string MDialog::GetText(const string &inID) const
+std::string MDialog::GetText(const std::string &inID) const
 {
-	string result;
+	std::string result;
 
 	MView *view = FindSubViewByID(inID);
 	THROW_IF_NIL(view);
@@ -251,7 +249,7 @@ string MDialog::GetText(const string &inID) const
 	return result;
 }
 
-void MDialog::SetText(const string &inID, const std::string &inText)
+void MDialog::SetText(const std::string &inID, const std::string &inText)
 {
 	MView *view = FindSubViewByID(inID);
 	THROW_IF_NIL(view);
@@ -267,7 +265,7 @@ void MDialog::SetText(const string &inID, const std::string &inText)
 		static_cast<MButton *>(view)->SetText(inText);
 }
 
-void MDialog::SetPasswordChar(const string &inID, const uint32_t inUnicode)
+void MDialog::SetPasswordChar(const std::string &inID, const uint32_t inUnicode)
 {
 	MView *view = FindSubViewByID(inID);
 	THROW_IF_NIL(dynamic_cast<MEdittext *>(view));
@@ -294,7 +292,7 @@ void MDialog::SetValue(const std::string &inID, int32_t inValue)
 		static_cast<MPopup *>(view)->SetValue(inValue);
 }
 
-bool MDialog::IsChecked(const string &inID) const
+bool MDialog::IsChecked(const std::string &inID) const
 {
 	MView *view = FindSubViewByID(inID);
 	if (dynamic_cast<MCheckbox *>(view) != nullptr)
@@ -305,7 +303,7 @@ bool MDialog::IsChecked(const string &inID) const
 		THROW_IF_NIL(nullptr);
 }
 
-void MDialog::SetChecked(const string &inID, bool inChecked)
+void MDialog::SetChecked(const std::string &inID, bool inChecked)
 {
 	MView *view = FindSubViewByID(inID);
 	if (dynamic_cast<MCheckbox *>(view) != nullptr)
@@ -314,7 +312,7 @@ void MDialog::SetChecked(const string &inID, bool inChecked)
 		static_cast<MRadiobutton *>(view)->SetChecked(inChecked);
 }
 
-void MDialog::SetChoices(const string &inID, vector<string> &inChoices)
+void MDialog::SetChoices(const std::string &inID, std::vector<std::string> &inChoices)
 {
 	MView *view = FindSubViewByID(inID);
 	if (dynamic_cast<MPopup *>(view) != nullptr)
@@ -323,35 +321,35 @@ void MDialog::SetChoices(const string &inID, vector<string> &inChoices)
 		static_cast<MCombobox *>(view)->SetChoices(inChoices);
 }
 
-bool MDialog::IsOpen(const string &inID) const
+bool MDialog::IsOpen(const std::string &inID) const
 {
 	MExpander *expander = dynamic_cast<MExpander *>(FindSubViewByID(inID));
 	THROW_IF_NIL(expander);
 	return expander->IsOpen();
 }
 
-void MDialog::SetOpen(const string &inID, bool inOpen)
+void MDialog::SetOpen(const std::string &inID, bool inOpen)
 {
 	MExpander *expander = dynamic_cast<MExpander *>(FindSubViewByID(inID));
 	THROW_IF_NIL(expander);
 	expander->SetOpen(inOpen);
 }
 
-MColor MDialog::GetColor(const string &inID) const
+MColor MDialog::GetColor(const std::string &inID) const
 {
 	MColorSwatch *swatch = dynamic_cast<MColorSwatch *>(FindSubViewByID(inID));
 	THROW_IF_NIL(swatch);
 	return swatch->GetColor();
 }
 
-void MDialog::SetColor(const string &inID, MColor inColor)
+void MDialog::SetColor(const std::string &inID, MColor inColor)
 {
 	MColorSwatch *swatch = dynamic_cast<MColorSwatch *>(FindSubViewByID(inID));
 	THROW_IF_NIL(swatch);
 	swatch->SetColor(inColor);
 }
 
-void MDialog::SetEnabled(const string &inID, bool inEnabled)
+void MDialog::SetEnabled(const std::string &inID, bool inEnabled)
 {
 	MView *view = FindSubViewByID(inID);
 	THROW_IF_NIL(view);
@@ -361,7 +359,7 @@ void MDialog::SetEnabled(const string &inID, bool inEnabled)
 		view->Disable();
 }
 
-void MDialog::SetVisible(const string &inID, bool inVisible)
+void MDialog::SetVisible(const std::string &inID, bool inVisible)
 {
 	MView *view = FindSubViewByID(inID);
 	THROW_IF_NIL(view);

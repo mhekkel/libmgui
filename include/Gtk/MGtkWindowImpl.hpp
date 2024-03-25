@@ -39,8 +39,6 @@ class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin, public MGtkCo
 	MGtkWindowImpl(MWindowFlags inFlags, MWindow *inWindow);
 	~MGtkWindowImpl();
 
-	static void RecycleWindows();
-
 	virtual void Create(MRect inBounds, const std::string &inTitle);
 
 	// A window contains a VBox, and in this VBox you have to add the various elements.
@@ -108,6 +106,4 @@ class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin, public MGtkCo
 	MGtkWidgetMixin *mFocus;
 	bool mConfigured;
 	GtkEventController *mShortcutController = nullptr;
-	
-	static std::list<MWindow *> sRecycle;
 };

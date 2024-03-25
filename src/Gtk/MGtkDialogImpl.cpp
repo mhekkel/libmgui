@@ -42,7 +42,6 @@
 
 #include <zeep/xml/document.hpp>
 
-using namespace std;
 using namespace zeep;
 
 namespace
@@ -62,7 +61,7 @@ int get_attribute_int(const zeep::xml::element *e, const char *name)
 class MGtkDialogImpl : public MGtkWindowImpl
 {
   public:
-	MGtkDialogImpl(const string &inResource, MWindow *inParent)
+	MGtkDialogImpl(const std::string &inResource, MWindow *inParent)
 		: MGtkWindowImpl(MWindowFlags(0), inParent)
 		, mResponse(this, &MGtkDialogImpl::OnResponse)
 		, mRsrc(inResource)
@@ -103,9 +102,9 @@ class MGtkDialogImpl : public MGtkWindowImpl
 	// MView *CreateListView(xml::element *inTemplate, int32_t inX, int32_t inY);
 	MView *CreateCanvas(xml::element *inTemplate, int32_t inX, int32_t inY);
 
-	uint32_t GetTextWidth(const string &inText, const wchar_t *inClass, int inPartID, int inStateID);
+	uint32_t GetTextWidth(const std::string &inText, const wchar_t *inClass, int inPartID, int inStateID);
 
-	string l(const string &s) { return GetLocalisedStringForContext(mRsrc, s); }
+	std::string l(const std::string &s) { return GetLocalisedStringForContext(mRsrc, s); }
 
 	void OnResponse(int32_t inResponseID)
 	{
@@ -138,9 +137,9 @@ class MGtkDialogImpl : public MGtkWindowImpl
 
 	float mDLUX, mDLUY;
 
-	string mRsrc;
-	list<MRadiobutton *> mRadioGroup;
-	vector<string> mResponseIDs;
+	std::string mRsrc;
+	std::list<MRadiobutton *> mRadioGroup;
+	std::vector<std::string> mResponseIDs;
 	int32_t mDefaultResponse;
 	bool mResultIsOK;
 };
@@ -192,7 +191,7 @@ void MGtkDialogImpl::Create(MRect inBounds, const std::string &inTitle)
 
 void MGtkDialogImpl::Finish()
 {
-	string resource = string("Dialogs/") + mRsrc + ".xml";
+	std::string resource = std::string("Dialogs/") + mRsrc + ".xml";
 	mrsrc::istream rsrc(resource);
 
 	if (not rsrc)
@@ -204,10 +203,10 @@ void MGtkDialogImpl::Finish()
 	if (dialog == nullptr)
 		THROW(("Invalid dialog resource"));
 
-	string title = l(dialog->get_attribute("title"));
+	std::string title = l(dialog->get_attribute("title"));
 
 	mFlags = kMFixedSize;
-	string flags = dialog->get_attribute("flags");
+	std::string flags = dialog->get_attribute("flags");
 	if (flags.find("flexible") != std::string::npos)
 		mFlags = MWindowFlags(mFlags & ~kMFixedSize);
 	if (flags.find("nosizebox") != std::string::npos)
@@ -340,8 +339,8 @@ void MGtkDialogImpl::GetMargins(xml::element *inTemplate,
 
 MView *MGtkDialogImpl::CreateButton(xml::element *inTemplate, int32_t inX, int32_t inY)
 {
-	string id = inTemplate->get_attribute("id");
-	string title = l(inTemplate->get_attribute("title"));
+	std::string id = inTemplate->get_attribute("id");
+	std::string title = l(inTemplate->get_attribute("title"));
 
 	//	float idealWidth = GetTextWidth(title, VSCLASS_BUTTON, BP_PUSHBUTTON, PBS_NORMAL) + 10 * mDLUX;
 	//	if (idealWidth < 50 * mDLUX)
@@ -371,7 +370,7 @@ MView *MGtkDialogImpl::CreateButton(xml::element *inTemplate, int32_t inX, int32
 
 MView *MGtkDialogImpl::CreateColorSwatch(xml::element *inTemplate, int32_t inX, int32_t inY)
 {
-	string id = inTemplate->get_attribute("id");
+	std::string id = inTemplate->get_attribute("id");
 
 	MRect bounds; //(inX, inY, static_cast<int32_t>(25 * mDLUX), static_cast<int32_t>(14 * mDLUY));
 
@@ -385,8 +384,8 @@ MView *MGtkDialogImpl::CreateColorSwatch(xml::element *inTemplate, int32_t inX, 
 
 MView *MGtkDialogImpl::CreateExpander(xml::element *inTemplate, int32_t inX, int32_t inY)
 {
-	string id = inTemplate->get_attribute("id");
-	string title = l(inTemplate->get_attribute("title"));
+	std::string id = inTemplate->get_attribute("id");
+	std::string title = l(inTemplate->get_attribute("title"));
 
 	MRect bounds; //(inX, inY,
 	              //		static_cast<int32_t>((13 + 3) * mDLUX) +
@@ -409,16 +408,16 @@ MView *MGtkDialogImpl::CreateExpander(xml::element *inTemplate, int32_t inX, int
 
 MView *MGtkDialogImpl::CreateCanvas(xml::element *inTemplate, int32_t inX, int32_t inY)
 {
-	string id = inTemplate->get_attribute("id");
+	std::string id = inTemplate->get_attribute("id");
 	return new MCanvas(id, { inX, inY, 2, 2 });
 }
 
 MView *MGtkDialogImpl::CreateCaption(xml::element *inTemplate, int32_t inX, int32_t inY)
 {
-	string id = inTemplate->get_attribute("id");
+	std::string id = inTemplate->get_attribute("id");
 	if (id.empty())
 		id = "caption";
-	string text = l(inTemplate->get_attribute("text"));
+	std::string text = l(inTemplate->get_attribute("text"));
 
 	MRect bounds; //(inX, static_cast<int32_t>(inY), 0, static_cast<int32_t>(10 * mDLUY));
 	              //	bounds.width = GetTextWidth(text, VSCLASS_TEXTSTYLE, TEXT_BODYTEXT, 0);
@@ -427,8 +426,8 @@ MView *MGtkDialogImpl::CreateCaption(xml::element *inTemplate, int32_t inX, int3
 
 MView *MGtkDialogImpl::CreateCheckbox(xml::element *inTemplate, int32_t inX, int32_t inY)
 {
-	string id = inTemplate->get_attribute("id");
-	string title = l(inTemplate->get_attribute("title"));
+	std::string id = inTemplate->get_attribute("id");
+	std::string title = l(inTemplate->get_attribute("title"));
 
 	MRect bounds; //(inX, inY, 0, static_cast<int32_t>(10 * mDLUY));
 	              //	bounds.width = static_cast<int32_t>(14 * mDLUX) +
@@ -443,8 +442,8 @@ MView *MGtkDialogImpl::CreateCheckbox(xml::element *inTemplate, int32_t inX, int
 
 MView *MGtkDialogImpl::CreateRadiobutton(xml::element *inTemplate, int32_t inX, int32_t inY)
 {
-	string id = inTemplate->get_attribute("id");
-	string title = l(inTemplate->get_attribute("title"));
+	std::string id = inTemplate->get_attribute("id");
+	std::string title = l(inTemplate->get_attribute("title"));
 
 	MRect bounds; //(inX, inY, 0, static_cast<int32_t>(10 * mDLUY));
 	              //	bounds.width = static_cast<int32_t>(14 * mDLUX) +
@@ -461,7 +460,7 @@ MView *MGtkDialogImpl::CreateRadiobutton(xml::element *inTemplate, int32_t inX, 
 
 MView *MGtkDialogImpl::CreateCombobox(xml::element *inTemplate, int32_t inX, int32_t inY)
 {
-	string id = inTemplate->get_attribute("id");
+	std::string id = inTemplate->get_attribute("id");
 
 	MRect bounds; //(inX, inY, static_cast<int32_t>(50 * mDLUX), static_cast<int32_t>(14 * mDLUY));
 	MCombobox *combobox = new MCombobox(id, bounds);
@@ -472,7 +471,7 @@ MView *MGtkDialogImpl::CreateCombobox(xml::element *inTemplate, int32_t inX, int
 
 MView *MGtkDialogImpl::CreateEdittext(xml::element *inTemplate, int32_t inX, int32_t inY)
 {
-	string id = inTemplate->get_attribute("id");
+	std::string id = inTemplate->get_attribute("id");
 
 	uint32_t flags = eMEditTextNoFlags;
 	if (inTemplate->get_attribute("style").find("right") != std::string::npos)
@@ -497,20 +496,20 @@ MView *MGtkDialogImpl::CreateEdittext(xml::element *inTemplate, int32_t inX, int
 
 MView *MGtkDialogImpl::CreateFiller(xml::element *inTemplate, int32_t inX, int32_t inY)
 {
-	string id = inTemplate->get_attribute("id");
+	std::string id = inTemplate->get_attribute("id");
 	return new MSimpleControl(id, { inX, inY, 0, 0 });
 }
 
 MView *MGtkDialogImpl::CreatePopup(xml::element *inTemplate, int32_t inX, int32_t inY)
 {
-	string id = inTemplate->get_attribute("id");
+	std::string id = inTemplate->get_attribute("id");
 
 	MRect bounds; //(inX, inY, 0, static_cast<int32_t>(14 * mDLUY));
 
-	vector<string> choices;
+	std::vector<std::string> choices;
 	for (xml::element *option : inTemplate->find("./option"))
 	{
-		string label = option->get_content();
+		std::string label = option->get_content();
 		//		int32_t width = GetTextWidth(label, VSCLASS_COMBOBOX, CP_DROPDOWNBUTTON, CBXSL_NORMAL);
 		//		if (bounds.width < width)
 		//			bounds.width = width;
@@ -530,7 +529,7 @@ MView *MGtkDialogImpl::CreatePopup(xml::element *inTemplate, int32_t inX, int32_
 
 MView *MGtkDialogImpl::CreatePager(xml::element *inTemplate, int32_t inX, int32_t inY)
 {
-	string id = inTemplate->get_attribute("id");
+	std::string id = inTemplate->get_attribute("id");
 
 	MRect r(inX, inY, 0, 0);
 	MPager *result = new MPager(id, r);
@@ -562,14 +561,14 @@ MView *MGtkDialogImpl::CreatePager(xml::element *inTemplate, int32_t inX, int32_
 
 MView *MGtkDialogImpl::CreateListBox(xml::element *inTemplate, int32_t inX, int32_t inY)
 {
-	string id = inTemplate->get_attribute("id");
+	std::string id = inTemplate->get_attribute("id");
 
 	MRect r(inX, inY, 0, 0);
 	MListBox *result = new MListBox(id, r);
 
 	for (auto listitem : inTemplate->find("./listitem"))
 	{
-		string text = l(listitem->get_content());
+		std::string text = l(listitem->get_content());
 		//		int32_t textWidth = GetTextWidth(text, VSCLASS_LISTBOX, LBCP_ITEM, 0);
 		//		if (r.width < textWidth)
 		//			r.width = textWidth;
@@ -586,14 +585,14 @@ MView *MGtkDialogImpl::CreateListBox(xml::element *inTemplate, int32_t inX, int3
 
 // MView *MGtkDialogImpl::CreateListView(xml::element *inTemplate, int32_t inX, int32_t inY)
 // {
-// 	string id = inTemplate->get_attribute("id");
+// 	std::string id = inTemplate->get_attribute("id");
 
 // 	MRect r(inX, inY, 0, 0);
 // 	MListView *result = new MListView(id, r);
 
 // 	for (xml::element *listitem : inTemplate->find("./listitem"))
 // 	{
-// 		string text = l(listitem->get_content());
+// 		std::string text = l(listitem->get_content());
 // 		//		int32_t textWidth = GetTextWidth(text, VSCLASS_LISTBOX, LBCP_ITEM, 0);
 // 		//		if (r.width < textWidth)
 // 		//			r.width = textWidth;
@@ -616,8 +615,8 @@ MView *MGtkDialogImpl::CreateSeparator(xml::element *inTemplate, int32_t inX, in
 
 MView *MGtkDialogImpl::CreateScrollbar(xml::element *inTemplate, int32_t inX, int32_t inY)
 {
-	string id = inTemplate->get_attribute("id");
-	string orientation = inTemplate->get_attribute("orientation");
+	std::string id = inTemplate->get_attribute("id");
+	std::string orientation = inTemplate->get_attribute("orientation");
 
 	MRect bounds(inX, inY, kScrollbarWidth, kScrollbarWidth);
 
@@ -631,7 +630,7 @@ MView *MGtkDialogImpl::CreateScrollbar(xml::element *inTemplate, int32_t inX, in
 
 MView *MGtkDialogImpl::CreateBox(xml::element *inTemplate, int32_t inX, int32_t inY, bool inHorizontal)
 {
-	string id = inTemplate->get_attribute("id");
+	std::string id = inTemplate->get_attribute("id");
 
 	uint32_t spacing = get_attribute_int(inTemplate, "spacing");
 	uint32_t padding = get_attribute_int(inTemplate, "padding");
@@ -658,9 +657,9 @@ MView *MGtkDialogImpl::CreateBox(xml::element *inTemplate, int32_t inX, int32_t 
 
 // MView *MGtkDialogImpl::CreateTable(xml::element *inTemplate, int32_t inX, int32_t inY)
 // {
-// 	string id = inTemplate->get_attribute("id");
+// 	std::string id = inTemplate->get_attribute("id");
 
-// 	vector<MView *> views;
+// 	std::vector<MView *> views;
 // 	uint32_t colCount = 0, rowCount = 0;
 
 // 	for (xml::element *row : inTemplate->find("./row"))
@@ -697,7 +696,7 @@ MView *MGtkDialogImpl::CreateControls(xml::element *inTemplate, int32_t inX, int
 {
 	MView *result = nullptr;
 
-	string name = inTemplate->name();
+	std::string name = inTemplate->name();
 
 	if (name == "button")
 		result = CreateButton(inTemplate, inX, inY);
@@ -792,7 +791,7 @@ MView *MGtkDialogImpl::CreateControls(xml::element *inTemplate, int32_t inX, int
 	return result;
 }
 
-uint32_t MGtkDialogImpl::GetTextWidth(const string &inText,
+uint32_t MGtkDialogImpl::GetTextWidth(const std::string &inText,
 	const wchar_t *inClass, int inPartID, int inStateID)
 {
 	uint32_t result = 0;
@@ -820,7 +819,7 @@ uint32_t MGtkDialogImpl::GetTextWidth(const string &inText,
 
 // --------------------------------------------------------------------
 
-MWindowImpl *MWindowImpl::CreateDialog(const string &inResource, MWindow *inWindow)
+MWindowImpl *MWindowImpl::CreateDialog(const std::string &inResource, MWindow *inWindow)
 {
 	return new MGtkDialogImpl(inResource, inWindow);
 }

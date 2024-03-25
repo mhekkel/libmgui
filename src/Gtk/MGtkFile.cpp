@@ -35,7 +35,6 @@
 #include <cassert>
 #include <filesystem>
 
-using namespace std;
 namespace fs = std::filesystem;
 
 // ------------------------------------------------------------------
@@ -52,7 +51,7 @@ namespace fs = std::filesystem;
 
 int32_t read_attribute(const fs::path &inPath, const char *inName, void *outData, size_t inDataSize)
 {
-	string path = inPath.string();
+	std::string path = inPath.string();
 
 	return extattr_get_file(path.c_str(), EXTATTR_NAMESPACE_USER,
 		inName, outData, inDataSize);
@@ -60,7 +59,7 @@ int32_t read_attribute(const fs::path &inPath, const char *inName, void *outData
 
 int32_t write_attribute(const fs::path &inPath, const char *inName, const void *inData, size_t inDataSize)
 {
-	string path = inPath.string();
+	std::string path = inPath.string();
 
 	time_t t = last_write_time(inPath);
 
@@ -79,9 +78,9 @@ int32_t write_attribute(const fs::path &inPath, const char *inName, const void *
 
 // #include <attr/attributes.h>
 
-int32_t read_attribute(const fs::path &inPath, const char *inName, void *outData, size_t inDataSize)
+int32_t read_attribute(const fs::path &inPath, const char *inName, void *outData, std::size_t inDataSize)
 {
-	string path = inPath.string();
+	std::string path = inPath.string();
 
 	int length = inDataSize;
 	// int err = ::attr_get(path.c_str(), inName,
@@ -93,9 +92,9 @@ int32_t read_attribute(const fs::path &inPath, const char *inName, void *outData
 	return length;
 }
 
-int32_t write_attribute(const fs::path &inPath, const char *inName, const void *inData, size_t inDataSize)
+int32_t write_attribute(const fs::path &inPath, const char *inName, const void *inData, std::size_t inDataSize)
 {
-	string path = inPath.string();
+	std::string path = inPath.string();
 
 	// (void)::attr_set(path.c_str(), inName,
 	// 	reinterpret_cast<const char*>(inData), inDataSize, 0);
@@ -114,14 +113,14 @@ int32_t write_attribute(const fs::path &inPath, const char *inName, const void *
 
 int32_t read_attribute(const fs::path &inPath, const char *inName, void *outData, size_t inDataSize)
 {
-	string path = inPath.string();
+	std::string path = inPath.string();
 
 	return ::getxattr(path.c_str(), inName, outData, inDataSize, 0, 0);
 }
 
 int32_t write_attribute(const fs::path &inPath, const char *inName, const void *inData, size_t inDataSize)
 {
-	string path = inPath.string();
+	std::string path = inPath.string();
 
 	(void)::setxattr(path.c_str(), inName, inData, inDataSize, 0, 0);
 }
@@ -147,7 +146,7 @@ namespace MFileDialogs
 
 // 		THROW_IF_NIL(dialog);
 
-// 		string currentFolder = "."; //gApp->GetCurrentFolder();
+// 		std::string currentFolder = "."; //gApp->GetCurrentFolder();
 
 // 		if (currentFolder.length() > 0)
 // 		{
@@ -349,7 +348,7 @@ namespace MFileDialogs
 // //
 // //		THROW_IF_NIL(dialog);
 // //
-// //		string currentFolder = gApp->GetCurrentFolder();
+// //		std::string currentFolder = gApp->GetCurrentFolder();
 // //
 // //		if (currentFolder.length() > 0)
 // //		{

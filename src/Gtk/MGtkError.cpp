@@ -38,8 +38,6 @@
 
 #include <gtk/gtk.h>
 
-using namespace std;
-
 #ifndef NDEBUG
 
 const char *__S_FILE;
@@ -55,7 +53,7 @@ void __debug_printf(const char *inStr, ...)
 	vsnprintf(msg, sizeof(msg), inStr, vl);
 	va_end(vl);
 
-	cerr << msg << '\n';
+	std::cerr << msg << '\n';
 }
 
 void __signal_throw(
@@ -64,7 +62,7 @@ void __signal_throw(
 	const char *inFile,
 	int inLine)
 {
-	cerr << "Throwing in file " << inFile << " line " << inLine
+	std::cerr << "Throwing in file " << inFile << " line " << inLine
 		 << " \"" << inFunction << "\": \n"
 		 << inCode << '\n';
 
