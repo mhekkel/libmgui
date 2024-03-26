@@ -129,9 +129,12 @@ class ExampleApp : public MApplication
 
 	void Quit()
 	{
-		DisplayAlert(nullptr, "close-all-windows-alert");
-
-		// MApplication::DoQuit();
+		DisplayAlert(nullptr, "close-all-windows-alert",
+			[this](int inReply) {
+				if (inReply == 1)
+					MApplication::DoQuit();
+			}
+		);
 	}
 
 	void About()

@@ -41,7 +41,7 @@ class MColorSquare : public MCanvas
 	MColorSquare(const std::string &inID, MRect inBounds, MColorPicker &inPicker);
 
 	// virtual void	Draw(MRect inUpdate);
-	virtual void Draw();
+	void Draw() override;
 
 	void SetColor(MColor inColor);
 	void SetMode(MPickerMode inMode);
@@ -228,7 +228,7 @@ class MColorSlider : public MCanvas
 	MColorSlider(const std::string &inID, MRect inBounds, MColorPicker &inPicker);
 
 	// virtual void	Draw(MRect inUpdate);
-	virtual void Draw();
+	void Draw() override;
 
 	void SetColor(MColor inColor);
 	void SetMode(MPickerMode inMode);
@@ -398,10 +398,20 @@ class MColorSample : public MCanvas
 	MColorSample(const std::string &inID, MRect inBounds, MColorPicker &inPicker, MColor &inColor);
 
 	// virtual void	Draw(MRect inUpdate);
-	virtual void Draw();
+	void Draw() override;
 
-	virtual void MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, uint32_t inModifiers);
-	virtual void MouseUp(int32_t inX, int32_t inY, uint32_t inModifiers);
+	void ClickPressed(int32_t inX, int32_t inY, int32_t inClickCount) override
+	{
+		mMouseDown = true;
+	}
+
+	void ClickReleased(int32_t inX, int32_t inY, int32_t inClickCount) override
+	{
+		if (mMouseDown and mBounds.ContainsPoint(inX, inY))
+			mPicker.SetColor(mColor);
+
+		mMouseDown = false;
+	}
 
 	void SetColor(MColor inColor);
 
@@ -430,20 +440,6 @@ void MColorSample::Draw()
 	MRect bounds = GetBounds();
 
 	dev.FillRect(bounds);
-}
-
-void MColorSample::MouseDown(int32_t inX, int32_t inY,
-	uint32_t inClickCount, uint32_t inModifiers)
-{
-	mMouseDown = true;
-}
-
-void MColorSample::MouseUp(int32_t inX, int32_t inY, uint32_t inModifiers)
-{
-	if (mMouseDown and mBounds.ContainsPoint(inX, inY))
-		mPicker.SetColor(mColor);
-
-	mMouseDown = false;
 }
 
 void MColorSample::SetColor(MColor inColor)

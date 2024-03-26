@@ -37,6 +37,14 @@
 
 namespace xml = zeep::xml;
 
+static void OnDialogResult(GtkDialog *dialog, gint inReplyButton, AlertReplyHandlerBase *inHandler)
+{
+	if (inHandler != nullptr)
+		inHandler->HandleReply(inReplyButton);
+	
+	gtk_window_destroy(GTK_WINDOW(dialog));
+}
+
 GtkWidget *CreateAlertWithArgs(const char *inResourceName, std::initializer_list<std::string> inArgs)
 {
 	using namespace std::literals;
@@ -134,18 +142,12 @@ GtkWidget *CreateAlertWithArgs(const char *inResourceName, std::initializer_list
 	if (defaultButton >= 0)
 		gtk_dialog_set_default_response(GTK_DIALOG(dlg), defaultButton);
 
-	g_signal_connect_swapped(GTK_DIALOG(dlg),
-		"response",
-		G_CALLBACK(gtk_window_destroy),
-		dlg);
-
 	return dlg;
 }
 
-int32_t DisplayAlert(MWindow *inParent, const std::string &inResourceName, std::initializer_list<std::string> inArgs)
+void DisplayAlert(MWindow *inParent, const std::string &inResourceName,
+	AlertReplyHandlerBase *inHandler, std::initializer_list<std::string> inArgs)
 {
-	int32_t result = -1;
-
 	try
 	{
 		GtkWidget *dlg = CreateAlertWithArgs(inResourceName.c_str(), inArgs);
@@ -172,6 +174,8 @@ int32_t DisplayAlert(MWindow *inParent, const std::string &inResourceName, std::
 				GTK_WINDOW(impl->GetWidget()));
 		}
 
+		g_signal_connect(GTK_DIALOG(dlg), "response", G_CALLBACK(OnDialogResult), inHandler);
+
 		gtk_window_present_with_time(GTK_WINDOW(dlg), GDK_CURRENT_TIME);
 
 		// #warning FIXME
@@ -181,8 +185,15 @@ int32_t DisplayAlert(MWindow *inParent, const std::string &inResourceName, std::
 	}
 	catch (const std::exception &e)
 	{
-		DisplayError(e);
+		try
+		{
+			DisplayError(e);
+		}
+		catch (const std::exception &e2)
+		{
+			std::cerr << e.what() << '\n'
+					  << "Additionally, you seem to have a problem with resources... exiting\n";
+			std::exit(1);
+		}
 	}
-
-	return result;
 }

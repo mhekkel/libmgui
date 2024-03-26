@@ -26,6 +26,7 @@
 
 #pragma once
 
+#include <concepts>
 #include <exception>
 #include <future>
 #include <sstream>
@@ -37,8 +38,46 @@ void DisplayError(const std::exception &inException);
 void DisplayError(const std::string &inError);
 void DisplayError(const std::error_code &inError);
 
-int32_t DisplayAlert(MWindow *inParent, const std::string &inResourceName,
-	std::initializer_list<std::string> inArguments = {});
+template <typename T>
+concept ReplyHandlerCallbackType = std::is_invocable_v<T, int>;
+
+
+struct AlertReplyHandlerBase
+{
+	virtual ~AlertReplyHandlerBase() = default;
+
+	virtual void HandleReply(int inReplyBtn) = 0;
+};
+
+template <ReplyHandlerCallbackType Handler>
+struct AlertReplyHandler : public AlertReplyHandlerBase
+{
+	AlertReplyHandler(Handler &&handler)
+		: mHandler(std::move(handler))
+	{
+	}
+
+	void HandleReply(int inReplyBtn) override
+	{
+		mHandler(inReplyBtn);
+	}
+
+	Handler mHandler;
+};
 
 void DisplayAlert(MWindow *inParent, const std::string &inResourceName,
-	std::promise<int> &inReply, std::initializer_list<std::string> inArguments = {});
+	AlertReplyHandlerBase *inHandler, std::initializer_list<std::string> inArguments = {});
+
+template <ReplyHandlerCallbackType Handler>
+void DisplayAlert(MWindow *inParent, const std::string &inResourceName,
+	Handler &&inHandler, std::initializer_list<std::string> inArguments = {})
+{
+	DisplayAlert(inParent, inResourceName, new AlertReplyHandler(std::move(inHandler)), inArguments);
+}
+
+inline void DisplayAlert(MWindow *inParent, const std::string &inResourceName,
+	std::initializer_list<std::string> inArguments = {})
+{
+	DisplayAlert(inParent, inResourceName, nullptr, inArguments);
+}
+
