@@ -256,3 +256,167 @@ uint32_t MapToKeyCode(uint32_t inKeyValue)
 
 	return result;
 }
+
+std::pair<uint32_t,uint32_t> MapKey(uint32_t inKeyValue, uint32_t inModifier)
+{
+	uint32_t modifier, keycode;
+
+	modifier = MapModifier(inModifier);
+
+	switch (inKeyValue)
+	{
+		case GDK_KEY_KP_Space:
+			modifier |= kNumPad;
+			keycode = kSpaceKeyCode;
+			break;
+		case GDK_KEY_KP_Tab:
+			modifier |= kNumPad;
+			keycode = kTabKeyCode;
+			break;
+		case GDK_KEY_KP_Enter:
+			modifier |= kNumPad;
+			keycode = kEnterKeyCode;
+			break;
+		case GDK_KEY_KP_F1:
+			modifier |= kNumPad;
+			keycode = kF1KeyCode;
+			break;
+		case GDK_KEY_KP_F2:
+			modifier |= kNumPad;
+			keycode = kF2KeyCode;
+			break;
+		case GDK_KEY_KP_F3:
+			modifier |= kNumPad;
+			keycode = kF3KeyCode;
+			break;
+		case GDK_KEY_KP_F4:
+			modifier |= kNumPad;
+			keycode = kF4KeyCode;
+			break;
+		case GDK_KEY_KP_Home:
+			modifier |= kNumPad;
+			keycode = kHomeKeyCode;
+			break;
+		case GDK_KEY_KP_Left:
+			modifier |= kNumPad;
+			keycode = kLeftArrowKeyCode;
+			break;
+		case GDK_KEY_KP_Up:
+			modifier |= kNumPad;
+			keycode = kUpArrowKeyCode;
+			break;
+		case GDK_KEY_KP_Right:
+			modifier |= kNumPad;
+			keycode = kRightArrowKeyCode;
+			break;
+		case GDK_KEY_KP_Down:
+			modifier |= kNumPad;
+			keycode = kDownArrowKeyCode;
+			break;
+		// case GDK_KEY_KP_Prior:
+		// 	modifier = kNumPad;
+		// 	keycode = kPriorKeyCode;
+		// 	break;
+		case GDK_KEY_KP_Page_Up:
+			modifier |= kNumPad;
+			keycode = kPageUpKeyCode;
+			break;
+		// case GDK_KEY_KP_Next:
+		// 	modifier = kNumPad;
+		// 	keycode = 
+		// 	break;
+		case GDK_KEY_KP_Page_Down:
+			modifier |= kNumPad;
+			keycode = kPageDownKeyCode;
+			break;
+		case GDK_KEY_KP_End:
+			modifier |= kNumPad;
+			keycode = kEndKeyCode;
+			break;
+		case GDK_KEY_KP_Begin:
+			modifier |= kNumPad;
+			keycode = kHomeKeyCode;
+			break;
+		case GDK_KEY_KP_Insert:
+			modifier |= kNumPad;
+			keycode = kInsertKeyCode;
+			break;
+		case GDK_KEY_KP_Delete:
+			modifier |= kNumPad;
+			keycode = kDeleteKeyCode;
+			break;
+		case GDK_KEY_KP_Equal:
+			modifier |= kNumPad;
+			keycode = '=';
+			break;
+		case GDK_KEY_KP_Multiply:
+			modifier |= kNumPad;
+			keycode = kMultiplyKeyCode;
+			break;
+		case GDK_KEY_KP_Add:
+			modifier |= kNumPad;
+			keycode = '+';
+			break;
+		case GDK_KEY_KP_Separator:
+			modifier |= kNumPad;
+			keycode = ',';
+			break;
+		case GDK_KEY_KP_Subtract:
+			modifier |= kNumPad;
+			keycode = '-';
+			break;
+		case GDK_KEY_KP_Decimal:
+			modifier |= kNumPad;
+			keycode = '.';
+			break;
+		case GDK_KEY_KP_Divide:
+			modifier |= kNumPad;
+			keycode = '/';
+			break;
+		case GDK_KEY_KP_0:
+			modifier |= kNumPad;
+			keycode = '0';
+			break;
+		case GDK_KEY_KP_1:
+			modifier |= kNumPad;
+			keycode = '1';
+			break;
+		case GDK_KEY_KP_2:
+			modifier |= kNumPad;
+			keycode = '2';
+			break;
+		case GDK_KEY_KP_3:
+			modifier |= kNumPad;
+			keycode = '3';
+			break;
+		case GDK_KEY_KP_4:
+			modifier |= kNumPad;
+			keycode = '4';
+			break;
+		case GDK_KEY_KP_5:
+			modifier |= kNumPad;
+			keycode = '5';
+			break;
+		case GDK_KEY_KP_6:
+			modifier |= kNumPad;
+			keycode = '6';
+			break;
+		case GDK_KEY_KP_7:
+			modifier |= kNumPad;
+			keycode = '7';
+			break;
+		case GDK_KEY_KP_8:
+			modifier |= kNumPad;
+			keycode = '8';
+			break;
+		case GDK_KEY_KP_9:
+			modifier |= kNumPad;
+			keycode = '9';
+			break;
+		default:
+			keycode = MapToKeyCode(inKeyValue);
+			break;
+	}
+
+	return { keycode, modifier };
+}

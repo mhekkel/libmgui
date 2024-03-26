@@ -112,19 +112,27 @@ void MGtkCanvasImpl::OnPointerLeave()
 
 bool MGtkCanvasImpl::OnKeyPressed(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers)
 {
-	auto modifiers = MapModifier(gtk_event_controller_get_current_event_state(
-		GTK_EVENT_CONTROLLER(mKeyPressed.GetSourceGObject())));
+	auto modifiers_ = gtk_event_controller_get_current_event_state(
+		GTK_EVENT_CONTROLLER(mKeyPressed.GetSourceGObject()));
 
-	return mControl->KeyPressed(MapToKeyCode(inKeyValue), gdk_keyval_to_unicode(inKeyValue),
+	assert(inModifiers == modifiers_);
+
+	auto [keycode, modifiers] = MapKey(inKeyValue, inModifiers);
+
+	return mControl->KeyPressed(keycode, gdk_keyval_to_unicode(inKeyValue),
 		modifiers, mAutoRepeat);
 }
 
 void MGtkCanvasImpl::OnKeyReleased(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers)
 {
-	auto modifiers = MapModifier(gtk_event_controller_get_current_event_state(
-		GTK_EVENT_CONTROLLER(mKeyReleased.GetSourceGObject())));
+	auto modifiers_ = gtk_event_controller_get_current_event_state(
+		GTK_EVENT_CONTROLLER(mKeyReleased.GetSourceGObject()));
 
-	mControl->KeyReleased(MapToKeyCode(inKeyValue), modifiers);
+	assert(inModifiers == modifiers_);
+
+	auto [keycode, modifiers] = MapKey(inKeyValue, inModifiers);
+
+	mControl->KeyReleased(keycode, modifiers);
 }
 
 void MGtkCanvasImpl::OnKeyModifiers(GdkModifierType inModifiers)
