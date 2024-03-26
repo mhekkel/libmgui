@@ -24,6 +24,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "MGtkApplicationImpl.hpp"
 #include "MGtkWindowImpl.hpp"
 
 #include "MAlerts.hpp"
@@ -118,18 +119,25 @@ GtkWidget *CreateAlertWithArgs(const char *inResourceName, std::initializer_list
 	dlg = gtk_message_dialog_new(nullptr, GTK_DIALOG_MODAL,
 		type, GTK_BUTTONS_NONE, "%s", instruction.c_str());
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-security"
 	THROW_IF_NIL(dlg);
 	if (not content.empty())
+	{
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-security"
 		gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dlg), content.c_str());
 #pragma GCC diagnostic pop
+	}
 
 	for (auto b : btns)
 		gtk_dialog_add_button(GTK_DIALOG(dlg), b.first.c_str(), b.second);
 
 	if (defaultButton >= 0)
 		gtk_dialog_set_default_response(GTK_DIALOG(dlg), defaultButton);
+
+	g_signal_connect_swapped(GTK_DIALOG(dlg),
+		"response",
+		G_CALLBACK(gtk_window_destroy),
+		dlg);
 
 	return dlg;
 }
@@ -153,19 +161,20 @@ int32_t DisplayAlert(MWindow *inParent, const std::string &inResourceName, std::
 				GTK_WINDOW(dlg),
 				GTK_WINDOW(impl->GetWidget()));
 		}
-		else if (MWindow::GetFirstWindow() != nullptr)
+		else if (auto w = gApp->GetActiveWindow(); w != nullptr)
 		{
-			MWindow::GetFirstWindow()->Select();
+			w->Select();
 
-			MGtkWindowImpl *impl =
-				static_cast<MGtkWindowImpl *>(MWindow::GetFirstWindow()->GetImpl());
+			MGtkWindowImpl *impl = static_cast<MGtkWindowImpl *>(w->GetImpl());
 
 			gtk_window_set_transient_for(
 				GTK_WINDOW(dlg),
 				GTK_WINDOW(impl->GetWidget()));
 		}
 
-#warning FIXME
+		gtk_window_present_with_time(GTK_WINDOW(dlg), GDK_CURRENT_TIME);
+
+		// #warning FIXME
 		// result = gtk_dialog_run(GTK_DIALOG(dlg));
 
 		// gtk_widget_destroy(dlg);

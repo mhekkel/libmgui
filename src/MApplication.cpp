@@ -121,28 +121,7 @@ void MApplication::DoSelectWindowFromWindowMenu(uint32_t inIndex)
 
 bool MApplication::AllowQuit(bool inLogOff)
 {
-	bool result = mQuitPending;
-
-	if (result == false)
-	{
-		result = true;
-
-		MWindow *window = MWindow::GetFirstWindow();
-		while (window != nullptr)
-		{
-			if (not window->AllowClose(true))
-			{
-				result = false;
-				break;
-			}
-
-			window = window->GetNextWindow();
-		}
-
-		mQuitPending = result;
-	}
-
-	return result;
+	return true;
 }
 
 void MApplication::DoQuit()

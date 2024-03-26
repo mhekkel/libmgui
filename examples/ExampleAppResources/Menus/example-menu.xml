@@ -30,4 +30,9 @@
 			</radio-item>
 		</section>
 	</menu>
+	<menu id='help' label="Help">
+		<section id="1">
+			<item label="About…" cmd="app.about"/>
+		</section>
+	</menu>
 </menubar>

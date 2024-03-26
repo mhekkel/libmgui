@@ -74,6 +74,8 @@ class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin, public MGtkCo
 
 	MWindow *GetWindow() const { return mWindow; }
 
+	static MGtkWindowImpl *GetWindowImpl(GtkWindow *inW);
+
 	GObject *GetObject() override
 	{
 		return G_OBJECT(GetWidget());

@@ -27,6 +27,7 @@
 #pragma once
 
 #include <exception>
+#include <future>
 #include <sstream>
 #include <vector>
 
@@ -37,4 +38,7 @@ void DisplayError(const std::string &inError);
 void DisplayError(const std::error_code &inError);
 
 int32_t DisplayAlert(MWindow *inParent, const std::string &inResourceName,
-	std::initializer_list<std::string> inArguments);
+	std::initializer_list<std::string> inArguments = {});
+
+void DisplayAlert(MWindow *inParent, const std::string &inResourceName,
+	std::promise<int> &inReply, std::initializer_list<std::string> inArguments = {});

@@ -91,7 +91,7 @@ class MApplicationImpl
 
 	virtual void InhibitQuit(bool inInhibit, const std::string &inReason, MWindowImpl *inImpl) = 0;
 
-	// virtual void RegisterAccelerator(const std::string &inAction, char32_t inKeyCode, uint32_t inModifiers) = 0;
+	virtual MWindow *GetActiveWindow() = 0;
 
 	template <typename Handler>
 	void execute(Handler &&h)
@@ -147,6 +147,11 @@ class MApplication
 	void InhibitQuit(bool inInhibit, const std::string &inReason, MWindow *inWindow = nullptr)
 	{
 		mImpl->InhibitQuit(inInhibit, inReason, inWindow ? inWindow->GetImpl() : nullptr);
+	}
+
+	MWindow *GetActiveWindow()
+	{
+		return mImpl->GetActiveWindow();
 	}
 
 	MApplicationImpl *GetImpl() const { return mImpl; }

@@ -1,0 +1,10 @@
+<?xml version="1.0" standalone="yes" ?>
+<alert type="information">
+	<instruction>libmgui-demo ^0 - rev ^2 (^3)</instruction>
+	<content>A libmgui demo app by Maarten L. Hekkelman.
+
+See https://github.com/mhekkel/libmgui</content>
+	<buttons>
+		<button title="OK" cmd="1" default='true'/>
+	</buttons>
+</alert>

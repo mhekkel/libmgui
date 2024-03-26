@@ -42,20 +42,20 @@
 
 G_BEGIN_DECLS
 
-#define MY_GTK_TYPE_WINDOW (mgtk_window_get_type())
+#define MGTK_TYPE_WINDOW (mgtk_window_get_type())
 
-G_DECLARE_FINAL_TYPE(MyGtkWindow, mgtk_window, MY_GTK, WINDOW, GtkApplicationWindow)
+G_DECLARE_FINAL_TYPE(MGtkWindow, mgtk_window, MGTK, WINDOW, GtkApplicationWindow)
 
-struct _MyGtkWindow
+struct _MGtkWindow
 {
 	GtkApplicationWindow parent_instance;
 
 	MGtkWindowImpl *m_impl;
 };
 
-typedef struct _MyGtkWindow MyGtkWindow;
+typedef struct _MGtkWindow MGtkWindow;
 
-G_DEFINE_FINAL_TYPE(MyGtkWindow, mgtk_window, GTK_TYPE_APPLICATION_WINDOW)
+G_DEFINE_FINAL_TYPE(MGtkWindow, mgtk_window, GTK_TYPE_APPLICATION_WINDOW)
 
 G_END_DECLS
 
@@ -63,13 +63,13 @@ G_END_DECLS
 
 static void mgtk_window_finalize(GObject *object)
 {
-	MyGtkWindow *self = MY_GTK_WINDOW(object);
+	MGtkWindow *self = MGTK_WINDOW(object);
 	delete self->m_impl->GetWindow();
 
 	G_OBJECT_CLASS(mgtk_window_parent_class)->finalize(object);
 }
 
-static void mgtk_window_class_init(MyGtkWindowClass *klass)
+static void mgtk_window_class_init(MGtkWindowClass *klass)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS(klass);
 	GtkWidgetClass *widget_class = GTK_WIDGET_CLASS(klass);
@@ -78,15 +78,15 @@ static void mgtk_window_class_init(MyGtkWindowClass *klass)
 	object_class->finalize = mgtk_window_finalize;
 }
 
-static void mgtk_window_init(MyGtkWindow *self)
+static void mgtk_window_init(MGtkWindow *self)
 {
 }
 
-MyGtkWindow *mgtk_window_new(GtkApplication *app, MGtkWindowImpl *impl)
+MGtkWindow *mgtk_window_new(GtkApplication *app, MGtkWindowImpl *impl)
 {
 	GtkWindowGroup *group = gtk_window_group_new();
 
-	MyGtkWindow *result = static_cast<MyGtkWindow *>(g_object_new(MY_GTK_TYPE_WINDOW, "application", app, nullptr));
+	MGtkWindow *result = static_cast<MGtkWindow *>(g_object_new(MGTK_TYPE_WINDOW, "application", app, nullptr));
 	gtk_window_group_add_window(group, GTK_WINDOW(result));
 	g_object_unref(group);
 
@@ -182,6 +182,12 @@ void MGtkWindowImpl::Create(MRect inBounds, const std::string &inTitle)
 
 	//	mChanged.Connect(this, "on_changed");
 }
+
+MGtkWindowImpl *MGtkWindowImpl::GetWindowImpl(GtkWindow *inW)
+{
+	return MGTK_IS_WINDOW(inW) ? MGTK_WINDOW(inW)->m_impl : nullptr;
+}
+
 
 void MGtkWindowImpl::AddMenubarWidget(GtkWidget *inWidget)
 {

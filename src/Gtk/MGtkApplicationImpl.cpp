@@ -171,7 +171,7 @@ void MGtkApplicationImpl::InhibitQuit(bool inInhibit, const std::string &inReaso
 	{
 		if (not mInhibitCookie)
 		{
-			if (auto w = MWindow::GetFirstWindow(); inImpl == nullptr and w != nullptr)
+			if (auto w = gApp->GetActiveWindow(); inImpl == nullptr and w != nullptr)
 				inImpl = w->GetImpl();
 
 			GtkWindow *gw = inImpl ? GTK_WINDOW(static_cast<MGtkWindowImpl *>(inImpl)->GetWidget()) : nullptr;
@@ -195,6 +195,18 @@ void MGtkApplicationImpl::Quit()
 	std::unique_lock lock(mMutex);
 	mHandlerQueue.push_front(nullptr);
 	mCV.notify_one();
+}
+
+MWindow *MGtkApplicationImpl::GetActiveWindow()
+{
+	MWindow *result = nullptr;
+	if (auto w = gtk_application_get_active_window(mGtkApplication); w != nullptr)
+	{
+		if (auto impl = MGtkWindowImpl::GetWindowImpl(w); impl != nullptr)
+			result = impl->GetWindow();
+	}
+	
+	return result;
 }
 
 void MGtkApplicationImpl::ProcessAsyncTasks(GMainContext *context)

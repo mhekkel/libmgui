@@ -138,14 +138,6 @@ class MWindow : public MView
 	// void Beep();
 
 	// --------------------------------------------------------------------
-	// Window List
-
-	static MWindow *GetFirstWindow();
-	MWindow *GetNextWindow() const;
-	static void RemoveWindowFromWindowList(MWindow *window);
-	static bool WindowExists(MWindow *window);
-
-	// --------------------------------------------------------------------
 
 	virtual void SetTitle(const std::string &inTitle);
 	virtual std::string GetTitle() const;
@@ -183,6 +175,4 @@ class MWindow : public MView
 	MWindowImpl *mImpl;
 	std::string mTitle;
 	bool mModified;
-
-	static std::list<MWindow *> sWindowList;
 };

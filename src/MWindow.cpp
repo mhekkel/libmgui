@@ -45,8 +45,6 @@ using namespace zeep;
 //	MWindow
 //
 
-std::list<MWindow *> MWindow::sWindowList;
-
 MWindow::MWindow(const std::string &inTitle, const MRect &inBounds, MWindowFlags inFlags)
 	: MView("window", inBounds)
 	, mImpl(MWindowImpl::Create(inTitle, inBounds, inFlags, this))
@@ -57,23 +55,18 @@ MWindow::MWindow(const std::string &inTitle, const MRect &inBounds, MWindowFlags
 	mBounds.x = mBounds.y = 0;
 
 	SetBindings(true, true, true, true);
-
-	sWindowList.push_back(this);
 }
 
 MWindow::MWindow(MWindowImpl *inImpl)
 	: MView("window", MRect(0, 0, 100, 100))
 	, mImpl(inImpl)
 {
-SetBindings(true, true, true, true);
-
-	sWindowList.push_back(this);
+	SetBindings(true, true, true, true);
 }
 
 MWindow::~MWindow()
 {
 	delete mImpl;
-	RemoveWindowFromWindowList(this);
 }
 
 void MWindow::SetImpl(MWindowImpl *inImpl)
@@ -96,41 +89,6 @@ void MWindow::Unmapped()
 MWindowFlags MWindow::GetFlags() const
 {
 	return mImpl->GetFlags();
-}
-
-MWindow *MWindow::GetFirstWindow()
-{
-	MWindow *result = nullptr;
-	if (not sWindowList.empty())
-		result = sWindowList.front();
-	return result;
-}
-
-MWindow *MWindow::GetNextWindow() const
-{
-	MWindow *result = nullptr;
-
-	std::list<MWindow *>::const_iterator w =
-		find(sWindowList.begin(), sWindowList.end(), this);
-
-	if (w != sWindowList.end())
-	{
-		++w;
-		if (w != sWindowList.end())
-			result = *w;
-	}
-
-	return result;
-}
-
-void MWindow::RemoveWindowFromWindowList(MWindow *window)
-{
-	sWindowList.erase(remove(sWindowList.begin(), sWindowList.end(), window), sWindowList.end());
-}
-
-bool MWindow::WindowExists(MWindow *window)
-{
-	return find(sWindowList.begin(), sWindowList.end(), window) != sWindowList.end();
 }
 
 MWindow *MWindow::GetWindow() const

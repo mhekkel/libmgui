@@ -47,6 +47,8 @@ class MGtkApplicationImpl : public MApplicationImpl, public MGtkCommandEmitter
 	int RunEventLoop() override;
 	void Quit() override;
 
+	MWindow *GetActiveWindow() override;
+
 	GtkApplication *GetGtkApp() const { return mGtkApplication; }
 
 	GObject *GetObject() override

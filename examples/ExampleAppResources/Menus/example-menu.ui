@@ -34,4 +34,12 @@
 			
 		</section>
 	</menu>
+	<menu id="help">
+		<section>
+			<item>
+				<attribute name="label">About…</attribute>
+				<attribute name="action">app.about</attribute>
+			</item>
+		</section>
+	</menu>
 </interface>

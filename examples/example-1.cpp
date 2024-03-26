@@ -1,9 +1,12 @@
+#include "MAlerts.hpp"
 #include "MApplication.hpp"
 #include "MColorPicker.hpp"
 #include "MCommand.hpp"
 #include "MControls.hpp"
 #include "MMenu.hpp"
 #include "MWindow.hpp"
+
+#include "revision.hpp"
 
 #include <iostream>
 
@@ -102,6 +105,7 @@ class ExampleApp : public MApplication
 		: MApplication(impl)
 		, cNew(this, "new", &ExampleApp::DoNew, 'n', kControlKey | kShiftKey)
 		, cQuit(this, "quit", &ExampleApp::Quit, 'q', kControlKey | kShiftKey)
+		, cAbout(this, "about", &ExampleApp::About)
 	{
 	}
 
@@ -125,11 +129,19 @@ class ExampleApp : public MApplication
 
 	void Quit()
 	{
-		MApplication::DoQuit();
+		DisplayAlert(nullptr, "close-all-windows-alert");
+
+		// MApplication::DoQuit();
+	}
+
+	void About()
+	{
+		DisplayAlert(nullptr, "about-alert", { kVersionNumber, kRevisionGitTag, std::to_string(kBuildNumber), kRevisionDate });
 	}
 
 	MCommand<void()> cNew;
 	MCommand<void()> cQuit;
+	MCommand<void()> cAbout;
 };
 
 MApplication *MApplication::Create(MApplicationImpl *inImpl)
