@@ -151,9 +151,10 @@ void MGtkWidgetMixin::SetWidget(GtkWidget *inWidget)
 				GtkEventControllerScrollFlags(GTK_EVENT_CONTROLLER_SCROLL_BOTH_AXES | GTK_EVENT_CONTROLLER_SCROLL_DISCRETE));
 			gtk_widget_add_controller(GetWidget(), cntrl);
 
-			mKeyPressed.Connect(G_OBJECT(cntrl), "key-pressed");
-			mKeyReleased.Connect(G_OBJECT(cntrl), "key-released");
-			mKeyModifiers.Connect(G_OBJECT(cntrl), "modifiers");
+			mDecelerate.Connect(G_OBJECT(cntrl), "decelerate");
+			mScroll.Connect(G_OBJECT(cntrl), "scroll");
+			mScrollBegin.Connect(G_OBJECT(cntrl), "scroll-begin");
+			mScrollEnd.Connect(G_OBJECT(cntrl), "scroll-end");
 		}
 
 		if (mRequestedWidth >= 0 or mRequestedHeight >= 0)

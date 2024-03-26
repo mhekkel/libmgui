@@ -152,7 +152,7 @@ class MGtkMenuImpl : public MMenu::MMenuImpl
 
 void MGtkMenuImpl::AppendItem(const std::string &inLabel, const std::string &inSection, const std::string &inAction, bool inStateful)
 {
-	Append(inSection, g_menu_item_new(inLabel.c_str(), inAction.c_str()));
+	Append(inSection, g_menu_item_new(inLabel.c_str(), inAction.empty() ? nullptr : inAction.c_str()));
 }
 
 void MGtkMenuImpl::AppendRadioItems(const std::vector<std::string> &inLabels, const std::string &inSection, const std::string &inAction)
