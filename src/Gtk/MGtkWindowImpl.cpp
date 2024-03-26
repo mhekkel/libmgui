@@ -72,8 +72,8 @@ static void mgtk_window_finalize(GObject *object)
 static void mgtk_window_class_init(MGtkWindowClass *klass)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS(klass);
-	GtkWidgetClass *widget_class = GTK_WIDGET_CLASS(klass);
-	GtkWindowClass *window_class = GTK_WINDOW_CLASS(klass);
+	// GtkWidgetClass *widget_class = GTK_WIDGET_CLASS(klass);
+	// GtkWindowClass *window_class = GTK_WINDOW_CLASS(klass);
 
 	object_class->finalize = mgtk_window_finalize;
 }
@@ -188,16 +188,21 @@ MGtkWindowImpl *MGtkWindowImpl::GetWindowImpl(GtkWindow *inW)
 	return MGTK_IS_WINDOW(inW) ? MGTK_WINDOW(inW)->m_impl : nullptr;
 }
 
+void MGtkWindowImpl::CreateMainVBox()
+{
+	mMainVBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+	gtk_window_set_child(GTK_WINDOW(GetWidget()), mMainVBox);
+
+	gtk_widget_set_hexpand(mMainVBox, true);
+	gtk_widget_set_vexpand(mMainVBox, true);
+
+	gtk_widget_show(mMainVBox);
+}
 
 void MGtkWindowImpl::AddMenubarWidget(GtkWidget *inWidget)
 {
 	if (mMainVBox == nullptr)
-	{
-		mMainVBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-		// gtk_box_append(GTK_BOX(GetWidget()), mMainVBox);
-		gtk_window_set_child(GTK_WINDOW(GetWidget()), mMainVBox);
-		gtk_widget_show(mMainVBox);
-	}
+		CreateMainVBox();
 
 	// gtk_box_pack_start(GTK_BOX(mMainVBox), inWidget, FALSE, FALSE, 0);
 	gtk_box_append(GTK_BOX(mMainVBox), inWidget);
@@ -207,37 +212,18 @@ void MGtkWindowImpl::AddMenubarWidget(GtkWidget *inWidget)
 void MGtkWindowImpl::AddStatusbarWidget(MGtkWidgetMixin *inChild)
 {
 	if (mMainVBox == nullptr)
-	{
-		mMainVBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-		gtk_window_set_child(GTK_WINDOW(GetWidget()), mMainVBox);
-		gtk_widget_show(mMainVBox);
-	}
+		CreateMainVBox();
 
 	gtk_box_append(GTK_BOX(mMainVBox), inChild->GetWidget());
 	// gtk_widget_show_all(inChild->GetWidget());
 }
 
-void MGtkWindowImpl::Append(MGtkWidgetMixin *inChild, bool inExpand, MRect inMargins)
+void MGtkWindowImpl::Append(MGtkWidgetMixin *inChild)
 {
 	if (mMainVBox == nullptr)
-	{
-		mMainVBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-		gtk_window_set_child(GTK_WINDOW(GetWidget()), mMainVBox);
-		gtk_widget_show(mMainVBox);
-	}
+		CreateMainVBox();
 
-	auto childWidget = inChild->GetWidget();
-
-	assert(GTK_IS_WIDGET(childWidget));
-
-	gtk_widget_set_margin_top(childWidget, inMargins.y);
-	gtk_widget_set_margin_bottom(childWidget, inMargins.height);
-	gtk_widget_set_margin_start(childWidget, inMargins.x);
-	gtk_widget_set_margin_end(childWidget, inMargins.width);
-
-	gtk_widget_set_hexpand(childWidget, inExpand);
-
-	gtk_box_append(GTK_BOX(mMainVBox), childWidget);
+	gtk_box_append(GTK_BOX(mMainVBox), inChild->GetWidget());
 }
 
 void MGtkWindowImpl::SetTransientFor(MWindow *inWindow)
@@ -415,21 +401,6 @@ bool MGtkWindowImpl::Visible() const
 void MGtkWindowImpl::Select()
 {
 	//	PRINT(("Select Window (%p)", std::this_thread::get_id()));
-
-	// auto gdkWindow = gtk_widget_get_window(GetWidget());
-
-	// if (getenv("WAYLAND_DISPLAY") == nullptr)
-	// {
-	// 	auto d = gdk_x11_display_get_xdisplay(gdk_display_get_default());
-	// 	auto w = gdk_x11_window_get_xid(gdkWindow);
-
-	// 	if (d and w)
-	// 		ActivateWindow(d, w);
-	// 	else
-	// 		gdk_window_focus(gdkWindow, GDK_CURRENT_TIME);
-	// }
-	// else
-	// 	gdk_window_focus(gdkWindow, GDK_CURRENT_TIME);
 
 	if (Visible())
 		gtk_window_present_with_time(GTK_WINDOW(GetWidget()), GDK_CURRENT_TIME);

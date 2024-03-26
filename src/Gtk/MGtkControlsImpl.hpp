@@ -44,7 +44,7 @@ class MGtkControlImpl : public CONTROL::MImpl, public MGtkWidgetMixin
 	void AddedToWindow() override;
 	void FrameMoved() override;
 	void FrameResized() override;
-	void MarginsChanged() override;
+	void LayoutChanged() override;
 	void EnableSelf() override;
 	void DisableSelf() override;
 	void ShowSelf() override;
@@ -73,7 +73,7 @@ class MGtkSimpleControlImpl : public MGtkControlImpl<MSimpleControl>
   public:
 	MGtkSimpleControlImpl(MSimpleControl *inControl);
 	void CreateWidget() override;
-	void Append(MGtkWidgetMixin *inChild, bool inExpand, MRect inMargins) override;
+	void Append(MGtkWidgetMixin *inChild) override;
 };
 
 class MGtkButtonImpl : public MGtkControlImpl<MButton>
@@ -125,7 +125,7 @@ class MGtkExpanderImpl : public MGtkControlImpl<MExpander>
 	void CreateWidget() override;
 	void AddedToWindow() override;
 
-	void Append(MGtkWidgetMixin *inChild, bool inExpand, MRect inMargins) override;
+	void Append(MGtkWidgetMixin *inChild) override;
 
   private:
 	bool mIsOpen;
@@ -368,7 +368,8 @@ class MGtkBoxControlImpl : public MGtkControlImpl<MBoxControl>
 
 	void CreateWidget() override;
 
-	void Append(MGtkWidgetMixin *inChild, bool inExpand, MRect inMargins) override;
+	void Append(MGtkWidgetMixin *inChild) override;
+	void AddChild(MControlBase *inChild, MControlBase *inBefore) override;
 
 	bool mHorizontal, mHomogeneous, mExpand, mFill;
 	uint32_t mSpacing, mPadding;

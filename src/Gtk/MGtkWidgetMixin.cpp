@@ -261,7 +261,7 @@ void MGtkWidgetMixin::RequestSize(int32_t inWidth, int32_t inHeight)
 		gtk_widget_set_size_request(mWidget, mRequestedWidth, mRequestedHeight);
 }
 
-void MGtkWidgetMixin::Append(MGtkWidgetMixin *inChild, bool inExpand, MRect inMargins)
+void MGtkWidgetMixin::Append(MGtkWidgetMixin *inChild)
 {
 	assert(false);
 }

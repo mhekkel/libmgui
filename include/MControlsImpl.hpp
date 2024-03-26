@@ -56,7 +56,7 @@ class MControlImpl : public MControlImplBase
 	virtual void AddedToWindow() {}
 	virtual void FrameMoved() {}
 	virtual void FrameResized() {}
-	virtual void MarginsChanged() {}
+	virtual void LayoutChanged() {}
 	virtual void Draw() {}
 	virtual void Click(int32_t inX, int32_t inY) {}
 	virtual void EnableSelf() {}
@@ -343,6 +343,8 @@ class MBoxControlImpl : public MControlImpl<MBoxControl>
 		: MControlImpl(inControl)
 	{
 	}
+
+	virtual void AddChild(MControlBase *inChild, MControlBase *inBefore) = 0;
 
 	static MBoxControlImpl *Create(MBoxControl *inControl, bool inHorizontal,
 		bool inHomogeneous, bool inExpand, bool inFill, uint32_t inSpacing, uint32_t inPadding);

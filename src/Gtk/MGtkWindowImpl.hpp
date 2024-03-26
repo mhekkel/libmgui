@@ -45,7 +45,7 @@ class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin, public MGtkCo
 	// (in the right order, please!)
 	virtual void AddMenubarWidget(GtkWidget *inWidget);
 	virtual void AddStatusbarWidget(MGtkWidgetMixin *inChild);
-	void Append(MGtkWidgetMixin *inChild, bool inExpand, MRect inMargins) override;
+	void Append(MGtkWidgetMixin *inChild) override;
 
 	void SetTitle(std::string inTitle) override;
 
@@ -103,6 +103,8 @@ class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin, public MGtkCo
 
 	MSlot<bool()> mCloseRequest;
 	bool OnCloseRequest();
+
+	void CreateMainVBox();
 
 	GtkWidget *mMainVBox;
 	MGtkWidgetMixin *mFocus;

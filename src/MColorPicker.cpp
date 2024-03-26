@@ -49,14 +49,14 @@ class MColorSquare : public MCanvas
 	MEventIn<void(MColor)> eChangedColor;
 	MEventIn<void(MPickerMode)> eChangedMode;
 
-	void ClickPressed(int32_t inX, int32_t inY, int32_t inClickCount) override;
+	void ClickPressed(int32_t inX, int32_t inY, int32_t inClickCount, uint32_t inModifiers) override;
 
-	void ClickReleased(int32_t inX, int32_t inY, int32_t inClickCount) override
+	void ClickReleased(int32_t inX, int32_t inY, int32_t inClickCount, uint32_t inModifiers) override
 	{
 		mMouseDown = false;
 	}
 
-	void PointerMotion(int32_t inX, int32_t inY) override;
+	void PointerMotion(int32_t inX, int32_t inY, uint32_t inModifiers) override;
 
   private:
 	bool mMouseDown;
@@ -177,13 +177,13 @@ void MColorSquare::Draw()
 	dev.DrawBitmap(bitmap, 0, 0);
 }
 
-void MColorSquare::ClickPressed(int32_t inX, int32_t inY, int32_t inClickCount)
+void MColorSquare::ClickPressed(int32_t inX, int32_t inY, int32_t inClickCount, uint32_t inModifiers)
 {
 	mMouseDown = true;
-	PointerMotion(inX, inY);
+	PointerMotion(inX, inY, inModifiers);
 }
 
-void MColorSquare::PointerMotion(int32_t inX, int32_t inY)
+void MColorSquare::PointerMotion(int32_t inX, int32_t inY, uint32_t inModifiers)
 {
 	if (mMouseDown)
 	{
@@ -236,13 +236,13 @@ class MColorSlider : public MCanvas
 	MEventIn<void(MColor)> eChangedColor;
 	MEventIn<void(MPickerMode)> eChangedMode;
 
-	void ClickPressed(int32_t inX, int32_t inY, int32_t inClickCount) override;
-	void ClickReleased(int32_t inX, int32_t inY, int32_t inClickCount) override
+	void ClickPressed(int32_t inX, int32_t inY, int32_t inClickCount, uint32_t inModifiers) override;
+	void ClickReleased(int32_t inX, int32_t inY, int32_t inClickCount, uint32_t inModifiers) override
 	{
 		mMouseDown = false;
 	}
 
-	void PointerMotion(int32_t inX, int32_t inY) override;
+	void PointerMotion(int32_t inX, int32_t inY, uint32_t inModifiers) override;
 
   private:
 	bool mMouseDown;
@@ -348,13 +348,13 @@ void MColorSlider::Draw()
 	dev.DrawBitmap(bitmap, 0, 0);
 }
 
-void MColorSlider::ClickPressed(int32_t inX, int32_t inY, int32_t inClickCount)
+void MColorSlider::ClickPressed(int32_t inX, int32_t inY, int32_t inClickCount, uint32_t inModifiers)
 {
 	mMouseDown = true;
-	PointerMotion(inX, inY);
+	PointerMotion(inX, inY, inModifiers);
 }
 
-void MColorSlider::PointerMotion(int32_t inX, int32_t inY)
+void MColorSlider::PointerMotion(int32_t inX, int32_t inY, uint32_t inModifiers)
 {
 	if (mMouseDown)
 	{
@@ -400,12 +400,12 @@ class MColorSample : public MCanvas
 	// virtual void	Draw(MRect inUpdate);
 	void Draw() override;
 
-	void ClickPressed(int32_t inX, int32_t inY, int32_t inClickCount) override
+	void ClickPressed(int32_t inX, int32_t inY, int32_t inClickCount, uint32_t inModifiers) override
 	{
 		mMouseDown = true;
 	}
 
-	void ClickReleased(int32_t inX, int32_t inY, int32_t inClickCount) override
+	void ClickReleased(int32_t inX, int32_t inY, int32_t inClickCount, uint32_t inModifiers) override
 	{
 		if (mMouseDown and mBounds.ContainsPoint(inX, inY))
 			mPicker.SetColor(mColor);

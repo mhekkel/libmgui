@@ -46,20 +46,10 @@ void MGtkSimpleControlImpl::CreateWidget()
 	SetWidget(gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0));
 }
 
-void MGtkSimpleControlImpl::Append(MGtkWidgetMixin *inChild, bool inExpand, MRect inMargins)
+void MGtkSimpleControlImpl::Append(MGtkWidgetMixin *inChild)
 {
 	assert(GTK_IS_BOX(GetWidget()));
-
-	auto childWidget = inChild->GetWidget();
-
-	assert(GTK_IS_WIDGET(childWidget));
-
-	gtk_widget_set_margin_top(childWidget, inMargins.y);
-	gtk_widget_set_margin_bottom(childWidget, inMargins.height);
-	gtk_widget_set_margin_start(childWidget, inMargins.x);
-	gtk_widget_set_margin_end(childWidget, inMargins.width);
-
-	gtk_box_append(GTK_BOX(GetWidget()), childWidget);
+	gtk_box_append(GTK_BOX(GetWidget()), inChild->GetWidget());
 }
 
 MSimpleControlImpl *MSimpleControlImpl::Create(MSimpleControl *inControl)
@@ -165,10 +155,8 @@ void MGtkExpanderImpl::CreateWidget()
 	SetWidget(gtk_expander_new(mLabel.c_str()));
 }
 
-void MGtkExpanderImpl::Append(MGtkWidgetMixin *inChild, bool inExpand, MRect inMargins)
+void MGtkExpanderImpl::Append(MGtkWidgetMixin *inChild)
 {
-	// assert(GTK_IS_CONTAINER(GetWidget()));
-	// gtk_container_add(GTK_CONTAINER(GetWidget()), inChild->GetWidget());
 	gtk_expander_set_child(GTK_EXPANDER(GetWidget()), inChild->GetWidget());
 }
 
@@ -219,22 +207,22 @@ void MGtkScrollbarImpl::CreateWidget()
 	else
 		SetWidget(gtk_scrollbar_new(GTK_ORIENTATION_VERTICAL, adjustment));
 
-	eValueChanged.Connect(GetWidget(), "value-changed");
+	eValueChanged.Connect(G_OBJECT(adjustment), "value-changed");
 }
 
 int32_t MGtkScrollbarImpl::GetValue() const
 {
 	int32_t result = 0;
 
-	if (GetWidget() != nullptr)
-		result = gtk_range_get_value(GTK_RANGE(GetWidget()));
+	if (auto adj = gtk_scrollbar_get_adjustment(GTK_SCROLLBAR(GetWidget())); adj != nullptr)
+		result = gtk_adjustment_get_value(adj);
 
 	return result;
 }
 
 void MGtkScrollbarImpl::SetValue(int32_t inValue)
 {
-	GtkAdjustment *adj = gtk_range_get_adjustment(GTK_RANGE(GetWidget()));
+	GtkAdjustment *adj = gtk_scrollbar_get_adjustment(GTK_SCROLLBAR(GetWidget()));
 
 	if (adj != nullptr)
 	{
@@ -248,7 +236,7 @@ void MGtkScrollbarImpl::SetValue(int32_t inValue)
 			inValue = maxValue;
 	}
 
-	gtk_range_set_value(GTK_RANGE(GetWidget()), inValue);
+	gtk_adjustment_set_value(adj, inValue);
 }
 
 int32_t MGtkScrollbarImpl::GetTrackValue() const
@@ -259,7 +247,7 @@ int32_t MGtkScrollbarImpl::GetTrackValue() const
 void MGtkScrollbarImpl::SetAdjustmentValues(int32_t inMinValue, int32_t inMaxValue,
 	int32_t inScrollUnit, int32_t inPageSize, int32_t inValue)
 {
-	GtkAdjustment *adj = gtk_range_get_adjustment(GTK_RANGE(GetWidget()));
+	GtkAdjustment *adj = gtk_scrollbar_get_adjustment(GTK_SCROLLBAR(GetWidget()));
 
 	if (adj != nullptr)
 	{
@@ -283,13 +271,13 @@ void MGtkScrollbarImpl::SetAdjustmentValues(int32_t inMinValue, int32_t inMaxVal
 
 int32_t MGtkScrollbarImpl::GetMinValue() const
 {
-	GtkAdjustment *adj = gtk_range_get_adjustment(GTK_RANGE(GetWidget()));
+	GtkAdjustment *adj = gtk_scrollbar_get_adjustment(GTK_SCROLLBAR(GetWidget()));
 	return adj == nullptr ? 0 : gtk_adjustment_get_lower(adj);
 }
 
 int32_t MGtkScrollbarImpl::GetMaxValue() const
 {
-	GtkAdjustment *adj = gtk_range_get_adjustment(GTK_RANGE(GetWidget()));
+	GtkAdjustment *adj = gtk_scrollbar_get_adjustment(GTK_SCROLLBAR(GetWidget()));
 
 	int32_t result = 0;
 	if (adj != nullptr)
@@ -575,9 +563,10 @@ MPopupImpl *MPopupImpl::Create(MPopup *inPopup)
 
 MGtkEdittextImpl::MGtkEdittextImpl(MEdittext *inEdittext, uint32_t inFlags)
 	: MGtkControlImpl(inEdittext, "")
-	, mFlags(inFlags)
 	, mTextInserted(this, &MGtkEdittextImpl::TextInserted)
 	, mTextDeleted(this, &MGtkEdittextImpl::TextDeleted)
+	, mBuffer(nullptr)
+	, mFlags(inFlags)
 {
 }
 
@@ -989,25 +978,23 @@ MBoxControlImpl *MBoxControlImpl::Create(MBoxControl *inControl, bool inHorizont
 	return new MGtkBoxControlImpl(inControl, inHorizontal, inHomogeneous, inExpand, inFill, inSpacing, inPadding);
 }
 
-void MGtkBoxControlImpl::Append(MGtkWidgetMixin *inChild, bool inExpand, MRect inMargins)
+void MGtkBoxControlImpl::Append(MGtkWidgetMixin *inChild)
 {
 	assert(GTK_IS_BOX(GetWidget()));
+	gtk_box_append(GTK_BOX(GetWidget()), inChild->GetWidget());
+}
 
-	auto childWidget = inChild->GetWidget();
+void MGtkBoxControlImpl::AddChild(MControlBase *inControl, MControlBase *inBefore)
+{
+	if (auto ci = dynamic_cast<MGtkWidgetMixin *>(inControl->GetControlImplBase()); ci != nullptr)
+	{
+		mControl->MView::AddChild(inControl);
 
-	assert(GTK_IS_WIDGET(childWidget));
+		auto bi = inBefore ? dynamic_cast<MGtkWidgetMixin *>(inBefore->GetControlImplBase()) : nullptr;
 
-	gtk_widget_set_margin_top(childWidget, inMargins.y);
-	gtk_widget_set_margin_bottom(childWidget, inMargins.height);
-	gtk_widget_set_margin_start(childWidget, inMargins.x);
-	gtk_widget_set_margin_end(childWidget, inMargins.width);
-
-	gtk_box_append(GTK_BOX(GetWidget()), childWidget);
-	
-
-
-	// if (inPacking == ePackStart)
-	// 	gtk_box_pack_start(GTK_BOX(GetWidget()), childWidget, inExpand, inFill, 0);
-	// else
-	// 	gtk_box_pack_end(GTK_BOX(GetWidget()), childWidget, inExpand, inFill, 0);
+		if (bi == nullptr)
+			gtk_box_reorder_child_after(GTK_BOX(GetWidget()), bi->GetWidget(), ci->GetWidget());
+		else
+			gtk_box_reorder_child_after(GTK_BOX(GetWidget()), ci->GetWidget(), nullptr);
+	}
 }

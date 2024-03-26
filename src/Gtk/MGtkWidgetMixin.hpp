@@ -29,6 +29,7 @@
 #include "MGtkLib.hpp"
 
 #include "MAlerts.hpp"
+#include "MControls.hpp"
 #include "MError.hpp"
 #include "MView.hpp"
 
@@ -334,7 +335,7 @@ class MGtkWidgetMixin
 	GtkWidget *GetWidget() const { return mWidget; }
 	void SetWidget(GtkWidget *inWidget);
 
-	virtual void Append(MGtkWidgetMixin *inChild, bool inExpand, MRect inMargins);
+	virtual void Append(MGtkWidgetMixin *inChild);
 
   protected:
 	GtkWidget *mWidget;

@@ -63,7 +63,23 @@ template <class CONTROL>
 void MGtkControlImpl<CONTROL>::SetFocus()
 {
 	if (GetWidget() != nullptr)
-		gtk_widget_grab_focus(GetWidget());
+	{
+		bool b = gtk_widget_grab_focus(GetWidget());
+
+		if (not b)
+		{
+			// try harder
+			MWindow *window = this->mControl->GetWindow();
+			if (window != nullptr)
+			{
+				auto w = static_cast<MGtkWindowImpl *>(window->GetImpl());
+				gtk_window_set_focus(GTK_WINDOW(w->GetWidget()), GetWidget());
+			}
+		}
+#ifndef NDEBUG
+		std::cerr << "grabbed focus? " << std::boolalpha << b << "\n";
+#endif
+	}
 }
 
 template <class CONTROL>
@@ -147,7 +163,7 @@ void MGtkControlImpl<CONTROL>::FrameResized()
 }
 
 template <class CONTROL>
-void MGtkControlImpl<CONTROL>::MarginsChanged()
+void MGtkControlImpl<CONTROL>::LayoutChanged()
 {
 	auto widget = GetWidget();
 
@@ -222,7 +238,20 @@ void MGtkControlImpl<CONTROL>::AddedToWindow()
 	GetParentAndBounds(parent, bounds);
 
 	MControlBase *control = this->mControl;
-	parent->Append(this, control->GetExpand(), control->GetMargins());
+
+	auto layout = control->GetLayout();
+	
+	assert(GTK_IS_WIDGET(mWidget));
+
+	gtk_widget_set_margin_top(mWidget, layout.mMargin.top);
+	gtk_widget_set_margin_bottom(mWidget, layout.mMargin.bottom);
+	gtk_widget_set_margin_start(mWidget, layout.mMargin.left);
+	gtk_widget_set_margin_end(mWidget, layout.mMargin.right);
+
+	gtk_widget_set_hexpand(mWidget, layout.mHExpand);
+	gtk_widget_set_vexpand(mWidget, layout.mVExpand);
+
+	parent->Append(this);
 }
 
 template <class CONTROL>

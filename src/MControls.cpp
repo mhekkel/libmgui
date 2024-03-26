@@ -357,3 +357,8 @@ MBoxControl::MBoxControl(const std::string& inID, MRect inBounds, bool inHorizon
 		inHorizontal, inHomogeneous, inExpand, inFill, inSpacing, inPadding))
 {
 }
+
+void MBoxControl::AddChild(MControlBase *inControl, MControlBase *inBefore)
+{
+	mImpl->AddChild(inControl, inBefore);
+}

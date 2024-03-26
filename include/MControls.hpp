@@ -32,12 +32,23 @@
 
 struct MControlImplBase;
 
+struct MMargins
+{
+	uint32_t left, top, right, bottom;
+};
+
+struct MControlLayout
+{
+	bool mHExpand, mVExpand;
+	bool mHFill, mVFill;
+	MMargins mMargin;
+};
+
 class MControlBase : public MView
 {
   public:
 	MControlBase(const std::string &inID, MRect inBounds)
 		: MView(inID, inBounds)
-		, mExpand(false)
 	{
 	}
 
@@ -46,22 +57,19 @@ class MControlBase : public MView
 	virtual bool IsFocus() const = 0;
 	virtual void SetFocus() = 0;
 
-	MRect GetMargins() const
+	MControlLayout GetLayout() const
 	{
-		return MRect(mLeftMargin, mTopMargin, mRightMargin, mBottomMargin);
+		return mLayout;
 	}
 
-	bool GetExpand() const { return mExpand; }
-	void SetExpand(bool inExpand) { mExpand = inExpand; }
-
-	void SetLayout(bool inExpand, MRect inMargins)
+	virtual void SetLayout(MControlLayout inLayout) = 0;
+	void SetLayout(bool expand, bool fill, uint32_t margin)
 	{
-		mExpand = inExpand;
-		SetMargins(inMargins.x, inMargins.y, inMargins.width, inMargins.height);
+		SetLayout({ expand, expand, fill, fill, margin, margin, margin, margin });
 	}
 
   protected:
-	bool mExpand;
+	MControlLayout mLayout{};
 };
 
 template <class I>
@@ -73,7 +81,9 @@ class MControl : public MControlBase
 	virtual void MoveFrame(int32_t inXDelta, int32_t inYDelta);
 
 	virtual void ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta);
-	virtual void SetMargins(int32_t inLeftMargin, int32_t inTopMargin, int32_t inRightMargin, int32_t inBottomMargin);
+
+	using MControlBase::SetLayout;
+	virtual void SetLayout(MControlLayout inLayout) override;
 
 	virtual void Draw();
 
@@ -87,11 +97,11 @@ class MControl : public MControlBase
 		return false;
 	}
 
-	virtual void ClickPressed(int32_t inX, int32_t inY, int32_t inClickCount) {}
-	virtual void ClickReleased(int32_t inX, int32_t inY, int32_t inClickCount) {}
+	virtual void ClickPressed(int32_t inX, int32_t inY, int32_t inClickCount, uint32_t inModifiers) {}
+	virtual void ClickReleased(int32_t inX, int32_t inY, int32_t inClickCount, uint32_t inModifiers) {}
 
-	virtual void PointerEnter(int32_t inX, int32_t inY) {}
-	virtual void PointerMotion(int32_t inX, int32_t inY) {}
+	virtual void PointerEnter(int32_t inX, int32_t inY, uint32_t inModifiers) {}
+	virtual void PointerMotion(int32_t inX, int32_t inY, uint32_t inModifiers) {}
 	virtual void PointerLeave() {}
 
 	virtual void KeyPressed(uint32_t inKeyValue, uint32_t inModifiers) {}
@@ -457,4 +467,7 @@ class MBoxControl : public MControl<MBoxControlImpl>
 	MBoxControl(const std::string &inID, MRect inBounds, bool inHorizontal,
 		bool inHomogeneous = false, bool inExpand = false, bool inFill = false,
 		uint32_t inSpacing = 0, uint32_t inPadding = 0);
+
+	using MView::AddChild;
+	void AddChild(MControlBase *inControl, MControlBase *inBefore);
 };

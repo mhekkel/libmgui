@@ -78,11 +78,12 @@ void MControl<IMPL>::ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta)
 }
 
 template <class IMPL>
-void MControl<IMPL>::SetMargins(int32_t inLeftMargin, int32_t inTopMargin, int32_t inRightMargin, int32_t inBottomMargin)
-
+void MControl<IMPL>::SetLayout(MControlLayout inLayout)
 {
-	MView::SetMargins(inLeftMargin, inTopMargin, inRightMargin, inBottomMargin);
-	mImpl->MarginsChanged();
+	mLayout = inLayout;
+
+	MView::SetMargins(inLayout.mMargin.left, inLayout.mMargin.top, inLayout.mMargin.right, inLayout.mMargin.bottom);
+	mImpl->LayoutChanged();
 }
 
 template <class IMPL>

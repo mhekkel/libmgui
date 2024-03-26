@@ -64,16 +64,24 @@ void MGtkCanvasImpl::CreateWidget()
 
 	gtk_widget_set_can_focus(GetWidget(), true);
 	gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA(GetWidget()), &MGtkCanvasImpl::Draw, this, nullptr);
+
+	mResize.Connect(GetWidget(), "resize");
 }
 
 void MGtkCanvasImpl::OnGestureClickPressed(double inX, double inY, gint inClickCount)
 {
-	mControl->ClickPressed(inX, inY, inClickCount);
+	auto modifiers = MapModifier(gtk_event_controller_get_current_event_state(
+		GTK_EVENT_CONTROLLER(mGestureClickPressed.GetSourceGObject())));
+
+	mControl->ClickPressed(inX, inY, inClickCount, modifiers);
 }
 
 void MGtkCanvasImpl::OnGestureClickReleased(double inX, double inY, gint inClickCount)
 {
-	mControl->ClickReleased(inX, inY, inClickCount);
+	auto modifiers = MapModifier(gtk_event_controller_get_current_event_state(
+		GTK_EVENT_CONTROLLER(mGestureClickReleased.GetSourceGObject())));
+
+	mControl->ClickReleased(inX, inY, inClickCount, modifiers);
 }
 
 void MGtkCanvasImpl::OnGestureClickStopped()
@@ -82,12 +90,18 @@ void MGtkCanvasImpl::OnGestureClickStopped()
 
 void MGtkCanvasImpl::OnPointerEnter(double inX, double inY)
 {
-	mControl->PointerEnter(inX, inY);
+	auto modifiers = MapModifier(gtk_event_controller_get_current_event_state(
+		GTK_EVENT_CONTROLLER(mPointerEnter.GetSourceGObject())));
+
+	mControl->PointerEnter(inX, inY, modifiers);
 }
 
 void MGtkCanvasImpl::OnPointerMotion(double inX, double inY)
 {
-	mControl->PointerMotion(inX, inY);
+	auto modifiers = MapModifier(gtk_event_controller_get_current_event_state(
+		GTK_EVENT_CONTROLLER(mPointerMotion.GetSourceGObject())));
+
+	mControl->PointerMotion(inX, inY, modifiers);
 }
 
 void MGtkCanvasImpl::OnPointerLeave()
