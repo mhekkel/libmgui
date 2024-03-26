@@ -88,7 +88,6 @@ list(APPEND public_headers
 	include/MAnimation.hpp
 	include/MApplication.hpp
 	include/MCanvas.hpp
-	include/MCanvasImpl.hpp
 	include/MClipboard.hpp
 	include/MClipboardImpl.hpp
 	include/MColor.hpp

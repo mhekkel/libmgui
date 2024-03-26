@@ -27,10 +27,32 @@
 #pragma once
 
 #include "MControls.hpp"
+#include "MControlsImpl.hpp"
 
 #include <filesystem>
 
-class MCanvasImpl;
+// --------------------------------------------------------------------
+
+class MCanvas;
+
+// --------------------------------------------------------------------
+
+class MCanvasImpl : public MControlImpl<MCanvas>
+{
+  public:
+	MCanvasImpl(MCanvas *inCanvas)
+		: MControlImpl(inCanvas)
+	{
+	}
+
+	virtual ~MCanvasImpl() = default;
+
+	virtual void Invalidate();
+
+	static MCanvasImpl *Create(MCanvas *inCanvas, uint32_t inWidth, uint32_t inHeight);
+};
+
+// --------------------------------------------------------------------
 
 class MCanvas : public MControl<MCanvasImpl>
 {

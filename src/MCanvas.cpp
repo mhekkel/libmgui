@@ -25,8 +25,17 @@
  */
 
 #include "MApplication.hpp"
-#include "MCanvasImpl.hpp"
+#include "MCanvas.hpp"
 #include "MControls.inl"
+
+// --------------------------------------------------------------------
+
+void MCanvasImpl::Invalidate()
+{
+	mControl->MView::Invalidate();
+}
+
+// --------------------------------------------------------------------
 
 MCanvas::MCanvas(const std::string &inID, MRect inBounds/* , bool inAcceptDropFiles, bool inAcceptDropText */)
 	: MControl<MCanvasImpl>(inID, inBounds, MCanvasImpl::Create(this, inBounds.width, inBounds.height))

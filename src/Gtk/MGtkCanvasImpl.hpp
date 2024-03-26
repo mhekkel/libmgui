@@ -26,12 +26,12 @@
 
 #pragma once
 
+#include "MCanvas.hpp"
 #include "MGtkControlsImpl.hpp"
-
-#include "MCanvasImpl.hpp"
 
 #include <cassert>
 
+// --------------------------------------------------------------------
 
 class MGtkCanvasImpl : public MGtkControlImpl<MCanvas>
 {

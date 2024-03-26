@@ -62,6 +62,7 @@ void MGtkCanvasImpl::CreateWidget()
 	SetEventMask(MEventMask::All);
 	SetWidget(gtk_drawing_area_new());
 
+	gtk_widget_set_focusable(GetWidget(), true);
 	gtk_widget_set_can_focus(GetWidget(), true);
 	gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA(GetWidget()), &MGtkCanvasImpl::Draw, this, nullptr);
 
@@ -81,7 +82,7 @@ void MGtkCanvasImpl::OnGestureClickReleased(double inX, double inY, gint inClick
 	auto modifiers = MapModifier(gtk_event_controller_get_current_event_state(
 		GTK_EVENT_CONTROLLER(mGestureClickReleased.GetSourceGObject())));
 
-	mControl->ClickReleased(inX, inY, inClickCount, modifiers);
+	mControl->ClickReleased(inX, inY, modifiers);
 }
 
 void MGtkCanvasImpl::OnGestureClickStopped()
@@ -111,11 +112,18 @@ void MGtkCanvasImpl::OnPointerLeave()
 
 bool MGtkCanvasImpl::OnKeyPressed(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers)
 {
-	return false;
+	auto modifiers = MapModifier(gtk_event_controller_get_current_event_state(
+		GTK_EVENT_CONTROLLER(mKeyPressed.GetSourceGObject())));
+
+	return mControl->KeyPressed(MapToKeyCode(inKeyValue), modifiers);
 }
 
 void MGtkCanvasImpl::OnKeyReleased(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers)
 {
+	auto modifiers = MapModifier(gtk_event_controller_get_current_event_state(
+		GTK_EVENT_CONTROLLER(mKeyReleased.GetSourceGObject())));
+
+	mControl->KeyReleased(MapToKeyCode(inKeyValue), modifiers);
 }
 
 void MGtkCanvasImpl::OnKeyModifiers(GdkModifierType inModifiers)
@@ -168,7 +176,7 @@ void MGtkCanvasImpl::Draw(GtkDrawingArea *area, cairo_t *cr, int width, int heig
 
 void MGtkCanvasImpl::OnCommit(char *inText)
 {
-	mControl->HandleCharacter({ inText }, mAutoRepeat);
+	mControl->EnterText({ inText }/* , mAutoRepeat */);
 }
 
 void MGtkCanvasImpl::OnDecelerate(double inVelX, double inVelY)

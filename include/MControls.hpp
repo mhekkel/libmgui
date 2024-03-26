@@ -87,26 +87,17 @@ class MControl : public MControlBase
 
 	virtual void Draw();
 
-	virtual bool HandleKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat)
-	{
-		return false;
-	}
-
-	virtual bool HandleCharacter(const std::string &inText, bool inRepeat)
-	{
-		return false;
-	}
-
 	virtual void ClickPressed(int32_t inX, int32_t inY, int32_t inClickCount, uint32_t inModifiers) {}
-	virtual void ClickReleased(int32_t inX, int32_t inY, int32_t inClickCount, uint32_t inModifiers) {}
+	virtual void ClickReleased(int32_t inX, int32_t inY, uint32_t inModifiers) {}
 
 	virtual void PointerEnter(int32_t inX, int32_t inY, uint32_t inModifiers) {}
 	virtual void PointerMotion(int32_t inX, int32_t inY, uint32_t inModifiers) {}
 	virtual void PointerLeave() {}
 
-	virtual void KeyPressed(uint32_t inKeyValue, uint32_t inModifiers) {}
+	virtual bool KeyPressed(uint32_t inKeyValue, uint32_t inModifiers) { return false; }
 	virtual void KeyReleased(uint32_t inKeyValue, uint32_t inModifiers) {}
 	virtual void Modifiers(uint32_t inModifiers) {}
+	virtual void EnterText(const std::string &inText) {}
 
 	virtual void ScrollDecelerate(double inVelX, double inVelY) {}
 	virtual bool Scroll(double inX, double inY) { return false; }

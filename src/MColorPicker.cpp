@@ -51,7 +51,7 @@ class MColorSquare : public MCanvas
 
 	void ClickPressed(int32_t inX, int32_t inY, int32_t inClickCount, uint32_t inModifiers) override;
 
-	void ClickReleased(int32_t inX, int32_t inY, int32_t inClickCount, uint32_t inModifiers) override
+	void ClickReleased(int32_t inX, int32_t inY, uint32_t inModifiers) override
 	{
 		mMouseDown = false;
 	}
@@ -237,7 +237,7 @@ class MColorSlider : public MCanvas
 	MEventIn<void(MPickerMode)> eChangedMode;
 
 	void ClickPressed(int32_t inX, int32_t inY, int32_t inClickCount, uint32_t inModifiers) override;
-	void ClickReleased(int32_t inX, int32_t inY, int32_t inClickCount, uint32_t inModifiers) override
+	void ClickReleased(int32_t inX, int32_t inY, uint32_t inModifiers) override
 	{
 		mMouseDown = false;
 	}
@@ -405,7 +405,7 @@ class MColorSample : public MCanvas
 		mMouseDown = true;
 	}
 
-	void ClickReleased(int32_t inX, int32_t inY, int32_t inClickCount, uint32_t inModifiers) override
+	void ClickReleased(int32_t inX, int32_t inY, uint32_t inModifiers) override
 	{
 		if (mMouseDown and mBounds.ContainsPoint(inX, inY))
 			mPicker.SetColor(mColor);
