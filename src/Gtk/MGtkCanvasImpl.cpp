@@ -115,7 +115,8 @@ bool MGtkCanvasImpl::OnKeyPressed(guint inKeyValue, guint inKeyCode, GdkModifier
 	auto modifiers = MapModifier(gtk_event_controller_get_current_event_state(
 		GTK_EVENT_CONTROLLER(mKeyPressed.GetSourceGObject())));
 
-	return mControl->KeyPressed(MapToKeyCode(inKeyValue), modifiers);
+	return mControl->KeyPressed(MapToKeyCode(inKeyValue), gdk_keyval_to_unicode(inKeyValue),
+		modifiers, mAutoRepeat);
 }
 
 void MGtkCanvasImpl::OnKeyReleased(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers)
@@ -176,7 +177,7 @@ void MGtkCanvasImpl::Draw(GtkDrawingArea *area, cairo_t *cr, int width, int heig
 
 void MGtkCanvasImpl::OnCommit(char *inText)
 {
-	mControl->EnterText({ inText }/* , mAutoRepeat */);
+	mControl->EnterText({ inText } /* , mAutoRepeat */);
 }
 
 void MGtkCanvasImpl::OnDecelerate(double inVelX, double inVelY)

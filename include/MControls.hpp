@@ -76,52 +76,52 @@ template <class I>
 class MControl : public MControlBase
 {
   public:
-	virtual ~MControl();
+	~MControl() override;
 
-	virtual void MoveFrame(int32_t inXDelta, int32_t inYDelta);
+	void MoveFrame(int32_t inXDelta, int32_t inYDelta) override;
 
-	virtual void ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta);
+	void ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta) override;
 
 	using MControlBase::SetLayout;
-	virtual void SetLayout(MControlLayout inLayout) override;
+	void SetLayout(MControlLayout inLayout) override;
 
 	virtual void Draw();
 
-	virtual void ClickPressed(int32_t inX, int32_t inY, int32_t inClickCount, uint32_t inModifiers) {}
-	virtual void ClickReleased(int32_t inX, int32_t inY, uint32_t inModifiers) {}
+	virtual void ClickPressed(int32_t inX, int32_t inY, int32_t inClickCount, uint32_t inModifiers) { }
+	virtual void ClickReleased(int32_t inX, int32_t inY, uint32_t inModifiers) { }
 
-	virtual void PointerEnter(int32_t inX, int32_t inY, uint32_t inModifiers) {}
-	virtual void PointerMotion(int32_t inX, int32_t inY, uint32_t inModifiers) {}
-	virtual void PointerLeave() {}
+	virtual void PointerEnter(int32_t inX, int32_t inY, uint32_t inModifiers) { }
+	virtual void PointerMotion(int32_t inX, int32_t inY, uint32_t inModifiers) { }
+	virtual void PointerLeave() { }
 
-	virtual bool KeyPressed(uint32_t inKeyValue, uint32_t inModifiers) { return false; }
-	virtual void KeyReleased(uint32_t inKeyValue, uint32_t inModifiers) {}
-	virtual void Modifiers(uint32_t inModifiers) {}
-	virtual void EnterText(const std::string &inText) {}
+	virtual bool KeyPressed(uint32_t inKeyCode, char32_t inUnicode, uint32_t inModifiers, bool inAutoRepeat) { return false;}
+	virtual void KeyReleased(uint32_t inKeyValue, uint32_t inModifiers) { }
+	virtual void Modifiers(uint32_t inModifiers) { }
+	virtual void EnterText(const std::string &inText) { }
 
-	virtual void ScrollDecelerate(double inVelX, double inVelY) {}
-	virtual bool Scroll(double inX, double inY) { return false; }
-	virtual void ScrollBegin() {}
-	virtual void ScrollEnd() {}
+	virtual void ScrollDecelerate(double inVelX, double inVelY) { }
+	virtual bool Scroll(double inX, double inY) { return false;}
+	virtual void ScrollBegin() { }
+	virtual void ScrollEnd() { }
 
-	virtual bool IsFocus() const;
-	virtual void SetFocus();
+	bool IsFocus() const override;
+	void SetFocus() override;
 
 	I *GetImpl() const { return mImpl; }
 	void SetImpl(I *inImpl) { mImpl = inImpl; }
 
-	virtual MControlImplBase *GetControlImplBase();
+	MControlImplBase *GetControlImplBase() override;
 
   protected:
 	MControl(const std::string &inID, MRect inBounds, I *inImpl);
 
-	virtual void EnableSelf();
-	virtual void DisableSelf();
+	void EnableSelf() override;
+	void DisableSelf() override;
 
-	virtual void ShowSelf();
-	virtual void HideSelf();
+	void ShowSelf() override;
+	void HideSelf() override;
 
-	virtual void AddedToWindow();
+	void AddedToWindow() override;
 
   protected:
 	MControl(const MControl &) = delete;
@@ -163,7 +163,7 @@ class MButton : public MControl<MButtonImpl>
 	void SimulateClick();
 	void MakeDefault(bool inDefault = true);
 
-	virtual void SetText(const std::string &inText);
+	void SetText(const std::string &inText);
 
 	MEventOut<void(const std::string &)> eClicked;
 	MEventOut<void(const std::string &, int32_t, int32_t)> eDropDown;
@@ -211,14 +211,14 @@ class MScrollbar : public MControl<MScrollbarImpl>
 
 	MScrollbar(const std::string &inID, MRect inBounds);
 
-	virtual int32_t GetValue() const;
-	virtual void SetValue(int32_t inValue);
+	int32_t GetValue() const;
+	void SetValue(int32_t inValue);
 
-	virtual int32_t GetTrackValue() const;
-	virtual int32_t GetMinValue() const;
-	virtual int32_t GetMaxValue() const;
+	int32_t GetTrackValue() const;
+	int32_t GetMinValue() const;
+	int32_t GetMaxValue() const;
 
-	virtual void SetAdjustmentValues(int32_t inMinValue, int32_t inMaxValue,
+	void SetAdjustmentValues(int32_t inMinValue, int32_t inMaxValue,
 		int32_t inScrollUnit, int32_t inPageSize, int32_t inValue);
 
 	MEventOut<void(MScrollMessage)> eScroll;
@@ -243,7 +243,7 @@ class MStatusbar : public MControl<MStatusbarImpl>
 	MStatusbar(const std::string &inID, MRect inBounds,
 		uint32_t inPartCount, MStatusBarElement inParts[]);
 
-	virtual void SetStatusText(uint32_t inPartNr, const std::string &inText, bool inBorder);
+	void SetStatusText(uint32_t inPartNr, const std::string &inText, bool inBorder);
 
 	MEventOut<void(uint32_t, MRect)> ePartClicked;
 };
@@ -261,10 +261,10 @@ class MCombobox : public MControl<MComboboxImpl>
 
 	MEventOut<void(const std::string &, int)> eValueChanged;
 
-	virtual void SetText(const std::string &inText);
-	virtual std::string GetText() const;
+	void SetText(const std::string &inText);
+	std::string GetText() const;
 
-	virtual void SetChoices(const std::vector<std::string> &inChoices);
+	void SetChoices(const std::vector<std::string> &inChoices);
 
 	int GetActive();
 	void SetActive(int inActive);
@@ -283,13 +283,13 @@ class MPopup : public MControl<MPopupImpl>
 
 	MEventOut<void(const std::string &, int32_t)> eValueChanged;
 
-	virtual void SetValue(int32_t inValue);
-	virtual int32_t GetValue() const;
+	void SetValue(int32_t inValue);
+	int32_t GetValue() const;
 
-	virtual void SetText(const std::string &inText);
-	virtual std::string GetText() const;
+	void SetText(const std::string &inText);
+	std::string GetText() const;
 
-	virtual void SetChoices(const std::vector<std::string> &inChoices);
+	void SetChoices(const std::vector<std::string> &inChoices);
 };
 
 // --------------------------------------------------------------------
@@ -304,7 +304,7 @@ class MCaption : public MControl<MCaptionImpl>
 	MCaption(const std::string &inID, MRect inBounds,
 		const std::string &inText);
 
-	virtual void SetText(const std::string &inText);
+	void SetText(const std::string &inText);
 };
 
 // --------------------------------------------------------------------
@@ -331,12 +331,12 @@ class MEdittext : public MControl<MEdittextImpl>
 	MEventOut<void(const std::string &, const std::string &)> eValueChanged;
 	MEventOut<void(uint32_t inKeyCode, uint32_t inModifiers)> eKeyDown;
 
-	virtual void SetText(const std::string &inText);
-	virtual std::string GetText() const;
+	void SetText(const std::string &inText);
+	std::string GetText() const;
 
 	uint32_t GetFlags() const;
 
-	virtual void SetPasswordChar(uint32_t inUnicode = 0x2022);
+	void SetPasswordChar(uint32_t inUnicode = 0x2022);
 };
 
 // --------------------------------------------------------------------
@@ -401,8 +401,8 @@ class MColorSwatch : public MControl<MColorSwatchImpl>
 	MColorSwatch(const std::string &inID, MRect inBounds,
 		MColor inColor);
 
-	virtual MColor GetColor() const;
-	virtual void SetColor(MColor inColor);
+	MColor GetColor() const;
+	void SetColor(MColor inColor);
 
 	void SetPalette(const std::vector<MColor> &colors);
 
@@ -423,8 +423,8 @@ class MListBox : public MControl<MListBoxImpl>
 
 	void AddItem(const std::string &inLabel);
 
-	virtual int32_t GetValue() const;
-	virtual void SetValue(int32_t inValue);
+	int32_t GetValue() const;
+	void SetValue(int32_t inValue);
 
 	MEventOut<void(const std::string &, int32_t)> eValueChanged;
 };
