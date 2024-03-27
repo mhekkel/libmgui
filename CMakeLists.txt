@@ -121,7 +121,6 @@ list(APPEND private_headers
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkLib.hpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkWidgetMixin.hpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkWindowImpl.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MPrimary.hpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkApplicationImpl.hpp	
 )
 
@@ -133,7 +132,6 @@ list(APPEND sources
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkMenu.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkSound.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkUtils.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MPrimary.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkCanvasImpl.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkControlsImpl.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkDeviceImpl.cpp

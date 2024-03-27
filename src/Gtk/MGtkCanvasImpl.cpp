@@ -39,7 +39,6 @@
 #include "MGtkControlsImpl.inl"
 #include "MGtkDeviceImpl.hpp"
 #include "MGtkWindowImpl.hpp"
-#include "MPrimary.hpp"
 
 #include <cassert>
 #include <iostream>
