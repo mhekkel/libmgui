@@ -1002,7 +1002,7 @@ bool MWinWindowImpl::WMContextMenu(HWND /*inHWnd*/, UINT /*inUMsg*/, WPARAM /*in
 		if (view != nullptr)
 		{
 			view->ConvertFromWindow(x, y);
-			view->ShowContextMenu(x, y);
+			view->SecondaryMouseButtonClick(x, y);
 		}
 	}
 	catch (...)

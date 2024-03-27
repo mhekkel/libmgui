@@ -89,6 +89,17 @@ void MGtkCanvasImpl::OnGestureClickStopped()
 {
 }
 
+void MGtkCanvasImpl::OnMiddleButtonClick(double inX, double inY, gint inClickCount)
+{
+	// mControl->ClickPressed(inX, inY, inClickCount, modifiers);
+}
+
+void MGtkCanvasImpl::OnSecondaryButtonClick(double inX, double inY, gint inClickCount)
+{
+	// mControl->ClickPressed(inX, inY, inClickCount, modifiers);
+	mControl->SecondaryMouseButtonClick(inX, inY);
+}
+
 void MGtkCanvasImpl::OnPointerEnter(double inX, double inY)
 {
 	auto modifiers = MapModifier(gtk_event_controller_get_current_event_state(

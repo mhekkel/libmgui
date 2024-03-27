@@ -26,6 +26,7 @@
 
 #include "MAlerts.hpp"
 #include "MApplication.hpp"
+#include "MClipboard.hpp"
 #include "MDialog.hpp"
 #include "MError.hpp"
 #include "MStrings.hpp"
@@ -67,6 +68,8 @@ void MGtkApplicationImpl::Startup()
 	// Start processing async tasks
 	mAsyncTaskThread = std::thread([this, context = g_main_context_get_thread_default()]()
 		{ ProcessAsyncTasks(context); });
+
+	MClipboard::InitPrimary();
 
 	gApp->Initialise();
 }

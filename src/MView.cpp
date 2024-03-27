@@ -304,12 +304,21 @@ void MView::ObscureCursor()
 		mParent->ObscureCursor();
 }
 
-void MView::ShowContextMenu(int32_t inX, int32_t inY)
+void MView::MiddleMouseButtonClick(int32_t inX, int32_t inY)
 {
 	if (mParent != nullptr)
 	{
 		ConvertToParent(inX, inY);
-		mParent->ShowContextMenu(inX, inY);
+		mParent->MiddleMouseButtonClick(inX, inY);
+	}
+}
+
+void MView::SecondaryMouseButtonClick(int32_t inX, int32_t inY)
+{
+	if (mParent != nullptr)
+	{
+		ConvertToParent(inX, inY);
+		mParent->SecondaryMouseButtonClick(inX, inY);
 	}
 }
 

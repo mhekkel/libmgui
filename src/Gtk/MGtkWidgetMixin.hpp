@@ -293,7 +293,10 @@ enum class MEventMask
 	Pointer = (1 << 3),
 	Scroll = (1 << 4),
 
-	All = (Focus | GestureClick | Key | Pointer | Scroll)
+	SecondaryButtonClick = (1 << 5),
+	MiddleButtonClick = (1 << 6),
+
+	All = (Focus | GestureClick | Key | Pointer | Scroll | SecondaryButtonClick | MiddleButtonClick)
 };
 
 constexpr MEventMask operator|(MEventMask a, MEventMask b)
@@ -417,6 +420,9 @@ class MGtkWidgetMixin : public MGtkCommandEmitter
 	virtual void OnGestureClickReleased(double inX, double inY, gint inClickCount) {}
 	virtual void OnGestureClickStopped() {}
 
+	virtual void OnMiddleButtonClick(double inX, double inY, gint inClickCount) {}
+	virtual void OnSecondaryButtonClick(double inX, double inY, gint inClickCount) {}
+
 	virtual void OnPointerEnter(double inX, double inY) {}
 	virtual void OnPointerMotion(double inX, double inY) {}
 	virtual void OnPointerLeave() {}
@@ -436,6 +442,9 @@ class MGtkWidgetMixin : public MGtkCommandEmitter
 	MSlot<void(double, double, gint)> mGestureClickPressed;
 	MSlot<void(double, double, gint)> mGestureClickReleased;
 	MSlot<void()> mGestureClickStopped;
+
+	MSlot<void(double, double, gint)> mMiddleButtonClick;
+	MSlot<void(double, double, gint)> mSecondaryButtonClick;
 
 	MSlot<void(double, double)> mPointerEnter;
 	MSlot<void(double, double)> mPointerMotion;

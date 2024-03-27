@@ -58,6 +58,9 @@ MGtkWidgetMixin::MGtkWidgetMixin(MEventMask inEvents)
 	, mGestureClickReleased(this, &MGtkWidgetMixin::OnGestureClickReleased)
 	, mGestureClickStopped(this, &MGtkWidgetMixin::OnGestureClickStopped)
 
+	, mMiddleButtonClick(this, &MGtkWidgetMixin::OnMiddleButtonClick)
+	, mSecondaryButtonClick(this, &MGtkWidgetMixin::OnSecondaryButtonClick)
+
 	, mPointerEnter(this, &MGtkWidgetMixin::OnPointerEnter)
 	, mPointerMotion(this, &MGtkWidgetMixin::OnPointerMotion)
 	, mPointerLeave(this, &MGtkWidgetMixin::OnPointerLeave)
@@ -123,6 +126,25 @@ void MGtkWidgetMixin::SetWidget(GtkWidget *inWidget)
 			mGestureClickPressed.Connect(G_OBJECT(cntrl), "pressed");
 			mGestureClickReleased.Connect(G_OBJECT(cntrl), "released");
 			mGestureClickStopped.Connect(G_OBJECT(cntrl), "stopped");
+
+		}
+
+		if (mEvents & MEventMask::SecondaryButtonClick)
+		{
+			auto cntrl = gtk_gesture_click_new();
+			gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(cntrl), GDK_BUTTON_SECONDARY);
+			gtk_widget_add_controller(GetWidget(), GTK_EVENT_CONTROLLER(cntrl));
+
+			mSecondaryButtonClick.Connect(G_OBJECT(cntrl), "pressed");
+		}
+
+		if (mEvents & MEventMask::MiddleButtonClick)
+		{
+			auto cntrl = gtk_gesture_click_new();
+			gtk_gesture_single_set_button(GTK_GESTURE_SINGLE(cntrl), GDK_BUTTON_MIDDLE);
+			gtk_widget_add_controller(GetWidget(), GTK_EVENT_CONTROLLER(cntrl));
+
+			mMiddleButtonClick.Connect(G_OBJECT(cntrl), "pressed");
 		}
 
 		if (mEvents & MEventMask::Pointer)

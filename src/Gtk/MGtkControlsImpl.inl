@@ -280,5 +280,5 @@ void MGtkControlImpl<CONTROL>::OnChanged()
 // 	// gdk_window_get_device_position(window, mouse_device, &x, &y, NULL);
 // 	// g_message ("pointer: %i %i", x, y);
 
-// 	this->mControl->ShowContextMenu(x, y);
+// 	this->mControl->SecondaryMouseButtonClick(x, y);
 // }

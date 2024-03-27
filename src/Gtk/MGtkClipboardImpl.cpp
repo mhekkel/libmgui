@@ -63,7 +63,7 @@ bool MGdkClipboardImpl::HasData()
 	bool result = false;
 
 	if (auto content = gdk_clipboard_get_formats(mGdkClipboard); content)
-		result = gdk_content_formats_contain_gtype(content, GTK_TYPE_TEXT);
+		result = gdk_content_formats_contain_gtype(content, G_TYPE_STRING);
 
 	return result;
 }

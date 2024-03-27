@@ -102,7 +102,8 @@ class MView
 	virtual void RecalculateLayout();
 	virtual void ChildResized();
 
-	virtual void ShowContextMenu(int32_t inX, int32_t inY);
+	virtual void MiddleMouseButtonClick(int32_t inX, int32_t inY);
+	virtual void SecondaryMouseButtonClick(int32_t inX, int32_t inY);
 
 	virtual void Enable();
 	virtual void Disable();

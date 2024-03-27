@@ -95,9 +95,9 @@ class MClipboard
 	static void InitPrimary(MClipboardImpl *inPrimaryImpl = nullptr)
 	{
 		if (inPrimaryImpl)
-			Init(new MClipboard(inPrimaryImpl));
+			InitPrimary(new MClipboard(inPrimaryImpl));
 		else
-			Init(new MClipboard(true));
+			InitPrimary(new MClipboard(true));
 	}
 
 	static void InitPrimary(MClipboard *inPrimary)

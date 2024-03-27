@@ -59,6 +59,9 @@ class MGtkCanvasImpl : public MGtkControlImpl<MCanvas>
 	void OnGestureClickReleased(double inX, double inY, gint inClickCount) override;
 	void OnGestureClickStopped() override;
 
+	void OnMiddleButtonClick(double inX, double inY, gint inClickCount) override;
+	void OnSecondaryButtonClick(double inX, double inY, gint inClickCount) override;
+
 	void OnPointerEnter(double inX, double inY) override;
 	void OnPointerMotion(double inX, double inY) override;
 	void OnPointerLeave() override;
