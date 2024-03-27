@@ -40,13 +40,12 @@
 
 MGtkApplicationImpl *MGtkApplicationImpl::sInstance;
 
-MGtkApplicationImpl::MGtkApplicationImpl(std::function<void()> inActivateCB)
+MGtkApplicationImpl::MGtkApplicationImpl()
 	: mStartup(this, &MGtkApplicationImpl::Startup)
 	, mActivate(this, &MGtkApplicationImpl::Activate)
+	, mQueryEnd(this, &MGtkApplicationImpl::OnQueryEnd)
 	, mCommandLine(this, &MGtkApplicationImpl::CommandLine)
 	, mGtkApplication(gtk_application_new("com.hekkelman.mgui-dummy-app-id", G_APPLICATION_HANDLES_COMMAND_LINE))
-	, mActivateCB(inActivateCB)
-	, mQueryEnd(this, &MGtkApplicationImpl::OnQueryEnd)
 {
 	sInstance = this;
 
@@ -284,7 +283,7 @@ int MApplication::Main(const std::vector<std::string> &argv)
 			gPrefixPath = gExecutablePath.parent_path();
 		}
 
-		MApplication *app = MApplication::Create(new MGtkApplicationImpl([]() {}));
+		MApplication *app = MApplication::Create(new MGtkApplicationImpl());
 
 		std::vector<char *> args;
 		for (auto &a : argv)

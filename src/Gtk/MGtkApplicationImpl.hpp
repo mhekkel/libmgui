@@ -38,7 +38,7 @@
 class MGtkApplicationImpl : public MApplicationImpl, public MGtkCommandEmitter
 {
   public:
-	MGtkApplicationImpl(std::function<void()> inActivateCB);
+	MGtkApplicationImpl();
 	virtual ~MGtkApplicationImpl();
 
 	static MGtkApplicationImpl *GetInstance() { return sInstance; }
@@ -83,7 +83,6 @@ class MGtkApplicationImpl : public MApplicationImpl, public MGtkCommandEmitter
 	guint mInhibitCookie = 0;
 	std::thread mAsyncTaskThread;
 	GtkApplication *mGtkApplication = nullptr;
-	std::function<void()> mActivateCB;
 };
 
 extern std::filesystem::path gExecutablePath, gPrefixPath;

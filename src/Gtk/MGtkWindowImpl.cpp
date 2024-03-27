@@ -131,6 +131,8 @@ void MGtkWindowImpl::Create(MRect inBounds, const std::string &inTitle)
 
 	SetWidget(widget);
 
+	gtk_window_set_handle_menubar_accel(GTK_WINDOW(widget), false);
+
 	mCloseRequest.Connect(GetWidget(), "close-request");
 
 	// GList *iconList = nullptr;

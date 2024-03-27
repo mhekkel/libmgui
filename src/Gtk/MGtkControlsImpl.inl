@@ -76,9 +76,6 @@ void MGtkControlImpl<CONTROL>::SetFocus()
 				gtk_window_set_focus(GTK_WINDOW(w->GetWidget()), GetWidget());
 			}
 		}
-#ifndef NDEBUG
-		std::cerr << "grabbed focus? " << std::boolalpha << b << "\n";
-#endif
 	}
 }
 
