@@ -28,6 +28,7 @@
 
 #include "MControlsImpl.hpp"
 #include "MGtkWidgetMixin.hpp"
+#include "MGtkWindowImpl.hpp"
 
 #include <vector>
 
@@ -52,6 +53,14 @@ class MGtkControlImpl : public CONTROL::MImpl, public MGtkWidgetMixin
 
 	std::string GetText() const override;
 	void SetText(const std::string &inText) override;
+
+	GObject *GetActionMapObject() override
+	{
+		if (auto w = this->mControl->GetWindow(); w != nullptr)
+			return G_OBJECT(static_cast<MGtkWindowImpl *>(w->GetImpl())->GetWidget());
+		return nullptr;
+	}
+
 
   protected:
 	void GetParentAndBounds(MGtkWidgetMixin *&outParent, MRect &outBounds);

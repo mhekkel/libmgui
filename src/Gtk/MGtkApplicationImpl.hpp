@@ -51,7 +51,7 @@ class MGtkApplicationImpl : public MApplicationImpl, public MGtkCommandEmitter
 
 	GtkApplication *GetGtkApp() const { return mGtkApplication; }
 
-	GObject *GetObject() override
+	GObject *GetActionMapObject() override
 	{
 		return G_OBJECT(mGtkApplication);
 	}

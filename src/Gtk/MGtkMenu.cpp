@@ -4,6 +4,7 @@
 //          http://www.boost.org/LICENSE_1_0.txt)
 
 #include "MGtkApplicationImpl.hpp"
+#include "MGtkControlsImpl.hpp"
 #include "MGtkWidgetMixin.hpp"
 #include "MGtkWindowImpl.hpp"
 
@@ -69,18 +70,32 @@ MCommandImpl *MCommand<void()>::RegisterCommand(MWindow *win, const std::string 
 			(inAcceleratorModifiers & kOptionKey ? GDK_ALT_MASK : 0)));
 		auto shortcut = gtk_shortcut_new(trigger, action);
 		impl->AddShortcut(shortcut);
-		// g_object_unref(shortcut);
-
-		// gtk_widget_class_add_binding_action(GTK_WIDGET_CLASS(impl->GetWidget()),
-		// 	inAcceleratorKeyCode,
-		// 	GdkModifierType((inAcceleratorModifiers & kControlKey ? GDK_CONTROL_MASK : 0) |
-		// 					(inAcceleratorModifiers & kShiftKey ? GDK_SHIFT_MASK : 0) |
-		// 					(inAcceleratorModifiers & kOptionKey ? GDK_ALT_MASK : 0)),
-		// 	("win." + inAction).c_str(), nullptr);
 	}
 
 	return result;
 }
+
+template <>
+MCommandImpl *MCommand<void()>::RegisterCommand(MControlBase *cntrl, const std::string &inAction,
+	char32_t inAcceleratorKeyCode, uint32_t inAcceleratorModifiers)
+{
+	auto impl = dynamic_cast<MGtkWidgetMixin *>(cntrl->GetControlImplBase());
+	auto result = impl->RegisterAction(inAction, *this);
+
+	if (inAcceleratorKeyCode)
+	{
+		auto action = gtk_named_action_new(("win." + inAction).c_str());
+		auto trigger = gtk_keyval_trigger_new(inAcceleratorKeyCode,
+			GdkModifierType((inAcceleratorModifiers & kControlKey ? GDK_CONTROL_MASK : 0) |
+			(inAcceleratorModifiers & kShiftKey ? GDK_SHIFT_MASK : 0) |
+			(inAcceleratorModifiers & kOptionKey ? GDK_ALT_MASK : 0)));
+		auto shortcut = gtk_shortcut_new(trigger, action);
+		impl->AddShortcut(shortcut);
+	}
+
+	return result;
+}
+
 
 template <>
 MCommandImpl *MCommand<void()>::RegisterCommand(MApplication *app, const std::string &action,
@@ -166,8 +181,9 @@ void MGtkMenuImpl::AppendRadioItems(const std::vector<std::string> &inLabels, co
 
 void MGtkMenuImpl::AppendSubmenu(MMenu *inMenu, const std::string &inSection)
 {
-	g_menu_append_submenu(mGMenu, inMenu->GetLabel().c_str(),
-		G_MENU_MODEL(static_cast<MGtkMenuImpl *>(inMenu->impl())->mGMenu));
+	Append(inSection, g_menu_item_new_submenu(inMenu->GetLabel().c_str(), G_MENU_MODEL(static_cast<MGtkMenuImpl *>(inMenu->impl())->mGMenu)));
+	// g_menu_append_submenu(mGMenu, inMenu->GetLabel().c_str(),
+	// 	G_MENU_MODEL(static_cast<MGtkMenuImpl *>(inMenu->impl())->mGMenu));
 }
 
 void MGtkMenuImpl::RemoveItemsFromSection(const std::string &inSection)

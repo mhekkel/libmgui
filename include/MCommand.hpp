@@ -35,26 +35,22 @@
 
 class MWindow;
 class MApplication;
+class MControlBase;
 
 template <typename>
 class MCommand;
 
 template <typename T>
-concept CommandEmitter = (
-	std::is_base_of_v<MWindow, T> or std::is_base_of_v<MApplication, T>
-);
+concept CommandEmitter = (std::is_base_of_v<MWindow, T> or std::is_base_of_v<MControlBase, T> or std::is_base_of_v<MApplication, T>);
 
 template <typename Sig>
-concept ImplementedSignature = (
-	std::is_same_v<Sig, void(void)> or
-	std::is_same_v<Sig, void(int)>
-);
+concept ImplementedSignature = (std::is_same_v<Sig, void(void)> or
+								std::is_same_v<Sig, void(int)>);
 
 struct MCommandImpl
 {
 	virtual ~MCommandImpl()
 	{
-		
 	}
 	virtual void SetEnabled(bool inEnabled) = 0;
 };
@@ -67,11 +63,17 @@ class MCommand<R(Args...)>
 
   public:
 	template <CommandEmitter C>
-	MCommand(C *owner, const std::string &action, R (C::*callback)(Args...)
-		, char32_t inAcceleratorKeyCode = 0, uint32_t inAcceleratorModifiers = 0)
-		: mHandler(new MCommandHandler<C>(owner, callback))
-		, mImpl(RegisterCommand(owner, action, inAcceleratorKeyCode, inAcceleratorModifiers))
+	MCommand(C *owner, const std::string &action, R (C::*callback)(Args...), char32_t inAcceleratorKeyCode = 0, uint32_t inAcceleratorModifiers = 0)
+		: mHandler(new MCommandHandler<C>(owner, callback, action, inAcceleratorKeyCode, inAcceleratorModifiers))
 	{
+		if constexpr (std::is_base_of_v<MWindow, C> or std::is_base_of_v<MApplication, C>)
+			Register();
+	}
+
+	void Register()
+	{
+		if (not mImpl)
+			mImpl.reset(mHandler->RegisterCommand(*this));
 	}
 
 	R Execute(Args... args)
@@ -85,16 +87,29 @@ class MCommand<R(Args...)>
 	}
 
   private:
-
 	MCommandImpl *RegisterCommand(MApplication *app, const std::string &action,
 		char32_t inAcceleratorKeyCode, uint32_t inAcceleratorModifiers);
 	MCommandImpl *RegisterCommand(MWindow *win, const std::string &action,
 		char32_t inAcceleratorKeyCode, uint32_t inAcceleratorModifiers);
+	MCommandImpl *RegisterCommand(MControlBase *cntrl, const std::string &action,
+		char32_t inAcceleratorKeyCode, uint32_t inAcceleratorModifiers);
 
 	struct MCommandHandlerBase
 	{
+		MCommandHandlerBase(const std::string &action, char32_t inAcceleratorKeyCode, uint32_t inAcceleratorModifiers)
+			: mAction(action)
+			, mAcceleratorKeyCode(inAcceleratorKeyCode)
+			, mAcceleratorModifiers(inAcceleratorModifiers)
+		{
+		}
+
 		virtual ~MCommandHandlerBase() = default;
 		virtual R execute(Args... args) = 0;
+		virtual MCommandImpl *RegisterCommand(MCommand &inCommand) = 0;
+
+		std::string mAction;
+		char32_t mAcceleratorKeyCode;
+		uint32_t mAcceleratorModifiers;
 	};
 
 	template <CommandEmitter C>
@@ -102,8 +117,9 @@ class MCommand<R(Args...)>
 	{
 		using F = R (C::*)(Args...);
 
-		MCommandHandler(C *owner, F method)
-			: mOwner(owner)
+		MCommandHandler(C *owner, F method, const std::string &action, char32_t inAcceleratorKeyCode, uint32_t inAcceleratorModifiers)
+			: MCommandHandlerBase(action, inAcceleratorKeyCode, inAcceleratorModifiers)
+			, mOwner(owner)
 			, mMethod(method)
 		{
 		}
@@ -113,11 +129,15 @@ class MCommand<R(Args...)>
 			return (mOwner->*mMethod)(args...);
 		}
 
+		MCommandImpl *RegisterCommand(MCommand &inCommand) override
+		{
+			return inCommand.RegisterCommand(mOwner, this->mAction, this->mAcceleratorKeyCode, this->mAcceleratorModifiers);
+		}
+
 		C *mOwner;
 		F mMethod;
 	};
 
 	std::unique_ptr<MCommandHandlerBase> mHandler;
 	std::unique_ptr<MCommandImpl> mImpl;
-	std::string mAcceleratorString;
 };

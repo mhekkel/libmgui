@@ -33,7 +33,7 @@
 
 #include <list>
 
-class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin, public MGtkCommandEmitter
+class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin
 {
   public:
 	MGtkWindowImpl(MWindowFlags inFlags, MWindow *inWindow);
@@ -43,7 +43,6 @@ class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin, public MGtkCo
 
 	// A window contains a VBox, and in this VBox you have to add the various elements.
 	// (in the right order, please!)
-	virtual void AddMenubarWidget(GtkWidget *inWidget);
 	virtual void AddStatusbarWidget(MGtkWidgetMixin *inChild);
 	void Append(MGtkWidgetMixin *inChild) override;
 
@@ -76,24 +75,6 @@ class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin, public MGtkCo
 
 	static MGtkWindowImpl *GetWindowImpl(GtkWindow *inW);
 
-	GObject *GetObject() override
-	{
-		return G_OBJECT(GetWidget());
-	}
-
-	void AddShortcut(GtkShortcut *inShortcut)
-	{
-		if (mShortcutController == nullptr)
-		{
-			mShortcutController = gtk_shortcut_controller_new();
-			gtk_widget_add_controller(GetWidget(), mShortcutController);
-			
-		}
-		
-		gtk_shortcut_controller_add_shortcut(
-			GTK_SHORTCUT_CONTROLLER(mShortcutController), inShortcut);
-	}
-
   protected:
 	// bool DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, const std::string &inText) override;
 
@@ -109,5 +90,4 @@ class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin, public MGtkCo
 	GtkWidget *mMainVBox;
 	MGtkWidgetMixin *mFocus;
 	bool mConfigured;
-	GtkEventController *mShortcutController = nullptr;
 };

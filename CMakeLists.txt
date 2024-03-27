@@ -89,7 +89,6 @@ list(APPEND public_headers
 	include/MApplication.hpp
 	include/MCanvas.hpp
 	include/MClipboard.hpp
-	include/MClipboardImpl.hpp
 	include/MColor.hpp
 	include/MColorPicker.hpp
 	include/MControls.hpp

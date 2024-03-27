@@ -27,7 +27,6 @@
 #pragma once
 
 #include "MCommand.hpp"
-#include "MGtkWidgetMixin.hpp"
 
 #include <gtk/gtk.h>
 
@@ -78,13 +77,13 @@ class MGtkCommandEmitter
 		}
 	}
 
-	virtual GObject *GetObject() = 0;
+	virtual GObject *GetActionMapObject() = 0;
 
 	template <ImplementedSignature Sig>
 	MCommandImpl *RegisterAction(const std::string &action, MCommand<Sig> &inCommand)
 	{
 		GSimpleAction *act = g_simple_action_new(action.c_str(), nullptr);
-		g_action_map_add_action(G_ACTION_MAP(GetObject()), G_ACTION(act));
+		g_action_map_add_action(G_ACTION_MAP(GetActionMapObject()), G_ACTION(act));
 		g_signal_connect(act, "activate", G_CALLBACK(MGtkCommandEmitter::ActionActivated), this);
 		mActionHandlers[G_ACTION(act)] = new MActionHandler<Sig>(inCommand);
 		return new MGtkCommandImpl(act);

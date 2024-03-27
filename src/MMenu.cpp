@@ -79,33 +79,33 @@ MMenu *MMenu::Create(xml::element *inXMLNode, bool inPopup)
 	MMenu *menu = new MMenu(label, inPopup);
 	menu->mID = inXMLNode->get_attribute("id");
 
+	int section = 0;
+
 	for (auto &item : *inXMLNode)
 	{
-		if (item.name() == "section")
+		if (item.name() == "separator")
 		{
-			std::string section_id = item.get_attribute("id");
+			++section;
+			continue;
+		}
 
-			for (auto &subitem : item)
-			{
-				if (subitem.name() == "item")
-				{
-					label = GetLocalisedStringForContext("menu", subitem.get_attribute("label"));
-					menu->AppendItem(label, section_id,
-						subitem.get_attribute("cmd"), subitem.get_attribute("check") == "check");
-				}
-				if (subitem.name() == "radio-item")
-				{
-					std::vector<std::string> channels;
-					for (auto &channel : subitem)
-						channels.emplace_back(channel.get_attribute("label"));
-					menu->AppendRadioItems(channels, section_id, subitem.get_attribute("action"));
-				}
-				else if (subitem.name() == "menu")
-					menu->AppendSubmenu(Create(&item, false), section_id);
-			}
+		std::string section_id = std::to_string(section);
+		
+		if (item.name() == "item")
+		{
+			label = GetLocalisedStringForContext("menu", item.get_attribute("label"));
+			menu->AppendItem(label, section_id,
+				item.get_attribute("cmd"), item.get_attribute("check") == "check");
+		}
+		if (item.name() == "radio-item")
+		{
+			std::vector<std::string> channels;
+			for (auto &channel : item)
+				channels.emplace_back(channel.get_attribute("label"));
+			menu->AppendRadioItems(channels, section_id, item.get_attribute("action"));
 		}
 		else if (item.name() == "menu")
-			menu->AppendSubmenu(Create(&item, false), "");
+			menu->AppendSubmenu(Create(&item, false), section_id);
 	}
 
 	return menu;

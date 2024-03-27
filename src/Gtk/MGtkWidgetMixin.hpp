@@ -27,6 +27,7 @@
 #pragma once
 
 #include "MGtkLib.hpp"
+#include "MGtkCommandEmitter.hpp"
 
 #include "MAlerts.hpp"
 #include "MControls.hpp"
@@ -307,7 +308,7 @@ constexpr bool operator&(MEventMask a, MEventMask b)
 
 // --------------------------------------------------------------------
 
-class MGtkWidgetMixin
+class MGtkWidgetMixin : public MGtkCommandEmitter
 {
   public:
 	MGtkWidgetMixin(const MGtkWidgetMixin &) = delete;
@@ -336,6 +337,24 @@ class MGtkWidgetMixin
 	void SetWidget(GtkWidget *inWidget);
 
 	virtual void Append(MGtkWidgetMixin *inChild);
+
+	GObject *GetActionMapObject() override
+	{
+		return G_OBJECT(GetWidget());
+	}
+
+	void AddShortcut(GtkShortcut *inShortcut)
+	{
+		if (mShortcutController == nullptr)
+		{
+			mShortcutController = gtk_shortcut_controller_new();
+			gtk_widget_add_controller(GetWidget(), mShortcutController);
+			
+		}
+		
+		gtk_shortcut_controller_add_shortcut(
+			GTK_SHORTCUT_CONTROLLER(mShortcutController), inShortcut);
+	}
 
   protected:
 	GtkWidget *mWidget;
@@ -441,4 +460,6 @@ class MGtkWidgetMixin
 	MEventMask mEvents;
 
 	std::optional<std::chrono::time_point<std::chrono::steady_clock>> mGainedFocusAt;
+
+	GtkEventController *mShortcutController = nullptr;
 };
