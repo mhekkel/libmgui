@@ -91,12 +91,11 @@ void MGtkCanvasImpl::OnGestureClickStopped()
 
 void MGtkCanvasImpl::OnMiddleButtonClick(double inX, double inY, gint inClickCount)
 {
-	// mControl->ClickPressed(inX, inY, inClickCount, modifiers);
+	mControl->MiddleMouseButtonClick(inX, inY);
 }
 
 void MGtkCanvasImpl::OnSecondaryButtonClick(double inX, double inY, gint inClickCount)
 {
-	// mControl->ClickPressed(inX, inY, inClickCount, modifiers);
 	mControl->SecondaryMouseButtonClick(inX, inY);
 }
 
@@ -123,11 +122,6 @@ void MGtkCanvasImpl::OnPointerLeave()
 
 bool MGtkCanvasImpl::OnKeyPressed(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers)
 {
-	auto modifiers_ = gtk_event_controller_get_current_event_state(
-		GTK_EVENT_CONTROLLER(mKeyPressed.GetSourceGObject()));
-
-	assert(inModifiers == modifiers_);
-
 	auto [keycode, modifiers] = MapKey(inKeyValue, inModifiers);
 
 	return mControl->KeyPressed(keycode, gdk_keyval_to_unicode(inKeyValue),
@@ -136,11 +130,6 @@ bool MGtkCanvasImpl::OnKeyPressed(guint inKeyValue, guint inKeyCode, GdkModifier
 
 void MGtkCanvasImpl::OnKeyReleased(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers)
 {
-	auto modifiers_ = gtk_event_controller_get_current_event_state(
-		GTK_EVENT_CONTROLLER(mKeyReleased.GetSourceGObject()));
-
-	assert(inModifiers == modifiers_);
-
 	auto [keycode, modifiers] = MapKey(inKeyValue, inModifiers);
 
 	mControl->KeyReleased(keycode, modifiers);
@@ -206,7 +195,30 @@ void MGtkCanvasImpl::OnDecelerate(double inVelX, double inVelY)
 
 bool MGtkCanvasImpl::OnScroll(double inX, double inY)
 {
-	return mControl->Scroll(inX, inY);
+	auto modifiers = gtk_event_controller_get_current_event_state(
+		GTK_EVENT_CONTROLLER(mScroll.GetSourceGObject()));
+
+	int32_t x, y;
+
+	auto w = static_cast<MGtkWindowImpl *>(mControl->GetWindow()->GetImpl())->GetWidget();
+
+	auto n = gtk_widget_get_native(w);
+	auto surface = n ? gtk_native_get_surface(n) : nullptr;
+	if (GDK_IS_SURFACE(surface))
+	{
+		GdkDisplay *display = gdk_display_get_default();
+		GdkSeat *seat = gdk_display_get_default_seat(display);
+		GdkDevice *device = gdk_seat_get_pointer(seat);
+	
+		double dx = 0, dy = 0;
+		gdk_surface_get_device_position(surface, device, &dx, &dy, nullptr);
+
+		gtk_widget_translate_coordinates(w, GetWidget(), dx, dy, &dx, &dy);
+
+		x = dx; y = dy;
+	}
+
+	return mControl->Scroll(x, y, inX, inY, modifiers);
 }
 
 void MGtkCanvasImpl::OnScrollBegin()

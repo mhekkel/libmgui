@@ -100,7 +100,7 @@ class MControl : public MControlBase
 	virtual void EnterText(const std::string &inText) { }
 
 	virtual void ScrollDecelerate(double inVelX, double inVelY) { }
-	virtual bool Scroll(double inX, double inY) { return false;}
+	virtual bool Scroll(int32_t inX, int32_t inY, int32_t inDeltaX, int32_t inDeltaY, uint32_t inModifiers) { return false;}
 	virtual void ScrollBegin() { }
 	virtual void ScrollEnd() { }
 
