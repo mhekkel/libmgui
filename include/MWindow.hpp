@@ -49,7 +49,8 @@ enum MWindowFlags
 	kMNoSizeBox = (1 << 5),
 	kMAcceptDragAndDrop = (1 << 6),
 	kMCustomNonClient = (1 << 7),
-	kMShowMenubar = (1 << 8)
+	kMShowMenubar = (1 << 8),
+	kMDoNotHandleF10 = (1 << 9)
 };
 
 // clean way to work with bitfields

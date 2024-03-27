@@ -102,11 +102,6 @@ MGtkWindow *mgtk_window_new(GtkApplication *app, MGtkWindowImpl *impl)
 
 MGtkWindowImpl::MGtkWindowImpl(MWindowFlags inFlags, MWindow *inWindow)
 	: MWindowImpl(inFlags, inWindow)
-	//	, mModified(false)
-    //	, mTransitionThread(nullptr)
-    // , mChildFocus(this, &MGtkWindowImpl::ChildFocus)
-    // , mMapEvent(this, &MGtkWindowImpl::OnMapEvent)
-    //	, mChanged(this, &MGtkWindowImpl::Changed)
 	, mCloseRequest(this, &MGtkWindowImpl::OnCloseRequest)
 	, mMainVBox(nullptr)
 	, mFocus(this)
@@ -131,7 +126,8 @@ void MGtkWindowImpl::Create(MRect inBounds, const std::string &inTitle)
 
 	SetWidget(widget);
 
-	gtk_window_set_handle_menubar_accel(GTK_WINDOW(widget), false);
+	if (mFlags & kMDoNotHandleF10)
+		gtk_window_set_handle_menubar_accel(GTK_WINDOW(widget), false);
 
 	mCloseRequest.Connect(GetWidget(), "close-request");
 
@@ -181,8 +177,6 @@ void MGtkWindowImpl::Create(MRect inBounds, const std::string &inTitle)
 
 	if (mFlags & MWindowFlags::kMShowMenubar)
 		MMenuBar::instance().AddToWindow(this);
-
-	//	mChanged.Connect(this, "on_changed");
 }
 
 MGtkWindowImpl *MGtkWindowImpl::GetWindowImpl(GtkWindow *inW)
@@ -199,16 +193,6 @@ void MGtkWindowImpl::CreateMainVBox()
 	gtk_widget_set_vexpand(mMainVBox, true);
 
 	gtk_widget_show(mMainVBox);
-}
-
-void MGtkWindowImpl::AddMenubarWidget(GtkWidget *inWidget)
-{
-	if (mMainVBox == nullptr)
-		CreateMainVBox();
-
-	// gtk_box_pack_start(GTK_BOX(mMainVBox), inWidget, FALSE, FALSE, 0);
-	gtk_box_append(GTK_BOX(mMainVBox), inWidget);
-	// gtk_widget_show_all(inWidget);
 }
 
 void MGtkWindowImpl::AddStatusbarWidget(MGtkWidgetMixin *inChild)
