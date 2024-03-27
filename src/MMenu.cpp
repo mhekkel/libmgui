@@ -76,8 +76,7 @@ MMenu *MMenu::Create(xml::element *inXMLNode, bool inPopup)
 			THROW(("Invalid menu specification, label is missing"));
 	}
 
-	MMenu *menu = new MMenu(label, inPopup);
-	menu->mID = inXMLNode->get_attribute("id");
+	MMenu *menu = new MMenu(inXMLNode->get_attribute("id"), label, inPopup);
 
 	int section = 0;
 
@@ -89,12 +88,10 @@ MMenu *MMenu::Create(xml::element *inXMLNode, bool inPopup)
 			continue;
 		}
 
-		std::string section_id = std::to_string(section);
-		
 		if (item.name() == "item")
 		{
 			label = GetLocalisedStringForContext("menu", item.get_attribute("label"));
-			menu->AppendItem(label, section_id,
+			menu->AppendItem(section, label,
 				item.get_attribute("cmd"), item.get_attribute("check") == "check");
 		}
 		if (item.name() == "radio-item")
@@ -102,10 +99,10 @@ MMenu *MMenu::Create(xml::element *inXMLNode, bool inPopup)
 			std::vector<std::string> channels;
 			for (auto &channel : item)
 				channels.emplace_back(channel.get_attribute("label"));
-			menu->AppendRadioItems(channels, section_id, item.get_attribute("action"));
+			menu->AppendRadioItems(section, channels, item.get_attribute("action"));
 		}
 		else if (item.name() == "menu")
-			menu->AppendSubmenu(Create(&item, false), section_id);
+			menu->AppendSubmenu(section, Create(&item, false));
 	}
 
 	return menu;
@@ -140,7 +137,7 @@ void MMenuBar::Init(const std::string &inMenuResourceName)
 	for (auto item : *node)
 	{
 		if (item.name() == "menu")
-			sInstance->AppendSubmenu(MMenu::Create(&item, false), "");
+			sInstance->AppendSubmenu(0, MMenu::Create(&item, false));
 	}
 }
 

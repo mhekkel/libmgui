@@ -304,11 +304,6 @@ bool MGtkWidgetMixin::IsFocus() const
 	return gtk_widget_has_focus(mWidget);
 }
 
-bool MGtkWidgetMixin::IsActive() const
-{
-	return gtk_widget_has_focus(mWidget);
-}
-
 void MGtkWidgetMixin::OnCommit(char *inText)
 {
 }

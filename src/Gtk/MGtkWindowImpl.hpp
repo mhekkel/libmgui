@@ -85,6 +85,12 @@ class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin
 	MSlot<bool()> mCloseRequest;
 	bool OnCloseRequest();
 
+	// void OnIsSuspendedChanged(GParamSpec *inProperty);
+	// MSlot<void(GParamSpec *)> mIsSuspendedChanged;
+
+	void OnIsActiveChanged(GParamSpec *inProperty);
+	MSlot<void(GParamSpec *)> mIsActiveChanged;
+
 	void CreateMainVBox();
 
 	GtkWidget *mMainVBox;

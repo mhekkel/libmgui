@@ -172,16 +172,16 @@ class MGtkMenuImpl : public MMenu::MMenuImpl
 	{
 	}
 
-	void AppendItem(const std::string &inLabel, const std::string &inSection, const std::string &inAction, bool inStateful) override;
-	void AppendRadioItems(const std::vector<std::string> &inLabels, const std::string &inSection, const std::string &inAction) override;
-	void AppendSubmenu(MMenu *inMenu, const std::string &inSection) override;
+	void AppendItem(uint32_t inSection, const std::string &inLabel, const std::string &inAction, bool inStateful) override;
+	void AppendRadioItems(uint32_t inSection, const std::vector<std::string> &inLabels, const std::string &inAction) override;
+	void AppendSubmenu(uint32_t inSection, MMenu *inMenu) override;
 
-	void RemoveItemsFromSection(const std::string &inSection) override;
+	void ReplaceItemsInSection(uint32_t inSection, const std::string &inAction,
+		const std::vector<std::string> &inItems) override;
 
-	MMenu *GetSubmenu(uint32_t inIndex) const override;
+	MMenu *FindMenuByID(const std::string &inMenuID) override;
 
 	void Popup(MWindow *inHandler, int32_t inX, int32_t inY, bool inBottomMenu) override;
-	void AddToWindow(MWindowImpl *inWindow) override;
 
   protected:
 	// for the menubar
@@ -191,7 +191,7 @@ class MGtkMenuImpl : public MMenu::MMenuImpl
 		mGMenu = inGMenu;
 	}
 
-	void Append(const std::string &inSection, GMenuItem *item)
+	void Append(uint32_t inSection, GMenuItem *item)
 	{
 		auto s = mSections.find(inSection);
 
@@ -207,16 +207,16 @@ class MGtkMenuImpl : public MMenu::MMenuImpl
 	}
 
 	GMenu *mGMenu = nullptr;
-	std::map<std::string, GMenu *> mSections;
-	GApplication *mApp;
+	std::map<uint32_t, GMenu *> mSections;
+	std::vector<MMenu *> mSubMenus;
 };
 
-void MGtkMenuImpl::AppendItem(const std::string &inLabel, const std::string &inSection, const std::string &inAction, bool inStateful)
+void MGtkMenuImpl::AppendItem(uint32_t inSection, const std::string &inLabel, const std::string &inAction, bool inStateful)
 {
 	Append(inSection, g_menu_item_new(inLabel.c_str(), inAction.empty() ? nullptr : inAction.c_str()));
 }
 
-void MGtkMenuImpl::AppendRadioItems(const std::vector<std::string> &inLabels, const std::string &inSection, const std::string &inAction)
+void MGtkMenuImpl::AppendRadioItems(uint32_t inSection, const std::vector<std::string> &inLabels, const std::string &inAction)
 {
 	for (int i = 0; auto &label : inLabels)
 	{
@@ -225,27 +225,44 @@ void MGtkMenuImpl::AppendRadioItems(const std::vector<std::string> &inLabels, co
 	}
 }
 
-void MGtkMenuImpl::AppendSubmenu(MMenu *inMenu, const std::string &inSection)
+void MGtkMenuImpl::AppendSubmenu(uint32_t inSection, MMenu *inMenu)
 {
 	Append(inSection, g_menu_item_new_submenu(inMenu->GetLabel().c_str(), G_MENU_MODEL(static_cast<MGtkMenuImpl *>(inMenu->impl())->mGMenu)));
-	// g_menu_append_submenu(mGMenu, inMenu->GetLabel().c_str(),
-	// 	G_MENU_MODEL(static_cast<MGtkMenuImpl *>(inMenu->impl())->mGMenu));
+	mSubMenus.push_back(inMenu);
 }
 
-void MGtkMenuImpl::RemoveItemsFromSection(const std::string &inSection)
+void MGtkMenuImpl::ReplaceItemsInSection(uint32_t inSection, const std::string &inAction,
+	const std::vector<std::string> &inItems)
 {
+	// throws an error if this section does not exist
+	auto s = mSections.at(inSection);
+
+	g_menu_remove_all(s);
+
+	for (int i = 0; auto &label : inItems)
+	{
+		std::string action = inAction + '(' + std::to_string(i++) + ')';
+
+		auto item = g_menu_item_new(label.c_str(), action.c_str());
+		g_menu_append_item(s, item);
+		g_object_unref(item);
+	}
 }
 
-MMenu *MGtkMenuImpl::GetSubmenu(uint32_t inIndex) const
+MMenu *MGtkMenuImpl::FindMenuByID(const std::string &inMenuID)
 {
-	return nullptr;
+	MMenu *result = nullptr;
+
+	for (auto &m : mSubMenus)
+	{
+		if (result = m->FindMenuByID(inMenuID); result != nullptr)
+			break;
+	}
+
+	return result;
 }
 
 void MGtkMenuImpl::Popup(MWindow *inHandler, int32_t inX, int32_t inY, bool inBottomMenu)
-{
-}
-
-void MGtkMenuImpl::AddToWindow(MWindowImpl *inWindow)
 {
 }
 

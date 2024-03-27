@@ -327,7 +327,6 @@ class MGtkWidgetMixin : public MGtkCommandEmitter
 
 	void RequestSize(int32_t inWidth, int32_t inHeight);
 
-	bool IsActive() const;
 	virtual void SetFocus();
 	virtual void ReleaseFocus();
 	virtual bool IsFocus() const;

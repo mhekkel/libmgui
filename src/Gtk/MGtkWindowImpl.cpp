@@ -103,6 +103,8 @@ MGtkWindow *mgtk_window_new(GtkApplication *app, MGtkWindowImpl *impl)
 MGtkWindowImpl::MGtkWindowImpl(MWindowFlags inFlags, MWindow *inWindow)
 	: MWindowImpl(inFlags, inWindow)
 	, mCloseRequest(this, &MGtkWindowImpl::OnCloseRequest)
+	// , mIsSuspendedChanged(this, &MGtkWindowImpl::OnIsSuspendedChanged)
+	, mIsActiveChanged(this, &MGtkWindowImpl::OnIsActiveChanged)
 	, mMainVBox(nullptr)
 	, mFocus(this)
 	, mConfigured(false)
@@ -130,6 +132,8 @@ void MGtkWindowImpl::Create(MRect inBounds, const std::string &inTitle)
 		gtk_window_set_handle_menubar_accel(GTK_WINDOW(widget), false);
 
 	mCloseRequest.Connect(GetWidget(), "close-request");
+	// mIsSuspendedChanged.Connect(GetWidget(), "notify::is-suspended");
+	mIsActiveChanged.Connect(GetWidget(), "notify::is-active");
 
 	// GList *iconList = nullptr;
 
@@ -222,6 +226,22 @@ void MGtkWindowImpl::SetTransientFor(MWindow *inWindow)
 bool MGtkWindowImpl::OnCloseRequest()
 {
 	return mWindow->AllowClose(false) ? false : true;
+}
+
+// void MGtkWindowImpl::OnIsSuspendedChanged(GParamSpec *inProperty)
+// {
+// 	if (gtk_window_is_suspended(GTK_WINDOW(GetWidget())))
+// 		mWindow->Hide();
+// 	else
+// 		mWindow->Show();
+// }
+
+void MGtkWindowImpl::OnIsActiveChanged(GParamSpec *inProperty)
+{
+	if (gtk_window_is_active(GTK_WINDOW(GetWidget())))
+		mWindow->Activate();
+	else
+		mWindow->Deactivate();
 }
 
 void MGtkWindowImpl::Show()
@@ -430,12 +450,12 @@ void MGtkWindowImpl::OnDestroy()
 
 void MGtkWindowImpl::OnMap()
 {
-	mWindow->Mapped();
+	mWindow->Show();
 }
 
 void MGtkWindowImpl::OnUnmap()
 {
-	mWindow->Unmapped();
+	mWindow->Hide();
 }
 
 void MGtkWindowImpl::ResizeWindow(int32_t inWidthDelta, int32_t inHeightDelta)

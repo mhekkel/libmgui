@@ -51,6 +51,7 @@ MView::MView(const std::string &inID, MRect inBounds)
 	, mBindRight(false)
 	, mBindBottom(false)
 	, mParent(nullptr)
+	, mActive(eTriStateLatent)
 	, mVisible(eTriStateLatent)
 	, mEnabled(eTriStateOn)
 {
@@ -480,6 +481,80 @@ void MView::DisableSelf()
 bool MView::IsEnabled() const
 {
 	return (mEnabled == eTriStateOn) and IsVisible();
+}
+
+void MView::Activate()
+{
+	if (mActive == eTriStateOff)
+	{
+		if (mParent != nullptr and mParent->mActive == eTriStateOn)
+		{
+			mActive = eTriStateOn;
+			ActivateSelf();
+		}
+		else
+			mActive = eTriStateLatent;
+	}
+
+	if (mActive == eTriStateOn)
+	{
+		for (MView *child : mChildren)
+			child->SuperActivate();
+	}
+}
+
+void MView::SuperActivate()
+{
+	if (mActive == eTriStateLatent)
+	{
+		mActive = eTriStateOn;
+		ActivateSelf();
+	}
+
+	if (mActive == eTriStateOn)
+	{
+		for (MView *child : mChildren)
+			child->SuperActivate();
+	}
+}
+
+void MView::ActivateSelf()
+{
+}
+
+void MView::Deactivate()
+{
+	if (mActive == eTriStateOn)
+	{
+		for (MView *child : mChildren)
+			child->SuperDeactivate();
+	}
+
+	bool wasActive = (mActive == eTriStateOn);
+	mActive = eTriStateOff;
+	if (wasActive)
+		DeactivateSelf();
+}
+
+void MView::SuperDeactivate()
+{
+	if (mActive == eTriStateOn)
+	{
+		for (MView *child : mChildren)
+			child->SuperDeactivate();
+
+		mActive = eTriStateLatent;
+		DeactivateSelf();
+	}
+}
+
+void MView::DeactivateSelf()
+{
+}
+
+bool MView::IsActive() const
+{
+	return (mActive == eTriStateOn) and IsVisible();
 }
 
 MView *MView::FindSubView(int32_t inX, int32_t inY) const

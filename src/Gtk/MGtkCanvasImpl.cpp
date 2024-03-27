@@ -70,10 +70,13 @@ void MGtkCanvasImpl::CreateWidget()
 
 void MGtkCanvasImpl::OnGestureClickPressed(double inX, double inY, gint inClickCount)
 {
-	auto modifiers = MapModifier(gtk_event_controller_get_current_event_state(
-		GTK_EVENT_CONTROLLER(mGestureClickPressed.GetSourceGObject())));
+	if (not mControl->GetWindow()->IgnoreSelectClick())
+	{
+		auto modifiers = MapModifier(gtk_event_controller_get_current_event_state(
+			GTK_EVENT_CONTROLLER(mGestureClickPressed.GetSourceGObject())));
 
-	mControl->ClickPressed(inX, inY, inClickCount, modifiers);
+		mControl->ClickPressed(inX, inY, inClickCount, modifiers);
+	}
 }
 
 void MGtkCanvasImpl::OnGestureClickReleased(double inX, double inY, gint inClickCount)
@@ -90,12 +93,14 @@ void MGtkCanvasImpl::OnGestureClickStopped()
 
 void MGtkCanvasImpl::OnMiddleButtonClick(double inX, double inY, gint inClickCount)
 {
-	mControl->MiddleMouseButtonClick(inX, inY);
+	if (not mControl->GetWindow()->IgnoreSelectClick())
+		mControl->MiddleMouseButtonClick(inX, inY);
 }
 
 void MGtkCanvasImpl::OnSecondaryButtonClick(double inX, double inY, gint inClickCount)
 {
-	mControl->SecondaryMouseButtonClick(inX, inY);
+	if (not mControl->GetWindow()->IgnoreSelectClick())
+		mControl->SecondaryMouseButtonClick(inX, inY);
 }
 
 void MGtkCanvasImpl::OnPointerEnter(double inX, double inY)

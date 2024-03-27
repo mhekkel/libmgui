@@ -52,16 +52,17 @@ class MMenu
 
 		virtual ~MMenuImpl() = default;
 
-		virtual void AppendItem(const std::string &inLabel, const std::string &inSection, const std::string &inAction, bool inStateful) = 0;
-		virtual void AppendRadioItems(const std::vector<std::string> &inLabels, const std::string &inSection, const std::string &inAction) = 0;
-		virtual void AppendSubmenu(MMenu *inMenu, const std::string &inSection) = 0;
+		virtual void AppendItem(uint32_t inSection, const std::string &inLabel, const std::string &inAction, bool inStateful) = 0;
+		virtual void AppendRadioItems(uint32_t inSection, const std::vector<std::string> &inLabels, const std::string &inAction) = 0;
+		virtual void AppendSubmenu(uint32_t inSection, MMenu *inMenu) = 0;
 
-		virtual void RemoveItemsFromSection(const std::string &inSection) = 0;
+		virtual void ReplaceItemsInSection(uint32_t inSection, const std::string &inAction,
+			const std::vector<std::string> &inItems) = 0;
 
-		virtual MMenu *GetSubmenu(uint32_t inIndex) const = 0;
+		virtual MMenu *FindMenuByID(const std::string &inMenuID) = 0;
 
 		virtual void Popup(MWindow *inHandler, int32_t inX, int32_t inY, bool inBottomMenu) = 0;
-		virtual void AddToWindow(MWindowImpl *inWindow) = 0;
+		virtual void AddToWindow(MWindowImpl *inWindow) {}
 
 		static MMenuImpl *Create(MMenu *inMenu, bool inPopup);
 		static MMenuImpl *CreateBar(MMenu *inMenu);
@@ -70,8 +71,9 @@ class MMenu
 		MMenu *mMenu;
 	};
 
-	MMenu(const std::string &inLabel, bool inPopup)
+	MMenu(const std::string &inID, const std::string &inLabel, bool inPopup)
 		: mImpl(MMenuImpl::Create(this, inPopup))
+		, mID(inID)
 		, mLabel(inLabel)
 	{
 	}
@@ -81,24 +83,33 @@ class MMenu
 	static MMenu *CreateFromResource(const char *inResourceName, bool inPopup);
 	static MMenu *Create(zeep::xml::element *inXMLNode, bool inPopup);
 
-	void AppendItem(const std::string &inLabel, const std::string &inSection, const std::string &inAction, bool inStateful = false)
+	void AppendItem(uint32_t inSection, const std::string &inLabel, const std::string &inAction, bool inStateful = false)
 	{
-		mImpl->AppendItem(inLabel, inSection, inAction, inStateful);
+		mImpl->AppendItem(inSection, inLabel, inAction, inStateful);
 	}
 
-	void AppendRadioItems(const std::vector<std::string> &inLabels, const std::string &inSection, const std::string &inAction)
+	void AppendRadioItems(uint32_t inSection, const std::vector<std::string> &inLabels, const std::string &inAction)
 	{
-		mImpl->AppendRadioItems(inLabels, inSection, inAction);
+		mImpl->AppendRadioItems(inSection, inLabels, inAction);
 	}
 
-	void AppendSubmenu(MMenu *inMenu, const std::string &inSection)
+	void AppendSubmenu(uint32_t inSection, MMenu *inMenu)
 	{
-		mImpl->AppendSubmenu(inMenu, inSection);
+		mImpl->AppendSubmenu(inSection, inMenu);
 	}
 
-	void RemoveItemsFromSection(const std::string &inSection)
+	void ReplaceItemsInSection(uint32_t inSection, const std::string &inAction,
+		const std::vector<std::string> &inItems)
 	{
-		mImpl->RemoveItemsFromSection(inSection);
+		mImpl->ReplaceItemsInSection(inSection, inAction, inItems);
+	}
+
+	virtual MMenu *FindMenuByID(const std::string &inMenuID)
+	{
+		if (mID == inMenuID)
+			return this;
+		else
+			return mImpl->FindMenuByID(inMenuID);
 	}
 
 	void Popup(MWindow *inTarget, int32_t inX, int32_t inY, bool inBottomMenu);
@@ -128,8 +139,6 @@ class MMenuBar : public MMenu
 {
   public:
 	static void Init(const std::string &inMenuResourceName);
-
-	MMenu *FindMenuByID(const std::string &inMenuID);
 
 	static MMenuBar &instance()
 	{

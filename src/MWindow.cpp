@@ -26,6 +26,7 @@
 
 #include "MWindow.hpp"
 #include "MApplication.hpp"
+#include "MControls.hpp"
 #include "MError.hpp"
 #include "MMenu.hpp"
 #include "MUtils.hpp"
@@ -76,14 +77,19 @@ void MWindow::SetImpl(MWindowImpl *inImpl)
 	mImpl = inImpl;
 }
 
-void MWindow::Mapped()
+void MWindow::Activate()
 {
-	SuperShow();
-}
+	if (mActive != eTriStateOn and IsVisible())
+	{
+		mActive = eTriStateOn;
+		ActivateSelf();
+		MView::Activate();
 
-void MWindow::Unmapped()
-{
-	SuperHide();
+		mLastActivate = std::chrono::steady_clock::now();
+
+		if (mLatentFocus != nullptr)
+			mLatentFocus->SetFocus();
+	}
 }
 
 MWindowFlags MWindow::GetFlags() const
@@ -119,6 +125,11 @@ void MWindow::Select()
 	if (not mImpl->Visible())
 		Show();
 	mImpl->Select();
+}
+
+bool MWindow::IgnoreSelectClick()
+{
+	return (std::chrono::steady_clock::now() - mLastActivate) < std::chrono::milliseconds(100);
 }
 
 void MWindow::UpdateNow()

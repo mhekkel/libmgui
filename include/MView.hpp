@@ -105,6 +105,10 @@ class MView
 	virtual void MiddleMouseButtonClick(int32_t inX, int32_t inY);
 	virtual void SecondaryMouseButtonClick(int32_t inX, int32_t inY);
 
+	virtual void Activate();
+	virtual void Deactivate();
+	bool IsActive() const;
+
 	virtual void Enable();
 	virtual void Disable();
 	bool IsEnabled() const;
@@ -134,6 +138,11 @@ class MView
 	virtual bool PastePrimaryBuffer(const std::string &inText);
 
   protected:
+	void SuperActivate();
+	virtual void ActivateSelf();
+	void SuperDeactivate();
+	virtual void DeactivateSelf();
+
 	void SuperEnable();
 	virtual void EnableSelf();
 	void SuperDisable();
@@ -151,6 +160,7 @@ class MView
 	bool mBindLeft, mBindTop, mBindRight, mBindBottom;
 	MView *mParent;
 	MViewList mChildren;
+	MTriState mActive;
 	MTriState mVisible;
 	MTriState mEnabled;
 };

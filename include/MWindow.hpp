@@ -26,16 +26,17 @@
 
 #pragma once
 
-#include <list>
-
 #include "MColor.hpp"
+#include "MP2PEvents.hpp"
 #include "MView.hpp"
 
-#include "MP2PEvents.hpp"
+#include <chrono>
+#include <list>
 
 // --------------------------------------------------------------------
 
 class MMenuBar;
+class MControlBase;
 
 // --------------------------------------------------------------------
 
@@ -123,18 +124,24 @@ class MWindow : public MView
 
 	virtual ~MWindow();
 
-	virtual MWindow *GetWindow() const;
+	MWindow *GetWindow() const override;
 	MWindowFlags GetFlags() const;
 
-	virtual void Mapped();
-	virtual void Unmapped();
+	void Activate() override;
 
-	virtual void Show();
+	void Show() override;
+	void UpdateNow() override;
+
 	virtual void Select();
-	virtual void UpdateNow();
+	virtual bool IgnoreSelectClick();
 
 	virtual bool AllowClose(bool inQuit);
 	virtual void Close();
+
+	void SetLatentFocus(MControlBase *inControl)
+	{
+		mLatentFocus = inControl;
+	}
 
 	// void Beep();
 
@@ -145,8 +152,8 @@ class MWindow : public MView
 
 	void SetModifiedMarkInTitle(bool inModified);
 
-	virtual void ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta);
-	virtual void ResizeWindow(int32_t inWidthDelta, int32_t inHeightDelta);
+	void ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta) override;
+	void ResizeWindow(int32_t inWidthDelta, int32_t inHeightDelta);
 
 	void GetWindowPosition(MRect &outPosition);
 	void SetWindowPosition(const MRect &outPosition, bool inTransition = false);
@@ -155,12 +162,12 @@ class MWindow : public MView
 
 	// --------------------------------------------------------------------
 	// coordinate manipulations
-	virtual void ConvertToScreen(int32_t &ioX, int32_t &ioY) const;
-	virtual void ConvertFromScreen(int32_t &ioX, int32_t &ioY) const;
+	void ConvertToScreen(int32_t &ioX, int32_t &ioY) const override;
+	void ConvertFromScreen(int32_t &ioX, int32_t &ioY) const override;
 
 	// --------------------------------------------------------------------
-	virtual void SetCursor(MCursor inCursor);
-	virtual void ObscureCursor();
+	void SetCursor(MCursor inCursor) override;
+	void ObscureCursor() override;
 
 	static void GetMainScreenBounds(MRect &outRect);
 
@@ -170,10 +177,14 @@ class MWindow : public MView
 	void SetImpl(MWindowImpl *inImpl);
 
   private:
-	virtual void ShowSelf();
-	virtual void HideSelf();
+	void ShowSelf() override;
+	void HideSelf() override;
+
+	using time_point = std::chrono::time_point<std::chrono::steady_clock>;
 
 	MWindowImpl *mImpl;
 	std::string mTitle;
 	bool mModified;
+	time_point mLastActivate;
+	MControlBase *mLatentFocus = nullptr;
 };
