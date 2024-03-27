@@ -404,10 +404,11 @@ std::string MGtkComboboxImpl::GetText() const
 {
 	std::string result;
 
-	// //	char* text = gtk_combo_box_get_active_text(GTK_COMBO_BOX(GetWidget()));
-	// const char *text = gtk_combo_box_text_get_active_text(GTK_ENTRY(gtk_combo_box_get_active(GTK_BIN(GetWidget()))));
-	// if (text != nullptr)
-	// 	result = text;
+	auto entry = gtk_combo_box_get_child(GTK_COMBO_BOX(GetWidget()));
+	auto buffer = gtk_entry_get_buffer(GTK_ENTRY(entry));
+	auto text = gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(buffer));
+	if (text != nullptr)
+		result = text;
 	return result;
 }
 

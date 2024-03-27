@@ -122,7 +122,7 @@ void MGtkCanvasImpl::OnPointerLeave()
 
 bool MGtkCanvasImpl::OnKeyPressed(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers)
 {
-	auto [keycode, modifiers] = MapKey(inKeyValue, inModifiers);
+	auto [keycode, modifiers] = MapFromGdkKey(inKeyValue, inModifiers);
 
 	return mControl->KeyPressed(keycode, gdk_keyval_to_unicode(inKeyValue),
 		modifiers, mAutoRepeat);
@@ -130,7 +130,7 @@ bool MGtkCanvasImpl::OnKeyPressed(guint inKeyValue, guint inKeyCode, GdkModifier
 
 void MGtkCanvasImpl::OnKeyReleased(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers)
 {
-	auto [keycode, modifiers] = MapKey(inKeyValue, inModifiers);
+	auto [keycode, modifiers] = MapFromGdkKey(inKeyValue, inModifiers);
 
 	mControl->KeyReleased(keycode, modifiers);
 }

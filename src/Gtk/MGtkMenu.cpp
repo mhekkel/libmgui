@@ -43,7 +43,55 @@ struct MAccel
 				os << "<Shift>";
 			if (inAcceleratorModifiers & kOptionKey)
 				os << "<Alt>";
-			os << char(inAcceleratorKeyCode);
+
+			switch (inAcceleratorKeyCode)
+			{
+				case kHomeKeyCode: os << "Home"; break;
+				case kCancelKeyCode: os << "Cancel"; break;
+				case kEndKeyCode: os << "End"; break;
+				case kInsertKeyCode: os << "Insert"; break;
+				case kBellKeyCode: os << "Bell"; break;
+				case kBackspaceKeyCode: os << "Backspace"; break;
+				case kTabKeyCode: os << "Tab"; break;
+				case kLineFeedKeyCode: os << "LineFeed"; break;
+				case kPageUpKeyCode: os << "PageUp"; break;
+				case kPageDownKeyCode: os << "PageDown"; break;
+				case kReturnKeyCode: os << "Return"; break;
+				case kPauseKeyCode: os << "Pause"; break;
+				case kEscapeKeyCode: os << "Escape"; break;
+				case kLeftArrowKeyCode: os << "LeftArrow"; break;
+				case kRightArrowKeyCode: os << "RightArrow"; break;
+				case kUpArrowKeyCode: os << "UpArrow"; break;
+				case kDownArrowKeyCode: os << "DownArrow"; break;
+				case kSpaceKeyCode: os << "Space"; break;
+				case kDeleteKeyCode: os << "Delete"; break;
+				case kDivideKeyCode: os << "Divide"; break;
+				case kMultiplyKeyCode: os << "Multiply"; break;
+				case kSubtractKeyCode: os << "Subtract"; break;
+				case kNumlockKeyCode: os << "Numlock"; break;
+				case kF1KeyCode: os << "F1"; break;
+				case kF2KeyCode: os << "F2"; break;
+				case kF3KeyCode: os << "F3"; break;
+				case kF4KeyCode: os << "F4"; break;
+				case kF5KeyCode: os << "F5"; break;
+				case kF6KeyCode: os << "F6"; break;
+				case kF7KeyCode: os << "F7"; break;
+				case kF8KeyCode: os << "F8"; break;
+				case kF9KeyCode: os << "F9"; break;
+				case kF10KeyCode: os << "F10"; break;
+				case kF11KeyCode: os << "F11"; break;
+				case kF12KeyCode: os << "F12"; break;
+				case kF13KeyCode: os << "F13"; break;
+				case kF14KeyCode: os << "F14"; break;
+				case kF15KeyCode: os << "F15"; break;
+				case kF16KeyCode: os << "F16"; break;
+				case kF17KeyCode: os << "F17"; break;
+				case kF18KeyCode: os << "F18"; break;
+				case kF19KeyCode: os << "F19"; break;
+				case kF20KeyCode: os << "F20"; break;
+				case kEnterKeyCode: os << "Enter"; break;
+				default: os << char(inAcceleratorKeyCode); break;
+			}
 		}
 
 		mStr = os.str();
@@ -63,11 +111,11 @@ MCommandImpl *MCommand<void()>::RegisterCommand(MWindow *win, const std::string 
 
 	if (inAcceleratorKeyCode)
 	{
+		std::tie(inAcceleratorKeyCode, inAcceleratorModifiers) = MapToGdkKey(inAcceleratorKeyCode, inAcceleratorModifiers);
+
 		auto action = gtk_named_action_new(("win." + inAction).c_str());
 		auto trigger = gtk_keyval_trigger_new(inAcceleratorKeyCode,
-			GdkModifierType((inAcceleratorModifiers & kControlKey ? GDK_CONTROL_MASK : 0) |
-			(inAcceleratorModifiers & kShiftKey ? GDK_SHIFT_MASK : 0) |
-			(inAcceleratorModifiers & kOptionKey ? GDK_ALT_MASK : 0)));
+			GdkModifierType(inAcceleratorModifiers));
 		auto shortcut = gtk_shortcut_new(trigger, action);
 		impl->AddShortcut(shortcut);
 	}
@@ -84,18 +132,16 @@ MCommandImpl *MCommand<void()>::RegisterCommand(MControlBase *cntrl, const std::
 
 	if (inAcceleratorKeyCode)
 	{
+		std::tie(inAcceleratorKeyCode, inAcceleratorModifiers) = MapToGdkKey(inAcceleratorKeyCode, inAcceleratorModifiers);
+
 		auto action = gtk_named_action_new(("win." + inAction).c_str());
-		auto trigger = gtk_keyval_trigger_new(inAcceleratorKeyCode,
-			GdkModifierType((inAcceleratorModifiers & kControlKey ? GDK_CONTROL_MASK : 0) |
-			(inAcceleratorModifiers & kShiftKey ? GDK_SHIFT_MASK : 0) |
-			(inAcceleratorModifiers & kOptionKey ? GDK_ALT_MASK : 0)));
+		auto trigger = gtk_keyval_trigger_new(inAcceleratorKeyCode, GdkModifierType(inAcceleratorModifiers));
 		auto shortcut = gtk_shortcut_new(trigger, action);
 		impl->AddShortcut(shortcut);
 	}
 
 	return result;
 }
-
 
 template <>
 MCommandImpl *MCommand<void()>::RegisterCommand(MApplication *app, const std::string &action,

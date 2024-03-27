@@ -8,7 +8,6 @@
 #include <map>
 
 #include "MWinProcMixin.hpp"
-#include "MWindowImpl.hpp"
 
 class MWinWindowImpl : public MWindowImpl, public MWinProcMixin
 {

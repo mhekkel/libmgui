@@ -37,4 +37,6 @@
 uint32_t MapModifier(uint32_t inModifier);
 uint32_t MapToKeyCode(uint32_t inKeyValue);
 
-std::pair<uint32_t,uint32_t> MapKey(uint32_t inKeyValue, uint32_t inModifier);
+std::pair<uint32_t,uint32_t> MapFromGdkKey(uint32_t inKeyValue, uint32_t inModifier);
+std::pair<uint32_t,GdkModifierType> MapToGdkKey(uint32_t inKeyValue, uint32_t inModifier);
+
