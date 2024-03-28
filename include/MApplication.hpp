@@ -126,7 +126,6 @@ class MApplication
 	virtual void Execute(const std::string &inCommand, const std::vector<std::string> &inArguments);
 
 	virtual void UpdateSpecialMenu(const std::string &inMenuKind, MMenu *inMenu);
-	virtual void UpdateWindowMenu(MMenu *inMenu);
 
 	MEventOut<void()> eIdle;
 

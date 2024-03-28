@@ -160,6 +160,24 @@ MCommandImpl *MCommand<void()>::RegisterCommand(MApplication *app, const std::st
 	return result;
 }
 
+template <>
+MCommandImpl *MCommand<void(int)>::RegisterCommand(MApplication *app, const std::string &action,
+	char32_t inAcceleratorKeyCode, uint32_t inAcceleratorModifiers)
+{
+	auto impl = static_cast<MGtkApplicationImpl *>(app->GetImpl());
+
+	auto result = impl->RegisterAction(action, *this);
+
+	if (inAcceleratorKeyCode != 0)
+	{
+		MAccel accel(inAcceleratorKeyCode, inAcceleratorModifiers);
+		gtk_application_set_accels_for_action(impl->GetGtkApp(), ("app." + action).c_str(), accel.mAccel);
+	}
+
+	return result;
+}
+
+
 // --------------------------------------------------------------------
 // MGtkMenuImpl
 
@@ -177,7 +195,7 @@ class MGtkMenuImpl : public MMenu::MMenuImpl
 	void AppendSubmenu(uint32_t inSection, MMenu *inMenu) override;
 
 	void ReplaceItemsInSection(uint32_t inSection, const std::string &inAction,
-		const std::vector<std::string> &inItems) override;
+		const std::vector<std::tuple<std::string,uint32_t>> &inItems) override;
 
 	MMenu *FindMenuByID(const std::string &inMenuID) override;
 
@@ -232,16 +250,16 @@ void MGtkMenuImpl::AppendSubmenu(uint32_t inSection, MMenu *inMenu)
 }
 
 void MGtkMenuImpl::ReplaceItemsInSection(uint32_t inSection, const std::string &inAction,
-	const std::vector<std::string> &inItems)
+	const std::vector<std::tuple<std::string,uint32_t>> &inItems)
 {
 	// throws an error if this section does not exist
 	auto s = mSections.at(inSection);
 
 	g_menu_remove_all(s);
 
-	for (int i = 0; auto &label : inItems)
+	for (const auto &[label, nr] : inItems)
 	{
-		std::string action = inAction + '(' + std::to_string(i++) + ')';
+		std::string action = inAction + '(' + std::to_string(nr) + ')';
 
 		auto item = g_menu_item_new(label.c_str(), action.c_str());
 		g_menu_append_item(s, item);

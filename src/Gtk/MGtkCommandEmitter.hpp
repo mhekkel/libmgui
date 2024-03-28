@@ -46,6 +46,11 @@ struct MGtkCommandImpl : public MCommandImpl
 		g_simple_action_set_enabled(mAction, inEnabled);
 	}
 
+	void SetState(int32_t inState) override
+	{
+		g_simple_action_set_state(mAction, g_variant_new_int32(inState));
+	}
+
 	GSimpleAction *mAction;
 };
 
@@ -57,7 +62,7 @@ class MGtkCommandEmitter
 	struct MActionHandlerBase
 	{
 		virtual ~MActionHandlerBase() = default;
-		virtual void ActionActivated(GVariant *param) = 0;
+		virtual void ActionActivated(GAction *action, GVariant *param) = 0;
 	};
 
 	template <ImplementedSignature Sig>
@@ -80,21 +85,14 @@ class MGtkCommandEmitter
 	virtual GObject *GetActionMapObject() = 0;
 
 	template <ImplementedSignature Sig>
-	MCommandImpl *RegisterAction(const std::string &action, MCommand<Sig> &inCommand)
-	{
-		GSimpleAction *act = g_simple_action_new(action.c_str(), nullptr);
-		g_action_map_add_action(G_ACTION_MAP(GetActionMapObject()), G_ACTION(act));
-		g_signal_connect(act, "activate", G_CALLBACK(MGtkCommandEmitter::ActionActivated), this);
-		mActionHandlers[G_ACTION(act)] = new MActionHandler<Sig>(inCommand);
-		return new MGtkCommandImpl(act);
-	}
+	MCommandImpl *RegisterAction(const std::string &action, MCommand<Sig> &inCommand);
 
 	static void ActionActivated(GAction *action, GVariant *param, void *user_data)
 	{
 		auto self = static_cast<MGtkCommandEmitter *>(user_data);
 		auto h = self->mActionHandlers[action];
 		if (h)
-			h->ActionActivated(param);
+			h->ActionActivated(action, param);
 	}
 
   private:
@@ -111,10 +109,50 @@ struct MGtkCommandEmitter::MActionHandler<void()> : public MActionHandlerBase
 	{
 	}
 
-	void ActionActivated(GVariant *param)
+	void ActionActivated(GAction *action, GVariant *param)
 	{
 		mCommand.Execute();
 	}
 
 	MCommand<void()> &mCommand;
 };
+
+template <>
+inline MCommandImpl *MGtkCommandEmitter::RegisterAction(const std::string &action, MCommand<void()> &inCommand)
+{
+	GSimpleAction *act = g_simple_action_new(action.c_str(), nullptr);
+	g_action_map_add_action(G_ACTION_MAP(GetActionMapObject()), G_ACTION(act));
+	g_signal_connect(act, "activate", G_CALLBACK(MGtkCommandEmitter::ActionActivated), this);
+	mActionHandlers[G_ACTION(act)] = new MActionHandler<void()>(inCommand);
+	return new MGtkCommandImpl(act);
+}
+
+template <>
+struct MGtkCommandEmitter::MActionHandler<void(int)> : public MActionHandlerBase
+{
+	MActionHandler(MCommand<void(int)> &inCommand)
+		: mCommand(inCommand)
+	{
+	}
+
+	void ActionActivated(GAction *action, GVariant *param)
+	{
+		mCommand.Execute(g_variant_get_int32(param));
+		g_simple_action_set_state(G_SIMPLE_ACTION(action), param);
+	}
+
+	MCommand<void(int)> &mCommand;
+};
+
+template <>
+inline MCommandImpl *MGtkCommandEmitter::RegisterAction(const std::string &action, MCommand<void(int)> &inCommand)
+{
+	GVariantType *vtype = g_variant_type_new("i");
+	GSimpleAction *act = g_simple_action_new_stateful(action.c_str(), vtype, g_variant_new_int32(0));
+	g_variant_type_free(vtype);
+	g_action_map_add_action(G_ACTION_MAP(GetActionMapObject()), G_ACTION(act));
+	g_signal_connect(act, "activate", G_CALLBACK(MGtkCommandEmitter::ActionActivated), this);
+	mActionHandlers[G_ACTION(act)] = new MActionHandler<void(int)>(inCommand);
+	return new MGtkCommandImpl(act);
+}
+

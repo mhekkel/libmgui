@@ -105,14 +105,7 @@ void MApplication::Execute(const std::string &inCommand,
 
 void MApplication::UpdateSpecialMenu(const std::string &inName, MMenu *inMenu)
 {
-	if (inName == "window")
-		UpdateWindowMenu(inMenu);
-	else
-		PRINT(("Unknown special menu %s", inName.c_str()));
-}
-
-void MApplication::UpdateWindowMenu(MMenu *inMenu)
-{
+	PRINT(("Unknown special menu %s", inName.c_str()));
 }
 
 void MApplication::DoSelectWindowFromWindowMenu(uint32_t inIndex)

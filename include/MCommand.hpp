@@ -53,6 +53,7 @@ struct MCommandImpl
 	{
 	}
 	virtual void SetEnabled(bool inEnabled) = 0;
+	virtual void SetState(int32_t inState) = 0;
 };
 
 template <typename R, typename... Args>
@@ -84,6 +85,11 @@ class MCommand<R(Args...)>
 	void SetEnabled(bool inEnabled)
 	{
 		mImpl->SetEnabled(inEnabled);
+	}
+
+	void SetState(int inState)
+	{
+		mImpl->SetState(inState);
 	}
 
   private:
