@@ -615,14 +615,8 @@ void MGtkEdittextImpl::SetPasswordChar(uint32_t inUnicode)
 
 bool MGtkEdittextImpl::OnKeyPressed(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers)
 {
-	const uint32_t
-		kValidModifiersMask = kControlKey | kShiftKey | kOptionKey;
-
-	uint32_t modifiers = MapModifier(inModifiers & kValidModifiersMask);
-	uint32_t keyValue = MapToKeyCode(inKeyValue);
-
-	mControl->eKeyDown(keyValue, modifiers);
-
+	auto [keycode, modifiers] = MapFromGdkKey(inKeyValue, inModifiers);
+	mControl->eKeyDown(keycode, modifiers);
 	return false;
 }
 
