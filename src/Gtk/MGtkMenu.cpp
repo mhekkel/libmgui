@@ -102,8 +102,9 @@ struct MAccel
 	const char *mAccel[2]{};
 };
 
-template <>
-MCommandImpl *MCommand<void()>::RegisterCommand(MWindow *win, const std::string &inAction,
+template <typename R, typename... Args>
+	requires ImplementedSignature<R(Args...)>
+MCommandImpl *MCommand<R(Args...)>::RegisterCommand(MWindow *win, const std::string &inAction,
 	char32_t inAcceleratorKeyCode, uint32_t inAcceleratorModifiers)
 {
 	auto impl = static_cast<MGtkWindowImpl *>(win->GetImpl());
@@ -123,29 +124,9 @@ MCommandImpl *MCommand<void()>::RegisterCommand(MWindow *win, const std::string 
 	return result;
 }
 
-template <>
-MCommandImpl *MCommand<void(int)>::RegisterCommand(MWindow *win, const std::string &inAction,
-	char32_t inAcceleratorKeyCode, uint32_t inAcceleratorModifiers)
-{
-	auto impl = static_cast<MGtkWindowImpl *>(win->GetImpl());
-	auto result = impl->RegisterAction(inAction, *this);
-
-	if (inAcceleratorKeyCode)
-	{
-		std::tie(inAcceleratorKeyCode, inAcceleratorModifiers) = MapToGdkKey(inAcceleratorKeyCode, inAcceleratorModifiers);
-
-		auto action = gtk_named_action_new(("win." + inAction).c_str());
-		auto trigger = gtk_keyval_trigger_new(inAcceleratorKeyCode,
-			GdkModifierType(inAcceleratorModifiers));
-		auto shortcut = gtk_shortcut_new(trigger, action);
-		impl->AddShortcut(shortcut);
-	}
-
-	return result;
-}
-
-template <>
-MCommandImpl *MCommand<void()>::RegisterCommand(MControlBase *cntrl, const std::string &inAction,
+template <typename R, typename... Args>
+	requires ImplementedSignature<R(Args...)>
+MCommandImpl *MCommand<R(Args...)>::RegisterCommand(MControlBase *cntrl, const std::string &inAction,
 	char32_t inAcceleratorKeyCode, uint32_t inAcceleratorModifiers)
 {
 	auto impl = dynamic_cast<MGtkWidgetMixin *>(cntrl->GetControlImplBase());
@@ -164,28 +145,9 @@ MCommandImpl *MCommand<void()>::RegisterCommand(MControlBase *cntrl, const std::
 	return result;
 }
 
-template <>
-MCommandImpl *MCommand<void(int)>::RegisterCommand(MControlBase *cntrl, const std::string &inAction,
-	char32_t inAcceleratorKeyCode, uint32_t inAcceleratorModifiers)
-{
-	auto impl = dynamic_cast<MGtkWidgetMixin *>(cntrl->GetControlImplBase());
-	auto result = impl->RegisterAction(inAction, *this);
-
-	if (inAcceleratorKeyCode)
-	{
-		std::tie(inAcceleratorKeyCode, inAcceleratorModifiers) = MapToGdkKey(inAcceleratorKeyCode, inAcceleratorModifiers);
-
-		auto action = gtk_named_action_new(("win." + inAction).c_str());
-		auto trigger = gtk_keyval_trigger_new(inAcceleratorKeyCode, GdkModifierType(inAcceleratorModifiers));
-		auto shortcut = gtk_shortcut_new(trigger, action);
-		impl->AddShortcut(shortcut);
-	}
-
-	return result;
-}
-
-template <>
-MCommandImpl *MCommand<void()>::RegisterCommand(MApplication *app, const std::string &action,
+template <typename R, typename... Args>
+	requires ImplementedSignature<R(Args...)>
+MCommandImpl *MCommand<R(Args...)>::RegisterCommand(MApplication *app, const std::string &action,
 	char32_t inAcceleratorKeyCode, uint32_t inAcceleratorModifiers)
 {
 	auto impl = static_cast<MGtkApplicationImpl *>(app->GetImpl());
@@ -201,23 +163,9 @@ MCommandImpl *MCommand<void()>::RegisterCommand(MApplication *app, const std::st
 	return result;
 }
 
-template <>
-MCommandImpl *MCommand<void(int)>::RegisterCommand(MApplication *app, const std::string &action,
-	char32_t inAcceleratorKeyCode, uint32_t inAcceleratorModifiers)
-{
-	auto impl = static_cast<MGtkApplicationImpl *>(app->GetImpl());
-
-	auto result = impl->RegisterAction(action, *this);
-
-	if (inAcceleratorKeyCode != 0)
-	{
-		MAccel accel(inAcceleratorKeyCode, inAcceleratorModifiers);
-		gtk_application_set_accels_for_action(impl->GetGtkApp(), ("app." + action).c_str(), accel.mAccel);
-	}
-
-	return result;
-}
-
+template class MCommand<void()>;
+template class MCommand<void(int)>;
+template class MCommand<void(bool)>;
 
 // --------------------------------------------------------------------
 // MGtkMenuImpl

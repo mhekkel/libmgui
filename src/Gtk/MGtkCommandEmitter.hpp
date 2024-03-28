@@ -51,6 +51,11 @@ struct MGtkCommandImpl : public MCommandImpl
 		g_simple_action_set_state(mAction, g_variant_new_int32(inState));
 	}
 
+	void SetChecked(bool inChecked) override
+	{
+		g_simple_action_set_state(mAction, g_variant_new_boolean(inChecked));
+	}
+
 	GSimpleAction *mAction;
 };
 
@@ -153,6 +158,34 @@ inline MCommandImpl *MGtkCommandEmitter::RegisterAction(const std::string &actio
 	g_action_map_add_action(G_ACTION_MAP(GetActionMapObject()), G_ACTION(act));
 	g_signal_connect(act, "activate", G_CALLBACK(MGtkCommandEmitter::ActionActivated), this);
 	mActionHandlers[G_ACTION(act)] = new MActionHandler<void(int)>(inCommand);
+	return new MGtkCommandImpl(act);
+}
+
+template <>
+struct MGtkCommandEmitter::MActionHandler<void(bool)> : public MActionHandlerBase
+{
+	MActionHandler(MCommand<void(bool)> &inCommand)
+		: mCommand(inCommand)
+	{
+	}
+
+	void ActionActivated(GAction *action, GVariant *param)
+	{
+		bool checked = g_variant_get_boolean(param);
+		mCommand.Execute(checked);
+		g_simple_action_set_state(G_SIMPLE_ACTION(action), g_variant_new_boolean(checked));
+	}
+
+	MCommand<void(bool)> &mCommand;
+};
+
+template <>
+inline MCommandImpl *MGtkCommandEmitter::RegisterAction(const std::string &action, MCommand<void(bool)> &inCommand)
+{
+	GSimpleAction *act = g_simple_action_new_stateful(action.c_str(), nullptr, g_variant_new_boolean(true));
+	g_action_map_add_action(G_ACTION_MAP(GetActionMapObject()), G_ACTION(act));
+	g_signal_connect(act, "activate", G_CALLBACK(MGtkCommandEmitter::ActionActivated), this);
+	mActionHandlers[G_ACTION(act)] = new MActionHandler<void(bool)>(inCommand);
 	return new MGtkCommandImpl(act);
 }
 

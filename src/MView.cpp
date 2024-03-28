@@ -634,11 +634,6 @@ void MView::ConvertFromScreen(int32_t &ioX, int32_t &ioY) const
 	ConvertFromParent(ioX, ioY);
 }
 
-bool MView::PastePrimaryBuffer(const std::string &inText)
-{
-	return false;
-}
-
 // --------------------------------------------------------------------
 
 MPager::MPager(const std::string &inID, MRect inBounds)

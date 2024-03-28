@@ -134,9 +134,6 @@ class MView
 	virtual void ConvertToScreen(int32_t &ioX, int32_t &ioY) const;
 	virtual void ConvertFromScreen(int32_t &ioX, int32_t &ioY) const;
 
-	// Used in X only
-	virtual bool PastePrimaryBuffer(const std::string &inText);
-
   protected:
 	void SuperActivate();
 	virtual void ActivateSelf();

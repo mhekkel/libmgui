@@ -45,15 +45,18 @@ concept CommandEmitter = (std::is_base_of_v<MWindow, T> or std::is_base_of_v<MCo
 
 template <typename Sig>
 concept ImplementedSignature = (std::is_same_v<Sig, void(void)> or
-								std::is_same_v<Sig, void(int)>);
+								std::is_same_v<Sig, void(int)> or
+								std::is_same_v<Sig, void(bool)>);
 
 struct MCommandImpl
 {
 	virtual ~MCommandImpl()
 	{
 	}
+
 	virtual void SetEnabled(bool inEnabled) = 0;
 	virtual void SetState(int32_t inState) = 0;
+	virtual void SetChecked(bool inChecked) = 0;
 };
 
 template <typename R, typename... Args>
@@ -90,6 +93,11 @@ class MCommand<R(Args...)>
 	void SetState(int inState)
 	{
 		mImpl->SetState(inState);
+	}
+
+	void SetChecked(int inChecked)
+	{
+		mImpl->SetChecked(inChecked);
 	}
 
   private:
