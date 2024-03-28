@@ -125,8 +125,6 @@ class MApplication
 	// virtual void Open(const std::string &inURL);
 	virtual void Execute(const std::string &inCommand, const std::vector<std::string> &inArguments);
 
-	virtual void UpdateSpecialMenu(const std::string &inMenuKind, MMenu *inMenu);
-
 	MEventOut<void()> eIdle;
 
 	template <typename Handler>

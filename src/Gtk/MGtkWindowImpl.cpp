@@ -180,7 +180,7 @@ void MGtkWindowImpl::Create(MRect inBounds, const std::string &inTitle)
 	// }
 
 	if (mFlags & MWindowFlags::kMShowMenubar)
-		MMenuBar::instance().AddToWindow(this);
+		MMenuBar::Instance().AddToWindow(this);
 }
 
 MGtkWindowImpl *MGtkWindowImpl::GetWindowImpl(GtkWindow *inW)

@@ -140,7 +140,7 @@ class MMenuBar : public MMenu
   public:
 	static void Init(const std::string &inMenuResourceName);
 
-	static MMenuBar &instance()
+	static MMenuBar &Instance()
 	{
 		return *sInstance;
 	}
