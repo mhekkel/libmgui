@@ -462,3 +462,22 @@ class MBoxControl : public MControl<MBoxControlImpl>
 	using MView::AddChild;
 	void AddChild(MControlBase *inControl, MControlBase *inBefore);
 };
+
+// --------------------------------------------------------------------
+// Stack
+
+class MStackControlImpl;
+
+class MStackControl : public MControl<MStackControlImpl>
+{
+  public:
+	typedef MStackControlImpl MImpl;
+
+	MStackControl(const std::string &inID, MRect inBounds);
+
+	using MView::AddChild;
+	void AddChild(MView *inControl, const std::string &inName);
+
+	void Select(const std::string &inName);
+};
+

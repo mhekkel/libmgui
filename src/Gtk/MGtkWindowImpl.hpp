@@ -53,8 +53,6 @@ class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin
 
 	void SetTransientFor(MWindow *inWindow) override;
 
-	bool Visible() const override;
-
 	void Select() override;
 	void Close() override;
 

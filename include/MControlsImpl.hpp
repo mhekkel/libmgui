@@ -350,4 +350,18 @@ class MBoxControlImpl : public MControlImpl<MBoxControl>
 		bool inHomogeneous, bool inExpand, bool inFill, uint32_t inSpacing, uint32_t inPadding);
 };
 
+class MStackControlImpl : public MControlImpl<MStackControl>
+{
+  public:
+	MStackControlImpl(MStackControl *inControl)
+		: MControlImpl(inControl)
+	{
+	}
+
+	virtual void AddChild(MView *inChild, const std::string &inName) = 0;
+	virtual void Select(const std::string &inName) = 0;
+
+	static MStackControlImpl *Create(MStackControl *inControl);
+};
+
 #endif

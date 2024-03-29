@@ -161,15 +161,3 @@ class MView
 	MTriState mVisible;
 	MTriState mEnabled;
 };
-
-// --------------------------------------------------------------------
-
-class MPager : public MView
-{
-  public:
-	MPager(const std::string &inID, MRect inBounds);
-
-	void AddPage(MView *inPage);
-	void SelectPage(uint32_t inPage);
-	virtual void RecalculateLayout();
-};

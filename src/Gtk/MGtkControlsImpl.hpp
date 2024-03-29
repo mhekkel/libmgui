@@ -383,3 +383,21 @@ class MGtkBoxControlImpl : public MGtkControlImpl<MBoxControl>
 	bool mHorizontal, mHomogeneous, mExpand, mFill;
 	uint32_t mSpacing, mPadding;
 };
+
+// --------------------------------------------------------------------
+
+class MGtkStackControlImpl : public MGtkControlImpl<MStackControl>
+{
+  public:
+	MGtkStackControlImpl(MStackControl *inControl);
+
+	void CreateWidget() override;
+
+	void AddChild(MView *inChild, const std::string &inName) override;
+	void Select(const std::string &inName) override;
+
+	void Append(MGtkWidgetMixin *inChild) override;
+	
+  private:
+	std::map<MGtkWidgetMixin *, std::string> mNames;
+};

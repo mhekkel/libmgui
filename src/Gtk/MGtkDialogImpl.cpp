@@ -518,18 +518,22 @@ MView *MGtkDialogImpl::CreatePager(xml::element *inTemplate, int32_t inX, int32_
 	std::string id = inTemplate->get_attribute("id");
 
 	MRect r(inX, inY, 0, 0);
-	MPager *result = new MPager(id, r);
+	MStackControl *result = new MStackControl(id, r);
 
 	MRect b;
+	std::string firstName;
 
-	for (xml::element *page : inTemplate->find("./page"))
+	for (bool first = true; xml::element *page : inTemplate->find("./page"))
 	{
 		if (page->get_attribute("if") == "WINDOWS")
 			continue;
 
 		MView *control = CreateControls(page, 0, 0);
 		control->SetBindings(true, true, true, true);
-		result->AddPage(control);
+		result->AddChild(control, control->GetID());
+
+		if (std::exchange(first, false))
+			firstName = control->GetID();
 
 		control->RecalculateLayout();
 
@@ -540,7 +544,7 @@ MView *MGtkDialogImpl::CreatePager(xml::element *inTemplate, int32_t inX, int32_
 	r.height = b.height;
 
 	result->SetFrame(r);
-	result->SelectPage(0);
+	result->Select(firstName);
 
 	return result;
 }

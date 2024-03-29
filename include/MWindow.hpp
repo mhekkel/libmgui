@@ -85,8 +85,6 @@ class MWindowImpl
 	virtual bool ShowModal() { return false; }
 	virtual void SetTransientFor(MWindow *inWindow) {}
 
-	virtual bool Visible() const = 0;
-
 	virtual void Select() = 0;
 	virtual void Close() = 0;
 

@@ -993,3 +993,48 @@ void MGtkBoxControlImpl::AddChild(MControlBase *inControl, MControlBase *inBefor
 			gtk_box_reorder_child_after(GTK_BOX(GetWidget()), ci->GetWidget(), nullptr);
 	}
 }
+
+// --------------------------------------------------------------------
+
+MGtkStackControlImpl::MGtkStackControlImpl(MStackControl *inControl)
+	: MGtkControlImpl(inControl, "")
+{
+}
+
+void MGtkStackControlImpl::CreateWidget()
+{
+	SetWidget(gtk_stack_new());
+}
+
+void MGtkStackControlImpl::AddChild(MView *inChild, const std::string &inName)
+{
+	if (auto cntrl = dynamic_cast<MControlBase *>(inChild); cntrl != nullptr)
+	{
+		auto ci = cntrl->GetControlImplBase();
+		auto wm = dynamic_cast<MGtkWidgetMixin *>(ci);
+		mNames[wm] = inName;
+	}
+	mControl->MView::AddChild(inChild);
+}
+
+void MGtkStackControlImpl::Append(MGtkWidgetMixin *inChild)
+{
+	if (auto cntrl = dynamic_cast<MControlImplBase *>(inChild); cntrl != nullptr)
+	{
+		if (auto ci = dynamic_cast<MGtkWidgetMixin *>(cntrl); ci != nullptr)
+		{
+			auto name = mNames.at(ci);
+			gtk_stack_add_named(GTK_STACK(GetWidget()), ci->GetWidget(), name.c_str());
+		}
+	}
+}
+
+void MGtkStackControlImpl::Select(const std::string &inName)
+{
+	gtk_stack_set_visible_child_name(GTK_STACK(GetWidget()), inName.c_str());
+}
+
+MStackControlImpl *MStackControlImpl::Create(MStackControl *inControl)
+{
+	return new MGtkStackControlImpl(inControl);
+}

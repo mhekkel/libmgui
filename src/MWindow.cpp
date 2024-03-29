@@ -122,8 +122,6 @@ void MWindow::HideSelf()
 
 void MWindow::Select()
 {
-	if (not mImpl->Visible())
-		Show();
 	mImpl->Select();
 }
 
