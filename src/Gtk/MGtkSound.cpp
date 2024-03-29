@@ -26,102 +26,103 @@
 
 #include "MGtkLib.hpp"
 
-#include "MError.hpp"
-#include "MFile.hpp"
-#include "MPreferences.hpp"
+// #include "MError.hpp"
+// #include "MFile.hpp"
+// #include "MPreferences.hpp"
 #include "MSound.hpp"
-#include "MWindow.hpp"
+// #include "MWindow.hpp"
 
-#include <canberra.h>
-#include <dlfcn.h>
-#include <iostream>
-#include <map>
+#include "mrsrc.hpp"
 
-namespace fs = std::filesystem;
+// #include <canberra.h>
+// #include <dlfcn.h>
+// #include <iostream>
+// #include <map>
 
-// namespace
-// {
-
-// class MAudioSocket
-// {
-//   public:
-// 	static MAudioSocket &Instance();
-
-// 	void Play(const std::string &inPath);
-
-//   private:
-// 	MAudioSocket();
-// 	~MAudioSocket();
-
-// 	static void CAFinishCallback(ca_context *inContext, uint32_t inID, int inErrorCode, void *inUserData);
-
-// 	ca_context *mCAContext;
-// };
-
-// MAudioSocket::MAudioSocket()
-// 	: mCAContext(nullptr)
-// {
-// 	int err = ca_context_create(&mCAContext);
-// 	if (err == 0)
-// 		err = ca_context_open(mCAContext);
-// }
-
-// MAudioSocket::~MAudioSocket()
-// {
-// 	ca_context_destroy(mCAContext);
-// 	mCAContext = nullptr;
-// }
-
-// MAudioSocket &MAudioSocket::Instance()
-// {
-// 	static MAudioSocket sInstance;
-// 	return sInstance;
-// }
-
-// void MAudioSocket::CAFinishCallback(ca_context *inContext, uint32_t inID, int inErrorCode, void *inUserData)
-// {
-// 	if (inErrorCode != CA_SUCCESS)
-// 		cerr << "Error playing sound using canberra: " << ca_strerror(inErrorCode) << '\n';
-// }
-
-// void MAudioSocket::Play(const std::string &inFile)
-// {
-// 	if (mCAContext != nullptr)
-// 	{
-// 		ca_proplist *pl;
-
-// 		ca_proplist_create(&pl);
-// 		ca_proplist_sets(pl, CA_PROP_MEDIA_FILENAME, inFile.c_str());
-
-// 		int pan = 2;
-// 		//        gc = gconf_client_get_default();
-// 		//        value = gconf_client_get(gc, ALARM_GCONF_PATH, NULL);
-// 		//
-// 		//        if (value && value->type == GCONF_VALUE_INT)
-// 		//                pan = gconf_value_get_int(value);
-// 		//        else
-// 		//                pan = 2;
-// 		float volume = (1.0f - float(pan) / 2.0f) * -6.0f;
-// 		ca_proplist_setf(pl, CA_PROP_CANBERRA_VOLUME, "%f", volume);
-
-// 		int err = ca_context_play_full(mCAContext, 0, pl, &MAudioSocket::CAFinishCallback, this);
-// 		if (err != CA_SUCCESS)
-// 			cerr << "Error calling ca_context_play_full: " << ca_strerror(err) << '\n';
-
-// 		ca_proplist_destroy(pl);
-// 	}
-// 	//	else if (MWindow::GetFirstWindow() != nullptr)
-// 	//		MWindow::GetFirstWindow()->Beep();
-// 	else
-// 		gdk_display_beep(gdk_display_get_default());
-// }
-
-// } // namespace
+static void
+sound_ended(GObject *object)
+{
+	g_object_unref(object);
+}
 
 void PlaySound(const std::string &inSoundName)
 {
-	// //	if (not gPlaySounds)
-	// //		return;
+	// mrsrc::rsrc data("Sounds/" + inSoundName + ".ogg");
+	// if (data)
+	// {
+	// 	// GInputStream *s = g_memory_input_stream_new_from_data(data.data(), data.size(), nullptr);
+
+	// 	// auto mf = gtk_media_file_new_for_input_stream(s);
+
+	// 	auto mf = gtk_media_file_new_for_filename("/home/maarten/projects/salt/rsrc/Sounds/service-login.oga");
+
+	// 	gtk_media_stream_set_volume(GTK_MEDIA_STREAM(mf), 1.0);
+	// 	gtk_media_stream_play(GTK_MEDIA_STREAM(mf));
+	// 	g_signal_connect(mf, "notify::ended", G_CALLBACK(sound_ended), NULL);
+
+	// 	// g_object_unref(mf);
+
+	// 	return;
+	// }
+
+	// ao_device *device;
+	// 	ao_sample_format format;
+	// 	int default_driver;
+	// 	char *buffer;
+	// 	int buf_size;
+	// 	int sample;
+	// 	float freq = 440.0;
+	// 	int i;
+
+	// 	/* -- Initialize -- */
+
+	// 	fprintf(stderr, "libao example program\n");
+
+	// 	ao_initialize();
+
+	// 	/* -- Setup for default driver -- */
+
+	// 	default_driver = ao_default_driver_id();
+
+	//         memset(&format, 0, sizeof(format));
+	// 	format.bits = 16;
+	// 	format.channels = 2;
+	// 	format.rate = 44100;
+	// 	format.byte_format = AO_FMT_LITTLE;
+
+	// 	/* -- Open driver -- */
+	// 	device = ao_open_live(default_driver, &format, NULL /* no options */);
+	// 	if (device == NULL) {
+	// 		fprintf(stderr, "Error opening device.\n");
+	// 		return 1;
+	// 	}
+
+	// 	/* -- Play some stuff -- */
+	// 	buf_size = format.bits/8 * format.channels * format.rate;
+	// 	buffer = calloc(buf_size,
+	// 			sizeof(char));
+
+	// 	for (i = 0; i < format.rate; i++) {
+	// 		sample = (int)(0.75 * 32768.0 *
+	// 			sin(2 * M_PI * freq * ((float) i/format.rate)));
+
+	// 		/* Put the same stuff in left and right channel */
+	// 		buffer[4*i] = buffer[4*i+2] = sample & 0xff;
+	// 		buffer[4*i+1] = buffer[4*i+3] = (sample >> 8) & 0xff;
+	// 	}
+	// 	ao_play(device, buffer, buf_size);
+
+	// 	/* -- Close and shutdown -- */
+	// 	ao_close(device);
+
+	// 	ao_shutdown();
+
+	// 	free(buffer);
+
+	//   return (0);
+
+	// if (not gPlaySounds)
+	// 	return;
 
 	// try
 	// {
@@ -165,6 +166,6 @@ void PlaySound(const std::string &inSoundName)
 	// }
 	// catch (...)
 	// {
-	// 	gdk_display_beep(gdk_display_get_default());
+	gdk_display_beep(gdk_display_get_default());
 	// }
 }
