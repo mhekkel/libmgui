@@ -103,10 +103,9 @@ int MGtkApplicationImpl::CommandLine(GApplicationCommandLine *inCommandLine)
 	for (i = 0; i < argc; i++)
 		g_print("argument %d: %s\n", i, argv[i]);
 
-	g_strfreev(argv);
+	int result = gApp->HandleCommandLine(argc, argv);
 
-	if (argc <= 1)
-		gApp->DoNew();
+	g_strfreev(argv);
 
 	return 0;
 }

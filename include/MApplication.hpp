@@ -120,6 +120,11 @@ class MApplication
 	~MApplication();
 	virtual void Initialise();
 
+	virtual int HandleCommandLine(int argc, const char * const argv[])
+	{
+		return 1;
+	}
+
 	virtual void DoNew();
 	virtual void DoOpen();
 	// virtual void Open(const std::string &inURL);
