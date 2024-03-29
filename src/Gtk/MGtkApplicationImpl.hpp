@@ -44,6 +44,8 @@ class MGtkApplicationImpl : public MApplicationImpl, public MGtkCommandEmitter
 	static MGtkApplicationImpl *GetInstance() { return sInstance; }
 
 	void Initialise() override;
+	void SetIconName(const std::string &inIconName) override;
+
 	int RunEventLoop() override;
 	void Quit() override;
 

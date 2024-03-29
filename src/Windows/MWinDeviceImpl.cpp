@@ -760,7 +760,7 @@ void MWinDeviceImpl::CreateTextFormat()
 float MWinDeviceImpl::GetAscent()
 {
 	if (not mFont)
-		SetFont(Preferences::GetString("font", "Consolas 10"));
+		SetFont(MPrefs::GetString("font", "Consolas 10"));
 
 	DWRITE_FONT_METRICS metrics;
 	mFont->GetMetrics(&metrics);
@@ -770,7 +770,7 @@ float MWinDeviceImpl::GetAscent()
 float MWinDeviceImpl::GetDescent()
 {
 	if (not mFont)
-		SetFont(Preferences::GetString("font", "Consolas 10"));
+		SetFont(MPrefs::GetString("font", "Consolas 10"));
 
 	DWRITE_FONT_METRICS metrics;
 	mFont->GetMetrics(&metrics);
@@ -780,7 +780,7 @@ float MWinDeviceImpl::GetDescent()
 int32_t MWinDeviceImpl::GetLineHeight()
 {
 	if (not mFont)
-		SetFont(Preferences::GetString("font", "Consolas 10"));
+		SetFont(MPrefs::GetString("font", "Consolas 10"));
 
 	DWRITE_FONT_METRICS metrics;
 	mFont->GetMetrics(&metrics);
@@ -791,7 +791,7 @@ int32_t MWinDeviceImpl::GetLineHeight()
 float MWinDeviceImpl::GetXWidth()
 {
 	if (not mFont)
-		SetFont(Preferences::GetString("font", "Consolas 10"));
+		SetFont(MPrefs::GetString("font", "Consolas 10"));
 
 	CreateTextFormat();
 

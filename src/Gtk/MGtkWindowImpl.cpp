@@ -271,6 +271,11 @@ void MGtkWindowImpl::SetTitle(std::string inTitle)
 	gtk_window_set_title(GTK_WINDOW(GetWidget()), inTitle.c_str());
 }
 
+void MGtkWindowImpl::SetIconName(const std::string &inIconName)
+{
+	gtk_window_set_icon_name(GTK_WINDOW(GetWidget()), inIconName.c_str());
+}
+
 // string MGtkWindowImpl::GetTitle() const
 //{
 //	const char* title = gtk_window_get_title(GTK_WINDOW(GetWidget()));

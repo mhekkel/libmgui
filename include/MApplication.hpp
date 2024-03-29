@@ -86,6 +86,7 @@ class MApplicationImpl
 	virtual ~MApplicationImpl() {}
 
 	virtual void Initialise() = 0;
+	virtual void SetIconName(const std::string &inIconName) = 0;
 	virtual int RunEventLoop() = 0;
 	virtual void Quit() = 0;
 
@@ -113,7 +114,6 @@ class MApplicationImpl
 class MApplication
 {
   public:
-	static void Install(const std::string &inPrefix);
 	static MApplication *Create(MApplicationImpl *inImpl);
 	static int Main(const std::vector<std::string> &argv);
 
@@ -156,14 +156,7 @@ class MApplication
   protected:
 	MApplication(MApplicationImpl *inImpl);
 
-	// void RegisterAccelerator(const std::string &inAction, char32_t inKeyCode, uint32_t inModifiers)
-	// {
-	// 	mImpl->RegisterAccelerator(inAction, inKeyCode, inModifiers);
-	// }
-
-	typedef std::list<MWindow *> MWindowList;
-
-	virtual void DoSelectWindowFromWindowMenu(uint32_t inIndex);
+	void SetIconName(const std::string &inIconName);
 
 	virtual void SaveGlobals();
 

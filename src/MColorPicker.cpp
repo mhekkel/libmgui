@@ -505,7 +505,7 @@ MColorPicker::MColorPicker(
 
 	Show(inWindow);
 
-	std::string mode = Preferences::GetString("color-picker-mode", "hue");
+	std::string mode = MPrefs::GetString("color-picker-mode", "hue");
 	MRadiobutton *button = dynamic_cast<MRadiobutton *>(FindSubViewByID(mode));
 	if (button != nullptr)
 	{
@@ -592,12 +592,12 @@ void MColorPicker::SetMode(MPickerMode inMode)
 
 	switch (inMode)
 	{
-		case ePickSVH: Preferences::SetString("color-picker-mode", "hue"); break;
-		case ePickHVS: Preferences::SetString("color-picker-mode", "saturation"); break;
-		case ePickHSV: Preferences::SetString("color-picker-mode", "value"); break;
-		case ePickBGR: Preferences::SetString("color-picker-mode", "red"); break;
-		case ePickBRG: Preferences::SetString("color-picker-mode", "green"); break;
-		case ePickRGB: Preferences::SetString("color-picker-mode", "blue"); break;
+		case ePickSVH: MPrefs::SetString("color-picker-mode", "hue"); break;
+		case ePickHVS: MPrefs::SetString("color-picker-mode", "saturation"); break;
+		case ePickHSV: MPrefs::SetString("color-picker-mode", "value"); break;
+		case ePickBGR: MPrefs::SetString("color-picker-mode", "red"); break;
+		case ePickBRG: MPrefs::SetString("color-picker-mode", "green"); break;
+		case ePickRGB: MPrefs::SetString("color-picker-mode", "blue"); break;
 	}
 }
 

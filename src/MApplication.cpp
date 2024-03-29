@@ -81,9 +81,14 @@ void MApplication::Initialise()
 	mImpl->Initialise();
 }
 
+void MApplication::SetIconName(const std::string &inIconName)
+{
+	mImpl->SetIconName(inIconName);
+}
+
 void MApplication::SaveGlobals()
 {
-	Preferences::SaveIfDirty();
+	MPrefs::SaveIfDirty();
 }
 
 void MApplication::DoNew()
@@ -94,16 +99,9 @@ void MApplication::DoOpen()
 {
 }
 
-// void MApplication::Open(const string &inURI)
-// {
-// }
 
 void MApplication::Execute(const std::string &inCommand,
 		const std::vector<std::string> &inArguments)
-{
-}
-
-void MApplication::DoSelectWindowFromWindowMenu(uint32_t inIndex)
 {
 }
 
@@ -125,5 +123,5 @@ void MApplication::DoQuit()
 void MApplication::Pulse()
 {
 	eIdle();
-	Preferences::SaveIfDirty();
+	MPrefs::SaveIfDirty();
 }

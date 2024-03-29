@@ -161,6 +161,11 @@ std::string MWindow::GetTitle() const
 	return mTitle;
 }
 
+void MWindow::SetIconName(const std::string &inIconName)
+{
+	mImpl->SetIconName(inIconName);
+}
+
 void MWindow::SetModifiedMarkInTitle(bool inModified)
 {
 	if (mModified != inModified)

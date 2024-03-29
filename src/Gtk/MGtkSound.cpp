@@ -130,13 +130,13 @@ void PlaySound(const std::string &inSoundName)
 	// 	std::string filename;
 
 	// 	if (inSoundName == "success")
-	// 		filename = Preferences::GetString("success sound", "info.wav");
+	// 		filename = MPrefs::GetString("success sound", "info.wav");
 	// 	else if (inSoundName == "failure" or inSoundName == "error")
-	// 		filename = Preferences::GetString("failure sound", "error.wav");
+	// 		filename = MPrefs::GetString("failure sound", "error.wav");
 	// 	else if (inSoundName == "warning")
-	// 		filename = Preferences::GetString("warning sound", "warning.wav");
+	// 		filename = MPrefs::GetString("warning sound", "warning.wav");
 	// 	else if (inSoundName == "question")
-	// 		filename = Preferences::GetString("question sound", "question.wav");
+	// 		filename = MPrefs::GetString("question sound", "question.wav");
 	// 	else
 	// 	{
 	// 		filename = "warning.wav";

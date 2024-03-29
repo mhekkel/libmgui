@@ -81,46 +81,11 @@ void MGtkApplicationImpl::Activate()
 
 void MGtkApplicationImpl::Initialise()
 {
-	GList *iconList = nullptr;
+}
 
-	mrsrc::rsrc appIconResource("Icons/appicon.png");
-	if (appIconResource)
-	{
-		GInputStream *s = g_memory_input_stream_new_from_data(appIconResource.data(), appIconResource.size(), nullptr);
-		THROW_IF_NIL(s);
-
-		GError *error = nullptr;
-		GdkPixbuf *icon = gdk_pixbuf_new_from_stream(s, nullptr, &error);
-		if (icon)
-			iconList = g_list_append(iconList, icon);
-
-		if (error)
-			g_free(error);
-	}
-
-	mrsrc::rsrc smallAppIconResource("Icons/appicon.png");
-	if (smallAppIconResource)
-	{
-		GInputStream *s = g_memory_input_stream_new_from_data(smallAppIconResource.data(), smallAppIconResource.size(), nullptr);
-		THROW_IF_NIL(s);
-
-		GError *error = nullptr;
-		GdkPixbuf *icon = gdk_pixbuf_new_from_stream(s, nullptr, &error);
-		if (icon)
-			iconList = g_list_append(iconList, icon);
-
-		if (error)
-			g_free(error);
-	}
-
-#warning FIXME
-	// if (iconList)
-	// 	gtk_window_set_default_icon_list(iconList);
-
-	// now start up the normal executable
-	gtk_window_set_default_icon_name("salt-terminal");
-
-	// gdk_notify_startup_complete();
+void MGtkApplicationImpl::SetIconName(const std::string &inIconName)
+{
+	gtk_window_set_default_icon_name(inIconName.c_str());
 }
 
 int MGtkApplicationImpl::CommandLine(GApplicationCommandLine *inCommandLine)

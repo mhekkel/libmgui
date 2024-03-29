@@ -79,6 +79,8 @@ class MWindowImpl
 	virtual void SetTitle(std::string inTitle) = 0;
 	// virtual std::string	GetTitle() const = 0;
 
+	virtual void SetIconName(const std::string &inIconName) = 0;
+
 	virtual void Show() = 0;
 	virtual void Hide() = 0;
 
@@ -147,6 +149,7 @@ class MWindow : public MView
 
 	virtual void SetTitle(const std::string &inTitle);
 	virtual std::string GetTitle() const;
+	virtual void SetIconName(const std::string &inIconName);
 
 	void SetModifiedMarkInTitle(bool inModified);
 

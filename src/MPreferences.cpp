@@ -52,7 +52,7 @@ namespace fs = std::filesystem;
 fs::path gPrefsDir;
 std::string gPrefsFileName = std::string(kAppName) + ".cfg";
 
-namespace Preferences
+namespace MPrefs
 {
 
 struct preference
@@ -359,4 +359,4 @@ void SaveIfDirty()
 		instance.Save();
 }
 
-} // namespace Preferences
+} // namespace MPrefs

@@ -78,9 +78,9 @@ set(CMAKE_THREAD_PREFER_PTHREAD)
 set(THREADS_PREFER_PTHREAD_FLAG)
 find_package(Threads REQUIRED)
 
-if(NOT TARGET zeep AND NOT zeep_FOUND)
-	find_package(zeep 5.1.6 REQUIRED)
-endif()
+# if(NOT TARGET zeep AND NOT zeep_FOUND)
+# 	find_package(zeep 5.1.6 REQUIRED)
+# endif()
 
 # The salt executable
 list(APPEND public_headers

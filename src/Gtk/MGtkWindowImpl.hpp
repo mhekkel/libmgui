@@ -47,6 +47,7 @@ class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin
 	void Append(MGtkWidgetMixin *inChild) override;
 
 	void SetTitle(std::string inTitle) override;
+	void SetIconName(const std::string &inIconName) override;
 
 	void Show() override;
 	void Hide() override;

@@ -13,7 +13,7 @@ namespace fs = std::filesystem;
 fs::path	gPrefsDir;
 string		gPrefsFileName = string(kAppName) + "-settings";
 
-namespace Preferences
+namespace MPrefs
 {
 
 class MPreferencesImpl

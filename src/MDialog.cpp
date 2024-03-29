@@ -208,12 +208,12 @@ void MDialog::SavePosition(const char *inName)
 	std::stringstream s;
 	s << r.x << ' ' << r.y << ' ' << r.width << ' ' << r.height;
 
-	Preferences::SetString(inName, s.str());
+	MPrefs::SetString(inName, s.str());
 }
 
 void MDialog::RestorePosition(const char *inName)
 {
-	std::string s = Preferences::GetString(inName, "");
+	std::string s = MPrefs::GetString(inName, "");
 	if (s.length() > 0)
 	{
 		MRect r;
