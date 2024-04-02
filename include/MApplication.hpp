@@ -115,7 +115,7 @@ class MApplication
 {
   public:
 	static MApplication *Create(MApplicationImpl *inImpl);
-	static int Main(const std::vector<std::string> &argv);
+	static int Main(const std::string &inApplicationID, const std::vector<std::string> &argv);
 
 	~MApplication();
 	virtual void Initialise();

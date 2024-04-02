@@ -41,12 +41,12 @@
 
 MGtkApplicationImpl *MGtkApplicationImpl::sInstance;
 
-MGtkApplicationImpl::MGtkApplicationImpl()
+MGtkApplicationImpl::MGtkApplicationImpl(const std::string &inApplicationID)
 	: mStartup(this, &MGtkApplicationImpl::Startup)
 	, mActivate(this, &MGtkApplicationImpl::Activate)
 	, mQueryEnd(this, &MGtkApplicationImpl::OnQueryEnd)
 	, mCommandLine(this, &MGtkApplicationImpl::CommandLine)
-	, mGtkApplication(gtk_application_new("com.hekkelman.mgui-dummy-app-id", G_APPLICATION_HANDLES_COMMAND_LINE))
+	, mGtkApplication(gtk_application_new(inApplicationID.c_str(), G_APPLICATION_HANDLES_COMMAND_LINE))
 {
 	sInstance = this;
 
@@ -235,7 +235,7 @@ gboolean MGtkApplicationImpl::Timeout(gpointer inData)
 
 // --------------------------------------------------------------------
 
-int MApplication::Main(const std::vector<std::string> &argv)
+int MApplication::Main(const std::string &inApplicationID, const std::vector<std::string> &argv)
 {
 	try
 	{
@@ -250,15 +250,17 @@ int MApplication::Main(const std::vector<std::string> &argv)
 			gPrefixPath = gExecutablePath.parent_path();
 		}
 
-		MApplication *app = MApplication::Create(new MGtkApplicationImpl());
+		assert(g_application_id_is_valid(inApplicationID.c_str()));
+
+		MApplication *app = MApplication::Create(new MGtkApplicationImpl(inApplicationID));
+		GApplication *g_app = G_APPLICATION(static_cast<MGtkApplicationImpl *>(app->GetImpl())->GetGtkApp());
 
 		std::vector<char *> args;
 		for (auto &a : argv)
 			args.emplace_back(const_cast<char *>(a.c_str()));
 		args.emplace_back(nullptr);
 
-		return g_application_run(G_APPLICATION(static_cast<MGtkApplicationImpl *>(app->GetImpl())->GetGtkApp()),
-			argv.size(), args.data());
+		return g_application_run(g_app, argv.size(), args.data());
 	}
 	catch (const std::exception &e)
 	{

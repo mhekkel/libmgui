@@ -38,7 +38,7 @@
 class MGtkApplicationImpl : public MApplicationImpl, public MGtkCommandEmitter
 {
   public:
-	MGtkApplicationImpl();
+	MGtkApplicationImpl(const std::string &inApplicationID);
 	virtual ~MGtkApplicationImpl();
 
 	static MGtkApplicationImpl *GetInstance() { return sInstance; }

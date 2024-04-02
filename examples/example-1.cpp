@@ -8,6 +8,7 @@
 
 #include "revision.hpp"
 
+#include <coroutine>
 #include <iostream>
 
 const char kAppName[] = "ExampleApp";
@@ -16,7 +17,7 @@ class ExampleWindow : public MWindow
 {
   public:
 	ExampleWindow()
-		: MWindow("Example", MRect{0, 0, 400, 400}, kMPostionDefault | kMShowMenubar)
+		: MWindow("Example", MRect{ 0, 0, 400, 400 }, kMPostionDefault | kMShowMenubar)
 		, cClose(this, "close", &ExampleWindow::Close, 'w', kControlKey | kShiftKey)
 		, cCut(this, "cut", &ExampleWindow::Cut, 'x', kControlKey | kShiftKey)
 		, cCopy(this, "copy", &ExampleWindow::Copy, 'c', kControlKey | kShiftKey)
@@ -35,7 +36,7 @@ class ExampleWindow : public MWindow
 		AddRoute(btn->eClicked, eClicked);
 		AddChild(btn);
 
-		MColorSwatch *cbtn = new MColorSwatch("kleur", MRect{0, 0, 100, 20}, MColor("ffa348"));
+		MColorSwatch *cbtn = new MColorSwatch("kleur", MRect{ 0, 0, 100, 20 }, MColor("ffa348"));
 		btn->SetLayout(false, false, 4);
 		AddChild(cbtn);
 		AddRoute(cbtn->eColorChanged, eColour);
@@ -44,8 +45,6 @@ class ExampleWindow : public MWindow
 		btn->SetLayout(false, false, 4);
 		AddRoute(cb->eValueChanged, eChanged);
 		AddChild(cb);
-
-
 
 		cCut.SetEnabled(mHasSelection);
 		cCopy.SetEnabled(mHasSelection);
@@ -98,6 +97,8 @@ class ExampleWindow : public MWindow
 
 int ExampleWindow::s_nr;
 
+// --------------------------------------------------------------------
+
 class ExampleApp : public MApplication
 {
   public:
@@ -115,10 +116,16 @@ class ExampleApp : public MApplication
 		MMenuBar::Init("example-menu");
 	}
 
-	void Execute(const std::string &command, const std::vector<std::string> &arguments) override
+	// void Execute(const std::string &command, const std::vector<std::string> &arguments) override
+	// {
+	// 	if (command == "New")
+	// 		DoNew();
+	// }
+
+	int HandleCommandLine(int argc, const char *const argv[]) override
 	{
-		if (command == "New")
-			DoNew();
+		DoNew();
+		return 0;
 	}
 
 	void DoNew() override
@@ -130,11 +137,11 @@ class ExampleApp : public MApplication
 	void Quit()
 	{
 		DisplayAlert(nullptr, "close-all-windows-alert",
-			[this](int inReply) {
+			[this](int inReply)
+			{
 				if (inReply == 1)
 					MApplication::DoQuit();
-			}
-		);
+			});
 	}
 
 	void About()
@@ -160,5 +167,5 @@ int main(int argc, char *argv[])
 	for (int i = 0; i < argc; ++i)
 		args.emplace_back(argv[i]);
 
-	return ExampleApp::Main(args);
+	return ExampleApp::Main("com.hekkelman.libmgui-example", args);
 }
