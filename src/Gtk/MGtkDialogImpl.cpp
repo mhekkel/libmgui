@@ -121,9 +121,12 @@ class MGtkDialogImpl : public MGtkWindowImpl
 				break;
 
 			case GTK_RESPONSE_CANCEL:
-			case GTK_RESPONSE_DELETE_EVENT:
-				if (dlog->CancelClicked() and inResponseID != GTK_RESPONSE_DELETE_EVENT)
+				if (dlog->CancelClicked())
 					dlog->Close();
+				break;
+
+			case GTK_RESPONSE_DELETE_EVENT:
+				// ehm... now what?
 				break;
 
 			default:
