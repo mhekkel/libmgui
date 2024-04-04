@@ -39,67 +39,13 @@ void MCanvasImpl::Invalidate()
 
 MCanvas::MCanvas(const std::string &inID, MRect inBounds/* , bool inAcceptDropFiles, bool inAcceptDropText */)
 	: MControl<MCanvasImpl>(inID, inBounds, MCanvasImpl::Create(this, inBounds.width, inBounds.height))
-	// , mAcceptDropFiles(inAcceptDropFiles)
-	// , mAcceptDropText(inAcceptDropText)
 {
 }
 
 MCanvas::~MCanvas()
 {
 }
-
-// void MCanvas::AddedToWindow()
-// {
-// 	MControl::AddedToWindow();
-
-// 	if (mAcceptDropFiles or mAcceptDropText)
-// 		mImpl->AcceptDragAndDrop(mAcceptDropFiles, mAcceptDropText);
-// }
-
 void MCanvas::Invalidate()
 {
 	mImpl->Invalidate();
 }
-
-// void MCanvas::DragEnter()
-// {
-// }
-
-// bool MCanvas::DragWithin(int32_t inX, int32_t inY)
-// {
-// 	return false;
-// }
-
-// void MCanvas::DragLeave()
-// {
-// }
-
-// bool MCanvas::Drop(bool inMove, int32_t inX, int32_t inY, const std::string &inText)
-// {
-// 	return false;
-// }
-
-// bool MCanvas::Drop(int32_t inX, int32_t inY, const std::filesystem::path &inFile)
-// {
-// 	try
-// 	{
-// 		// gApp->OpenOneDocument(inFile.string());
-// 	}
-// 	catch (...)
-// 	{
-// 	}
-// 	return true;
-// }
-
-// void MCanvas::StartDrag()
-// {
-// 	mImpl->StartDrag();
-// }
-
-// void MCanvas::DragSendData(std::string &outData)
-// {
-// }
-
-// void MCanvas::DragDeleteData()
-// {
-// }

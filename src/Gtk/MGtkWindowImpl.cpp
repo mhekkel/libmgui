@@ -105,7 +105,6 @@ MGtkWindowImpl::MGtkWindowImpl(MWindowFlags inFlags, MWindow *inWindow)
 	, mCloseRequest(this, &MGtkWindowImpl::OnCloseRequest)
 	// , mIsSuspendedChanged(this, &MGtkWindowImpl::OnIsSuspendedChanged)
 	, mIsActiveChanged(this, &MGtkWindowImpl::OnIsActiveChanged)
-	, mMainVBox(nullptr)
 	, mFocus(this)
 	, mConfigured(false)
 {
@@ -188,32 +187,10 @@ MGtkWindowImpl *MGtkWindowImpl::GetWindowImpl(GtkWindow *inW)
 	return MGTK_IS_WINDOW(inW) ? MGTK_WINDOW(inW)->m_impl : nullptr;
 }
 
-void MGtkWindowImpl::CreateMainVBox()
-{
-	mMainVBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-	gtk_window_set_child(GTK_WINDOW(GetWidget()), mMainVBox);
-
-	gtk_widget_set_hexpand(mMainVBox, true);
-	gtk_widget_set_vexpand(mMainVBox, true);
-
-	gtk_widget_show(mMainVBox);
-}
-
-void MGtkWindowImpl::AddStatusbarWidget(MGtkWidgetMixin *inChild)
-{
-	if (mMainVBox == nullptr)
-		CreateMainVBox();
-
-	gtk_box_append(GTK_BOX(mMainVBox), inChild->GetWidget());
-	// gtk_widget_show_all(inChild->GetWidget());
-}
-
 void MGtkWindowImpl::Append(MGtkWidgetMixin *inChild)
 {
-	if (mMainVBox == nullptr)
-		CreateMainVBox();
-
-	gtk_box_append(GTK_BOX(mMainVBox), inChild->GetWidget());
+	assert(gtk_window_get_child(GTK_WINDOW(GetWidget())) == nullptr);
+	gtk_window_set_child(GTK_WINDOW(GetWidget()), inChild->GetWidget());
 }
 
 void MGtkWindowImpl::SetTransientFor(MWindow *inWindow)
@@ -227,14 +204,6 @@ bool MGtkWindowImpl::OnCloseRequest()
 {
 	return mWindow->AllowClose(false) ? false : true;
 }
-
-// void MGtkWindowImpl::OnIsSuspendedChanged(GParamSpec *inProperty)
-// {
-// 	if (gtk_window_is_suspended(GTK_WINDOW(GetWidget())))
-// 		mWindow->Hide();
-// 	else
-// 		mWindow->Show();
-// }
 
 void MGtkWindowImpl::OnIsActiveChanged(GParamSpec *inProperty)
 {

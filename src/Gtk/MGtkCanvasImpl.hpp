@@ -49,10 +49,6 @@ class MGtkCanvasImpl : public MGtkControlImpl<MCanvas>
 
 	void Invalidate() override;
 
-	// // MCanvasImpl overrides
-	// virtual void AcceptDragAndDrop(bool inFiles, bool inText);
-	// virtual void StartDrag();
-
   protected:
 
 	void OnGestureClickPressed(double inX, double inY, gint inClickCount) override;
@@ -76,8 +72,6 @@ class MGtkCanvasImpl : public MGtkControlImpl<MCanvas>
 	void OnScrollEnd() override;
 
 	void OnCommit(char *inText) override;
-
-	// bool OnScrollEvent(GdkEvent *inEvent) override;
 
 	static void Draw(GtkDrawingArea *area, cairo_t *cr, int width, int height, gpointer data);
 

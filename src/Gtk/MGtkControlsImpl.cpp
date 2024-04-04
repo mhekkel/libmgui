@@ -305,59 +305,51 @@ MScrollbarImpl *MScrollbarImpl::Create(MScrollbar *inScrollbar)
 MGtkStatusbarImpl::MGtkStatusbarImpl(MStatusbar *inStatusbar, uint32_t inPartCount, MStatusBarElement inParts[])
 	: MGtkControlImpl(inStatusbar, "")
 	, mParts(inParts, inParts + inPartCount)
-	, mClicked(this, &MGtkStatusbarImpl::Clicked)
 {
 }
 
 void MGtkStatusbarImpl::CreateWidget()
 {
+	SetEventMask(MEventMask::GestureClick);
+
 	GtkWidget *statusBar = gtk_statusbar_new();
 
-	// GtkShadowType shadow_type = GTK_SHADOW_NONE;
-	//	gtk_widget_style_get(statusBar, "shadow_type", &shadow_type, nullptr);
+	GtkRequisition minimum, natural;
+	gtk_widget_get_preferred_size(statusBar, &minimum, &natural);
+
+	MRect bounds(0, 0, natural.width, natural.height);
+	g_object_ref_sink(statusBar);
+
+	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+
+	gtk_widget_set_size_request(box, natural.width, natural.height);
 
 	for (auto part : mParts)
 	{
-		GtkWidget *frame = gtk_frame_new(nullptr);
-		// gtk_frame_set_shadow_type(GTK_FRAME(frame), shadow_type);
-
 		GtkWidget *label = gtk_label_new("");
 		gtk_label_set_single_line_mode(GTK_LABEL(label), true);
-		gtk_label_set_selectable(GTK_LABEL(label), true);
+		gtk_label_set_selectable(GTK_LABEL(label), false);
 		gtk_label_set_xalign(GTK_LABEL(label), 0);
 		gtk_label_set_yalign(GTK_LABEL(label), 0.5);
+		gtk_label_set_ellipsize(GTK_LABEL(label), PANGO_ELLIPSIZE_END);
 
-		// gtk_container_add(GTK_CONTAINER(frame), label);
-		gtk_frame_set_child(GTK_FRAME(frame), label);
-
-		// if (part.packing == ePackStart)
-			gtk_box_append(GTK_BOX(statusBar), frame);//, part.expand, part.fill, part.padding);
-		// else
-		// 	gtk_box_pack_end(GTK_BOX(statusBar), frame, part.expand, part.fill, part.padding);
+		gtk_box_append(GTK_BOX(box), label);
 
 		if (part.width > 0)
-			gtk_widget_set_size_request(frame, part.width, -1);
+			gtk_widget_set_size_request(label, part.width, -1);
+		
+		if (part.expand)
+			gtk_widget_set_hexpand(label, true);
+		
+		gtk_widget_set_margin_start(label, part.margins.left);
+		gtk_widget_set_margin_top(label, part.margins.top);
+		gtk_widget_set_margin_end(label, part.margins.right);
+		gtk_widget_set_margin_bottom(label, part.margins.bottom);
 
 		mPanels.push_back(label);
-
-		mClicked.Connect(label, "button-press-event");
 	}
 
-	SetWidget(statusBar);
-}
-
-void MGtkStatusbarImpl::AddedToWindow()
-{
-	CreateWidget();
-
-	MGtkWidgetMixin *parent;
-	MRect bounds;
-
-	GetParentAndBounds(parent, bounds);
-
-	MGtkWindowImpl *impl = dynamic_cast<MGtkWindowImpl *>(parent);
-	assert(impl != nullptr);
-	impl->AddStatusbarWidget(this);
+	SetWidget(box);
 }
 
 void MGtkStatusbarImpl::SetStatusText(uint32_t inPartNr, const std::string &inText, bool inBorder)
@@ -366,15 +358,22 @@ void MGtkStatusbarImpl::SetStatusText(uint32_t inPartNr, const std::string &inTe
 		gtk_label_set_text(GTK_LABEL(mPanels[inPartNr]), inText.c_str());
 }
 
-bool MGtkStatusbarImpl::Clicked(GdkEvent *inEvent)
+void MGtkStatusbarImpl::OnGestureClickPressed(double inX, double inY, gint inClickCount)
 {
-	GtkWidget *source = GTK_WIDGET(mClicked.GetSourceGObject());
+	for (std::size_t ix = 0; auto panel : mPanels)
+	{
+		graphene_rect_t r;
+		gtk_widget_compute_bounds(panel, GetWidget(), &r);
 
-	auto panel = find(mPanels.begin(), mPanels.end(), source);
-	if (panel != mPanels.end())
-		mControl->ePartClicked(panel - mPanels.begin(), MRect());
+		if (inX >= r.origin.x and inX <= r.origin.x + r.size.width and
+			inY >= r.origin.y and inY <= r.origin.y + r.size.height)
+		{
+			mControl->ePartClicked(ix, MRect(r.origin.x, r.origin.y, r.size.width, r.size.height));
+			break;
+		}
 
-	return true;
+		++ix;
+	}
 }
 
 MStatusbarImpl *MStatusbarImpl::Create(MStatusbar *inStatusbar, uint32_t inPartCount, MStatusBarElement inParts[])

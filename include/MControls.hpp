@@ -231,7 +231,7 @@ class MStatusbarImpl;
 struct MStatusBarElement
 {
 	uint32_t width;
-	MRect margins;
+	MMargins margins;
 	bool expand;
 };
 
