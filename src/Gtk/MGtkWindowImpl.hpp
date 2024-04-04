@@ -41,9 +41,6 @@ class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin
 
 	virtual void Create(MRect inBounds, const std::string &inTitle);
 
-	// A window contains a VBox, and in this VBox you have to add the various elements.
-	// (in the right order, please!)
-	virtual void AddStatusbarWidget(MGtkWidgetMixin *inChild);
 	void Append(MGtkWidgetMixin *inChild) override;
 
 	void SetTitle(std::string inTitle) override;
@@ -52,7 +49,7 @@ class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin
 	void Show() override;
 	void Hide() override;
 
-	void SetTransientFor(MWindow *inWindow) override;
+	void SetParentWindow(MWindow *inWindow) override;
 
 	void Select() override;
 	void Close() override;
@@ -90,9 +87,6 @@ class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin
 	void OnIsActiveChanged(GParamSpec *inProperty);
 	MSlot<void(GParamSpec *)> mIsActiveChanged;
 
-	void CreateMainVBox();
-
-	GtkWidget *mMainVBox;
 	MGtkWidgetMixin *mFocus;
 	bool mConfigured;
 };

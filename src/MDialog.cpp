@@ -96,16 +96,10 @@ void MDialog::Show(MWindow *inParent)
 	SetWindowPosition(r);
 
 	if (inParent)
-		GetImpl()->SetTransientFor(inParent);
+		GetImpl()->SetParentWindow(inParent);
 
 	MWindow::Show();
 	MWindow::Select();
-}
-
-bool MDialog::ShowModal(MWindow *inParent)
-{
-	Show(inParent);
-	return GetImpl()->ShowModal();
 }
 
 void MDialog::RecalculateLayout()

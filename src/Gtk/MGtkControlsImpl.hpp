@@ -180,14 +180,12 @@ class MGtkStatusbarImpl : public MGtkControlImpl<MStatusbar>
 
 	void CreateWidget() override;
 	void SetStatusText(uint32_t inPartNr, const std::string &inText, bool inBorder) override;
-	void AddedToWindow() override;
 
   private:
 	std::vector<MStatusBarElement> mParts;
 	std::vector<GtkWidget *> mPanels;
 
-	bool Clicked(GdkEvent *inEvent);
-	MSlot<bool(GdkEvent *)> mClicked;
+	void OnGestureClickPressed(double inX, double inY, gint inClickCount) override;
 };
 
 class MGtkComboboxImpl : public MGtkControlImpl<MCombobox>
