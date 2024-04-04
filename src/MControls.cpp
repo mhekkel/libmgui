@@ -135,7 +135,7 @@ int32_t MScrollbar::GetMaxValue() const
 MStatusbar::MStatusbar(const std::string &inID, MRect inBounds, uint32_t inPartCount, MStatusBarElement inParts[])
 	: MControl<MStatusbarImpl>(inID, inBounds, MStatusbarImpl::Create(this, inPartCount, inParts))
 {
-	SetBindings(true, false, true, true);
+	SetLayout({ true, false, 0, 0, 0, 0 });
 }
 
 void MStatusbar::SetStatusText(uint32_t inPartNr, const std::string &inText, bool inBorder)
@@ -351,9 +351,8 @@ void MListBox::SetValue(int32_t inValue)
 // --------------------------------------------------------------------
 // Gtk specific controls
 
-MBoxControl::MBoxControl(const std::string &inID, MRect inBounds, bool inHorizontal,
-	bool inHomogeneous, bool inExpand, bool inFill, uint32_t inSpacing, uint32_t inPadding)
-	: MControl(inID, inBounds, MBoxControlImpl::Create(this, inHorizontal, inHomogeneous, inExpand, inFill, inSpacing, inPadding))
+MBoxControl::MBoxControl(const std::string &inID, MRect inBounds, bool inHorizontal)
+	: MControl(inID, inBounds, MBoxControlImpl::Create(this, inHorizontal))
 {
 }
 

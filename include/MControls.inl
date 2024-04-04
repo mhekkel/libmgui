@@ -78,12 +78,18 @@ void MControl<IMPL>::ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta)
 }
 
 template <class IMPL>
-void MControl<IMPL>::SetLayout(MControlLayout inLayout)
+void MControl<IMPL>::SetLayout(MViewLayout inLayout)
 {
 	mLayout = inLayout;
 
-	MView::SetMargins(inLayout.mMargin.left, inLayout.mMargin.top, inLayout.mMargin.right, inLayout.mMargin.bottom);
+	MView::SetLayout(inLayout);
 	mImpl->LayoutChanged();
+}
+
+template <class IMPL>
+void MControl<IMPL>::RequestSize(int32_t inWidth, int32_t inHeight)
+{
+	mImpl->RequestSize(inWidth, inHeight);
 }
 
 template <class IMPL>

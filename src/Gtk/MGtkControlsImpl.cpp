@@ -363,7 +363,8 @@ void MGtkStatusbarImpl::OnGestureClickPressed(double inX, double inY, gint inCli
 	for (std::size_t ix = 0; auto panel : mPanels)
 	{
 		graphene_rect_t r;
-		gtk_widget_compute_bounds(panel, GetWidget(), &r);
+		if (not gtk_widget_compute_bounds(panel, GetWidget(), &r))
+			continue;
 
 		if (inX >= r.origin.x and inX <= r.origin.x + r.size.width and
 			inY >= r.origin.y and inY <= r.origin.y + r.size.height)
@@ -949,27 +950,20 @@ MListBoxImpl *MListBoxImpl::Create(MListBox *inListBox)
 
 // --------------------------------------------------------------------
 
-MGtkBoxControlImpl::MGtkBoxControlImpl(MBoxControl *inControl, bool inHorizontal,
-	bool inHomogeneous, bool inExpand, bool inFill, uint32_t inSpacing, uint32_t inPadding)
+MGtkBoxControlImpl::MGtkBoxControlImpl(MBoxControl *inControl, bool inHorizontal)
 	: MGtkControlImpl(inControl, "")
 	, mHorizontal(inHorizontal)
-	, mHomogeneous(inHomogeneous)
-	, mExpand(inExpand)
-	, mFill(inFill)
-	, mSpacing(inSpacing)
-	, mPadding(inPadding)
 {
 }
 
 void MGtkBoxControlImpl::CreateWidget()
 {
-	SetWidget(gtk_box_new(mHorizontal ? GTK_ORIENTATION_HORIZONTAL : GTK_ORIENTATION_VERTICAL, mSpacing));
+	SetWidget(gtk_box_new(mHorizontal ? GTK_ORIENTATION_HORIZONTAL : GTK_ORIENTATION_VERTICAL, 0));
 }
 
-MBoxControlImpl *MBoxControlImpl::Create(MBoxControl *inControl, bool inHorizontal,
-	bool inHomogeneous, bool inExpand, bool inFill, uint32_t inSpacing, uint32_t inPadding)
+MBoxControlImpl *MBoxControlImpl::Create(MBoxControl *inControl, bool inHorizontal)
 {
-	return new MGtkBoxControlImpl(inControl, inHorizontal, inHomogeneous, inExpand, inFill, inSpacing, inPadding);
+	return new MGtkBoxControlImpl(inControl, inHorizontal);
 }
 
 void MGtkBoxControlImpl::Append(MGtkWidgetMixin *inChild)
@@ -984,12 +978,15 @@ void MGtkBoxControlImpl::AddChild(MControlBase *inControl, MControlBase *inBefor
 	{
 		mControl->MView::AddChild(inControl);
 
-		auto bi = inBefore ? dynamic_cast<MGtkWidgetMixin *>(inBefore->GetControlImplBase()) : nullptr;
+		if (inBefore)
+		{
+			auto bi = inBefore ? dynamic_cast<MGtkWidgetMixin *>(inBefore->GetControlImplBase()) : nullptr;
 
-		if (bi == nullptr)
-			gtk_box_reorder_child_after(GTK_BOX(GetWidget()), bi->GetWidget(), ci->GetWidget());
-		else
-			gtk_box_reorder_child_after(GTK_BOX(GetWidget()), ci->GetWidget(), nullptr);
+			if (bi == nullptr)
+				gtk_box_reorder_child_after(GTK_BOX(GetWidget()), bi->GetWidget(), ci->GetWidget());
+			else
+				gtk_box_reorder_child_after(GTK_BOX(GetWidget()), ci->GetWidget(), nullptr);
+		}
 	}
 }
 

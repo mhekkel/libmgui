@@ -32,18 +32,6 @@
 
 struct MControlImplBase;
 
-struct MMargins
-{
-	uint32_t left, top, right, bottom;
-};
-
-struct MControlLayout
-{
-	bool mHExpand, mVExpand;
-	bool mHFill, mVFill;
-	MMargins mMargin;
-};
-
 class MControlBase : public MView
 {
   public:
@@ -56,20 +44,6 @@ class MControlBase : public MView
 
 	virtual bool IsFocus() const = 0;
 	virtual void SetFocus() = 0;
-
-	MControlLayout GetLayout() const
-	{
-		return mLayout;
-	}
-
-	virtual void SetLayout(MControlLayout inLayout) = 0;
-	void SetLayout(bool expand, bool fill, uint32_t margin)
-	{
-		SetLayout({ expand, expand, fill, fill, margin, margin, margin, margin });
-	}
-
-  protected:
-	MControlLayout mLayout{};
 };
 
 template <class I>
@@ -83,7 +57,8 @@ class MControl : public MControlBase
 	void ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta) override;
 
 	using MControlBase::SetLayout;
-	void SetLayout(MControlLayout inLayout) override;
+	void SetLayout(MViewLayout inLayout) override;
+	void RequestSize(int32_t inWidth, int32_t inHeight) override;
 
 	virtual void Draw();
 
@@ -455,9 +430,7 @@ class MBoxControl : public MControl<MBoxControlImpl>
   public:
 	typedef MBoxControlImpl MImpl;
 
-	MBoxControl(const std::string &inID, MRect inBounds, bool inHorizontal,
-		bool inHomogeneous = false, bool inExpand = false, bool inFill = false,
-		uint32_t inSpacing = 0, uint32_t inPadding = 0);
+	MBoxControl(const std::string &inID, MRect inBounds, bool inHorizontal);
 
 	using MView::AddChild;
 	void AddChild(MControlBase *inControl, MControlBase *inBefore);

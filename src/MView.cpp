@@ -42,14 +42,6 @@ MView::MView(const std::string &inID, MRect inBounds)
 	: mID(inID)
 	, mBounds(0, 0, inBounds.width, inBounds.height)
 	, mFrame(inBounds)
-	, mLeftMargin(0)
-	, mTopMargin(0)
-	, mRightMargin(0)
-	, mBottomMargin(0)
-	, mBindLeft(true)
-	, mBindTop(true)
-	, mBindRight(false)
-	, mBindBottom(false)
 	, mParent(nullptr)
 	, mActive(eTriStateLatent)
 	, mVisible(eTriStateLatent)
@@ -151,27 +143,33 @@ void MView::SetFrame(const MRect &inFrame)
 	{
 		mFrame = inFrame;
 
-		mBounds.x = mLeftMargin;
-		mBounds.y = mTopMargin;
-		mBounds.width = mFrame.width - mLeftMargin - mRightMargin;
-		mBounds.height = mFrame.height - mTopMargin - mBottomMargin;
+		mBounds.x = mLayout.mMargin.left;
+		mBounds.y = mLayout.mMargin.top;
+		mBounds.width = mFrame.width - mLayout.mMargin.left - mLayout.mMargin.right;
+		mBounds.height = mFrame.height - mLayout.mMargin.top - mLayout.mMargin.bottom;
 	}
 }
 
-void MView::GetBindings(bool &outFollowLeft, bool &outFollowTop, bool &outFollowRight, bool &outFollowBottom) const
+MViewLayout MView::GetLayout() const
 {
-	outFollowLeft = mBindLeft;
-	outFollowTop = mBindTop;
-	outFollowRight = mBindRight;
-	outFollowBottom = mBindBottom;
+	return mLayout;
 }
 
-void MView::SetBindings(bool inFollowLeft, bool inFollowTop, bool inFollowRight, bool inFollowBottom)
+void MView::SetLayout(MViewLayout inLayout)
 {
-	mBindLeft = inFollowLeft;
-	mBindTop = inFollowTop;
-	mBindRight = inFollowRight;
-	mBindBottom = inFollowBottom;
+	int32_t dx = inLayout.mMargin.left - mLayout.mMargin.left;
+	int32_t dy = inLayout.mMargin.top - mLayout.mMargin.top;
+
+	mLayout = inLayout;
+
+	mBounds.x = mLayout.mMargin.left;
+	mBounds.y = mLayout.mMargin.top;
+
+	mFrame.width = mBounds.width + mLayout.mMargin.left + mLayout.mMargin.right;
+	mFrame.height = mBounds.height + mLayout.mMargin.top + mLayout.mMargin.bottom;
+
+	for (MView *child : mChildren)
+		child->MoveFrame(dx, dy);
 }
 
 void MView::MoveFrame(int32_t inXDelta, int32_t inYDelta)
@@ -196,56 +194,16 @@ void MView::ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta)
 		if (child->mVisible == eTriStateOff)
 			continue;
 
-		int32_t dx = 0, dy = 0, dw = 0, dh = 0;
+		int32_t dw = 0, dh = 0;
 
-		if (child->mBindRight)
-		{
-			if (child->mBindLeft)
-				dw = inWidthDelta;
-			else
-				dx = inWidthDelta;
-		}
+		if (child->mLayout.mHExpand)
+			dw = inWidthDelta;
 
-		if (child->mBindBottom)
-		{
-			if (child->mBindTop)
-				dh = inHeightDelta;
-			else
-				dy = inHeightDelta;
-		}
+		if (child->mLayout.mVExpand)
+			dh = inHeightDelta;
 
-		if (dx or dy)
-			child->MoveFrame(dx, dy);
 		child->ResizeFrame(dw, dh);
 	}
-}
-
-void MView::GetMargins(int32_t &outLeftMargin, int32_t &outTopMargin, int32_t &outRightMargin, int32_t &outBottomMargin) const
-{
-	outLeftMargin = mLeftMargin;
-	outTopMargin = mTopMargin;
-	outRightMargin = mRightMargin;
-	outBottomMargin = mBottomMargin;
-}
-
-void MView::SetMargins(int32_t inLeftMargin, int32_t inTopMargin, int32_t inRightMargin, int32_t inBottomMargin)
-{
-	int32_t dx = inLeftMargin - mLeftMargin;
-	int32_t dy = inTopMargin - mTopMargin;
-
-	mLeftMargin = inLeftMargin;
-	mTopMargin = inTopMargin;
-	mRightMargin = inRightMargin;
-	mBottomMargin = inBottomMargin;
-
-	mBounds.x = mLeftMargin;
-	mBounds.y = mTopMargin;
-
-	mFrame.width = mBounds.width + mLeftMargin + mRightMargin;
-	mFrame.height = mBounds.height + mTopMargin + mBottomMargin;
-
-	for (MView *child : mChildren)
-		child->MoveFrame(dx, dy);
 }
 
 void MView::RecalculateLayout()
@@ -260,8 +218,8 @@ void MView::RecalculateLayout()
 		b |= child->GetFrame();
 	}
 
-	mFrame.width = b.width + mLeftMargin + mRightMargin;
-	mFrame.height = b.height + mTopMargin + mBottomMargin;
+	mFrame.width = b.width + mLayout.mMargin.left + mLayout.mMargin.right;
+	mFrame.height = b.height + mLayout.mMargin.top + mLayout.mMargin.bottom;
 }
 
 void MView::ChildResized()
@@ -596,14 +554,14 @@ MView *MView::FindSubViewByID(const std::string &inID) const
 
 void MView::ConvertToParent(int32_t &ioX, int32_t &ioY) const
 {
-	ioX += mFrame.x - mBounds.x + mLeftMargin;
-	ioY += mFrame.y - mBounds.y + mTopMargin;
+	ioX += mFrame.x - mBounds.x + mLayout.mMargin.left;
+	ioY += mFrame.y - mBounds.y + mLayout.mMargin.top;
 }
 
 void MView::ConvertFromParent(int32_t &ioX, int32_t &ioY) const
 {
-	ioX -= mFrame.x - mBounds.x + mLeftMargin;
-	ioY -= mFrame.y - mBounds.y + mTopMargin;
+	ioX -= mFrame.x - mBounds.x + mLayout.mMargin.left;
+	ioY -= mFrame.y - mBounds.y + mLayout.mMargin.top;
 }
 
 void MView::ConvertToWindow(int32_t &ioX, int32_t &ioY) const

@@ -50,6 +50,8 @@ class MControlImpl : public MControlImplBase
 	}
 	virtual ~MControlImpl() {}
 
+	virtual void RequestSize(int32_t inWidth, int32_t inHeight) = 0;
+
 	virtual bool IsFocus() const { return false; }
 	virtual void SetFocus() {}
 
@@ -332,9 +334,8 @@ class MListBoxImpl : public MControlImpl<MListBox>
 // 					Create(MListView* inListView);
 // };
 
-#ifndef _MSC_VER
 // --------------------------------------------------------------------
-// Gtk specific controls
+// Some container controls
 
 class MBoxControlImpl : public MControlImpl<MBoxControl>
 {
@@ -346,8 +347,7 @@ class MBoxControlImpl : public MControlImpl<MBoxControl>
 
 	virtual void AddChild(MControlBase *inChild, MControlBase *inBefore) = 0;
 
-	static MBoxControlImpl *Create(MBoxControl *inControl, bool inHorizontal,
-		bool inHomogeneous, bool inExpand, bool inFill, uint32_t inSpacing, uint32_t inPadding);
+	static MBoxControlImpl *Create(MBoxControl *inControl, bool inHorizontal);
 };
 
 class MStackControlImpl : public MControlImpl<MStackControl>
@@ -363,5 +363,3 @@ class MStackControlImpl : public MControlImpl<MStackControl>
 
 	static MStackControlImpl *Create(MStackControl *inControl);
 };
-
-#endif

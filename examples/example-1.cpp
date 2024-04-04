@@ -32,17 +32,17 @@ class ExampleWindow : public MWindow
 		std::cout << GetBounds() << "\n";
 
 		MButton *btn = new MButton("test", MRect{ 10, 10, 100, 20 }, "Click me!");
-		btn->SetLayout(false, false, 4);
+		btn->SetLayout(false, 4);
 		AddRoute(btn->eClicked, eClicked);
 		AddChild(btn);
 
 		MColorSwatch *cbtn = new MColorSwatch("kleur", MRect{ 0, 0, 100, 20 }, MColor("ffa348"));
-		btn->SetLayout(false, false, 4);
+		btn->SetLayout(false, 4);
 		AddChild(cbtn);
 		AddRoute(cbtn->eColorChanged, eColour);
 
 		MCheckbox *cb = new MCheckbox("checkbox", MRect{}, "Een checkbox");
-		btn->SetLayout(false, false, 4);
+		btn->SetLayout(false, 4);
 		AddRoute(cb->eValueChanged, eChanged);
 		AddChild(cb);
 

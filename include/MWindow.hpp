@@ -68,12 +68,13 @@ class MWindowImpl
 	static MWindowImpl *Create(const std::string &inTitle, MRect inBounds,
 		MWindowFlags inFlags, MWindow *inWindow);
 
-	static MWindowImpl *CreateDialog(const std::string &inResource, MWindow *inWindow);
+	static MWindowImpl *CreateDialogImpl(MWindow *inWindow);
 
 	virtual ~MWindowImpl() = default;
 
 	MWindowFlags GetFlags() const { return mFlags; }
 
+	virtual void CreateWindow(MRect inBounds, const std::string &inTitle) = 0;
 	virtual void Finish() {}
 
 	virtual void SetTitle(std::string inTitle) = 0;

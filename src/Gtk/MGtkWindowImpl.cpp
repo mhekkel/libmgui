@@ -114,7 +114,7 @@ MGtkWindowImpl::~MGtkWindowImpl()
 {
 }
 
-void MGtkWindowImpl::Create(MRect inBounds, const std::string &inTitle)
+void MGtkWindowImpl::CreateWindow(MRect inBounds, const std::string &inTitle)
 {
 	auto w = mgtk_window_new(static_cast<MGtkApplicationImpl *>(gApp->GetImpl())->GetGtkApp(), this);
 	// auto w = gtk_application_window_new(static_cast<MGtkApplicationImpl *>(gApp->GetImpl())->GetGtkApp());
@@ -133,50 +133,6 @@ void MGtkWindowImpl::Create(MRect inBounds, const std::string &inTitle)
 	mCloseRequest.Connect(GetWidget(), "close-request");
 	// mIsSuspendedChanged.Connect(GetWidget(), "notify::is-suspended");
 	mIsActiveChanged.Connect(GetWidget(), "notify::is-active");
-
-	// GList *iconList = nullptr;
-
-	// mrsrc::rsrc appIconResource("Icons/appicon.png");
-	// GInputStream *s = g_memory_input_stream_new_from_data(appIconResource.data(), appIconResource.size(), nullptr);
-	// THROW_IF_NIL(s);
-
-	// GError *error = nullptr;
-	// GdkPixbuf *icon = gdk_pixbuf_new_from_stream(s, nullptr, &error);
-	// if (icon)
-	// 	iconList = g_list_append(iconList, icon);
-
-	// if (error)
-	// 	g_free(error);
-
-	// mrsrc::rsrc smallAppIconResource("Icons/appicon.png");
-	// s = g_memory_input_stream_new_from_data(smallAppIconResource.data(), smallAppIconResource.size(), nullptr);
-	// THROW_IF_NIL(s);
-
-	// icon = gdk_pixbuf_new_from_stream(s, nullptr, &error);
-	// if (icon)
-	// 	iconList = g_list_append(iconList, icon);
-
-	// if (error)
-	// 	g_free(error);
-
-#warning FIXME
-	// if (iconList)
-	// 	gtk_window_set_icon_list(GTK_WINDOW(widget), iconList);
-
-	//	GList* defaulIconList = gtk_window_get_default_icon_list();
-	//	if (defaulIconList != nullptr)
-	//	{
-	//		gtk_window_set_icon_list(GTK_WINDOW(widget), defaulIconList);
-	//		g_list_free(defaulIconList);
-	//	}
-
-	// mMapEvent.Connect(widget, "map-event");
-
-	// if (mMenubar != nullptr)
-	// {
-	// 	mMenubar->AddToWindow(this);
-	// 	mMenubar->SetTarget(mWindow);
-	// }
 
 	if (mFlags & MWindowFlags::kMShowMenubar)
 		MMenuBar::Instance().AddToWindow(this);
@@ -314,7 +270,7 @@ MWindowImpl *MWindowImpl::Create(const std::string &inTitle, MRect inBounds,
 	MWindowFlags inFlags, MWindow *inWindow)
 {
 	MGtkWindowImpl *result = new MGtkWindowImpl(inFlags, inWindow);
-	result->Create(inBounds, inTitle);
+	result->CreateWindow(inBounds, inTitle);
 	return result;
 }
 

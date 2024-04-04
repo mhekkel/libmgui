@@ -39,13 +39,15 @@ class MGtkControlImpl : public CONTROL::MImpl, public MGtkWidgetMixin
 	MGtkControlImpl(CONTROL *inControl, const std::string &inLabel);
 	~MGtkControlImpl();
 
+	void RequestSize(int32_t inWidth, int32_t inHeight) override
+	{
+		MGtkWidgetMixin::RequestSize(inWidth, inHeight);
+	}
+
 	bool IsFocus() const override;
 	void SetFocus() override;
 
 	void AddedToWindow() override;
-	void FrameMoved() override;
-	void FrameResized() override;
-	void LayoutChanged() override;
 	void EnableSelf() override;
 	void DisableSelf() override;
 	void ShowSelf() override;
@@ -369,17 +371,14 @@ class MGtkListBoxImpl : public MGtkControlImpl<MListBox>
 class MGtkBoxControlImpl : public MGtkControlImpl<MBoxControl>
 {
   public:
-	MGtkBoxControlImpl(MBoxControl *inControl,
-		bool inHorizontal, bool inHomogeneous, bool inExpand, bool inFill,
-		uint32_t inSpacing, uint32_t inPadding);
+	MGtkBoxControlImpl(MBoxControl *inControl, bool inHorizontal);
 
 	void CreateWidget() override;
 
 	void Append(MGtkWidgetMixin *inChild) override;
 	void AddChild(MControlBase *inChild, MControlBase *inBefore) override;
 
-	bool mHorizontal, mHomogeneous, mExpand, mFill;
-	uint32_t mSpacing, mPadding;
+	bool mHorizontal;
 };
 
 // --------------------------------------------------------------------

@@ -55,14 +55,14 @@ MWindow::MWindow(const std::string &inTitle, const MRect &inBounds, MWindowFlags
 
 	mBounds.x = mBounds.y = 0;
 
-	SetBindings(true, true, true, true);
+	SetLayout({ true, 0 });
 }
 
 MWindow::MWindow(MWindowImpl *inImpl)
 	: MView("window", MRect(0, 0, 100, 100))
 	, mImpl(inImpl)
 {
-	SetBindings(true, true, true, true);
+	SetLayout({ true, 0 });
 }
 
 MWindow::~MWindow()

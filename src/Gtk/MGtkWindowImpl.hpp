@@ -39,7 +39,7 @@ class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin
 	MGtkWindowImpl(MWindowFlags inFlags, MWindow *inWindow);
 	~MGtkWindowImpl();
 
-	virtual void Create(MRect inBounds, const std::string &inTitle);
+	void CreateWindow(MRect inBounds, const std::string &inTitle) override;
 
 	void Append(MGtkWidgetMixin *inChild) override;
 

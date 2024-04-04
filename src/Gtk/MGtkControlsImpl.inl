@@ -139,49 +139,6 @@ void MGtkControlImpl<CONTROL>::HideSelf()
 }
 
 template <class CONTROL>
-void MGtkControlImpl<CONTROL>::FrameMoved()
-{
-	//	FrameResized();
-}
-
-template <class CONTROL>
-void MGtkControlImpl<CONTROL>::FrameResized()
-{
-	//	if (GetWidget() != nullptr)
-	//	{
-	//		MRect bounds;
-	//		MGtkWidgetMixin* parent;
-	//
-	//		GetParentAndBounds(parent, bounds);
-	//
-	//		::MoveWindow(GetWidget(), bounds.x, bounds.y,
-	//			bounds.width, bounds.height, true);
-	//	}
-}
-
-template <class CONTROL>
-void MGtkControlImpl<CONTROL>::LayoutChanged()
-{
-	auto widget = GetWidget();
-
-	if (widget != nullptr)
-	{
-		int32_t l, t, r, b;
-
-		MView *view = this->mControl;
-		view->GetMargins(l, t, r, b);
-
-		//		MRect bounds;
-		//		MGtkWidgetMixin* parent;
-		//
-		//		GetParentAndBounds(parent, bounds);
-		//
-		//		::MoveWindow(GetWidget(), bounds.x, bounds.y,
-		//			bounds.width, bounds.height, true);
-	}
-}
-
-template <class CONTROL>
 void MGtkControlImpl<CONTROL>::GetParentAndBounds(MGtkWidgetMixin *&outParent, MRect &outBounds)
 {
 	MView *view = this->mControl;

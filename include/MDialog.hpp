@@ -31,9 +31,14 @@
 
 #pragma once
 
+#include "MControls.hpp"
+#include "MWindow.hpp"
+
+#include <zeep/xml/node.hpp>
+
 #include <vector>
 
-#include "MWindow.hpp"
+// --------------------------------------------------------------------
 
 class MDialog : public MWindow
 {
@@ -98,11 +103,45 @@ class MDialog : public MWindow
   protected:
 	MDialog(const std::string &inDialogResource);
 
+	virtual void Build();
+
+	MMargins GetMargins(zeep::xml::element *inTemplate);
+
+	MView *CreateControls(zeep::xml::element *inTemplate, int32_t inX, int32_t inY);
+
+	MView *CreateButton(zeep::xml::element *inTemplate, int32_t inX, int32_t inY);
+	MView *CreateColorSwatch(zeep::xml::element *inTemplate, int32_t inX, int32_t inY);
+	MView *CreateCaption(zeep::xml::element *inTemplate, int32_t inX, int32_t inY);
+	MView *CreateCheckbox(zeep::xml::element *inTemplate, int32_t inX, int32_t inY);
+	MView *CreateRadiobutton(zeep::xml::element *inTemplate, int32_t inX, int32_t inY);
+	MView *CreateExpander(zeep::xml::element *inTemplate, int32_t inX, int32_t inY);
+	MView *CreateCombobox(zeep::xml::element *inTemplate, int32_t inX, int32_t inY);
+	MView *CreateEdittext(zeep::xml::element *inTemplate, int32_t inX, int32_t inY);
+	MView *CreateFiller(zeep::xml::element *inTemplate, int32_t inX, int32_t inY);
+	MView *CreatePopup(zeep::xml::element *inTemplate, int32_t inX, int32_t inY);
+	MView *CreateScrollbar(zeep::xml::element *inTemplate, int32_t inX, int32_t inY);
+	MView *CreateSeparator(zeep::xml::element *inTemplate, int32_t inX, int32_t inY);
+	MView *CreateBox(zeep::xml::element *inTemplate, int32_t inX, int32_t inY, bool inHorizontal);
+	// MView *CreateTable(zeep::xml::element *inTemplate, int32_t inX, int32_t inY);
+	MView *CreatePager(zeep::xml::element *inTemplate, int32_t inX, int32_t inY);
+	MView *CreateListBox(zeep::xml::element *inTemplate, int32_t inX, int32_t inY);
+	// MView *CreateListView(zeep::xml::element *inTemplate, int32_t inX, int32_t inY);
+	MView *CreateCanvas(zeep::xml::element *inTemplate, int32_t inX, int32_t inY);
+
+	// uint32_t GetTextWidth(const std::string &inText, const wchar_t *inClass, int inPartID, int inStateID);
+
+	std::string l(const std::string &s);
+
+
 	virtual void ChildResized();
 	virtual void RecalculateLayout();
 
+	std::string mRsrc;
+	float mDLUX, mDLUY;
+	std::vector<MRadiobutton *> mRadioGroup;
+	std::vector<std::string> mResponseIDs;
+	int mDefaultResponse = 0;
+
   private:
 	MWindow *mParentWindow;
-	MDialog *mNext; // for the close all
-	static MDialog *sFirst;
 };

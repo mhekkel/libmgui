@@ -37,11 +37,48 @@
 #include <list>
 #include <vector>
 
+// --------------------------------------------------------------------
+
 class MWindow;
 class MDevice;
 class MView;
 
+// --------------------------------------------------------------------
+
 typedef std::list<MView *> MViewList;
+
+struct MMargins
+{
+	uint32_t left, top, right, bottom;
+};
+
+struct MViewLayout
+{
+	MViewLayout()
+		: mHExpand(false)
+		, mVExpand(false)
+		, mMargin{ 0, 0, 0, 0 }
+	{
+	}
+
+	MViewLayout(bool inExpand, uint32_t inMargin)
+		: mHExpand(inExpand)
+		, mVExpand(inExpand)
+		, mMargin{ inMargin, inMargin, inMargin, inMargin }
+	{
+	}
+
+	MViewLayout(bool inHExpand, bool inVExpand,
+		uint32_t inMarginLeft, uint32_t inMarginTop, uint32_t inMarginRight, uint32_t inMarginBottom)
+		: mHExpand(inHExpand)
+		, mVExpand(inVExpand)
+		, mMargin{ inMarginLeft, inMarginTop, inMarginRight, inMarginBottom }
+	{
+	}
+
+	bool mHExpand, mVExpand;
+	MMargins mMargin;
+};
 
 enum MCursor
 {
@@ -90,13 +127,14 @@ class MView
 
 	virtual void MoveFrame(int32_t inXDelta, int32_t inYDelta);
 	virtual void ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta);
-	virtual void GetBindings(bool &outFollowLeft, bool &outFollowTop, bool &outFollowRight, bool &outFollowBottom) const;
-	virtual void SetBindings(bool inFollowLeft, bool inFollowTop, bool inFollowRight, bool inFollowBottom);
-	bool WidthResizable() const { return mBindLeft and mBindRight; }
-	bool HeightResizable() const { return mBindTop and mBindBottom; }
 
-	virtual void GetMargins(int32_t &outLeftMargin, int32_t &outTopMargin, int32_t &outRightMargin, int32_t &outBottomMargin) const;
-	virtual void SetMargins(int32_t inLeftMargin, int32_t inTopMargin, int32_t inRightMargin, int32_t inBottomMargin);
+	virtual void RequestSize(int32_t inWidth, int32_t inHeight) {}
+
+	virtual void SetLayout(MViewLayout inLayout);
+	virtual MViewLayout GetLayout() const;
+
+	bool WidthResizable() const { return mLayout.mHExpand; }
+	bool HeightResizable() const { return mLayout.mVExpand; }
 
 	// used in automatic layout
 	virtual void RecalculateLayout();
@@ -153,8 +191,7 @@ class MView
 	std::string mID;
 	MRect mBounds;
 	MRect mFrame;
-	int32_t mLeftMargin, mTopMargin, mRightMargin, mBottomMargin;
-	bool mBindLeft, mBindTop, mBindRight, mBindBottom;
+	MViewLayout mLayout{};
 	MView *mParent;
 	MViewList mChildren;
 	MTriState mActive;
