@@ -193,7 +193,7 @@ void MGtkWindowImpl::Append(MGtkWidgetMixin *inChild)
 	gtk_window_set_child(GTK_WINDOW(GetWidget()), inChild->GetWidget());
 }
 
-void MGtkWindowImpl::SetTransientFor(MWindow *inWindow)
+void MGtkWindowImpl::SetParentWindow(MWindow *inWindow)
 {
 	gtk_window_set_transient_for(
 		GTK_WINDOW(GetWidget()),

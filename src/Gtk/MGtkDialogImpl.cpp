@@ -69,8 +69,6 @@ class MGtkDialogImpl : public MGtkWindowImpl
 	{
 	}
 
-	bool ShowModal() override;
-
 	void Create(MRect inBounds, const std::string &inTitle) override;
 	void Finish() override;
 
@@ -169,14 +167,6 @@ class MGtkDialogImpl : public MGtkWindowImpl
 
 // 	return result;
 // }
-
-bool MGtkDialogImpl::ShowModal()
-{
-	MGtkWindowImpl::Select();
-
-	// (void)gtk_dialog_run(GTK_DIALOG(GetWidget()));
-	return mResultIsOK;
-}
 
 void MGtkDialogImpl::Create(MRect inBounds, const std::string &inTitle)
 {
@@ -280,13 +270,13 @@ void MGtkDialogImpl::Finish()
 
 			int32_t response = mResponseIDs.size();
 			if (button.get_attribute("id") == "ok")
-				response = GTK_RESPONSE_OK;
+			response = GTK_RESPONSE_OK;
 			else if (button.get_attribute("id") == "cancel")
-				response = GTK_RESPONSE_CANCEL;
+			response = GTK_RESPONSE_CANCEL;
 
 			GtkWidget *wdgt = gtk_dialog_add_button(GTK_DIALOG(GetWidget()),
-				l(button.get_attribute("title")).c_str(), response);
-
+			l(button.get_attribute("title")).c_str(), response);
+			
 			assert(GTK_IS_WIDGET(wdgt));
 
 			// gtk_widget_set_margin_start(wdgt, 4 * mDLUX);
@@ -297,7 +287,7 @@ void MGtkDialogImpl::Finish()
 			if (button.get_attribute("default") == "true")
 			{
 				gtk_dialog_set_default_response(GTK_DIALOG(GetWidget()), response);
-				mDefaultResponse = response;
+			mDefaultResponse = response;
 			}
 		}
 	}

@@ -46,7 +46,6 @@ class MDialog : public MWindow
 
 	using MWindow::Show;
 	void Show(MWindow *inParent);
-	bool ShowModal(MWindow *inParent);
 
 	void SavePosition(const char *inName);
 

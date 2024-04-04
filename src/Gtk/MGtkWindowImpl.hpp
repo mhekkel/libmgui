@@ -49,7 +49,7 @@ class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin
 	void Show() override;
 	void Hide() override;
 
-	void SetTransientFor(MWindow *inWindow) override;
+	void SetParentWindow(MWindow *inWindow) override;
 
 	void Select() override;
 	void Close() override;
