@@ -80,7 +80,7 @@ std::pair<int, bool> get_attribute_int(const zeep::xml::element *e, const char *
 	if (auto attr = e->get_attribute(name); not attr.empty())
 	{
 		auto r = std::from_chars(attr.data(), attr.data() + attr.length(), value);
-		ok = r.ec != std::errc() and r.ptr == attr.data() + attr.length();
+		ok = r.ec == std::errc() and r.ptr == attr.data() + attr.length();
 	}
 
 	return { value, ok };
@@ -104,7 +104,13 @@ void MDialog::Build()
 		THROW(("Invalid dialog resource"));
 
 	std::string title = l(dialog->get_attribute("title"));
-	SetTitle(title);
+
+	// setup the DLU values
+
+	MDevice dev;
+	dev.SetText("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
+	mDLUX = dev.GetTextWidth() / (52 * 4.0f);
+	mDLUY = dev.GetLineHeight() / 8.0f;
 
 	// mFlags = kMFixedSize;
 	// std::string flags = dialog->get_attribute("flags");
@@ -125,13 +131,6 @@ void MDialog::Build()
 	// now create the dialog
 	GetImpl()->CreateWindow(bounds, title);
 
-	// setup the DLU values
-
-	MDevice dev;
-	dev.SetText("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
-	mDLUX = dev.GetTextWidth() / (52 * 4.0f);
-	mDLUY = dev.GetLineHeight() / 8.0f;
-
 	// create the dialog controls, all stacked on top of each other
 	zeep::xml::element *vbox = dialog->find_first("vbox");
 	if (vbox == nullptr)
@@ -144,6 +143,12 @@ void MDialog::Build()
 
 	// Main vbox first
 	MBoxControl *mainVBox = new MBoxControl("main-vbox", bounds, false);
+	mainVBox->SetLayout({ true, true, 
+		static_cast<uint32_t>(5 * mDLUX),
+		static_cast<uint32_t>(5 * mDLUY),
+		static_cast<uint32_t>(5 * mDLUX),
+		static_cast<uint32_t>(5 * mDLUY) });
+
 	AddChild(mainVBox);
 
 	mainVBox->AddChild(content);
@@ -156,10 +161,10 @@ void MDialog::Build()
 
 	MBoxControl *buttonBar = new MBoxControl("buttonbar", bounds, true);
 	buttonBar->SetLayout({ true, false,
-		static_cast<uint32_t>(5 * mDLUX),
+		0,
 		static_cast<uint32_t>(2 * mDLUY),
-		static_cast<uint32_t>(5 * mDLUX),
-		static_cast<uint32_t>(2 * mDLUY)});
+		0,
+		0});
 	mainVBox->AddChild(buttonBar);
 
 	auto filler = new MSimpleControl("button-bar-filler", bounds);
@@ -168,7 +173,7 @@ void MDialog::Build()
 
 	for (auto button : buttons->find("button"))
 	{
-		MControlBase *btn = static_cast<MButton* >(CreateButton(button, 0, 0));
+		MButton *btn = static_cast<MButton* >(CreateButton(button, 0, 0));
 
 		auto layout = btn->GetLayout();
 		layout.mMargin = GetMargins(button);
@@ -176,30 +181,14 @@ void MDialog::Build()
 
 		buttonBar->AddChild(btn);
 
-		// mResponseIDs.push_back(button->get_attribute("id"));
-
-		// int32_t response = mResponseIDs.size();
-		// if (button.get_attribute("id") == "ok")
-		// response = GTK_RESPONSE_OK;
-		// else if (button.get_attribute("id") == "cancel")
-		// response = GTK_RESPONSE_CANCEL;
-
-		// GtkWidget *wdgt = gtk_dialog_add_button(GTK_DIALOG(GetWidget()),
-		// l(button.get_attribute("title")).c_str(), response);
-		
-		// assert(GTK_IS_WIDGET(wdgt));
-
-		// // gtk_widget_set_margin_start(wdgt, 4 * mDLUX);
-		// gtk_widget_set_margin_end(wdgt, 4 * mDLUX);
-		// gtk_widget_set_margin_top(wdgt, 4 * mDLUY);
-		// gtk_widget_set_margin_bottom(wdgt, 4 * mDLUY);
-
-		// if (button.get_attribute("default") == "true")
-		// {
-		// 	gtk_dialog_set_default_response(GTK_DIALOG(GetWidget()), response);
-		// 	mDefaultResponse = response;
+		if (button->get_attribute("id") == "ok")
+			GetImpl()->SetDefaultButton(btn);
 	}
+}
 
+void MDialog::SetDefaultButton(MButton *inButton)
+{
+	GetImpl()->SetDefaultButton(inButton);
 }
 
 std::string MDialog::l(const std::string &s)
@@ -209,7 +198,7 @@ std::string MDialog::l(const std::string &s)
 
 MMargins MDialog::GetMargins(zeep::xml::element *inTemplate)
 {
-	MMargins result{ 4, 4, 4, 4 };
+	MMargins result{ 4, 1, 4, 1 };
 
 	if (auto [m, ok] = get_attribute_int(inTemplate, "margin"); ok)
 		result.left = result.top = result.right = result.bottom = m;
@@ -234,10 +223,7 @@ MView *MDialog::CreateButton(zeep::xml::element *inTemplate, int32_t inX, int32_
 	std::string id = inTemplate->get_attribute("id");
 	std::string title = l(inTemplate->get_attribute("title"));
 
-	//	float idealWidth = GetTextWidth(title, VSCLASS_BUTTON, BP_PUSHBUTTON, PBS_NORMAL) + 10 * mDLUX;
-	//	if (idealWidth < 50 * mDLUX)
-	//		idealWidth = 50 * mDLUX;
-	MRect bounds; //(inX, inY, static_cast<int32_t>(idealWidth), static_cast<int32_t>(14 * mDLUY));
+	MRect bounds;
 
 	MButtonFlags flags = eBF_None;
 
@@ -661,32 +647,6 @@ MView *MDialog::CreateControls(zeep::xml::element *inTemplate, int32_t inX, int3
 
 	return result;
 }
-
-// uint32_t MDialog::GetTextWidth(const std::string &inText,
-// 	const wchar_t *inClass, int inPartID, int inStateID)
-// {
-// 	uint32_t result = 0;
-// 	//	wstring text(c2w(inText));
-// 	//
-// 	//	HTHEME hTheme = ::OpenThemeData(GetHandle(), inClass);
-// 	//
-// 	//	if (hTheme != nullptr)
-// 	//	{
-// 	//		RECT r;
-// 	//		THROW_IF_HRESULT_ERROR(::GetThemeTextExtent(hTheme, mDC,
-// 	//			inPartID, inStateID, text.c_str(), text.length(), 0, nullptr, &r));
-// 	//		result = r.right - r.left;
-// 	//		::CloseThemeData(hTheme);
-// 	//	}
-// 	//	else
-// 	//	{
-// 	//		SIZE size;
-// 	//		::GetTextExtentPoint32_t(mDC, text.c_str(), text.length(), &size);
-// 	//		result = size.cx;
-// 	//	}
-
-// 	return result;
-// }
 
 // --------------------------------------------------------------------
 

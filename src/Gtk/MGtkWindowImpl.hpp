@@ -49,6 +49,7 @@ class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin
 	void Show() override;
 	void Hide() override;
 
+	void SetDefaultButton(MButton *inButton) override;
 	void SetParentWindow(MWindow *inWindow) override;
 
 	void Select() override;

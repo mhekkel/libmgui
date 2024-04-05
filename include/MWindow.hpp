@@ -35,6 +35,7 @@
 
 // --------------------------------------------------------------------
 
+class MButton;
 class MMenuBar;
 class MControlBase;
 
@@ -85,6 +86,7 @@ class MWindowImpl
 	virtual void Show() = 0;
 	virtual void Hide() = 0;
 
+	virtual void SetDefaultButton(MButton *inButton) {}
 	virtual void SetParentWindow(MWindow *inWindow) {}
 
 	virtual void Select() = 0;

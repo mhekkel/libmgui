@@ -53,8 +53,9 @@ class MDialog : public MWindow
 	void Show(MWindow *inParent);
 
 	void SavePosition(const char *inName);
-
 	void RestorePosition(const char *inName);
+
+	void SetDefaultButton(MButton *inButton);
 
 	MWindow *GetParentWindow() const { return mParentWindow; }
 
@@ -139,8 +140,6 @@ class MDialog : public MWindow
 	std::string mRsrc;
 	float mDLUX, mDLUY;
 	std::vector<MRadiobutton *> mRadioGroup;
-	std::vector<std::string> mResponseIDs;
-	int mDefaultResponse = 0;
 
   private:
 	MWindow *mParentWindow;

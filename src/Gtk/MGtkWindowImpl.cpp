@@ -24,6 +24,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "MGtkControlsImpl.hpp"
 #include "MGtkWindowImpl.hpp"
 #include "MGtkApplicationImpl.hpp"
 
@@ -147,6 +148,13 @@ void MGtkWindowImpl::Append(MGtkWidgetMixin *inChild)
 {
 	assert(gtk_window_get_child(GTK_WINDOW(GetWidget())) == nullptr);
 	gtk_window_set_child(GTK_WINDOW(GetWidget()), inChild->GetWidget());
+}
+
+void MGtkWindowImpl::SetDefaultButton(MButton *inButton)
+{
+	auto ci = inButton->GetControlImplBase();
+	auto wm = dynamic_cast<MGtkWidgetMixin *>(ci);
+	gtk_window_set_default_widget(GTK_WINDOW(GetWidget()), wm->GetWidget());
 }
 
 void MGtkWindowImpl::SetParentWindow(MWindow *inWindow)
@@ -282,14 +290,18 @@ void MWindow::GetMainScreenBounds(MRect &outRect)
 	GdkDevice *device = gdk_seat_get_pointer(seat);
 	auto surface = gdk_device_get_surface_at_position(device, nullptr, nullptr);
 
-	double x, y;
-	gdk_surface_get_device_position(surface, device, &x, &y, nullptr);
-
-	auto monitor = gdk_display_get_monitor_at_surface(display, surface);
 	GdkRectangle r{ 0, 0, 1024, 768 };
 
-	if (GDK_IS_MONITOR(monitor))
-		gdk_monitor_get_geometry(monitor, &r);
+	if (surface != nullptr)
+	{
+		double x, y;
+		gdk_surface_get_device_position(surface, device, &x, &y, nullptr);
+
+		auto monitor = gdk_display_get_monitor_at_surface(display, surface);
+
+		if (GDK_IS_MONITOR(monitor))
+			gdk_monitor_get_geometry(monitor, &r);
+	}
 
 	outRect = MRect(r.x, r.y, r.width, r.height);
 }
