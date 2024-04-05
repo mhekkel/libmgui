@@ -35,8 +35,6 @@
 
 #include "mrsrc.hpp"
 
-// #include <gdk/gdkx.h>
-
 #include <iostream>
 
 // --------------------------------------------------------------------
@@ -73,8 +71,6 @@ static void mgtk_window_finalize(GObject *object)
 static void mgtk_window_class_init(MGtkWindowClass *klass)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS(klass);
-	// GtkWidgetClass *widget_class = GTK_WIDGET_CLASS(klass);
-	// GtkWindowClass *window_class = GTK_WINDOW_CLASS(klass);
 
 	object_class->finalize = mgtk_window_finalize;
 }
@@ -104,7 +100,6 @@ MGtkWindow *mgtk_window_new(GtkApplication *app, MGtkWindowImpl *impl)
 MGtkWindowImpl::MGtkWindowImpl(MWindowFlags inFlags, MWindow *inWindow)
 	: MWindowImpl(inFlags, inWindow)
 	, mCloseRequest(this, &MGtkWindowImpl::OnCloseRequest)
-	// , mIsSuspendedChanged(this, &MGtkWindowImpl::OnIsSuspendedChanged)
 	, mIsActiveChanged(this, &MGtkWindowImpl::OnIsActiveChanged)
 	, mFocus(this)
 	, mConfigured(false)
@@ -118,7 +113,6 @@ MGtkWindowImpl::~MGtkWindowImpl()
 void MGtkWindowImpl::CreateWindow(MRect inBounds, const std::string &inTitle)
 {
 	auto w = mgtk_window_new(static_cast<MGtkApplicationImpl *>(gApp->GetImpl())->GetGtkApp(), this);
-	// auto w = gtk_application_window_new(static_cast<MGtkApplicationImpl *>(gApp->GetImpl())->GetGtkApp());
 
 	GtkWidget *widget = GTK_WIDGET(w);
 	THROW_IF_NIL(widget);
@@ -132,7 +126,6 @@ void MGtkWindowImpl::CreateWindow(MRect inBounds, const std::string &inTitle)
 		gtk_window_set_handle_menubar_accel(GTK_WINDOW(widget), false);
 
 	mCloseRequest.Connect(GetWidget(), "close-request");
-	// mIsSuspendedChanged.Connect(GetWidget(), "notify::is-suspended");
 	mIsActiveChanged.Connect(GetWidget(), "notify::is-active");
 
 	if (mFlags & MWindowFlags::kMShowMenubar)
@@ -208,22 +201,6 @@ void MGtkWindowImpl::SetIconName(const std::string &inIconName)
 {
 	gtk_window_set_icon_name(GTK_WINDOW(GetWidget()), inIconName.c_str());
 }
-
-// string MGtkWindowImpl::GetTitle() const
-//{
-//	const char* title = gtk_window_get_title(GTK_WINDOW(GetWidget()));
-//	return title ? title : "";
-// }
-
-// void MGtkWindowImpl::SetModifiedMarkInTitle(
-//	bool		inModified)
-//{
-//	if (mModified != inModified)
-//	{
-//		mModified = inModified;
-//		SetTitle(mTitle);
-//	}
-// }
 
 void MGtkWindowImpl::OnDestroy()
 {
