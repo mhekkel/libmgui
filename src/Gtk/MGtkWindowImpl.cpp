@@ -220,6 +220,9 @@ void MGtkWindowImpl::OnUnmap()
 
 void MGtkWindowImpl::ResizeWindow(int32_t inWidthDelta, int32_t inHeightDelta)
 {
+	int w, h;
+	gtk_window_get_default_size(GTK_WINDOW(GetWidget()), &w, &h);
+	gtk_window_set_default_size(GTK_WINDOW(GetWidget()), w + inWidthDelta, h + inHeightDelta);
 }
 
 void MGtkWindowImpl::GetWindowPosition(MRect &outPosition) const

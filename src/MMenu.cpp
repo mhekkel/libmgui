@@ -43,8 +43,6 @@
 
 #undef AppendSubmenu
 
-namespace xml = zeep::xml;
-
 // --------------------------------------------------------------------
 
 MMenu *MMenu::CreateFromResource(const char *inResourceName, bool inPopup)
@@ -54,10 +52,10 @@ MMenu *MMenu::CreateFromResource(const char *inResourceName, bool inPopup)
 	MMenu *result = nullptr;
 
 	mrsrc::istream rsrc("Menus/"s + inResourceName + ".xml");
-	xml::document doc(rsrc);
+	zeep::xml::document doc(rsrc);
 
 	// build a menu from the resource XML
-	xml::element *root = doc.find_first("/menu");
+	zeep::xml::element *root = doc.find_first("/menu");
 
 	if (root != nullptr)
 		result = Create(root, inPopup);
@@ -65,7 +63,7 @@ MMenu *MMenu::CreateFromResource(const char *inResourceName, bool inPopup)
 	return result;
 }
 
-MMenu *MMenu::Create(xml::element *inXMLNode, bool inPopup)
+MMenu *MMenu::Create(zeep::xml::element *inXMLNode, bool inPopup)
 {
 	std::string label;
 
@@ -125,7 +123,7 @@ MMenuBar::MMenuBar()
 void MMenuBar::Init(const std::string &inMenuResourceName)
 {
 	mrsrc::istream rsrc("Menus/" + inMenuResourceName + ".xml");
-	xml::document doc(rsrc);
+	zeep::xml::document doc(rsrc);
 
 	zeep::xml::element *node = &doc.front();
 

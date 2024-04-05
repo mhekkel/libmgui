@@ -17,15 +17,11 @@
 #include "MUtils.hpp"
 #include "MWindow.hpp"
 
-#include <zeep/xml/document.hpp>
-
 #include <gdk/gdkkeysyms.h>
 
 #include <algorithm>
 #include <cstring>
 #include <iostream>
-
-namespace xml = zeep::xml;
 
 // --------------------------------------------------------------------
 

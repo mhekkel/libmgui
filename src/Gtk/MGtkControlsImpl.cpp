@@ -984,7 +984,8 @@ void MGtkStackControlImpl::Append(MGtkWidgetMixin *inChild)
 
 void MGtkStackControlImpl::Select(const std::string &inName)
 {
-	gtk_stack_set_visible_child_name(GTK_STACK(GetWidget()), inName.c_str());
+	if (GTK_IS_STACK(GetWidget()))
+		gtk_stack_set_visible_child_name(GTK_STACK(GetWidget()), inName.c_str());
 }
 
 MStackControlImpl *MStackControlImpl::Create(MStackControl *inControl)
