@@ -180,9 +180,6 @@ void MDialog::Build()
 		btn->SetLayout(layout);
 
 		buttonBar->AddChild(btn);
-
-		if (button->get_attribute("id") == "ok")
-			GetImpl()->SetDefaultButton(btn);
 	}
 }
 
@@ -232,14 +229,14 @@ MView *MDialog::CreateButton(zeep::xml::element *inTemplate, int32_t inX, int32_
 
 	MButton *button = new MButton(id, bounds, title, flags);
 
-	//	if (inTemplate->get_attribute("default") == "true")
-	//		button->MakeDefault(true);
-	//
-	//	if (id == "ok" and mOKButton == nullptr)
-	//		mOKButton = button;
-	//
-	//	if (id == "cancel")
-	//		mCancelButton = button;
+	if (inTemplate->get_attribute("default") == "true")
+		button->MakeDefault(true);
+
+	if (id == "ok" and mOKButton == nullptr)
+		mOKButton = button;
+
+	if (id == "cancel")
+		mCancelButton = button;
 
 	AddRoute(button->eClicked, eButtonClicked);
 
@@ -718,6 +715,11 @@ bool MDialog::CancelClicked()
 	return true;
 }
 
+bool MDialog::AllowClose(bool inQuitting)
+{
+	return CancelClicked();
+}
+
 void MDialog::ButtonClicked(const std::string &inID)
 {
 	if (inID == "ok")
@@ -730,6 +732,33 @@ void MDialog::ButtonClicked(const std::string &inID)
 		if (CancelClicked())
 			Close();
 	}
+}
+
+bool MDialog::KeyPressed(uint32_t inKeyCode, char32_t inUnicode, uint32_t inModifiers, bool inAutoRepeat)
+{
+	bool result = true;
+	if (mOKButton and (inKeyCode == kEnterKeyCode or inKeyCode == kReturnKeyCode))
+		mOKButton->SimulateClick();
+	else if (mCancelButton and inKeyCode == kEscapeKeyCode)
+		mCancelButton->SimulateClick();
+	else
+		result = false;
+	return result;
+}
+
+void MDialog::KeyReleased(uint32_t inKeyValue, uint32_t inModifiers)
+{
+
+}
+
+void MDialog::Modifiers(uint32_t inModifiers)
+{
+
+}
+
+void MDialog::EnterText(const std::string &inText)
+{
+
 }
 
 void MDialog::CheckboxChanged(const std::string &inID, bool inChecked)

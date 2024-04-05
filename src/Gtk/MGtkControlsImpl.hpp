@@ -101,8 +101,6 @@ class MGtkButtonImpl : public MGtkControlImpl<MButton>
 	void CreateWidget() override;
 	void GetIdealSize(int32_t &outWidth, int32_t &outHeight) override;
 
-	void AddedToWindow() override;
-
 	MSlot<void()> mClicked;
 	void Clicked();
 
@@ -128,7 +126,6 @@ class MGtkExpanderImpl : public MGtkControlImpl<MExpander>
 {
   public:
 	MGtkExpanderImpl(MExpander *inExpander, const std::string &inLabel);
-	~MGtkExpanderImpl();
 
 	void SetOpen(bool inOpen) override;
 	bool IsOpen() const override;
@@ -140,10 +137,6 @@ class MGtkExpanderImpl : public MGtkControlImpl<MExpander>
 
   private:
 	bool mIsOpen;
-	// bool			mMouseInside;
-	// bool			mMouseDown;
-	// bool			mMouseTracking;
-	// double			mLastExit;
 };
 
 class MGtkScrollbarImpl : public MGtkControlImpl<MScrollbar>
@@ -152,9 +145,6 @@ class MGtkScrollbarImpl : public MGtkControlImpl<MScrollbar>
 	MGtkScrollbarImpl(MScrollbar *inScrollbar);
 
 	void CreateWidget() override;
-
-	//	void	ShowSelf() override;
-	//	void	HideSelf() override;
 
 	int32_t GetValue() const override;
 	void SetValue(int32_t inValue) override;
@@ -165,11 +155,7 @@ class MGtkScrollbarImpl : public MGtkControlImpl<MScrollbar>
 		int32_t inScrollUnit, int32_t inPageSize, int32_t inValue) override;
 
 	int32_t GetMinValue() const override;
-	//	void	SetMinValue(int32_t inValue) override;
 	int32_t GetMaxValue() const override;
-	//	void	SetMaxValue(int32_t inValue) override;
-	//
-	//	void	SetViewSize(int32_t inValue) override;
 
 	MSlot<void()> eValueChanged;
 	void ValueChanged();

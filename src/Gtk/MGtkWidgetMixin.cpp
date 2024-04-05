@@ -162,6 +162,9 @@ void MGtkWidgetMixin::SetWidget(GtkWidget *inWidget)
 			auto cntrl = gtk_event_controller_key_new();
 			gtk_widget_add_controller(GetWidget(), cntrl);
 
+			if (mEvents & MEventMask::Capture)
+				gtk_event_controller_set_propagation_phase(cntrl, GTK_PHASE_CAPTURE);
+
 			mKeyPressed.Connect(G_OBJECT(cntrl), "key-pressed");
 			mKeyReleased.Connect(G_OBJECT(cntrl), "key-released");
 			mKeyModifiers.Connect(G_OBJECT(cntrl), "modifiers");

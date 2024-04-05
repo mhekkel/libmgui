@@ -143,6 +143,11 @@ class MView
 	virtual void MiddleMouseButtonClick(int32_t inX, int32_t inY);
 	virtual void SecondaryMouseButtonClick(int32_t inX, int32_t inY);
 
+	virtual bool KeyPressed(uint32_t inKeyCode, char32_t inUnicode, uint32_t inModifiers, bool inAutoRepeat) { return false;}
+	virtual void KeyReleased(uint32_t inKeyValue, uint32_t inModifiers) { }
+	virtual void Modifiers(uint32_t inModifiers) { }
+	virtual void EnterText(const std::string &inText) { }
+
 	virtual void Activate();
 	virtual void Deactivate();
 	bool IsActive() const;

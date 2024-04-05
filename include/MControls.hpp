@@ -69,11 +69,6 @@ class MControl : public MControlBase
 	virtual void PointerMotion(int32_t inX, int32_t inY, uint32_t inModifiers) { }
 	virtual void PointerLeave() { }
 
-	virtual bool KeyPressed(uint32_t inKeyCode, char32_t inUnicode, uint32_t inModifiers, bool inAutoRepeat) { return false;}
-	virtual void KeyReleased(uint32_t inKeyValue, uint32_t inModifiers) { }
-	virtual void Modifiers(uint32_t inModifiers) { }
-	virtual void EnterText(const std::string &inText) { }
-
 	virtual void ScrollDecelerate(double inVelX, double inVelY) { }
 	virtual bool Scroll(int32_t inX, int32_t inY, int32_t inDeltaX, int32_t inDeltaY, uint32_t inModifiers) { return false;}
 	virtual void ScrollBegin() { }

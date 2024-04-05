@@ -82,11 +82,12 @@ class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin
 	MSlot<bool()> mCloseRequest;
 	bool OnCloseRequest();
 
-	// void OnIsSuspendedChanged(GParamSpec *inProperty);
-	// MSlot<void(GParamSpec *)> mIsSuspendedChanged;
-
 	void OnIsActiveChanged(GParamSpec *inProperty);
 	MSlot<void(GParamSpec *)> mIsActiveChanged;
+
+	bool OnKeyPressed(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers) override;
+	void OnKeyReleased(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers) override;
+	void OnKeyModifiers(GdkModifierType inModifiers) override;
 
 	MGtkWidgetMixin *mFocus;
 	bool mConfigured;

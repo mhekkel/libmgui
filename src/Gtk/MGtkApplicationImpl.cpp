@@ -96,13 +96,6 @@ int MGtkApplicationImpl::CommandLine(GApplicationCommandLine *inCommandLine)
 
 	argv = g_application_command_line_get_arguments(inCommandLine, &argc);
 
-	// g_application_command_line_print(inCommandLine,
-	// 	"This text is written back\n"
-	// 	"to stdout of the caller\n");
-
-	for (i = 0; i < argc; i++)
-		g_print("argument %d: %s\n", i, argv[i]);
-
 	int result = gApp->HandleCommandLine(argc, argv);
 
 	g_strfreev(argv);

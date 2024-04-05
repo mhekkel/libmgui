@@ -54,6 +54,15 @@ class MGtkDialogImpl : public MGtkWindowImpl
 	{
 	}
 
+	void CreateWindow(MRect inBounds, const std::string &inTitle) override
+	{
+		SetEventMask(MEventMask::KeyCapture);
+
+		MGtkWindowImpl::CreateWindow(inBounds, inTitle);
+
+		// mKeyPressed.GetSourceGObject
+	}
+
 	void OnResponse(int32_t inResponseID)
 	{
 		// PRINT(("Response: %d", inResponseID));

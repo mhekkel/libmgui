@@ -46,7 +46,6 @@ class MDialog : public MWindow
 	~MDialog();
 
 	virtual bool OKClicked();
-
 	virtual bool CancelClicked();
 
 	using MWindow::Show;
@@ -133,13 +132,20 @@ class MDialog : public MWindow
 
 	std::string l(const std::string &s);
 
+	bool AllowClose(bool inQuitting) override;
 
-	virtual void ChildResized();
-	virtual void RecalculateLayout();
+	void ChildResized() override;
+	void RecalculateLayout() override;
+
+	bool KeyPressed(uint32_t inKeyCode, char32_t inUnicode, uint32_t inModifiers, bool inAutoRepeat) override;
+	void KeyReleased(uint32_t inKeyValue, uint32_t inModifiers) override;
+	void Modifiers(uint32_t inModifiers) override;
+	void EnterText(const std::string &inText) override;
 
 	std::string mRsrc;
 	float mDLUX, mDLUY;
 	std::vector<MRadiobutton *> mRadioGroup;
+	MButton *mOKButton = nullptr, *mCancelButton = nullptr;
 
   private:
 	MWindow *mParentWindow;

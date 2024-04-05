@@ -272,6 +272,26 @@ void MGtkWindowImpl::ConvertFromScreen(int32_t &ioX, int32_t &ioY) const
 {
 }
 
+
+bool MGtkWindowImpl::OnKeyPressed(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers)
+{
+	auto [keycode, modifiers] = MapFromGdkKey(inKeyValue, inModifiers);
+
+	return mWindow->KeyPressed(keycode, gdk_keyval_to_unicode(inKeyValue),
+		modifiers, mAutoRepeat);
+}
+
+void MGtkWindowImpl::OnKeyReleased(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers)
+{
+	auto [keycode, modifiers] = MapFromGdkKey(inKeyValue, inModifiers);
+
+	mWindow->KeyReleased(keycode, modifiers);
+}
+
+void MGtkWindowImpl::OnKeyModifiers(GdkModifierType inModifiers)
+{
+}
+
 // --------------------------------------------------------------------
 
 MWindowImpl *MWindowImpl::Create(const std::string &inTitle, MRect inBounds,

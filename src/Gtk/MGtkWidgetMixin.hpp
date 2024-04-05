@@ -296,6 +296,10 @@ enum class MEventMask
 	SecondaryButtonClick = (1 << 5),
 	MiddleButtonClick = (1 << 6),
 
+	Capture = (1 << 7),
+
+	KeyCapture = (Key | Capture),
+
 	All = (Focus | GestureClick | Key | Pointer | Scroll | SecondaryButtonClick | MiddleButtonClick)
 };
 

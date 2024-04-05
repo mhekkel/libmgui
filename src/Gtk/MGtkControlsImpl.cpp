@@ -80,54 +80,22 @@ void MGtkButtonImpl::Clicked()
 
 void MGtkButtonImpl::SimulateClick()
 {
-	//	::SendMessage(GetWidget(), BM_SETSTATE, 1, 0);
-	//	::UpdateWindow(GetWidget());
-	//	::delay(12.0 / 60.0);
-	//	::SendMessage(GetWidget(), BM_SETSTATE, 0, 0);
-	//	::UpdateWindow(GetWidget());
-	//
-	//	mControl->eClicked(mControl->GetID());
+	g_signal_emit_by_name(G_OBJECT(GetWidget()), "activate");
 }
 
 void MGtkButtonImpl::MakeDefault(bool inDefault)
 {
 	mDefault = inDefault;
-
-	// if (GetWidget() != nullptr)
-	// 	gtk_widget_grab_default(GetWidget());
 }
 
 void MGtkButtonImpl::SetText(const std::string &inText)
 {
 	mLabel = inText;
 	gtk_button_set_label(GTK_BUTTON(GetWidget()), mLabel.c_str());
-	//	wstring text(c2w(inText));
-	//	::SendMessage(GetWidget(), WM_SETTEXT, 0, (LPARAM)text.c_str());
-}
-
-void MGtkButtonImpl::AddedToWindow()
-{
-	MGtkControlImpl::AddedToWindow();
-	//	if (mDefault)
-	//		::SendMessage(GetWidget(), BM_SETSTYLE, (WPARAM)BS_DEFPUSHBUTTON, 0);
-	//	else
-	//		::SendMessage(GetWidget(), BM_SETSTYLE, (WPARAM)BS_PUSHBUTTON, 0);
 }
 
 void MGtkButtonImpl::GetIdealSize(int32_t &outWidth, int32_t &outHeight)
 {
-	//	outWidth = 75;
-	//	outHeight = 23;
-	//
-	//	SIZE size;
-	//	if (GetWidget() != nullptr and Button_GetIdealSize(GetWidget(), &size))
-	//	{
-	//		if (outWidth < size.cx + 20)
-	//			outWidth = size.cx + 20;
-	//
-	//		if (outHeight < size.cy + 2)
-	//			outHeight = size.cy + 2;
-	//	}
 }
 
 MButtonImpl *MButtonImpl::Create(MButton *inButton, const std::string &inLabel,
@@ -142,12 +110,6 @@ MGtkExpanderImpl::MGtkExpanderImpl(MExpander *inExpander, const std::string &inL
 	: MGtkControlImpl(inExpander, inLabel)
 	, mIsOpen(false)
 {
-}
-
-MGtkExpanderImpl::~MGtkExpanderImpl()
-{
-	//	if (mDC)
-	//		::ReleaseDC(GetWidget(), mDC);
 }
 
 void MGtkExpanderImpl::CreateWidget()
