@@ -99,7 +99,7 @@ void MGtkControlImpl<CONTROL>::SetText(const std::string &inText)
 	{
 		GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(wdgt));
 		if (buffer == nullptr)
-			THROW(("Invalid text buffer"));
+			throw std::runtime_error("Invalid text buffer");
 		gtk_text_buffer_set_text(buffer, inText.c_str(), inText.length());
 	}
 	else if (GTK_IS_PROGRESS_BAR(wdgt))

@@ -45,15 +45,13 @@ static void OnDialogResult(GtkDialog *dialog, gint inReplyButton, AlertReplyHand
 	gtk_window_destroy(GTK_WINDOW(dialog));
 }
 
-GtkWidget *CreateAlertWithArgs(const char *inResourceName, std::initializer_list<std::string> inArgs)
+GtkWidget *CreateAlertWithArgs(const std::string &inResourceName, std::initializer_list<std::string> inArgs)
 {
-	using namespace std::literals;
-
 	GtkWidget *dlg = nullptr;
 
-	mrsrc::istream rsrc("Alerts/"s + inResourceName + ".xml");
+	mrsrc::istream rsrc("Alerts/" + inResourceName + ".xml");
 	if (not rsrc)
-		THROW(("Could not load resource Alerts/%s.xml", inResourceName));
+		throw std::runtime_error("Could not load alert resource" + inResourceName);
 
 	// parse the XML data
 	xml::document doc(rsrc);
@@ -62,7 +60,7 @@ GtkWidget *CreateAlertWithArgs(const char *inResourceName, std::initializer_list
 	xml::element *root = doc.find_first("/alert");
 
 	if (root->name() != "alert")
-		THROW(("Invalid resource for alert %s, first tag should be <alert>", inResourceName));
+		throw std::runtime_error("Invalid resource for alert " + inResourceName + ", first tag should be <alert>");
 
 	std::string instruction, content;
 	std::vector<std::pair<std::string, uint32_t>> btns;
@@ -127,7 +125,8 @@ GtkWidget *CreateAlertWithArgs(const char *inResourceName, std::initializer_list
 	dlg = gtk_message_dialog_new(nullptr, GTK_DIALOG_MODAL,
 		type, GTK_BUTTONS_NONE, "%s", instruction.c_str());
 
-	THROW_IF_NIL(dlg);
+	assert(dlg);
+
 	if (not content.empty())
 	{
 #pragma GCC diagnostic push

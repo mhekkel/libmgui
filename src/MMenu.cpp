@@ -73,7 +73,7 @@ MMenu *MMenu::Create(xml::element *inXMLNode, bool inPopup)
 	{
 		label = GetLocalisedStringForContext("menu", inXMLNode->get_attribute("label"));
 		if (label.length() == 0)
-			THROW(("Invalid menu specification, label is missing"));
+			throw std::runtime_error("Invalid menu specification, label is missing");
 	}
 
 	MMenu *menu = new MMenu(inXMLNode->get_attribute("id"), label, inPopup);
@@ -130,7 +130,7 @@ void MMenuBar::Init(const std::string &inMenuResourceName)
 	zeep::xml::element *node = &doc.front();
 
 	if (node->name() != "menubar")
-		THROW(("Invalid menubar specification"));
+		throw std::runtime_error("Invalid menubar specification");
 
 	sInstance.reset(new MMenuBar());
 

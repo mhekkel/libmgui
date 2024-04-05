@@ -98,7 +98,7 @@ unicode GetUnicode(MEncoding inEncoding, char inByte)
 	{
 		case kEncodingMacOSRoman:	return kMacOSRomanChars[static_cast<uint8_t>(inByte)];
 		case kEncodingISO88591:		return static_cast<uint8_t>(inByte);	// iso-8859-1 maps exactly on unicode
-		default:					THROW(("Invalid encoding for GetUnicode"));
+		default:					throw std::runtime_error("Invalid encoding for GetUnicode");
 	}
 }
 
@@ -359,7 +359,7 @@ MEncoder* MEncoder::GetEncoder(MEncoding inEncoding)
 		
 		default:
 			assert(false);
-			THROW(("Unknown encoding"));
+			throw std::runtime_error("Unknown encoding");
 			break;
 	}
 	
@@ -429,7 +429,7 @@ MDecoder* MDecoder::GetDecoder(MEncoding inEncoding, const void* inBuffer, uint3
 		
 		default:
 			assert(false);
-			THROW(("Unknown encoding"));
+			throw std::runtime_error("Unknown encoding");
 			break;
 	}
 	
@@ -489,9 +489,9 @@ std::string::iterator next_cursor_position(
 	return result;
 }
 
-ustring::iterator next_cursor_position(ustring::iterator inStart, ustring::iterator inEnd)
+std::u32string::iterator next_cursor_position(std::u32string::iterator inStart, std::u32string::iterator inEnd)
 {
-	ustring::iterator result = inEnd;
+	std::u32string::iterator result = inEnd;
 
 	CharBreakClass c1 = GetCharBreakClass(*inStart);
 

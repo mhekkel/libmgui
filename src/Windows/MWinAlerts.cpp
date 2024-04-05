@@ -38,7 +38,7 @@ int32_t DisplayAlert(
 	xml::element* root = doc.find_first("/alert");
 	
 	if (root->name() != "alert")
-		THROW(("Invalid resource for alert %s, first tag should be <alert>", inResourceName));
+		throw std::runtime_error("Invalid resource for alert %s, first tag should be <alert>", inResourceName);
 
 	// OK, setup a standard Task dialog
 

@@ -25,13 +25,76 @@
  */
 
 #include "MColorPicker.hpp"
-#include "MCanvas.hpp"
-#include "MControls.hpp"
 #include "MDevice.hpp"
 #include "MPreferences.hpp"
 #include "MUtils.hpp"
 
 #include <regex>
+
+// --------------------------------------------------------------------
+
+MColorSwatch::MColorSwatch(const std::string &inID, MRect inBounds, MColor inColor)
+	: MCanvas(inID, inBounds)
+	, mColor(inColor)
+
+	, ePickedColor(this, &MColorSwatch::OnPickedColor)
+	, ePreviewColor(this, &MColorSwatch::OnPreviewColor)
+{
+}
+
+void MColorSwatch::Draw()
+{
+	MDevice dev(this);
+
+	dev.SetForeColor(mColor);
+
+	MRect bounds = GetBounds();
+
+	dev.FillRect(bounds);
+}
+
+MColor MColorSwatch::GetColor() const
+{
+	return mColor;
+}
+
+void MColorSwatch::SetColor(MColor inColor)
+{
+	mColor = inColor;
+	Invalidate();
+}
+
+void MColorSwatch::SetPalette(const std::vector<MColor> &colors)
+{
+	mPalette = colors;
+}
+
+void MColorSwatch::ClickPressed(int32_t inX, int32_t inY, int32_t inClickCount, uint32_t inModifiers)
+{
+	auto picker = new MColorPicker(GetWindow(), mColor, mPalette);
+	AddRoute(ePreviewColor, picker->eChangedColor);
+	AddRoute(ePickedColor, picker->eSelectedColor);
+	picker->Select();
+}
+
+void MColorSwatch::ClickReleased(int32_t inX, int32_t inY, uint32_t inModifiers)
+{
+}
+
+void MColorSwatch::PointerMotion(int32_t inX, int32_t inY, uint32_t inModifiers)
+{
+}
+
+void MColorSwatch::OnPickedColor(MColor inColor)
+{
+	mColor = inColor;
+	eColorChanged(mID, mColor);
+}
+
+void MColorSwatch::OnPreviewColor(MColor inColor)
+{
+	eColorPreview(mID, inColor);
+}
 
 // --------------------------------------------------------------------
 
@@ -70,6 +133,7 @@ MColorSquare::MColorSquare(const std::string &inID, MRect inBounds, MColorPicker
 	, mMouseDown(false)
 	, mPicker(inPicker)
 {
+	SetLayout({ false, false, 0, 0, 0, 0 });
 }
 
 void MColorSquare::Draw()
@@ -256,6 +320,7 @@ MColorSlider::MColorSlider(const std::string &inID, MRect inBounds, MColorPicker
 	, mMouseDown(false)
 	, mPicker(inPicker)
 {
+	SetLayout({ false, false, 0, 0, 0, 0 });
 }
 
 void MColorSlider::Draw()
@@ -450,9 +515,8 @@ void MColorSample::SetColor(MColor inColor)
 
 // --------------------------------------------------------------------
 
-MColorPicker::MColorPicker(
-	MWindow *inWindow,
-	MColor inColor)
+MColorPicker::MColorPicker(MWindow *inWindow, MColor inColor,
+	std::vector<MColor> inPalette)
 	: MDialog("color-picker")
 	, mMode(ePickHSV)
 	, mSettingText(false)
@@ -493,6 +557,18 @@ MColorPicker::MColorPicker(
 	bounds = placeholder->GetBounds();
 	sample = new MColorSample("sample-control", bounds, *this, inColor);
 	placeholder->AddChild(sample);
+
+	auto paletteBox = static_cast<MBoxControl *>(FindSubViewByID("palette"));
+	for (std::size_t n = 0; auto color : inPalette)
+	{
+		if (++n > 6)
+			break;
+
+		bounds = { 0, 0, static_cast<int32_t>(8 * mDLUX), static_cast<int32_t>(8 * mDLUY) };
+		auto paletteColor = new MColorSample("palette-color-" + std::to_string(n), bounds, *this, color);
+		paletteColor->SetLayout({ true, static_cast<uint32_t>(mDLUX) });
+		paletteBox->AddChild(paletteColor);
+	}
 
 	AddRoute(eChangedMode, square->eChangedMode);
 	AddRoute(eChangedMode, slider->eChangedMode);
@@ -608,7 +684,7 @@ MPickerMode MColorPicker::GetMode() const
 
 void MColorPicker::UpdateColor()
 {
-	MValueChanger<bool> save(mSettingText, true);
+	mSettingText = true;
 
 	uint32_t red = static_cast<uint32_t>(mRed * 255);
 	uint32_t green = static_cast<uint32_t>(mGreen * 255);
@@ -635,6 +711,8 @@ void MColorPicker::UpdateColor()
 	hex[5] = kHexChars[blue & 0x0f];
 
 	SetText("hex", hex);
+
+	mSettingText = false;
 
 	MColor color(mRed, mGreen, mBlue);
 	eChangedColor(color);

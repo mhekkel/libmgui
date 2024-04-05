@@ -115,7 +115,8 @@ void MGtkWindowImpl::CreateWindow(MRect inBounds, const std::string &inTitle)
 	auto w = mgtk_window_new(static_cast<MGtkApplicationImpl *>(gApp->GetImpl())->GetGtkApp(), this);
 
 	GtkWidget *widget = GTK_WIDGET(w);
-	THROW_IF_NIL(widget);
+	if (widget == nullptr)
+throw std::runtime_error("unexpected nullptr");
 
 	gtk_window_set_default_size(GTK_WINDOW(widget), inBounds.width, inBounds.height);
 	gtk_window_set_title(GTK_WINDOW(widget), inTitle.c_str());

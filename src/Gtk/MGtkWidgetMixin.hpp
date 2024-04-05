@@ -242,7 +242,6 @@ class MSlot : public MakeGtkCallbackHandler<Function>::type
 
 	void Connect(GObject *inObject, const char *inSignalName)
 	{
-		THROW_IF_NIL(inObject);
 		mID = g_signal_connect(inObject, inSignalName,
 			G_CALLBACK(&base_class::GCallback), this);
 	}
@@ -261,14 +260,12 @@ class MSlot : public MakeGtkCallbackHandler<Function>::type
 
 	void Block(GtkWidget *inObject, const char *inSignalName)
 	{
-		THROW_IF_NIL(inObject);
 		g_signal_handlers_block_by_func(G_OBJECT(inObject),
 			(void *)G_CALLBACK(&base_class::GCallback), this);
 	}
 
 	void Unblock(GtkWidget *inObject, const char *inSignalName)
 	{
-		THROW_IF_NIL(inObject);
 		g_signal_handlers_unblock_by_func(G_OBJECT(inObject),
 			(void *)G_CALLBACK(&base_class::GCallback), this);
 	}

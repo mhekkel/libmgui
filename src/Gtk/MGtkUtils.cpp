@@ -97,9 +97,9 @@ GdkPixbuf *CreateDot(MColor inColor, uint32_t inSize)
 
 	// then copy the data over to a pixbuf;
 
-	GdkPixbuf *result = gdk_pixbuf_new(
-		GDK_COLORSPACE_RGB, true, 8, inSize, inSize);
-	THROW_IF_NIL(result);
+	GdkPixbuf *result = gdk_pixbuf_new(GDK_COLORSPACE_RGB, true, 8, inSize, inSize);
+	if (result == nullptr)
+		throw std::runtime_error("unexpected nullptr");
 
 	unsigned char *dst = gdk_pixbuf_get_pixels(result);
 	unsigned char *src = cairo_image_surface_get_data(cs);
@@ -158,7 +158,7 @@ std::string GetHomeDirectory()
 std::string GetPrefsDirectory()
 {
 	const char *user_config_dir = g_get_user_config_dir();
-	return user_config_dir ? (fs::path(user_config_dir) / kAppName).string() : (GetHomeDirectory() + '/' + kAppName);
+	return user_config_dir ? (std::filesystem::path(user_config_dir) / kAppName).string() : (GetHomeDirectory() + '/' + kAppName);
 }
 
 std::string GetApplicationVersion()

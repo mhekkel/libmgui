@@ -239,7 +239,7 @@ int MApplication::Main(const std::string &inApplicationID, const std::vector<std
 		if (r > 0)
 		{
 			exePath[r] = 0;
-			gExecutablePath = fs::canonical(exePath);
+			gExecutablePath = std::filesystem::canonical(exePath);
 			gPrefixPath = gExecutablePath.parent_path();
 		}
 

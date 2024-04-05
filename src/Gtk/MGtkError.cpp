@@ -69,9 +69,6 @@ void __signal_throw(
 			  << " \"" << inFunction << "\": \n"
 			  << inCode << '\n';
 
-	if (StOKToThrow::IsOK())
-		return;
-
 	GtkWindow *parent = nullptr;
 
 	if (auto w = gApp->GetActiveWindow(); w != nullptr)

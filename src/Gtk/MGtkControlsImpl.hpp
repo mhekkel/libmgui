@@ -305,31 +305,31 @@ class MGtkRadiobuttonImpl : public MGtkControlImpl<MRadiobutton>
 	MGtkRadiobuttonImpl *mGroup = nullptr;
 };
 
-class MGtkColorSwatchImpl : public MGtkControlImpl<MColorSwatch>
-{
-  public:
-	MGtkColorSwatchImpl(MColorSwatch *inColorSwatch, MColor inColor);
+// class MGtkColorSwatchImpl : public MGtkControlImpl<MColorSwatch>
+// {
+//   public:
+// 	MGtkColorSwatchImpl(MColorSwatch *inColorSwatch, MColor inColor);
 
-	void CreateWidget() override;
+// 	void CreateWidget() override;
 
-	MColor GetColor() const override;
-	void SetColor(MColor inColor) override;
+// 	MColor GetColor() const override;
+// 	void SetColor(MColor inColor) override;
 
-	void SetPalette(const std::vector<MColor> &colors) override;
+// 	void SetPalette(const std::vector<MColor> &colors) override;
 
-  private:
-	MEventIn<void(MColor)> eSelectedColor;
-	void SelectedColor(MColor inColor);
+//   private:
+// 	MEventIn<void(MColor)> eSelectedColor;
+// 	void SelectedColor(MColor inColor);
 
-	MEventIn<void(MColor)> ePreviewColor;
-	void PreviewColor(MColor inColor);
+// 	MEventIn<void(MColor)> ePreviewColor;
+// 	void PreviewColor(MColor inColor);
 
-	MSlot<void()> mColorSet;
-	void OnColorSet();
+// 	MSlot<void()> mColorSet;
+// 	void OnColorSet();
 
-	MColor mColor;
-	std::vector<MColor> mPalette;
-};
+// 	MColor mColor;
+// 	std::vector<MColor> mPalette;
+// };
 
 class MGtkListBoxImpl : public MGtkControlImpl<MListBox>
 {

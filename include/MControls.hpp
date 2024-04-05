@@ -62,17 +62,17 @@ class MControl : public MControlBase
 
 	virtual void Draw();
 
-	virtual void ClickPressed(int32_t inX, int32_t inY, int32_t inClickCount, uint32_t inModifiers) { }
-	virtual void ClickReleased(int32_t inX, int32_t inY, uint32_t inModifiers) { }
+	virtual void ClickPressed(int32_t inX, int32_t inY, int32_t inClickCount, uint32_t inModifiers) {}
+	virtual void ClickReleased(int32_t inX, int32_t inY, uint32_t inModifiers) {}
 
-	virtual void PointerEnter(int32_t inX, int32_t inY, uint32_t inModifiers) { }
-	virtual void PointerMotion(int32_t inX, int32_t inY, uint32_t inModifiers) { }
-	virtual void PointerLeave() { }
+	virtual void PointerEnter(int32_t inX, int32_t inY, uint32_t inModifiers) {}
+	virtual void PointerMotion(int32_t inX, int32_t inY, uint32_t inModifiers) {}
+	virtual void PointerLeave() {}
 
-	virtual void ScrollDecelerate(double inVelX, double inVelY) { }
-	virtual bool Scroll(int32_t inX, int32_t inY, int32_t inDeltaX, int32_t inDeltaY, uint32_t inModifiers) { return false;}
-	virtual void ScrollBegin() { }
-	virtual void ScrollEnd() { }
+	virtual void ScrollDecelerate(double inVelX, double inVelY) {}
+	virtual bool Scroll(int32_t inX, int32_t inY, int32_t inDeltaX, int32_t inDeltaY, uint32_t inModifiers) { return false; }
+	virtual void ScrollBegin() {}
+	virtual void ScrollEnd() {}
 
 	bool IsFocus() const override;
 	void SetFocus() override;
@@ -138,19 +138,6 @@ class MButton : public MControl<MButtonImpl>
 	MEventOut<void(const std::string &)> eClicked;
 	MEventOut<void(const std::string &, int32_t, int32_t)> eDropDown;
 };
-
-//// --------------------------------------------------------------------
-//
-// class MImageButton : public MControl<MImageButtonImpl>
-//{
-//  public:
-//	typedef MImageButtonImpl MImpl;
-//
-//					MImageButtonImpl(const std::string& inID, MRect inBounds,
-//						const std::string& inImageResource);
-//
-//	MEventOut<void(const std::string&)> eClicked;
-//};
 
 // --------------------------------------------------------------------
 
@@ -361,27 +348,6 @@ class MRadiobutton : public MControl<MRadiobuttonImpl>
 
 // --------------------------------------------------------------------
 
-class MColorSwatchImpl;
-
-class MColorSwatch : public MControl<MColorSwatchImpl>
-{
-  public:
-	typedef MColorSwatchImpl MImpl;
-
-	MColorSwatch(const std::string &inID, MRect inBounds,
-		MColor inColor);
-
-	MColor GetColor() const;
-	void SetColor(MColor inColor);
-
-	void SetPalette(const std::vector<MColor> &colors);
-
-	MEventOut<void(const std::string &, MColor)> eColorChanged;
-	MEventOut<void(const std::string &, MColor)> eColorPreview;
-};
-
-// --------------------------------------------------------------------
-
 class MListBoxImpl;
 
 class MListBox : public MControl<MListBoxImpl>
@@ -399,24 +365,8 @@ class MListBox : public MControl<MListBoxImpl>
 	MEventOut<void(const std::string &, int32_t)> eValueChanged;
 };
 
-// // --------------------------------------------------------------------
-
-// class MListViewImpl;
-
-// class MListView : public MControl<MListViewImpl>
-// {
-//   public:
-// 	typedef MListViewImpl MImpl;
-
-// 	MListView(const std::string &inID, MRect inBounds);
-
-// 	void AddItem(const std::string &inLabel);
-
-// 	MEventOut<void(const std::string &, int32_t)> eValueChanged;
-// };
-
 // --------------------------------------------------------------------
-// Gtk specific controls
+// Box control, a container
 
 class MBoxControlImpl;
 
@@ -432,7 +382,7 @@ class MBoxControl : public MControl<MBoxControlImpl>
 };
 
 // --------------------------------------------------------------------
-// Stack
+// Stack, another container
 
 class MStackControlImpl;
 
@@ -448,4 +398,3 @@ class MStackControl : public MControl<MStackControlImpl>
 
 	void Select(const std::string &inName);
 };
-

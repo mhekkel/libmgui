@@ -452,7 +452,8 @@ bool MWinExpanderImpl::WMPaint(HWND inHWnd, UINT inMsg, WPARAM inWParam, LPARAM 
 	{
 		PAINTSTRUCT lPs;
 		HDC hdc = ::BeginPaint(inHWnd, &lPs);
-		THROW_IF_NIL(hdc);
+		if (hdc == nullptr)
+throw std::runtime_error("unexpected nullptr");
 		
 //		::GetUpdateRect(inHWnd, &lPs.rcPaint, false);
 		
@@ -904,7 +905,8 @@ void MWinComboboxImpl::AddedToWindow()
 	MWinControlImpl::AddedToWindow();
 	
 	HWND edit = ::GetWindow(GetHandle(), GW_CHILD);
-	THROW_IF_NIL(edit);
+	if (edit == nullptr)
+throw std::runtime_error("unexpected nullptr");
 
 	mEditor.SetHandle(edit);
 	mEditor.SubClass();
@@ -1052,7 +1054,7 @@ void MWinPopupImpl::SetText(const string& inText)
 	wstring s(c2w(inText));	
 	int r = ::SendMessageW(GetHandle(), CB_FINDSTRINGEXACT, (WPARAM)(-1), (LPARAM)(s.c_str()));
 	if (r == CB_ERR)
-		THROW(("Could not find text in popup menu"));
+		throw std::runtime_error("Could not find text in popup menu");
 	::SendMessage(GetHandle(), CB_SETCURSEL, (WPARAM)r, 0);
 	::UpdateWindow(GetHandle());
 }

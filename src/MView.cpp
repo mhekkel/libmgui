@@ -184,9 +184,9 @@ void MView::MoveFrame(int32_t inXDelta, int32_t inYDelta)
 void MView::ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta)
 {
 	mFrame.width += inWidthDelta;
-	mFrame.height += inHeightDelta;
-
 	mBounds.width += inWidthDelta;
+
+	mFrame.height += inHeightDelta;
 	mBounds.height += inHeightDelta;
 
 	for (MView *child : mChildren)
@@ -194,15 +194,7 @@ void MView::ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta)
 		if (child->mVisible == eTriStateOff)
 			continue;
 
-		int32_t dw = 0, dh = 0;
-
-		if (child->mLayout.mHExpand)
-			dw = inWidthDelta;
-
-		if (child->mLayout.mVExpand)
-			dh = inHeightDelta;
-
-		child->ResizeFrame(dw, dh);
+		child->ResizeFrame(inWidthDelta, inHeightDelta);
 	}
 }
 

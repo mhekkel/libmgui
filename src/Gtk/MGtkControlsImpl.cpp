@@ -300,8 +300,7 @@ void MGtkStatusbarImpl::CreateWidget()
 		if (part.width > 0)
 			gtk_widget_set_size_request(label, part.width, -1);
 		
-		if (part.expand)
-			gtk_widget_set_hexpand(label, true);
+		gtk_widget_set_hexpand(label, part.expand);
 		
 		gtk_widget_set_margin_start(label, part.margins.left);
 		gtk_widget_set_margin_top(label, part.margins.top);
@@ -354,8 +353,6 @@ MGtkComboboxImpl::MGtkComboboxImpl(MCombobox *inCombobox)
 void MGtkComboboxImpl::CreateWidget()
 {
 	GtkTreeModel *list_store = GTK_TREE_MODEL(gtk_list_store_new(1, G_TYPE_STRING));
-	THROW_IF_NIL(list_store);
-
 	GtkWidget *wdgt = gtk_combo_box_new_with_model_and_entry(list_store);
 	gtk_combo_box_set_entry_text_column(GTK_COMBO_BOX(wdgt), 0);
 
@@ -388,7 +385,7 @@ void MGtkComboboxImpl::SetText(const std::string &inText)
 	GtkWidget *wdgt = GetWidget();
 
 	if (not GTK_IS_COMBO_BOX(wdgt))
-		THROW(("Item is not a combo box"));
+		throw std::runtime_error("Item is not a combo box");
 
 	auto ix = i - mChoices.begin();
 	if (ix != gtk_combo_box_get_active(GTK_COMBO_BOX(wdgt)))
@@ -406,11 +403,9 @@ void MGtkComboboxImpl::SetChoices(const std::vector<std::string> &inChoices)
 		mChanged.Disconnect(wdgt);
 
 		if (not GTK_IS_COMBO_BOX(wdgt))
-			THROW(("Item is not a combo box"));
+			throw std::runtime_error("Item is not a combo box");
 
 		GtkListStore *model = GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(wdgt)));
-		THROW_IF_NIL(model);
-
 		gtk_list_store_clear(model);
 
 		for (auto s : inChoices)
@@ -543,7 +538,7 @@ void MGtkEdittextImpl::CreateWidget()
 	auto entry = gtk_entry_new();
 	gtk_entry_set_buffer(GTK_ENTRY(entry), mBuffer);
 
-	SetEventMask(MEventMask::Key);
+	SetEventMask(MEventMask::KeyCapture);
 	SetWidget(entry);
 
 	gtk_widget_set_focus_on_click(entry, true);
@@ -572,7 +567,7 @@ void MGtkEdittextImpl::SetPasswordChar(uint32_t inUnicode)
 		gtk_entry_set_invisible_char(GTK_ENTRY(wdgt), inUnicode);
 	}
 	else
-		THROW(("item is not an entry"));
+		throw std::runtime_error("item is not an entry");
 }
 
 bool MGtkEdittextImpl::OnKeyPressed(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers)
@@ -725,95 +720,95 @@ MRadiobuttonImpl *MRadiobuttonImpl::Create(MRadiobutton *inRadiobutton, const st
 	return new MGtkRadiobuttonImpl(inRadiobutton, inText);
 }
 
-// --------------------------------------------------------------------
+// // --------------------------------------------------------------------
 
-MGtkColorSwatchImpl::MGtkColorSwatchImpl(MColorSwatch *inColorSwatch, MColor inColor)
-	: MGtkControlImpl(inColorSwatch, "")
-	, eSelectedColor(this, &MGtkColorSwatchImpl::SelectedColor)
-	, ePreviewColor(this, &MGtkColorSwatchImpl::PreviewColor)
-	, mColorSet(this, &MGtkColorSwatchImpl::OnColorSet)
-	, mColor(inColor)
-{
-}
+// MGtkColorSwatchImpl::MGtkColorSwatchImpl(MColorSwatch *inColorSwatch, MColor inColor)
+// 	: MGtkControlImpl(inColorSwatch, "")
+// 	, eSelectedColor(this, &MGtkColorSwatchImpl::SelectedColor)
+// 	, ePreviewColor(this, &MGtkColorSwatchImpl::PreviewColor)
+// 	, mColorSet(this, &MGtkColorSwatchImpl::OnColorSet)
+// 	, mColor(inColor)
+// {
+// }
 
-void MGtkColorSwatchImpl::CreateWidget()
-{
-	GdkRGBA color = {};
-	color.red = mColor.red / 255.0;
-	color.green = mColor.green / 255.0;
-	color.blue = mColor.blue / 255.0;
-	color.alpha = 1.0;
+// void MGtkColorSwatchImpl::CreateWidget()
+// {
+// 	GdkRGBA color = {};
+// 	color.red = mColor.red / 255.0;
+// 	color.green = mColor.green / 255.0;
+// 	color.blue = mColor.blue / 255.0;
+// 	color.alpha = 1.0;
 
-	SetWidget(gtk_color_button_new_with_rgba(&color));
+// 	SetWidget(gtk_color_button_new_with_rgba(&color));
 
-	mColorSet.Connect(GetWidget(), "color-set");
-}
+// 	mColorSet.Connect(GetWidget(), "color-set");
+// }
 
-void MGtkColorSwatchImpl::OnColorSet()
-{
-	GdkRGBA color = {};
-	gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(GetWidget()), &color);
+// void MGtkColorSwatchImpl::OnColorSet()
+// {
+// 	GdkRGBA color = {};
+// 	gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(GetWidget()), &color);
 
-	mColor.red = static_cast<uint8_t>(255 * color.red);
-	mColor.green = static_cast<uint8_t>(255 * color.green);
-	mColor.blue = static_cast<uint8_t>(255 * color.blue);
+// 	mColor.red = static_cast<uint8_t>(255 * color.red);
+// 	mColor.green = static_cast<uint8_t>(255 * color.green);
+// 	mColor.blue = static_cast<uint8_t>(255 * color.blue);
 
-	mControl->eColorChanged(mControl->GetID(), mColor);
-}
+// 	mControl->eColorChanged(mControl->GetID(), mColor);
+// }
 
-void MGtkColorSwatchImpl::SelectedColor(MColor inColor)
-{
-	SetColor(inColor);
-	mControl->eColorChanged(mControl->GetID(), mColor);
-}
+// void MGtkColorSwatchImpl::SelectedColor(MColor inColor)
+// {
+// 	SetColor(inColor);
+// 	mControl->eColorChanged(mControl->GetID(), mColor);
+// }
 
-void MGtkColorSwatchImpl::PreviewColor(MColor inColor)
-{
-	mControl->eColorPreview(mControl->GetID(), inColor);
-}
+// void MGtkColorSwatchImpl::PreviewColor(MColor inColor)
+// {
+// 	mControl->eColorPreview(mControl->GetID(), inColor);
+// }
 
-MColor MGtkColorSwatchImpl::GetColor() const
-{
-	return mColor;
-}
+// MColor MGtkColorSwatchImpl::GetColor() const
+// {
+// 	return mColor;
+// }
 
-void MGtkColorSwatchImpl::SetColor(MColor inColor)
-{
-	mColor = inColor;
+// void MGtkColorSwatchImpl::SetColor(MColor inColor)
+// {
+// 	mColor = inColor;
 
-	GdkRGBA color = {};
-	color.red = mColor.red / 255.0;
-	color.green = mColor.green / 255.0;
-	color.blue = mColor.blue / 255.0;
-	color.alpha = 1.0;
-	if (GTK_IS_COLOR_BUTTON(GetWidget()))
-		gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(GetWidget()), &color);
-}
+// 	GdkRGBA color = {};
+// 	color.red = mColor.red / 255.0;
+// 	color.green = mColor.green / 255.0;
+// 	color.blue = mColor.blue / 255.0;
+// 	color.alpha = 1.0;
+// 	if (GTK_IS_COLOR_BUTTON(GetWidget()))
+// 		gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(GetWidget()), &color);
+// }
 
-void MGtkColorSwatchImpl::SetPalette(const std::vector<MColor> &colors)
-{
-	mPalette = colors;
+// void MGtkColorSwatchImpl::SetPalette(const std::vector<MColor> &colors)
+// {
+// 	mPalette = colors;
 
-	std::vector<GdkRGBA> gtkColors(colors.size());
-	for (std::size_t i = 0; auto c : colors)
-	{
-		GdkRGBA &color = gtkColors[i];
-		color.red = c.red / 255.0;
-		color.green = c.green / 255.0;
-		color.blue = c.blue / 255.0;
-		color.alpha = 1.0;
-		++i;
-	}
+// 	std::vector<GdkRGBA> gtkColors(colors.size());
+// 	for (std::size_t i = 0; auto c : colors)
+// 	{
+// 		GdkRGBA &color = gtkColors[i];
+// 		color.red = c.red / 255.0;
+// 		color.green = c.green / 255.0;
+// 		color.blue = c.blue / 255.0;
+// 		color.alpha = 1.0;
+// 		++i;
+// 	}
 
-	if (GTK_IS_COLOR_BUTTON(GetWidget()))
-		gtk_color_chooser_add_palette(GTK_COLOR_CHOOSER(GetWidget()), GTK_ORIENTATION_HORIZONTAL,
-			9, gtkColors.size(), gtkColors.data());
-}
+// 	if (GTK_IS_COLOR_BUTTON(GetWidget()))
+// 		gtk_color_chooser_add_palette(GTK_COLOR_CHOOSER(GetWidget()), GTK_ORIENTATION_HORIZONTAL,
+// 			9, gtkColors.size(), gtkColors.data());
+// }
 
-MColorSwatchImpl *MColorSwatchImpl::Create(MColorSwatch *inColorSwatch, MColor inColor)
-{
-	return new MGtkColorSwatchImpl(inColorSwatch, inColor);
-}
+// MColorSwatchImpl *MColorSwatchImpl::Create(MColorSwatch *inColorSwatch, MColor inColor)
+// {
+// 	return new MGtkColorSwatchImpl(inColorSwatch, inColor);
+// }
 
 // --------------------------------------------------------------------
 

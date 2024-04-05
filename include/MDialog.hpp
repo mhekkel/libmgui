@@ -128,8 +128,6 @@ class MDialog : public MWindow
 	// MView *CreateListView(zeep::xml::element *inTemplate, int32_t inX, int32_t inY);
 	MView *CreateCanvas(zeep::xml::element *inTemplate, int32_t inX, int32_t inY);
 
-	// uint32_t GetTextWidth(const std::string &inText, const wchar_t *inClass, int inPartID, int inStateID);
-
 	std::string l(const std::string &s);
 
 	bool AllowClose(bool inQuitting) override;
@@ -148,5 +146,8 @@ class MDialog : public MWindow
 	MButton *mOKButton = nullptr, *mCancelButton = nullptr;
 
   private:
+
+	std::pair<int, bool> GetAttributeSize(const zeep::xml::element *e, const char *name, float inDLU);
+
 	MWindow *mParentWindow;
 };

@@ -31,11 +31,6 @@
     Conventions used in this program:
 
     std::string is in UTF-8 encoding, unless specified otherwise.
-    ustring is in UTF-16 encoding with native byte ordering.
-    wstring is in UCS2 encoding with native byte ordering.
-
-
-
 */
 
 #pragma once
@@ -44,10 +39,6 @@
 #include <vector>
 
 #include "MTypes.hpp"
-
-// a unicode version of the std::string
-// In Windows a wchar_t is 16 bit, we need 32 bit.
-typedef std::basic_string<unicode> ustring;
 
 enum MEncoding
 {
@@ -184,7 +175,7 @@ unicode ToLower(unicode inUnicode);
 unicode ToUpper(unicode inUnicode);
 
 std::string::iterator next_cursor_position(std::string::iterator inStart, std::string::iterator inEnd);
-ustring::iterator next_cursor_position(ustring::iterator inStart, ustring::iterator inEnd);
+std::u32string::iterator next_cursor_position(std::u32string::iterator inStart, std::u32string::iterator inEnd);
 
 std::string::iterator next_line_break(std::string::iterator inStart, std::string::iterator inEnd);
 

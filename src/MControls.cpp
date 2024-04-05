@@ -292,27 +292,27 @@ void MRadiobutton::SetGroup(MRadiobutton *inButton)
 	mImpl->SetGroup(inButton->GetImpl());
 }
 
-// --------------------------------------------------------------------
+// // --------------------------------------------------------------------
 
-MColorSwatch::MColorSwatch(const std::string &inID, MRect inBounds, MColor inColor)
-	: MControl<MColorSwatchImpl>(inID, inBounds, MColorSwatchImpl::Create(this, inColor))
-{
-}
+// MColorSwatch::MColorSwatch(const std::string &inID, MRect inBounds, MColor inColor)
+// 	: MControl<MColorSwatchImpl>(inID, inBounds, MColorSwatchImpl::Create(this, inColor))
+// {
+// }
 
-MColor MColorSwatch::GetColor() const
-{
-	return mImpl->GetColor();
-}
+// MColor MColorSwatch::GetColor() const
+// {
+// 	return mImpl->GetColor();
+// }
 
-void MColorSwatch::SetColor(MColor inColor)
-{
-	mImpl->SetColor(inColor);
-}
+// void MColorSwatch::SetColor(MColor inColor)
+// {
+// 	mImpl->SetColor(inColor);
+// }
 
-void MColorSwatch::SetPalette(const std::vector<MColor> &colors)
-{
-	mImpl->SetPalette(colors);
-}
+// void MColorSwatch::SetPalette(const std::vector<MColor> &colors)
+// {
+// 	mImpl->SetPalette(colors);
+// }
 
 // --------------------------------------------------------------------
 

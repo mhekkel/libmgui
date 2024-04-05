@@ -181,7 +181,7 @@ void MWinDialogImpl::Finish()
 
 	xml::element *dialog = doc.find_first("/dialog");
 	if (dialog == nullptr)
-		THROW(("Invalid dialog resource"));
+		throw std::runtime_error("Invalid dialog resource");
 
 	wstring title = c2w(l(dialog->get_attribute("title")));
 

@@ -29,7 +29,7 @@
 #include <iostream>
 #include <cstdint>
 
-typedef uint32_t unicode;
+typedef char32_t unicode;
 
 struct MRect
 {

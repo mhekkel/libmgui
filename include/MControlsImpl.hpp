@@ -132,16 +132,6 @@ class MButtonImpl : public MControlImpl<MButton>
 		MButtonFlags inFlags);
 };
 
-// class MImageButtonImpl : public MControlImpl<MImageButton>
-//{
-// public:
-//					MImageButtonImpl(MImageButton* inButton)
-//						: MControlImpl<MImageButton>(inButton)				{}
-//
-//	static MImageButtonImpl*
-//					Create(MImageButton* inButton, const std::string& inImageResource);
-// };
-
 class MExpanderImpl : public MControlImpl<MExpander>
 {
   public:
@@ -288,23 +278,6 @@ class MRadiobuttonImpl : public MControlImpl<MRadiobutton>
 	Create(MRadiobutton *inRadiobutton, const std::string &inTitle);
 };
 
-class MColorSwatchImpl : public MControlImpl<MColorSwatch>
-{
-  public:
-	MColorSwatchImpl(MColorSwatch *inColorSwatch)
-		: MControlImpl<MColorSwatch>(inColorSwatch)
-	{
-	}
-
-	virtual MColor GetColor() const = 0;
-	virtual void SetColor(MColor inColor) = 0;
-
-	virtual void SetPalette(const std::vector<MColor> &colors) = 0;
-
-	static MColorSwatchImpl *
-	Create(MColorSwatch *inColorSwatch, MColor inColor);
-};
-
 class MListBoxImpl : public MControlImpl<MListBox>
 {
   public:
@@ -321,18 +294,6 @@ class MListBoxImpl : public MControlImpl<MListBox>
 	static MListBoxImpl *
 	Create(MListBox *inListBox);
 };
-
-// class MListViewImpl : public MControlImpl<MListView>
-// {
-// public:
-// 					MListViewImpl(MListView* inListView)
-// 						: MControlImpl<MListView>(inListView)				{}
-
-// 	virtual void	AddItem(const std::string& inText) = 0;
-
-// 	static MListViewImpl*
-// 					Create(MListView* inListView);
-// };
 
 // --------------------------------------------------------------------
 // Some container controls

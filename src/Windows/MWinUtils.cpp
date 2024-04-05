@@ -197,9 +197,6 @@ void __signal_throw(
 
 	cerr << s.str();
 
-	if (StOKToThrow::IsOK())
-		return;
-
 	wstring msg(c2w(s.str()));
 
 	TaskDialog(nullptr, MWinApplicationImpl::GetInstance()->GetHInstance(),

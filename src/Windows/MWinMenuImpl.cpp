@@ -351,7 +351,7 @@ MMenuImpl* MMenuImpl::CreateBar(MMenu* inMenu)
 //	//mrsrc::rsrc rsrc(string("Menus/") + inResourceName + ".xml");
 //	//
 //	//if (not rsrc)
-//	//	THROW(("Menu resource not found: %s", inResourceName));
+//	//	throw std::runtime_error("Menu resource not found: %s", inResourceName);
 //
 //	//io::stream<io::array_source> data(rsrc.data(), rsrc.size());
 //	ifstream data("C:\\Users\\maarten\\projects\\japi\\Resources\\Menus\\" + string(inMenuResource) + ".xml");

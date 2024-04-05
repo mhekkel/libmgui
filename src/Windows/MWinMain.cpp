@@ -101,7 +101,7 @@ MDDEImpl::MDDEImpl(uint32_t inInst)
 		mIsServer = true;
 
 		if (not ::DdeNameService(mInst, mServer, 0, DNS_REGISTER))
-			THROW(("Failed to register DDE name service"));
+			throw std::runtime_error("Failed to register DDE name service");
 		mConv = ::DdeConnect(inInst, mServer, mTopic, nullptr);
 	}
 }

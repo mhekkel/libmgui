@@ -29,10 +29,11 @@
     Created Sunday August 15 2004 13:51:21
 */
 
-#include "MCanvas.hpp"
-#include "MDevice.hpp"
 #include "MDialog.hpp"
+#include "MCanvas.hpp"
+#include "MColorPicker.hpp"
 #include "MControls.hpp"
+#include "MDevice.hpp"
 #include "MError.hpp"
 #include "MPreferences.hpp"
 #include "MStrings.hpp"
@@ -69,10 +70,7 @@ MDialog::~MDialog()
 
 // --------------------------------------------------------------------
 
-namespace
-{
-
-std::pair<int, bool> get_attribute_int(const zeep::xml::element *e, const char *name)
+std::pair<int, bool> MDialog::GetAttributeSize(const zeep::xml::element *e, const char *name, float inDLU)
 {
 	bool ok = false;
 	int value = 0;
@@ -80,14 +78,16 @@ std::pair<int, bool> get_attribute_int(const zeep::xml::element *e, const char *
 	if (auto attr = e->get_attribute(name); not attr.empty())
 	{
 		auto r = std::from_chars(attr.data(), attr.data() + attr.length(), value);
-		ok = r.ec == std::errc() and r.ptr == attr.data() + attr.length();
+		auto suffix = std::string_view(r.ptr, attr.data() + attr.length());
+		ok = r.ec == std::errc();
+		if (suffix.empty())
+			value *= inDLU;
+		else if (suffix != "px")
+			ok = false;
 	}
 
 	return { value, ok };
 }
-
-} // namespace
-
 
 void MDialog::Build()
 {
@@ -95,13 +95,13 @@ void MDialog::Build()
 	mrsrc::istream rsrc(resource);
 
 	if (not rsrc)
-		THROW(("Dialog resource not found: %s", resource.c_str()));
+		throw std::runtime_error("Dialog resource not found: " + resource);
 
 	zeep::xml::document doc(rsrc);
 
 	zeep::xml::element *dialog = doc.find_first("/dialog");
 	if (dialog == nullptr)
-		THROW(("Invalid dialog resource"));
+		throw std::runtime_error("Invalid dialog resource");
 
 	std::string title = l(dialog->get_attribute("title"));
 
@@ -120,13 +120,13 @@ void MDialog::Build()
 	// 	mFlags = MWindowFlags(mFlags | kMNoSizeBox);
 
 	uint32_t minWidth = 40;
-	if (auto [w, ok] = get_attribute_int(dialog, "width"); ok)
+	if (auto [w, ok] = GetAttributeSize(dialog, "width", mDLUX); ok)
 		minWidth = w;
 	uint32_t minHeight = 40;
-	if (auto [h, ok] = get_attribute_int(dialog, "height"); ok)
+	if (auto [h, ok] = GetAttributeSize(dialog, "height", mDLUY); ok)
 		minHeight = h;
 
-	MRect bounds(0, 0, minWidth * mDLUX, minHeight * mDLUY);
+	MRect bounds(0, 0, minWidth, minHeight);
 
 	// now create the dialog
 	GetImpl()->CreateWindow(bounds, title);
@@ -134,7 +134,7 @@ void MDialog::Build()
 	// create the dialog controls, all stacked on top of each other
 	zeep::xml::element *vbox = dialog->find_first("vbox");
 	if (vbox == nullptr)
-		THROW(("Invalid dialog resource"));
+		throw std::runtime_error("Invalid dialog resource");
 
 	MView *content = CreateControls(vbox, 0, 0);
 
@@ -143,11 +143,9 @@ void MDialog::Build()
 
 	// Main vbox first
 	MBoxControl *mainVBox = new MBoxControl("main-vbox", bounds, false);
-	mainVBox->SetLayout({ true, true, 
-		static_cast<uint32_t>(5 * mDLUX),
-		static_cast<uint32_t>(5 * mDLUY),
-		static_cast<uint32_t>(5 * mDLUX),
-		static_cast<uint32_t>(5 * mDLUY) });
+	MViewLayout layout{ true, true, 0, 0, 0, 0 };
+	layout.mMargin = GetMargins(vbox);
+	mainVBox->SetLayout(layout);
 
 	AddChild(mainVBox);
 
@@ -157,14 +155,14 @@ void MDialog::Build()
 
 	zeep::xml::element *buttons = dialog->find_first("/dialog/hbox");
 	if (buttons == nullptr)
-		THROW(("Invalid dialog resource"));
+		throw std::runtime_error("Invalid dialog resource");
 
 	MBoxControl *buttonBar = new MBoxControl("buttonbar", bounds, true);
 	buttonBar->SetLayout({ true, false,
 		0,
 		static_cast<uint32_t>(2 * mDLUY),
 		0,
-		0});
+		0 });
 	mainVBox->AddChild(buttonBar);
 
 	auto filler = new MSimpleControl("button-bar-filler", bounds);
@@ -173,7 +171,7 @@ void MDialog::Build()
 
 	for (auto button : buttons->find("button"))
 	{
-		MButton *btn = static_cast<MButton* >(CreateButton(button, 0, 0));
+		MButton *btn = static_cast<MButton *>(CreateButton(button, 0, 0));
 
 		auto layout = btn->GetLayout();
 		layout.mMargin = GetMargins(button);
@@ -195,21 +193,28 @@ std::string MDialog::l(const std::string &s)
 
 MMargins MDialog::GetMargins(zeep::xml::element *inTemplate)
 {
-	MMargins result{ 4, 1, 4, 1 };
+	MMargins result{
+		static_cast<uint32_t>(2 * mDLUX),
+		static_cast<uint32_t>(1 * mDLUY),
+		static_cast<uint32_t>(2 * mDLUX),
+		static_cast<uint32_t>(1 * mDLUY) };
 
-	if (auto [m, ok] = get_attribute_int(inTemplate, "margin"); ok)
-		result.left = result.top = result.right = result.bottom = m;
-	if (auto [m, ok] = get_attribute_int(inTemplate, "margin-left-right"); ok)
+	if (auto [m, ok] = GetAttributeSize(inTemplate, "margin", 1); ok)
+	{
+		result.left = result.right = m * mDLUX;
+		result.top = result.bottom = m * mDLUY;
+	}
+	if (auto [m, ok] = GetAttributeSize(inTemplate, "margin-left-right", mDLUX); ok)
 		result.left = result.right = m;
-	if (auto [m, ok] = get_attribute_int(inTemplate, "margin-top-bottom"); ok)
+	if (auto [m, ok] = GetAttributeSize(inTemplate, "margin-top-bottom", mDLUY); ok)
 		result.top = result.bottom = m;
-	if (auto [m, ok] = get_attribute_int(inTemplate, "margin-left"); ok)
+	if (auto [m, ok] = GetAttributeSize(inTemplate, "margin-left", mDLUX); ok)
 		result.left = m;
-	if (auto [m, ok] = get_attribute_int(inTemplate, "margin-top"); ok)
+	if (auto [m, ok] = GetAttributeSize(inTemplate, "margin-top", mDLUY); ok)
 		result.top = m;
-	if (auto [m, ok] = get_attribute_int(inTemplate, "margin-right"); ok)
+	if (auto [m, ok] = GetAttributeSize(inTemplate, "margin-right", mDLUX); ok)
 		result.right = m;
-	if (auto [m, ok] = get_attribute_int(inTemplate, "margin-bottom"); ok)
+	if (auto [m, ok] = GetAttributeSize(inTemplate, "margin-bottom", mDLUY); ok)
 		result.bottom = m;
 
 	return result;
@@ -247,7 +252,7 @@ MView *MDialog::CreateColorSwatch(zeep::xml::element *inTemplate, int32_t inX, i
 {
 	std::string id = inTemplate->get_attribute("id");
 
-	MRect bounds; //(inX, inY, static_cast<int32_t>(25 * mDLUX), static_cast<int32_t>(14 * mDLUY));
+	MRect bounds(inX, inY, static_cast<int32_t>(16 * mDLUX), static_cast<int32_t>(6 * mDLUY));
 
 	MColor color(inTemplate->get_attribute("color").c_str());
 	MColorSwatch *swatch = new MColorSwatch(id, bounds, color);
@@ -407,7 +412,7 @@ MView *MDialog::CreatePager(zeep::xml::element *inTemplate, int32_t inX, int32_t
 	MRect b;
 	std::string firstName;
 
-	for (bool first = true; zeep::xml::element *page : inTemplate->find("./page"))
+	for (bool first = true; zeep::xml::element * page : inTemplate->find("./page"))
 	{
 		if (page->get_attribute("if") == "WINDOWS")
 			continue;
@@ -618,8 +623,8 @@ MView *MDialog::CreateControls(zeep::xml::element *inTemplate, int32_t inX, int3
 
 		if (inTemplate->get_attribute("width") == "scrollbarwidth")
 			width += kScrollbarWidth;
-		else if (auto [m, ok] = get_attribute_int(inTemplate, "width"); ok)
-			width += m * mDLUX;
+		else if (auto [m, ok] = GetAttributeSize(inTemplate, "width", mDLUX); ok)
+			width += m;
 
 		MRect frame = result->GetFrame();
 		if (frame.width < width)
@@ -634,8 +639,8 @@ MView *MDialog::CreateControls(zeep::xml::element *inTemplate, int32_t inX, int3
 
 		if (inTemplate->get_attribute("height") == "scrollbarheight")
 			height += kScrollbarWidth;
-		else if (auto [m, ok] = get_attribute_int(inTemplate, "height"); ok)
-			height += m * mDLUY;
+		else if (auto [m, ok] = GetAttributeSize(inTemplate, "height", mDLUY); ok)
+			height += m;
 
 		MRect frame = result->GetFrame();
 		if (frame.height < height)
@@ -748,17 +753,14 @@ bool MDialog::KeyPressed(uint32_t inKeyCode, char32_t inUnicode, uint32_t inModi
 
 void MDialog::KeyReleased(uint32_t inKeyValue, uint32_t inModifiers)
 {
-
 }
 
 void MDialog::Modifiers(uint32_t inModifiers)
 {
-
 }
 
 void MDialog::EnterText(const std::string &inText)
 {
-
 }
 
 void MDialog::CheckboxChanged(const std::string &inID, bool inChecked)
@@ -829,7 +831,8 @@ std::string MDialog::GetText(const std::string &inID) const
 	std::string result;
 
 	MView *view = FindSubViewByID(inID);
-	THROW_IF_NIL(view);
+	if (view == nullptr)
+throw std::runtime_error("unexpected nullptr");
 	if (dynamic_cast<MCombobox *>(view) != nullptr)
 		result = static_cast<MCombobox *>(view)->GetText();
 	else if (dynamic_cast<MEdittext *>(view) != nullptr)
@@ -843,7 +846,8 @@ std::string MDialog::GetText(const std::string &inID) const
 void MDialog::SetText(const std::string &inID, const std::string &inText)
 {
 	MView *view = FindSubViewByID(inID);
-	THROW_IF_NIL(view);
+	if (view == nullptr)
+throw std::runtime_error("unexpected nullptr");
 	if (dynamic_cast<MCombobox *>(view) != nullptr)
 		static_cast<MCombobox *>(view)->SetText(inText);
 	else if (dynamic_cast<MPopup *>(view) != nullptr)
@@ -859,7 +863,8 @@ void MDialog::SetText(const std::string &inID, const std::string &inText)
 void MDialog::SetPasswordChar(const std::string &inID, const uint32_t inUnicode)
 {
 	MView *view = FindSubViewByID(inID);
-	THROW_IF_NIL(dynamic_cast<MEdittext *>(view));
+	if (dynamic_cast<MEdittext *>(view) == nullptr)
+throw std::runtime_error("unexpected nullptr");
 	static_cast<MEdittext *>(view)->SetPasswordChar(inUnicode);
 }
 
@@ -868,7 +873,8 @@ int32_t MDialog::GetValue(const std::string &inID) const
 	int32_t result = -1;
 
 	MView *view = FindSubViewByID(inID);
-	THROW_IF_NIL(view);
+	if (view == nullptr)
+throw std::runtime_error("unexpected nullptr");
 	if (dynamic_cast<MPopup *>(view) != nullptr)
 		result = static_cast<MPopup *>(view)->GetValue();
 
@@ -878,7 +884,8 @@ int32_t MDialog::GetValue(const std::string &inID) const
 void MDialog::SetValue(const std::string &inID, int32_t inValue)
 {
 	MView *view = FindSubViewByID(inID);
-	THROW_IF_NIL(view);
+	if (view == nullptr)
+throw std::runtime_error("unexpected nullptr");
 	if (dynamic_cast<MPopup *>(view) != nullptr)
 		static_cast<MPopup *>(view)->SetValue(inValue);
 }
@@ -891,7 +898,8 @@ bool MDialog::IsChecked(const std::string &inID) const
 	else if (dynamic_cast<MRadiobutton *>(view) != nullptr)
 		return static_cast<MRadiobutton *>(view)->IsChecked();
 	else
-		THROW_IF_NIL(nullptr);
+		if (nullptr == nullptr)
+throw std::runtime_error("unexpected nullptr");
 }
 
 void MDialog::SetChecked(const std::string &inID, bool inChecked)
@@ -915,35 +923,40 @@ void MDialog::SetChoices(const std::string &inID, std::vector<std::string> &inCh
 bool MDialog::IsOpen(const std::string &inID) const
 {
 	MExpander *expander = dynamic_cast<MExpander *>(FindSubViewByID(inID));
-	THROW_IF_NIL(expander);
+	if (expander == nullptr)
+throw std::runtime_error("unexpected nullptr");
 	return expander->IsOpen();
 }
 
 void MDialog::SetOpen(const std::string &inID, bool inOpen)
 {
 	MExpander *expander = dynamic_cast<MExpander *>(FindSubViewByID(inID));
-	THROW_IF_NIL(expander);
+	if (expander == nullptr)
+throw std::runtime_error("unexpected nullptr");
 	expander->SetOpen(inOpen);
 }
 
 MColor MDialog::GetColor(const std::string &inID) const
 {
 	MColorSwatch *swatch = dynamic_cast<MColorSwatch *>(FindSubViewByID(inID));
-	THROW_IF_NIL(swatch);
+	if (swatch == nullptr)
+throw std::runtime_error("unexpected nullptr");
 	return swatch->GetColor();
 }
 
 void MDialog::SetColor(const std::string &inID, MColor inColor)
 {
 	MColorSwatch *swatch = dynamic_cast<MColorSwatch *>(FindSubViewByID(inID));
-	THROW_IF_NIL(swatch);
+	if (swatch == nullptr)
+throw std::runtime_error("unexpected nullptr");
 	swatch->SetColor(inColor);
 }
 
 void MDialog::SetEnabled(const std::string &inID, bool inEnabled)
 {
 	MView *view = FindSubViewByID(inID);
-	THROW_IF_NIL(view);
+	if (view == nullptr)
+throw std::runtime_error("unexpected nullptr");
 	if (inEnabled)
 		view->Enable();
 	else
@@ -953,7 +966,8 @@ void MDialog::SetEnabled(const std::string &inID, bool inEnabled)
 void MDialog::SetVisible(const std::string &inID, bool inVisible)
 {
 	MView *view = FindSubViewByID(inID);
-	THROW_IF_NIL(view);
+	if (view == nullptr)
+throw std::runtime_error("unexpected nullptr");
 	if (inVisible)
 		view->Show();
 	else

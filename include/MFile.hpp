@@ -34,11 +34,7 @@
 namespace MFileDialogs
 {
 
-// bool ChooseDirectory(MWindow *inParent, fs::path &outDirectory);
-// bool ChooseOneFile(MWindow *inParent, fs::path &ioFile);
-// bool ChooseFiles(MWindow *inParent, bool inLocalOnly, std::vector<fs::path> &outFiles);
-
-void ChooseOneFile(MWindow *inParent, std::function<void(std::filesystem::path)> &&callback);
-void SaveFileAs(MWindow *inParent, std::filesystem::path filename, std::function<void(std::filesystem::path)> &&callback);
+void ChooseOneFile(MWindow *inParent, std::function<void(std::filesystem::path)> &&inCallback);
+void SaveFileAs(MWindow *inParent, std::filesystem::path inFileName, std::function<void(std::filesystem::path)> &&inCallback);
 
 } // namespace MFileDialogs
