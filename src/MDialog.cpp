@@ -193,11 +193,9 @@ std::string MDialog::l(const std::string &s)
 
 MMargins MDialog::GetMargins(zeep::xml::element *inTemplate)
 {
-	MMargins result{
-		static_cast<uint32_t>(2 * mDLUX),
-		static_cast<uint32_t>(1 * mDLUY),
-		static_cast<uint32_t>(2 * mDLUX),
-		static_cast<uint32_t>(1 * mDLUY) };
+	MMargins result = inTemplate->name() == "hbox" or inTemplate->name() == "vbox" ?
+		MMargins{ 0, 0, 0, 0 } :
+		MMargins{ static_cast<uint32_t>(2 * mDLUX), static_cast<uint32_t>(1 * mDLUY), static_cast<uint32_t>(2 * mDLUX), static_cast<uint32_t>(1 * mDLUY) };
 
 	if (auto [m, ok] = GetAttributeSize(inTemplate, "margin", 1); ok)
 	{
@@ -832,7 +830,7 @@ std::string MDialog::GetText(const std::string &inID) const
 
 	MView *view = FindSubViewByID(inID);
 	if (view == nullptr)
-throw std::runtime_error("unexpected nullptr");
+		throw std::runtime_error("unexpected nullptr");
 	if (dynamic_cast<MCombobox *>(view) != nullptr)
 		result = static_cast<MCombobox *>(view)->GetText();
 	else if (dynamic_cast<MEdittext *>(view) != nullptr)
@@ -847,7 +845,7 @@ void MDialog::SetText(const std::string &inID, const std::string &inText)
 {
 	MView *view = FindSubViewByID(inID);
 	if (view == nullptr)
-throw std::runtime_error("unexpected nullptr");
+		throw std::runtime_error("unexpected nullptr");
 	if (dynamic_cast<MCombobox *>(view) != nullptr)
 		static_cast<MCombobox *>(view)->SetText(inText);
 	else if (dynamic_cast<MPopup *>(view) != nullptr)
@@ -864,7 +862,7 @@ void MDialog::SetPasswordChar(const std::string &inID, const uint32_t inUnicode)
 {
 	MView *view = FindSubViewByID(inID);
 	if (dynamic_cast<MEdittext *>(view) == nullptr)
-throw std::runtime_error("unexpected nullptr");
+		throw std::runtime_error("unexpected nullptr");
 	static_cast<MEdittext *>(view)->SetPasswordChar(inUnicode);
 }
 
@@ -874,7 +872,7 @@ int32_t MDialog::GetValue(const std::string &inID) const
 
 	MView *view = FindSubViewByID(inID);
 	if (view == nullptr)
-throw std::runtime_error("unexpected nullptr");
+		throw std::runtime_error("unexpected nullptr");
 	if (dynamic_cast<MPopup *>(view) != nullptr)
 		result = static_cast<MPopup *>(view)->GetValue();
 
@@ -885,7 +883,7 @@ void MDialog::SetValue(const std::string &inID, int32_t inValue)
 {
 	MView *view = FindSubViewByID(inID);
 	if (view == nullptr)
-throw std::runtime_error("unexpected nullptr");
+		throw std::runtime_error("unexpected nullptr");
 	if (dynamic_cast<MPopup *>(view) != nullptr)
 		static_cast<MPopup *>(view)->SetValue(inValue);
 }
@@ -897,9 +895,8 @@ bool MDialog::IsChecked(const std::string &inID) const
 		return static_cast<MCheckbox *>(view)->IsChecked();
 	else if (dynamic_cast<MRadiobutton *>(view) != nullptr)
 		return static_cast<MRadiobutton *>(view)->IsChecked();
-	else
-		if (nullptr == nullptr)
-throw std::runtime_error("unexpected nullptr");
+	else if (nullptr == nullptr)
+		throw std::runtime_error("unexpected nullptr");
 }
 
 void MDialog::SetChecked(const std::string &inID, bool inChecked)
@@ -924,7 +921,7 @@ bool MDialog::IsOpen(const std::string &inID) const
 {
 	MExpander *expander = dynamic_cast<MExpander *>(FindSubViewByID(inID));
 	if (expander == nullptr)
-throw std::runtime_error("unexpected nullptr");
+		throw std::runtime_error("unexpected nullptr");
 	return expander->IsOpen();
 }
 
@@ -932,7 +929,7 @@ void MDialog::SetOpen(const std::string &inID, bool inOpen)
 {
 	MExpander *expander = dynamic_cast<MExpander *>(FindSubViewByID(inID));
 	if (expander == nullptr)
-throw std::runtime_error("unexpected nullptr");
+		throw std::runtime_error("unexpected nullptr");
 	expander->SetOpen(inOpen);
 }
 
@@ -940,7 +937,7 @@ MColor MDialog::GetColor(const std::string &inID) const
 {
 	MColorSwatch *swatch = dynamic_cast<MColorSwatch *>(FindSubViewByID(inID));
 	if (swatch == nullptr)
-throw std::runtime_error("unexpected nullptr");
+		throw std::runtime_error("unexpected nullptr");
 	return swatch->GetColor();
 }
 
@@ -948,7 +945,7 @@ void MDialog::SetColor(const std::string &inID, MColor inColor)
 {
 	MColorSwatch *swatch = dynamic_cast<MColorSwatch *>(FindSubViewByID(inID));
 	if (swatch == nullptr)
-throw std::runtime_error("unexpected nullptr");
+		throw std::runtime_error("unexpected nullptr");
 	swatch->SetColor(inColor);
 }
 
@@ -956,7 +953,7 @@ void MDialog::SetEnabled(const std::string &inID, bool inEnabled)
 {
 	MView *view = FindSubViewByID(inID);
 	if (view == nullptr)
-throw std::runtime_error("unexpected nullptr");
+		throw std::runtime_error("unexpected nullptr");
 	if (inEnabled)
 		view->Enable();
 	else
@@ -967,7 +964,7 @@ void MDialog::SetVisible(const std::string &inID, bool inVisible)
 {
 	MView *view = FindSubViewByID(inID);
 	if (view == nullptr)
-throw std::runtime_error("unexpected nullptr");
+		throw std::runtime_error("unexpected nullptr");
 	if (inVisible)
 		view->Show();
 	else
