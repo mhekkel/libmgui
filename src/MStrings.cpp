@@ -25,6 +25,7 @@
  */
 
 #include "MStrings.hpp"
+#include "MUnicode.hpp"
 #include "MUtils.hpp"
 
 #include <zeep/xml/document.hpp>
@@ -89,13 +90,13 @@ MLocalisedStringTable::MLocalisedStringTable(int)
 
 			for (auto &s : mLocalStrings)
 			{
-				zeep::replace_all(s.key, "\\r", "\r");
-				zeep::replace_all(s.key, "\\n", "\n");
-				zeep::replace_all(s.key, "\\t", "\t");
+				ReplaceAll(s.key, "\\r", "\r");
+				ReplaceAll(s.key, "\\n", "\n");
+				ReplaceAll(s.key, "\\t", "\t");
 
-				zeep::replace_all(s.value, "\\r", "\r");
-				zeep::replace_all(s.value, "\\n", "\n");
-				zeep::replace_all(s.value, "\\t", "\t");
+				ReplaceAll(s.value, "\\r", "\r");
+				ReplaceAll(s.value, "\\n", "\n");
+				ReplaceAll(s.value, "\\t", "\t");
 
 				mMappedStrings[s.key] = s.value;
 			}

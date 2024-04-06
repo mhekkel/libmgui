@@ -179,10 +179,6 @@ target_link_libraries(mgui Threads::Threads zeep::zeep)
 
 if(UNIX)
 	pkg_check_modules(GTK4 gtk4 REQUIRED IMPORTED_TARGET)
-
-	# The salt executable
-	add_compile_definitions(GDK_DISABLE_DEPRECATED GTK_DISABLE_DEPRECATED)
-
 	target_link_libraries(mgui PkgConfig::GTK4)
 endif()
 

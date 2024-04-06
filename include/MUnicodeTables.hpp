@@ -1,17 +1,17 @@
 /*-
  * SPDX-License-Identifier: BSD-2-Clause
- * 
+ *
  * Copyright (c) 2023 Maarten L. Hekkelman
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -24,20 +24,23 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-struct MUnicodeInfoAtom {
-	uint32_t			upper;
-	uint32_t			lower;
-	CharBreakClass	cbc;
-	LineBreakClass	lbc;
-	uint8_t			prop;
+struct MUnicodeInfoAtom
+{
+	uint32_t upper;
+	uint32_t lower;
+	CharBreakClass cbc;
+	LineBreakClass lbc;
+	uint8_t prop;
 };
 
-typedef MUnicodeInfoAtom	MUnicodeInfoPage[256];
+typedef MUnicodeInfoAtom MUnicodeInfoPage[256];
 
-struct MUnicodeInfo {
-	int16_t				page_index[4352];
-	MUnicodeInfoPage	data[119];
+struct MUnicodeInfo
+{
+	int16_t page_index[4352];
+	MUnicodeInfoPage data[119];
 } kUnicodeInfo = {
+	// clang-format off
 	{
 		0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 
 		16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 
@@ -31019,3 +31022,4 @@ struct MUnicodeInfo {
 	}
 };
 
+// clang-format on

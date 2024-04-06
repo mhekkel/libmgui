@@ -66,7 +66,7 @@ bool MWinClipboardImpl::WMRenderClipboard(HWND inHWnd, UINT inUMsg, WPARAM inWPa
 		bool block;
 
 		mClipboard->GetData(text, block);
-		zeep::replace_all(text, "\n", "\r\n");
+		ReplaceAll(text, "\n", "\r\n");
 		
 		if (format == CF_UNICODETEXT)
 		{
@@ -101,7 +101,7 @@ void MWinClipboardImpl::LoadClipboardIfNeeded()
 			try
 			{
 				wstring text(data);
-				zeep::replace_all(text, L"\r\n", L"\n");
+				ReplaceAll(text, L"\r\n", L"\n");
 				mClipboard->SetData(w2c(text), false);
 			
 				::GlobalUnlock(hMem);

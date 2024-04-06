@@ -69,88 +69,6 @@ struct MEncodingTraits
 	static uint32_t WriteUnicode(ByteIterator &inText, unicode inUnicode);
 };
 
-enum WordBreakClass
-{
-	eWB_CR,
-	eWB_LF,
-	eWB_Sep,
-	eWB_Tab,
-	eWB_Let,
-	eWB_Com,
-	eWB_Hira,
-	eWB_Kata,
-	eWB_Han,
-	eWB_Other,
-	eWB_None
-};
-
-WordBreakClass GetWordBreakClass(unicode inUnicode);
-
-enum CharBreakClass
-{
-	kCBC_CR,
-	kCBC_LF,
-	kCBC_Control,
-	kCBC_Extend,
-	kCBC_L,
-	kCBC_V,
-	kCBC_T,
-	kCBC_LV,
-	kCBC_LVT,
-	kCBC_Other,
-
-	kCBC_Prepend,
-	kCBC_SpacingMark
-};
-
-extern const bool kCharBreakTable[10][10];
-
-CharBreakClass GetCharBreakClass(unicode inUnicode);
-
-enum LineBreakClass
-{
-	kLBC_OpenPunctuation,
-	kLBC_ClosePunctuation,
-	kLBC_CloseParenthesis,
-	kLBC_Quotation,
-	kLBC_NonBreaking,
-	kLBC_Nonstarter,
-	kLBC_Exlamation,
-	kLBC_SymbolAllowingBreakAfter,
-	kLBC_InfixNumericSeparator,
-	kLBC_PrefixNumeric,
-	kLBC_PostfixNumeric,
-	kLBC_Numeric,
-	kLBC_Alphabetic,
-	kLBC_Ideographic,
-	kLBC_Inseperable,
-	kLBC_Hyphen,
-	kLBC_BreakAfter,
-	kLBC_BreakBefor,
-	kLBC_BreakOpportunityBeforeAndAfter,
-	kLBC_ZeroWidthSpace,
-	kLBC_CombiningMark,
-	kLBC_WordJoiner,
-	kLBC_HangulLVSyllable,
-	kLBC_HangulLVTSyllable,
-	kLBC_HangulLJamo,
-	kLBC_HangulVJamo,
-	kLBC_HangulTJamo,
-
-	kLBC_MandatoryBreak,
-	kLBC_CarriageReturn,
-	kLBC_LineFeed,
-	kLBC_NextLine,
-	kLBC_Surrogate,
-	kLBC_Space,
-	kLBC_ContigentBreakOpportunity,
-	kLBC_Ambiguous,
-	kLBC_ComplexContext,
-	kLBC_Unknown
-};
-
-LineBreakClass GetLineBreakClass(unicode inUnicode);
-
 enum UnicodeProperty
 {
 	kLETTER,
@@ -165,70 +83,62 @@ enum UnicodeProperty
 
 UnicodeProperty GetProperty(unicode inUnicode);
 
-bool IsSpace(unicode inChar);
-bool IsAlpha(unicode inChar);
-bool IsNum(unicode inChar);
-bool IsAlnum(unicode inChar);
-bool IsCombining(unicode inChar);
-
 unicode ToLower(unicode inUnicode);
 unicode ToUpper(unicode inUnicode);
 
-std::string::iterator next_cursor_position(std::string::iterator inStart, std::string::iterator inEnd);
-std::u32string::iterator next_cursor_position(std::u32string::iterator inStart, std::u32string::iterator inEnd);
+// --------------------------------------------------------------------
+/// \brief Compare two strings ignoring case
 
-std::string::iterator next_line_break(std::string::iterator inStart, std::string::iterator inEnd);
+bool IEquals(std::string_view a, std::string_view b);
 
+// --------------------------------------------------------------------
+/// \brief Simplistic replace_all
+
+inline void ReplaceAll(std::string& s, std::string_view p, std::string_view r)
+{
+	std::string::size_type i = 0;
+	for (;;)
+	{
+		auto l = s.find(p, i);
+		if (l == std::string::npos)
+			break;
+		
+		s.replace(l, p.length(), r);
+		i = l + r.length();
+	}
+}
+
+// --------------------------------------------------------------------
+/// \brief Simplistic join
+
+template<typename Container = std::vector<std::string> >
+std::string Join(const Container& v, std::string_view d)
+{
+	std::string result;
+
+	if (not v.empty())
+	{
+		auto i = v.begin();
+		for (;;)
+		{
+			result += *i++;
+
+			if (i == v.end())
+				break;
+
+			result += d;
+		}
+	}
+	return result;
+}
+
+// --------------------------------------------------------------------
 // one byte character set utilities
+
 namespace MUnicodeMapping
 {
 unicode GetUnicode(MEncoding inEncoding, char inByte);
 char GetChar(MEncoding inEncoding, unicode inChar);
 } // namespace MUnicodeMapping
-
-class MEncoder
-{
-  public:
-	virtual ~MEncoder() {}
-
-	virtual void WriteUnicode(unicode inUnicode) = 0;
-
-	void SetText(const std::string &inText);
-	void SetText(const std::wstring &inText);
-
-	std::size_t GetBufferSize() const { return mBuffer.size(); }
-	const void *Peek() const { return &mBuffer[0]; }
-
-	template <class Iterator>
-	void CopyBuffer(Iterator inDest) const { std::copy(mBuffer.begin(), mBuffer.end(), inDest); }
-
-	static MEncoder *GetEncoder(MEncoding inEncoding);
-
-  protected:
-	std::vector<char> mBuffer;
-};
-
-class MDecoder
-{
-  public:
-	virtual ~MDecoder() {}
-
-	virtual bool ReadUnicode(unicode &outUnicode) = 0;
-
-	void GetText(std::string &outText);
-	void GetText(std::wstring &outText);
-
-	static MDecoder *GetDecoder(MEncoding inEncoding, const void *inBuffer, uint32_t inLength);
-
-  protected:
-	MDecoder(const void *inBuffer, uint32_t inLength)
-		: mBuffer(static_cast<const char *>(inBuffer))
-		, mLength(inLength)
-	{
-	}
-
-	const char *mBuffer;
-	uint32_t mLength;
-};
 
 #include "MUnicode.inl"

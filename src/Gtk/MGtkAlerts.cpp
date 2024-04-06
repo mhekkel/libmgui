@@ -30,6 +30,7 @@
 #include "MAlerts.hpp"
 #include "MError.hpp"
 #include "MStrings.hpp"
+#include "MUnicode.hpp"
 
 #include "mrsrc.hpp"
 
@@ -98,7 +99,7 @@ GtkWidget *CreateAlertWithArgs(const std::string &inResourceName, std::initializ
 
 			for (auto a : inArgs)
 			{
-				zeep::replace_all(text, s, a);
+				ReplaceAll(text, s, a);
 				++s[1];
 			}
 

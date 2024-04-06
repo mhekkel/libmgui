@@ -94,7 +94,7 @@ int32_t DisplayAlert(
 	
 			for (string a: inArguments)
 			{
-				zeep::replace_all(text, s, a);
+				ReplaceAll(text, s, a);
 				++s[1];
 			}
 
