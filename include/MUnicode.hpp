@@ -92,6 +92,10 @@ unicode ToUpper(unicode inUnicode);
 bool IEquals(std::string_view a, std::string_view b);
 
 // --------------------------------------------------------------------
+
+void Trim(std::string &ioString);
+
+// --------------------------------------------------------------------
 /// \brief Simplistic replace_all
 
 inline void ReplaceAll(std::string& s, std::string_view p, std::string_view r)
@@ -129,6 +133,35 @@ std::string Join(const Container& v, std::string_view d)
 			result += d;
 		}
 	}
+	return result;
+}
+
+// --------------------------------------------------------------------
+/// \brief Split string
+
+template <typename S = std::string_view>
+inline std::vector<S> Split(std::string_view s, std::string_view p, bool compress = false)
+{
+	std::string_view::size_type i = 0;
+	const auto e = s.length();
+
+	std::vector<S> result;
+
+	while (i <= e)
+	{
+		auto n = s.find(p, i);
+		if (n > e)
+			n = e;
+
+		if (n > i or compress == false)
+			result.emplace_back(s.substr(i, n - i));
+
+		if (n == std::string_view::npos)
+			break;
+
+		i = n + p.length();
+	}
+
 	return result;
 }
 

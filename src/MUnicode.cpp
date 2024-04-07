@@ -266,3 +266,24 @@ bool IEquals(std::string_view a, std::string_view b)
 
 	return true;
 }
+
+void Trim(std::string &ioString)
+{
+	auto s = ioString.begin();
+	auto e = ioString.end();
+
+	while (s != e and std::isspace(*s))
+		++s;
+
+	if (s > ioString.begin())
+	{
+		ioString.erase(ioString.begin(), s);
+		e = ioString.end();
+	}
+
+	while (e != s and std::isspace(e[-1]))
+		--e;
+
+	if (e < ioString.end())
+		ioString.erase(e, ioString.end());
+}
