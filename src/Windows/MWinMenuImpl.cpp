@@ -7,16 +7,11 @@
 
 #include <fstream>
 
-#include "zeep/xml/document.hpp"
-
 #include "MWinMenuImpl.hpp"
 #include "MWinWindowImpl.hpp"
 #include "MError.hpp"
 #include "MWinUtils.hpp"
 #include "MAcceleratorTable.hpp"
-
-using namespace std;
-using namespace zeep;
 
 MWinMenuImpl::MWinMenuImpl(MMenu* inMenu, bool inPopup)
 	: MMenuImpl(inMenu)

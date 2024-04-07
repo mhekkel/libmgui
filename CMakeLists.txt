@@ -97,14 +97,15 @@ list(APPEND headers
 	include/MClipboard.hpp
 	include/MColor.hpp
 	include/MColorPicker.hpp
+	include/MCommand.hpp
 	include/MControls.hpp
 	include/MControlsImpl.hpp
+	include/MControls.inl
 	include/MDevice.hpp
 	include/MDeviceImpl.hpp
 	include/MDialog.hpp
 	include/MError.hpp
 	include/MFile.hpp
-	# include/MHandler.hpp
 	include/MLib.hpp
 	include/MMenu.hpp
 	include/MP2PEvents.hpp
@@ -114,11 +115,11 @@ list(APPEND headers
 	include/MStrings.hpp
 	include/MTypes.hpp
 	include/MUnicode.hpp
+	include/MUnicode.inl
 	include/MUnicodeTables.hpp
 	include/MUtils.hpp
 	include/MView.hpp
-	include/MWindow.hpp
-)
+	include/MWindow.hpp)
 
 list(APPEND private_headers
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkCanvasImpl.hpp

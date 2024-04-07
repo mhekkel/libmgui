@@ -12,7 +12,6 @@
 
 #pragma comment(lib, "dwmapi")
 
-#include "zeep/xml/document.hpp"
 #include "MWinWindowImpl.hpp"
 #include "MWindow.hpp"
 #include "MError.hpp"
@@ -23,9 +22,6 @@
 #include "MWinUtils.hpp"
 #include "MWinMenuImpl.hpp"
 #include "MAcceleratorTable.hpp"
-
-using namespace std;
-using namespace zeep;
 
 const int BIT_COUNT = 32;
 

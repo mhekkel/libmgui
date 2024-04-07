@@ -5,16 +5,10 @@
 
 #include "MWinLib.hpp"
 
-#include "zeep/xml/document.hpp"
-
 #include <map>
 #include "mrsrc.hpp"
 #include "MError.hpp"
 #include "MUtils.hpp"
-
-// using namespace std;
-// using namespace zeep;
-// namespace io = boost::iostreams;
 
 // namespace mrsrc
 // {

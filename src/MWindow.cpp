@@ -33,13 +33,9 @@
 
 #include "mrsrc.hpp"
 
-#include "zeep/xml/document.hpp"
-
 #include <iostream>
 
 #undef GetNextWindow
-
-using namespace zeep;
 
 // --------------------------------------------------------------------
 //
