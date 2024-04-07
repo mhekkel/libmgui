@@ -34,7 +34,7 @@
 #include "MControls.hpp"
 #include "MWindow.hpp"
 
-#include <zeep/xml/node.hpp>
+#include <mxml/node.hpp>
 
 #include <vector>
 
@@ -105,28 +105,28 @@ class MDialog : public MWindow
 
 	virtual void Build();
 
-	MMargins GetMargins(zeep::xml::element *inTemplate);
+	MMargins GetMargins(const mxml::element &inTemplate);
 
-	MView *CreateControls(zeep::xml::element *inTemplate, int32_t inX, int32_t inY);
+	MView *CreateControls(const mxml::element &inTemplate, int32_t inX, int32_t inY);
 
-	MView *CreateButton(zeep::xml::element *inTemplate, int32_t inX, int32_t inY);
-	MView *CreateColorSwatch(zeep::xml::element *inTemplate, int32_t inX, int32_t inY);
-	MView *CreateCaption(zeep::xml::element *inTemplate, int32_t inX, int32_t inY);
-	MView *CreateCheckbox(zeep::xml::element *inTemplate, int32_t inX, int32_t inY);
-	MView *CreateRadiobutton(zeep::xml::element *inTemplate, int32_t inX, int32_t inY);
-	MView *CreateExpander(zeep::xml::element *inTemplate, int32_t inX, int32_t inY);
-	MView *CreateCombobox(zeep::xml::element *inTemplate, int32_t inX, int32_t inY);
-	MView *CreateEdittext(zeep::xml::element *inTemplate, int32_t inX, int32_t inY);
-	MView *CreateFiller(zeep::xml::element *inTemplate, int32_t inX, int32_t inY);
-	MView *CreatePopup(zeep::xml::element *inTemplate, int32_t inX, int32_t inY);
-	MView *CreateScrollbar(zeep::xml::element *inTemplate, int32_t inX, int32_t inY);
-	MView *CreateSeparator(zeep::xml::element *inTemplate, int32_t inX, int32_t inY);
-	MView *CreateBox(zeep::xml::element *inTemplate, int32_t inX, int32_t inY, bool inHorizontal);
-	// MView *CreateTable(zeep::xml::element *inTemplate, int32_t inX, int32_t inY);
-	MView *CreatePager(zeep::xml::element *inTemplate, int32_t inX, int32_t inY);
-	MView *CreateListBox(zeep::xml::element *inTemplate, int32_t inX, int32_t inY);
-	// MView *CreateListView(zeep::xml::element *inTemplate, int32_t inX, int32_t inY);
-	MView *CreateCanvas(zeep::xml::element *inTemplate, int32_t inX, int32_t inY);
+	MView *CreateButton(const mxml::element &inTemplate, int32_t inX, int32_t inY);
+	MView *CreateColorSwatch(const mxml::element &inTemplate, int32_t inX, int32_t inY);
+	MView *CreateCaption(const mxml::element &inTemplate, int32_t inX, int32_t inY);
+	MView *CreateCheckbox(const mxml::element &inTemplate, int32_t inX, int32_t inY);
+	MView *CreateRadiobutton(const mxml::element &inTemplate, int32_t inX, int32_t inY);
+	MView *CreateExpander(const mxml::element &inTemplate, int32_t inX, int32_t inY);
+	MView *CreateCombobox(const mxml::element &inTemplate, int32_t inX, int32_t inY);
+	MView *CreateEdittext(const mxml::element &inTemplate, int32_t inX, int32_t inY);
+	MView *CreateFiller(const mxml::element &inTemplate, int32_t inX, int32_t inY);
+	MView *CreatePopup(const mxml::element &inTemplate, int32_t inX, int32_t inY);
+	MView *CreateScrollbar(const mxml::element &inTemplate, int32_t inX, int32_t inY);
+	MView *CreateSeparator(const mxml::element &inTemplate, int32_t inX, int32_t inY);
+	MView *CreateBox(const mxml::element &inTemplate, int32_t inX, int32_t inY, bool inHorizontal);
+	// MView *CreateTable(const mxml::element &inTemplate, int32_t inX, int32_t inY);
+	MView *CreatePager(const mxml::element &inTemplate, int32_t inX, int32_t inY);
+	MView *CreateListBox(const mxml::element &inTemplate, int32_t inX, int32_t inY);
+	// MView *CreateListView(const mxml::element &inTemplate, int32_t inX, int32_t inY);
+	MView *CreateCanvas(const mxml::element &inTemplate, int32_t inX, int32_t inY);
 
 	std::string l(const std::string &s);
 
@@ -147,7 +147,7 @@ class MDialog : public MWindow
 
   private:
 
-	std::pair<int, bool> GetAttributeSize(const zeep::xml::element *e, const char *name, float inDLU);
+	std::pair<int, bool> GetAttributeSize(const mxml::element &e, const char *name, float inDLU);
 
 	MWindow *mParentWindow;
 };

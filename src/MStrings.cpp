@@ -28,14 +28,14 @@
 #include "MUnicode.hpp"
 #include "MUtils.hpp"
 
-#include <zeep/xml/document.hpp>
-#include <zeep/xml/serialize.hpp>
+#include <mxml/document.hpp>
+#include <mxml/serialize.hpp>
 
 #include "mrsrc.hpp"
 
 #include <map>
 
-namespace xml = zeep::xml;
+namespace xml = mxml;
 
 struct ls
 {
@@ -46,7 +46,11 @@ struct ls
 	template <class Archive>
 	void serialize(Archive &ar, const unsigned int version)
 	{
-		ar &zeep::make_nvp("key", key) & zeep::make_nvp("value", value) & zeep::xml::make_attribute_nvp("context", context);
+		// clang-format off
+		ar & mxml::make_element_nvp("key", key)
+		   & mxml::make_element_nvp("value", value)
+		   & mxml::make_attribute_nvp("context", context);
+		// clang-format on
 	}
 };
 
@@ -62,7 +66,9 @@ class MLocalisedStringTable
 	template <class Archive>
 	void serialize(Archive &ar, unsigned long v)
 	{
-		ar &zeep::xml::make_element_nvp("localstring", mLocalStrings);
+		// clang-format off
+		ar & mxml::make_element_nvp("localstring", mLocalStrings);
+		// clang-format on
 	}
 
 	MLocalisedStringTable() {}
@@ -86,7 +92,7 @@ MLocalisedStringTable::MLocalisedStringTable(int)
 		{
 			// parse the XML data
 			xml::document doc(rsrc);
-			doc.deserialize("strings", *this);
+			from_xml(doc, "strings", *this);
 
 			for (auto &s : mLocalStrings)
 			{

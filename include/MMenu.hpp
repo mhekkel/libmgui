@@ -28,7 +28,7 @@
 
 #include "MP2PEvents.hpp"
 
-#include <zeep/xml/node.hpp>
+#include <mxml/node.hpp>
 
 #include <list>
 #include <memory>
@@ -81,7 +81,7 @@ class MMenu
 	virtual ~MMenu() = default;
 
 	static MMenu *CreateFromResource(const char *inResourceName, bool inPopup);
-	static MMenu *Create(zeep::xml::element *inXMLNode, bool inPopup);
+	static MMenu *Create(const mxml::element &inXMLNode, bool inPopup);
 
 	void AppendItem(uint32_t inSection, const std::string &inLabel, const std::string &inAction, bool inStateful = false)
 	{

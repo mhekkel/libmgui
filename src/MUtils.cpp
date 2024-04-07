@@ -27,6 +27,8 @@
 #include "MUtils.hpp"
 #include "MError.hpp"
 
+#include "revision.hpp"
+
 #include <cmath>
 #include <sstream>
 #include <stack>
@@ -165,4 +167,12 @@ void HexDump(
 		offset += rr;
 		data += rr;
 	}
+}
+// --------------------------------------------------------------------
+
+std::string GetMGuiVersionString()
+{
+	std::ostringstream os;
+	write_version_string(os, false);
+	return os.str();
 }

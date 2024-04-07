@@ -31,20 +31,24 @@ class ExampleWindow : public MWindow
 
 		std::cout << GetBounds() << "\n";
 
-		MButton *btn = new MButton("test", MRect{ 10, 10, 100, 20 }, "Click me!");
-		btn->SetLayout(false, 4);
-		AddRoute(btn->eClicked, eClicked);
-		AddChild(btn);
+		MBoxControl *vbox = new MBoxControl("vbox", MRect{}, false);
+		vbox->SetLayout({ true, 0 });
+		AddChild(vbox);
 
-		MColorSwatch *cbtn = new MColorSwatch("kleur", MRect{ 0, 0, 100, 20 }, MColor("ffa348"));
-		btn->SetLayout(false, 4);
-		AddChild(cbtn);
+		MButton *btn = new MButton("test", MRect{ 10, 10, 100, 20 }, "Click me!");
+		btn->SetLayout({ false, 4 });
+		AddRoute(btn->eClicked, eClicked);
+		vbox->AddChild(btn);
+
+		MColorSwatch *cbtn = new MColorSwatch("kleur", MRect{ 0, 0, 20, 20 }, MColor("ffa348"));
+		btn->SetLayout({ false, 4 });
+		vbox->AddChild(cbtn);
 		AddRoute(cbtn->eColorChanged, eColour);
 
 		MCheckbox *cb = new MCheckbox("checkbox", MRect{}, "Een checkbox");
-		btn->SetLayout(false, 4);
+		btn->SetLayout({ false, 4 });
 		AddRoute(cb->eValueChanged, eChanged);
-		AddChild(cb);
+		vbox->AddChild(cb);
 
 		cCut.SetEnabled(mHasSelection);
 		cCopy.SetEnabled(mHasSelection);
@@ -57,8 +61,9 @@ class ExampleWindow : public MWindow
 
 	void Colour(const std::string &id, MColor inColor)
 	{
-		auto dlog = new MColorPicker(this, inColor);
-		dlog->Show();
+		// SetColor
+		// auto dlog = new MColorPicker(this, inColor);
+		// dlog->Show();
 	}
 
 	void Clicked(const std::string &id)

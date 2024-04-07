@@ -34,9 +34,9 @@
 
 #include "mrsrc.hpp"
 
-#include <zeep/xml/document.hpp>
+#include <mxml/document.hpp>
 
-namespace xml = zeep::xml;
+namespace xml = mxml;
 
 static void OnDialogResult(GtkDialog *dialog, gint inReplyButton, AlertReplyHandlerBase *inHandler)
 {
@@ -58,7 +58,7 @@ GtkWidget *CreateAlertWithArgs(const std::string &inResourceName, std::initializ
 	xml::document doc(rsrc);
 
 	// build an alert
-	xml::element *root = doc.find_first("/alert");
+	auto root = doc.find_first("/alert");
 
 	if (root->name() != "alert")
 		throw std::runtime_error("Invalid resource for alert " + inResourceName + ", first tag should be <alert>");

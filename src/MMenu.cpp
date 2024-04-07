@@ -35,7 +35,7 @@
 
 #include "mrsrc.hpp"
 
-#include <zeep/xml/document.hpp>
+#include <mxml/document.hpp>
 
 #include <algorithm>
 #include <cstring>
@@ -52,33 +52,33 @@ MMenu *MMenu::CreateFromResource(const char *inResourceName, bool inPopup)
 	MMenu *result = nullptr;
 
 	mrsrc::istream rsrc("Menus/"s + inResourceName + ".xml");
-	zeep::xml::document doc(rsrc);
+	mxml::document doc(rsrc);
 
 	// build a menu from the resource XML
-	zeep::xml::element *root = doc.find_first("/menu");
+	auto root = doc.find_first("/menu");
 
-	if (root != nullptr)
-		result = Create(root, inPopup);
+	if (root != doc.end())
+		result = Create(*root, inPopup);
 
 	return result;
 }
 
-MMenu *MMenu::Create(zeep::xml::element *inXMLNode, bool inPopup)
+MMenu *MMenu::Create(const mxml::element &inXMLNode, bool inPopup)
 {
 	std::string label;
 
-	if (inXMLNode->name() == "menu")
+	if (inXMLNode.name() == "menu")
 	{
-		label = GetLocalisedStringForContext("menu", inXMLNode->get_attribute("label"));
+		label = GetLocalisedStringForContext("menu", inXMLNode.get_attribute("label"));
 		if (label.length() == 0)
 			throw std::runtime_error("Invalid menu specification, label is missing");
 	}
 
-	MMenu *menu = new MMenu(inXMLNode->get_attribute("id"), label, inPopup);
+	MMenu *menu = new MMenu(inXMLNode.get_attribute("id"), label, inPopup);
 
 	int section = 0;
 
-	for (auto &item : *inXMLNode)
+	for (auto item : inXMLNode)
 	{
 		if (item.name() == "separator")
 		{
@@ -100,7 +100,7 @@ MMenu *MMenu::Create(zeep::xml::element *inXMLNode, bool inPopup)
 			menu->AppendRadioItems(section, channels, item.get_attribute("action"));
 		}
 		else if (item.name() == "menu")
-			menu->AppendSubmenu(section, Create(&item, false));
+			menu->AppendSubmenu(section, Create(item, false));
 	}
 
 	return menu;
@@ -123,9 +123,9 @@ MMenuBar::MMenuBar()
 void MMenuBar::Init(const std::string &inMenuResourceName)
 {
 	mrsrc::istream rsrc("Menus/" + inMenuResourceName + ".xml");
-	zeep::xml::document doc(rsrc);
+	mxml::document doc(rsrc);
 
-	zeep::xml::element *node = &doc.front();
+	mxml::element *node = &doc.front();
 
 	if (node->name() != "menubar")
 		throw std::runtime_error("Invalid menubar specification");
@@ -135,7 +135,7 @@ void MMenuBar::Init(const std::string &inMenuResourceName)
 	for (auto item : *node)
 	{
 		if (item.name() == "menu")
-			sInstance->AppendSubmenu(0, MMenu::Create(&item, false));
+			sInstance->AppendSubmenu(0, MMenu::Create(item, false));
 	}
 }
 

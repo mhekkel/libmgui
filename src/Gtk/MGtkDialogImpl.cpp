@@ -40,9 +40,7 @@
 
 #include <charconv>
 
-#include <zeep/xml/document.hpp>
-
-using namespace zeep;
+#include <mxml/document.hpp>
 
 class MGtkDialogImpl : public MGtkWindowImpl
 {

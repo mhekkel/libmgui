@@ -27,6 +27,8 @@ cmake_minimum_required(VERSION 3.28)
 # set the project name
 project(libmgui VERSION 1.0.0 LANGUAGES CXX)
 
+list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
 include(GNUInstallDirs)
 include(CheckFunctionExists)
 include(CheckIncludeFiles)
@@ -34,6 +36,7 @@ include(CheckLibraryExists)
 include(CMakePackageConfigHelpers)
 include(GenerateExportHeader)
 include(FindPkgConfig)
+include(VersionString)
 
 if(WIN32)
 	if(${CMAKE_SYSTEM_VERSION} GREATER_EQUAL 10) # Windows 10
@@ -78,9 +81,12 @@ set(CMAKE_THREAD_PREFER_PTHREAD)
 set(THREADS_PREFER_PTHREAD_FLAG)
 find_package(Threads REQUIRED)
 
-if(NOT TARGET zeep AND NOT zeep_FOUND)
-	find_package(zeep 5.1.6 REQUIRED)
+if(NOT TARGET mxml AND NOT mxml_FOUND)
+	find_package(mxml 1.0.2 REQUIRED)
 endif()
+
+# Version info
+write_version_header("${CMAKE_CURRENT_SOURCE_DIR}/src" LIB_NAME "libmgui")
 
 # The salt executable
 list(APPEND public_headers
@@ -121,7 +127,8 @@ list(APPEND private_headers
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkLib.hpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkWidgetMixin.hpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkWindowImpl.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkApplicationImpl.hpp	
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkApplicationImpl.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/revision.hpp
 )
 
 list(APPEND sources
@@ -175,7 +182,7 @@ target_sources(mgui
 
 target_include_directories(mgui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-target_link_libraries(mgui Threads::Threads zeep::zeep)
+target_link_libraries(mgui Threads::Threads mxml::mxml)
 
 if(UNIX)
 	pkg_check_modules(GTK4 gtk4 REQUIRED IMPORTED_TARGET)

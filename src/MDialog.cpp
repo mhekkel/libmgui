@@ -40,7 +40,7 @@
 
 #include "mrsrc.hpp"
 
-#include <zeep/xml/document.hpp>
+#include <mxml/document.hpp>
 
 #include <cassert>
 #include <charconv>
@@ -70,12 +70,12 @@ MDialog::~MDialog()
 
 // --------------------------------------------------------------------
 
-std::pair<int, bool> MDialog::GetAttributeSize(const zeep::xml::element *e, const char *name, float inDLU)
+std::pair<int, bool> MDialog::GetAttributeSize(const mxml::element &e, const char *name, float inDLU)
 {
 	bool ok = false;
 	int value = 0;
 
-	if (auto attr = e->get_attribute(name); not attr.empty())
+	if (auto attr = e.get_attribute(name); not attr.empty())
 	{
 		auto r = std::from_chars(attr.data(), attr.data() + attr.length(), value);
 		auto suffix = std::string_view(r.ptr, attr.data() + attr.length());
@@ -97,10 +97,10 @@ void MDialog::Build()
 	if (not rsrc)
 		throw std::runtime_error("Dialog resource not found: " + resource);
 
-	zeep::xml::document doc(rsrc);
+	mxml::document doc(rsrc);
 
-	zeep::xml::element *dialog = doc.find_first("/dialog");
-	if (dialog == nullptr)
+	auto dialog = doc.find_first("/dialog");
+	if (dialog == doc.end())
 		throw std::runtime_error("Invalid dialog resource");
 
 	std::string title = l(dialog->get_attribute("title"));
@@ -120,10 +120,10 @@ void MDialog::Build()
 	// 	mFlags = MWindowFlags(mFlags | kMNoSizeBox);
 
 	uint32_t minWidth = 40;
-	if (auto [w, ok] = GetAttributeSize(dialog, "width", mDLUX); ok)
+	if (auto [w, ok] = GetAttributeSize(*dialog, "width", mDLUX); ok)
 		minWidth = w;
 	uint32_t minHeight = 40;
-	if (auto [h, ok] = GetAttributeSize(dialog, "height", mDLUY); ok)
+	if (auto [h, ok] = GetAttributeSize(*dialog, "height", mDLUY); ok)
 		minHeight = h;
 
 	MRect bounds(0, 0, minWidth, minHeight);
@@ -132,11 +132,11 @@ void MDialog::Build()
 	GetImpl()->CreateWindow(bounds, title);
 
 	// create the dialog controls, all stacked on top of each other
-	zeep::xml::element *vbox = dialog->find_first("vbox");
-	if (vbox == nullptr)
+	auto vbox = dialog->find_first("vbox");
+	if (vbox == dialog->end())
 		throw std::runtime_error("Invalid dialog resource");
 
-	MView *content = CreateControls(vbox, 0, 0);
+	MView *content = CreateControls(*vbox, 0, 0);
 
 	for (MRadiobutton *radiobutton : mRadioGroup)
 		radiobutton->SetGroup(mRadioGroup.front());
@@ -144,7 +144,7 @@ void MDialog::Build()
 	// Main vbox first
 	MBoxControl *mainVBox = new MBoxControl("main-vbox", bounds, false);
 	MViewLayout layout{ true, true, 0, 0, 0, 0 };
-	layout.mMargin = GetMargins(vbox);
+	layout.mMargin = GetMargins(*vbox);
 	mainVBox->SetLayout(layout);
 
 	AddChild(mainVBox);
@@ -153,8 +153,8 @@ void MDialog::Build()
 
 	// the buttons
 
-	zeep::xml::element *buttons = dialog->find_first("/dialog/hbox");
-	if (buttons == nullptr)
+	auto buttons = dialog->find_first("/dialog/hbox");
+	if (buttons == dialog->end())
 		throw std::runtime_error("Invalid dialog resource");
 
 	MBoxControl *buttonBar = new MBoxControl("buttonbar", bounds, true);
@@ -171,10 +171,10 @@ void MDialog::Build()
 
 	for (auto button : buttons->find("button"))
 	{
-		MButton *btn = static_cast<MButton *>(CreateButton(button, 0, 0));
+		MButton *btn = static_cast<MButton *>(CreateButton(*button, 0, 0));
 
 		auto layout = btn->GetLayout();
-		layout.mMargin = GetMargins(button);
+		layout.mMargin = GetMargins(*button);
 		btn->SetLayout(layout);
 
 		buttonBar->AddChild(btn);
@@ -191,9 +191,9 @@ std::string MDialog::l(const std::string &s)
 	return GetLocalisedStringForContext(mRsrc, s);
 }
 
-MMargins MDialog::GetMargins(zeep::xml::element *inTemplate)
+MMargins MDialog::GetMargins(const mxml::element &inTemplate)
 {
-	MMargins result = inTemplate->name() == "hbox" or inTemplate->name() == "vbox" ?
+	MMargins result = inTemplate.name() == "hbox" or inTemplate.name() == "vbox" ?
 		MMargins{ 0, 0, 0, 0 } :
 		MMargins{ static_cast<uint32_t>(2 * mDLUX), static_cast<uint32_t>(1 * mDLUY), static_cast<uint32_t>(2 * mDLUX), static_cast<uint32_t>(1 * mDLUY) };
 
@@ -218,21 +218,21 @@ MMargins MDialog::GetMargins(zeep::xml::element *inTemplate)
 	return result;
 }
 
-MView *MDialog::CreateButton(zeep::xml::element *inTemplate, int32_t inX, int32_t inY)
+MView *MDialog::CreateButton(const mxml::element &inTemplate, int32_t inX, int32_t inY)
 {
-	std::string id = inTemplate->get_attribute("id");
-	std::string title = l(inTemplate->get_attribute("title"));
+	std::string id = inTemplate.get_attribute("id");
+	std::string title = l(inTemplate.get_attribute("title"));
 
 	MRect bounds;
 
 	MButtonFlags flags = eBF_None;
 
-	if (inTemplate->get_attribute("split") == "true")
+	if (inTemplate.get_attribute("split") == "true")
 		flags = eBF_Split;
 
 	MButton *button = new MButton(id, bounds, title, flags);
 
-	if (inTemplate->get_attribute("default") == "true")
+	if (inTemplate.get_attribute("default") == "true")
 		button->MakeDefault(true);
 
 	if (id == "ok" and mOKButton == nullptr)
@@ -246,13 +246,13 @@ MView *MDialog::CreateButton(zeep::xml::element *inTemplate, int32_t inX, int32_
 	return button;
 }
 
-MView *MDialog::CreateColorSwatch(zeep::xml::element *inTemplate, int32_t inX, int32_t inY)
+MView *MDialog::CreateColorSwatch(const mxml::element &inTemplate, int32_t inX, int32_t inY)
 {
-	std::string id = inTemplate->get_attribute("id");
+	std::string id = inTemplate.get_attribute("id");
 
 	MRect bounds(inX, inY, static_cast<int32_t>(16 * mDLUX), static_cast<int32_t>(6 * mDLUY));
 
-	MColor color(inTemplate->get_attribute("color").c_str());
+	MColor color(inTemplate.get_attribute("color").c_str());
 	MColorSwatch *swatch = new MColorSwatch(id, bounds, color);
 
 	AddRoute(swatch->eColorChanged, eColorChanged);
@@ -260,10 +260,10 @@ MView *MDialog::CreateColorSwatch(zeep::xml::element *inTemplate, int32_t inX, i
 	return swatch;
 }
 
-MView *MDialog::CreateExpander(zeep::xml::element *inTemplate, int32_t inX, int32_t inY)
+MView *MDialog::CreateExpander(const mxml::element &inTemplate, int32_t inX, int32_t inY)
 {
-	std::string id = inTemplate->get_attribute("id");
-	std::string title = l(inTemplate->get_attribute("title"));
+	std::string id = inTemplate.get_attribute("id");
+	std::string title = l(inTemplate.get_attribute("title"));
 
 	MRect bounds; //(inX, inY,
 	              //		static_cast<int32_t>((13 + 3) * mDLUX) +
@@ -273,39 +273,39 @@ MView *MDialog::CreateExpander(zeep::xml::element *inTemplate, int32_t inX, int3
 	MExpander *expander = new MExpander(id, bounds, title);
 	AddRoute(expander->eClicked, eButtonClicked);
 
-	for (auto &b : *inTemplate)
+	for (auto b : inTemplate)
 	{
 		if (b.get_attribute("if") == "WINDOWS")
 			continue;
 
-		expander->AddChild(CreateControls(&b, 0, 0));
+		expander->AddChild(CreateControls(b, 0, 0));
 	}
 
 	return expander;
 }
 
-MView *MDialog::CreateCanvas(zeep::xml::element *inTemplate, int32_t inX, int32_t inY)
+MView *MDialog::CreateCanvas(const mxml::element &inTemplate, int32_t inX, int32_t inY)
 {
-	std::string id = inTemplate->get_attribute("id");
+	std::string id = inTemplate.get_attribute("id");
 	return new MCanvas(id, { inX, inY, 2, 2 });
 }
 
-MView *MDialog::CreateCaption(zeep::xml::element *inTemplate, int32_t inX, int32_t inY)
+MView *MDialog::CreateCaption(const mxml::element &inTemplate, int32_t inX, int32_t inY)
 {
-	std::string id = inTemplate->get_attribute("id");
+	std::string id = inTemplate.get_attribute("id");
 	if (id.empty())
 		id = "caption";
-	std::string text = l(inTemplate->get_attribute("text"));
+	std::string text = l(inTemplate.get_attribute("text"));
 
 	MRect bounds; //(inX, static_cast<int32_t>(inY), 0, static_cast<int32_t>(10 * mDLUY));
 	              //	bounds.width = GetTextWidth(text, VSCLASS_TEXTSTYLE, TEXT_BODYTEXT, 0);
 	return new MCaption(id, bounds, text);
 }
 
-MView *MDialog::CreateCheckbox(zeep::xml::element *inTemplate, int32_t inX, int32_t inY)
+MView *MDialog::CreateCheckbox(const mxml::element &inTemplate, int32_t inX, int32_t inY)
 {
-	std::string id = inTemplate->get_attribute("id");
-	std::string title = l(inTemplate->get_attribute("title"));
+	std::string id = inTemplate.get_attribute("id");
+	std::string title = l(inTemplate.get_attribute("title"));
 
 	MRect bounds; //(inX, inY, 0, static_cast<int32_t>(10 * mDLUY));
 	              //	bounds.width = static_cast<int32_t>(14 * mDLUX) +
@@ -317,10 +317,10 @@ MView *MDialog::CreateCheckbox(zeep::xml::element *inTemplate, int32_t inX, int3
 	return checkbox;
 }
 
-MView *MDialog::CreateRadiobutton(zeep::xml::element *inTemplate, int32_t inX, int32_t inY)
+MView *MDialog::CreateRadiobutton(const mxml::element &inTemplate, int32_t inX, int32_t inY)
 {
-	std::string id = inTemplate->get_attribute("id");
-	std::string title = l(inTemplate->get_attribute("title"));
+	std::string id = inTemplate.get_attribute("id");
+	std::string title = l(inTemplate.get_attribute("title"));
 
 	MRect bounds; //(inX, inY, 0, static_cast<int32_t>(10 * mDLUY));
 	              //	bounds.width = static_cast<int32_t>(14 * mDLUX) +
@@ -334,9 +334,9 @@ MView *MDialog::CreateRadiobutton(zeep::xml::element *inTemplate, int32_t inX, i
 	return radiobutton;
 }
 
-MView *MDialog::CreateCombobox(zeep::xml::element *inTemplate, int32_t inX, int32_t inY)
+MView *MDialog::CreateCombobox(const mxml::element &inTemplate, int32_t inX, int32_t inY)
 {
-	std::string id = inTemplate->get_attribute("id");
+	std::string id = inTemplate.get_attribute("id");
 
 	MRect bounds; //(inX, inY, static_cast<int32_t>(50 * mDLUX), static_cast<int32_t>(14 * mDLUY));
 	MCombobox *combobox = new MCombobox(id, bounds);
@@ -344,44 +344,44 @@ MView *MDialog::CreateCombobox(zeep::xml::element *inTemplate, int32_t inX, int3
 	return combobox;
 }
 
-MView *MDialog::CreateEdittext(zeep::xml::element *inTemplate, int32_t inX, int32_t inY)
+MView *MDialog::CreateEdittext(const mxml::element &inTemplate, int32_t inX, int32_t inY)
 {
-	std::string id = inTemplate->get_attribute("id");
+	std::string id = inTemplate.get_attribute("id");
 
 	uint32_t flags = eMEditTextNoFlags;
-	if (inTemplate->get_attribute("style").find("right") != std::string::npos)
+	if (inTemplate.get_attribute("style").find("right") != std::string::npos)
 		flags |= eMEditTextAlignRight;
-	if (inTemplate->get_attribute("style").find("number") != std::string::npos)
+	if (inTemplate.get_attribute("style").find("number") != std::string::npos)
 		flags |= eMEditTextNumbers;
-	if (inTemplate->get_attribute("style").find("multiline") != std::string::npos)
+	if (inTemplate.get_attribute("style").find("multiline") != std::string::npos)
 		flags |= eMEditTextMultiLine;
-	if (inTemplate->get_attribute("style").find("readonly") != std::string::npos)
+	if (inTemplate.get_attribute("style").find("readonly") != std::string::npos)
 		flags |= eMEditTextReadOnly;
 
 	MRect bounds; //(inX, inY, static_cast<int32_t>(5 * mDLUX), static_cast<int32_t>(14 * mDLUY));
 	MEdittext *edittext = new MEdittext(id, bounds, flags);
 
-	if (inTemplate->get_attribute("password") == "true")
+	if (inTemplate.get_attribute("password") == "true")
 		edittext->SetPasswordChar();
 
 	AddRoute(edittext->eValueChanged, eTextChanged);
 	return edittext;
 }
 
-MView *MDialog::CreateFiller(zeep::xml::element *inTemplate, int32_t inX, int32_t inY)
+MView *MDialog::CreateFiller(const mxml::element &inTemplate, int32_t inX, int32_t inY)
 {
-	std::string id = inTemplate->get_attribute("id");
+	std::string id = inTemplate.get_attribute("id");
 	return new MSimpleControl(id, { inX, inY, 0, 0 });
 }
 
-MView *MDialog::CreatePopup(zeep::xml::element *inTemplate, int32_t inX, int32_t inY)
+MView *MDialog::CreatePopup(const mxml::element &inTemplate, int32_t inX, int32_t inY)
 {
-	std::string id = inTemplate->get_attribute("id");
+	std::string id = inTemplate.get_attribute("id");
 
 	MRect bounds; //(inX, inY, 0, static_cast<int32_t>(14 * mDLUY));
 
 	std::vector<std::string> choices;
-	for (zeep::xml::element *option : inTemplate->find("./option"))
+	for (auto option : inTemplate.find("./option"))
 	{
 		std::string label = option->get_content();
 		//		int32_t width = GetTextWidth(label, VSCLASS_COMBOBOX, CP_DROPDOWNBUTTON, CBXSL_NORMAL);
@@ -400,9 +400,9 @@ MView *MDialog::CreatePopup(zeep::xml::element *inTemplate, int32_t inX, int32_t
 	return popup;
 }
 
-MView *MDialog::CreatePager(zeep::xml::element *inTemplate, int32_t inX, int32_t inY)
+MView *MDialog::CreatePager(const mxml::element &inTemplate, int32_t inX, int32_t inY)
 {
-	std::string id = inTemplate->get_attribute("id");
+	std::string id = inTemplate.get_attribute("id");
 
 	MRect r(inX, inY, 0, 0);
 	MStackControl *result = new MStackControl(id, r);
@@ -410,12 +410,12 @@ MView *MDialog::CreatePager(zeep::xml::element *inTemplate, int32_t inX, int32_t
 	MRect b;
 	std::string firstName;
 
-	for (bool first = true; zeep::xml::element * page : inTemplate->find("./page"))
+	for (bool first = true; mxml::element * page : inTemplate.find("./page"))
 	{
 		if (page->get_attribute("if") == "WINDOWS")
 			continue;
 
-		MView *control = CreateControls(page, 0, 0);
+		MView *control = CreateControls(*page, 0, 0);
 		control->SetLayout({ true, 0 });
 		result->AddChild(control, control->GetID());
 
@@ -436,14 +436,14 @@ MView *MDialog::CreatePager(zeep::xml::element *inTemplate, int32_t inX, int32_t
 	return result;
 }
 
-MView *MDialog::CreateListBox(zeep::xml::element *inTemplate, int32_t inX, int32_t inY)
+MView *MDialog::CreateListBox(const mxml::element &inTemplate, int32_t inX, int32_t inY)
 {
-	std::string id = inTemplate->get_attribute("id");
+	std::string id = inTemplate.get_attribute("id");
 
 	MRect r(inX, inY, 0, 0);
 	MListBox *result = new MListBox(id, r);
 
-	for (auto listitem : inTemplate->find("./listitem"))
+	for (auto listitem : inTemplate.find("./listitem"))
 	{
 		std::string text = l(listitem->get_content());
 		//		int32_t textWidth = GetTextWidth(text, VSCLASS_LISTBOX, LBCP_ITEM, 0);
@@ -460,14 +460,14 @@ MView *MDialog::CreateListBox(zeep::xml::element *inTemplate, int32_t inX, int32
 	return result;
 }
 
-// MView *MDialog::CreateListView(zeep::xml::element *inTemplate, int32_t inX, int32_t inY)
+// MView *MDialog::CreateListView(const mxml::element &inTemplate, int32_t inX, int32_t inY)
 // {
-// 	std::string id = inTemplate->get_attribute("id");
+// 	std::string id = inTemplate.get_attribute("id");
 
 // 	MRect r(inX, inY, 0, 0);
 // 	MListView *result = new MListView(id, r);
 
-// 	for (zeep::xml::element *listitem : inTemplate->find("./listitem"))
+// 	for (const mxml::element &listitem : inTemplate.find("./listitem"))
 // 	{
 // 		std::string text = l(listitem->get_content());
 // 		//		int32_t textWidth = GetTextWidth(text, VSCLASS_LISTBOX, LBCP_ITEM, 0);
@@ -484,16 +484,16 @@ MView *MDialog::CreateListBox(zeep::xml::element *inTemplate, int32_t inX, int32
 // 	return result;
 // }
 
-MView *MDialog::CreateSeparator(zeep::xml::element *inTemplate, int32_t inX, int32_t inY)
+MView *MDialog::CreateSeparator(const mxml::element &inTemplate, int32_t inX, int32_t inY)
 {
 	MRect bounds(inX, inY, 2, 2);
 	return new MSeparator("separator", bounds);
 }
 
-MView *MDialog::CreateScrollbar(zeep::xml::element *inTemplate, int32_t inX, int32_t inY)
+MView *MDialog::CreateScrollbar(const mxml::element &inTemplate, int32_t inX, int32_t inY)
 {
-	std::string id = inTemplate->get_attribute("id");
-	std::string orientation = inTemplate->get_attribute("orientation");
+	std::string id = inTemplate.get_attribute("id");
+	std::string orientation = inTemplate.get_attribute("orientation");
 
 	MRect bounds(inX, inY, kScrollbarWidth, kScrollbarWidth);
 
@@ -505,19 +505,19 @@ MView *MDialog::CreateScrollbar(zeep::xml::element *inTemplate, int32_t inX, int
 	return new MScrollbar(id, bounds);
 }
 
-MView *MDialog::CreateBox(zeep::xml::element *inTemplate, int32_t inX, int32_t inY, bool inHorizontal)
+MView *MDialog::CreateBox(const mxml::element &inTemplate, int32_t inX, int32_t inY, bool inHorizontal)
 {
-	std::string id = inTemplate->get_attribute("id");
+	std::string id = inTemplate.get_attribute("id");
 
 	MRect r(inX, inY, 0, 0);
 	MView *result = new MBoxControl(id, r, inHorizontal);
 
-	for (auto &b : *inTemplate)
+	for (auto &b : inTemplate)
 	{
 		if (b.get_attribute("if") == "WINDOWS")
 			continue;
 
-		auto view = CreateControls(&b, 0, 0);
+		auto view = CreateControls(b, 0, 0);
 		if (view != nullptr)
 			result->AddChild(view);
 	}
@@ -525,14 +525,14 @@ MView *MDialog::CreateBox(zeep::xml::element *inTemplate, int32_t inX, int32_t i
 	return result;
 }
 
-// MView *MDialog::CreateTable(zeep::xml::element *inTemplate, int32_t inX, int32_t inY)
+// MView *MDialog::CreateTable(const mxml::element &inTemplate, int32_t inX, int32_t inY)
 // {
-// 	std::string id = inTemplate->get_attribute("id");
+// 	std::string id = inTemplate.get_attribute("id");
 
 // 	std::vector<MView *> views;
 // 	uint32_t colCount = 0, rowCount = 0;
 
-// 	for (zeep::xml::element *row : inTemplate->find("./row"))
+// 	for (const mxml::element &row : inTemplate.find("./row"))
 // 	{
 // 		uint32_t cn = 0;
 
@@ -562,11 +562,11 @@ MView *MDialog::CreateBox(zeep::xml::element *inTemplate, int32_t inX, int32_t i
 // 	return result;
 // }
 
-MView *MDialog::CreateControls(zeep::xml::element *inTemplate, int32_t inX, int32_t inY)
+MView *MDialog::CreateControls(const mxml::element &inTemplate, int32_t inX, int32_t inY)
 {
 	MView *result = nullptr;
 
-	std::string name = inTemplate->name();
+	std::string name = inTemplate.name();
 
 	if (name == "button")
 		result = CreateButton(inTemplate, inX, inY);
@@ -615,11 +615,11 @@ MView *MDialog::CreateControls(zeep::xml::element *inTemplate, int32_t inX, int3
 	layout.mMargin = GetMargins(inTemplate);
 	result->SetLayout(layout);
 
-	if (not inTemplate->get_attribute("width").empty())
+	if (not inTemplate.get_attribute("width").empty())
 	{
 		int32_t width = layout.mMargin.left + layout.mMargin.right;
 
-		if (inTemplate->get_attribute("width") == "scrollbarwidth")
+		if (inTemplate.get_attribute("width") == "scrollbarwidth")
 			width += kScrollbarWidth;
 		else if (auto [m, ok] = GetAttributeSize(inTemplate, "width", mDLUX); ok)
 			width += m;
@@ -631,11 +631,11 @@ MView *MDialog::CreateControls(zeep::xml::element *inTemplate, int32_t inX, int3
 		result->RequestSize(width, -1);
 	}
 
-	if (not inTemplate->get_attribute("height").empty())
+	if (not inTemplate.get_attribute("height").empty())
 	{
 		int32_t height = layout.mMargin.top + layout.mMargin.bottom;
 
-		if (inTemplate->get_attribute("height") == "scrollbarheight")
+		if (inTemplate.get_attribute("height") == "scrollbarheight")
 			height += kScrollbarWidth;
 		else if (auto [m, ok] = GetAttributeSize(inTemplate, "height", mDLUY); ok)
 			height += m;

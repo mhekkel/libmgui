@@ -25,7 +25,6 @@
 #include "mrsrc.hpp"
 
 using namespace std;
-using namespace zeep;
 
 class MWinDialogImpl : public MWinWindowImpl
 {

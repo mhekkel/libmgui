@@ -5,7 +5,7 @@
 
 #include "MWinLib.hpp"
 
-#include <zeep/xml/document.hpp>
+#include <mxml/document.hpp>
 
 #include "MAlerts.hpp"
 #include "mrsrc.hpp"
@@ -17,7 +17,7 @@
 #include "MUtils.hpp"
 
 using namespace std;
-namespace xml = zeep::xml;
+namespace xml = mxml;
 
 string localise(const string& inResourceName, const string& inText)
 {

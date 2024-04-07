@@ -4,11 +4,11 @@
 
 #include <ostream>
 
-constexpr const char kProjectName[] = "mgui-gtk4-examples";
-constexpr const char kVersionNumber[] = "1.0.0";
-constexpr int kBuildNumber = 148;
-constexpr const char kRevisionGitTag[] = "d7e8170*";
-constexpr const char kRevisionDate[] = "2024-04-07T10:50:00Z";
+constexpr const char k@VAR_PREFIX@ProjectName[] = "@PROJECT_NAME@";
+constexpr const char k@VAR_PREFIX@VersionNumber[] = "@PROJECT_VERSION@";
+constexpr int k@VAR_PREFIX@BuildNumber = @BUILD_NUMBER@;
+constexpr const char k@VAR_PREFIX@RevisionGitTag[] = "@REVISION_GIT_TAGREF@";
+constexpr const char k@VAR_PREFIX@RevisionDate[] = "@REVISION_DATE_TIME@";
 
 #ifndef VERSION_INFO_DEFINED
 #define VERSION_INFO_DEFINED 1
@@ -111,11 +111,11 @@ inline void write_version_string(std::ostream &os, bool verbose)
 
 #endif
 
-const class version_info_impl : public version_info_v1_2::version_info<version_info_impl>
+const class version_info_@IDENT_PREFIX@impl : public version_info_v1_2::version_info<version_info_@IDENT_PREFIX@impl>
 {
   public:
-	version_info_impl()
-		: version_info(kProjectName, kVersionNumber, kBuildNumber, kRevisionGitTag, kRevisionDate, true)
+	version_info_@IDENT_PREFIX@impl()
+		: version_info(k@VAR_PREFIX@ProjectName, k@VAR_PREFIX@VersionNumber, k@VAR_PREFIX@BuildNumber, k@VAR_PREFIX@RevisionGitTag, k@VAR_PREFIX@RevisionDate, @BOOL_IS_MAIN@)
 	{
 	}
-} s_version_info_instance;
+} s_version_info_@IDENT_PREFIX@instance;

@@ -39,3 +39,5 @@ void HexDump(const void *inBuffer, uint32_t inLength, std::ostream &outStream);
 void OpenURI(const std::string &inURI);
 std::string GetUserLocaleName();
 std::string GetApplicationVersion();
+
+std::string GetMGuiVersionString();
