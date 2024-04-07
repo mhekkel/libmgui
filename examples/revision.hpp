@@ -6,9 +6,9 @@
 
 constexpr const char kProjectName[] = "mgui-gtk4-examples";
 constexpr const char kVersionNumber[] = "1.0.0";
-constexpr int kBuildNumber = 148;
-constexpr const char kRevisionGitTag[] = "d7e8170*";
-constexpr const char kRevisionDate[] = "2024-04-07T10:50:00Z";
+constexpr int kBuildNumber = 149;
+constexpr const char kRevisionGitTag[] = "c20eb0f*";
+constexpr const char kRevisionDate[] = "2024-04-07T15:11:14Z";
 
 #ifndef VERSION_INFO_DEFINED
 #define VERSION_INFO_DEFINED 1

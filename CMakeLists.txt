@@ -89,7 +89,7 @@ endif()
 write_version_header("${CMAKE_CURRENT_SOURCE_DIR}/src" LIB_NAME "libmgui")
 
 # The salt executable
-list(APPEND public_headers
+list(APPEND headers
 	include/MAlerts.hpp
 	include/MAnimation.hpp
 	include/MApplication.hpp
@@ -180,9 +180,31 @@ target_sources(mgui
 	FILES ${headers}
 )
 
-target_include_directories(mgui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-
 target_link_libraries(mgui Threads::Threads mxml::mxml)
+
+install(TARGETS mgui
+	EXPORT mgui
+	FILE_SET public_headers DESTINATION include)
+
+install(EXPORT mgui
+	NAMESPACE mgui::
+	DESTINATION lib/cmake/mgui
+	FILE mgui-targets.cmake)
+
+configure_package_config_file(
+	${PROJECT_SOURCE_DIR}/cmake/mgui-config.cmake.in
+	${CMAKE_CURRENT_BINARY_DIR}/mgui-config.cmake
+	INSTALL_DESTINATION lib/cmake/mgui)
+
+write_basic_package_version_file(
+	"${CMAKE_CURRENT_BINARY_DIR}/mgui-config-version.cmake"
+	COMPATIBILITY AnyNewerVersion
+)
+
+install(FILES
+	${CMAKE_CURRENT_BINARY_DIR}/mgui-config.cmake
+	${CMAKE_CURRENT_BINARY_DIR}/mgui-config-version.cmake
+	DESTINATION lib/cmake/mgui)
 
 if(UNIX)
 	pkg_check_modules(GTK4 gtk4 REQUIRED IMPORTED_TARGET)
