@@ -37,6 +37,8 @@
 #include <sys/types.h>
 
 #include <cmath>
+#include <fstream>
+#include <regex>
 #include <sstream>
 #include <stack>
 #include <string>
@@ -149,16 +151,45 @@ void OpenURI(const std::string &inURI)
 	}
 }
 
-std::string GetHomeDirectory()
+std::filesystem::path GetHomeDirectory()
 {
 	const char *home = getenv("HOME");
-	return home ? std::string(home) : "~";
+	return home ? std::filesystem::path(home) : "~";
 }
 
-std::string GetPrefsDirectory()
+std::filesystem::path GetPrefsDirectory()
 {
 	const char *user_config_dir = g_get_user_config_dir();
-	return user_config_dir ? (std::filesystem::path(user_config_dir) / kAppName).string() : (GetHomeDirectory() + '/' + kAppName);
+	return user_config_dir ?
+		std::filesystem::path(user_config_dir) / kAppName :
+		GetHomeDirectory() / kAppName;
+}
+
+std::filesystem::path GetDownloadDirectory()
+{
+	const std::regex rx("^XDG_DOWNLOAD_DIR=\"(.+)\"$");
+
+	const char *user_config_dir = g_get_user_config_dir();
+	if (user_config_dir)
+	{
+		std::ifstream dirs(std::filesystem::path(user_config_dir) / "user-dirs.dirs");
+
+		std::string line;
+		while (getline(dirs, line))
+		{
+			std::smatch m;
+			if (not std::regex_match(line, m, rx))
+				continue;
+			
+			std::string p = m[1];
+			if (auto i = p.find("$HOME"); i != std::string::npos)
+				p.replace(i, 5, GetHomeDirectory());
+			
+			return p;
+		}
+	}
+
+	return GetHomeDirectory() / "Download";
 }
 
 std::string GetApplicationVersion()

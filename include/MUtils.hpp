@@ -28,12 +28,15 @@
 
 #include "MTypes.hpp"
 
+#include <filesystem>
+
 uint16_t CalculateCRC(const void *inData, uint32_t inLength, uint16_t inCRC);
 std::string Escape(std::string inString);
 std::string Unescape(std::string inString);
 std::string GetUserName(bool inShortName = false);
-std::string GetHomeDirectory();
-std::string GetPrefsDirectory();
+std::filesystem::path GetHomeDirectory();
+std::filesystem::path GetPrefsDirectory();
+std::filesystem::path GetDownloadDirectory();
 
 void HexDump(const void *inBuffer, uint32_t inLength, std::ostream &outStream);
 void OpenURI(const std::string &inURI);

@@ -127,7 +127,6 @@ int32_t write_attribute(const fs::path &inPath, const char *inName, const void *
 
 #endif
 namespace MFileDialogs
-
 {
 
 struct FileChooserResponder
@@ -178,8 +177,25 @@ void ChooseOneFile(MWindow *inParent, std::function<void(std::filesystem::path)>
 	GtkFileChooserNative *native = gtk_file_chooser_native_new(_("Select File"),
 		GTK_WINDOW(static_cast<MGtkWindowImpl *>(inParent->GetImpl())->GetWidget()),
 		action,
-		_("Cancel"),
-		_("Open"));
+		_("Open"),
+		_("Cancel"));
+
+	GtkFileChooser *chooser = GTK_FILE_CHOOSER(native);
+
+	new FileChooserResponder(chooser, std::move(callback));
+
+	gtk_native_dialog_show(GTK_NATIVE_DIALOG(native));
+}
+
+void ChooseDirectory(MWindow *inParent, std::function<void(std::filesystem::path)> &&callback)
+{
+	GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER;
+
+	GtkFileChooserNative *native = gtk_file_chooser_native_new(_("Select Folder"),
+		GTK_WINDOW(static_cast<MGtkWindowImpl *>(inParent->GetImpl())->GetWidget()),
+		action,
+		_("Select"),
+		_("Cancel"));
 
 	GtkFileChooser *chooser = GTK_FILE_CHOOSER(native);
 
