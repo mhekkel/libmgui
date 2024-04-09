@@ -352,7 +352,9 @@ void MGtkDeviceImpl::SetTextStyles(uint32_t inStyleCount, uint32_t inStyles[], u
 		attr->end_index = end_index;
 		pango_attr_list_change(attrs, attr);
 
-		attr = pango_attr_underline_new(inStyles[ix] & MDevice::eTextStyleUnderline ? PANGO_UNDERLINE_SINGLE : PANGO_UNDERLINE_NONE);
+		attr = pango_attr_underline_new(
+			inStyles[ix] & MDevice::eTextStyleDoubleUnderline ? PANGO_UNDERLINE_DOUBLE :
+				inStyles[ix] & MDevice::eTextStyleUnderline ? PANGO_UNDERLINE_SINGLE : PANGO_UNDERLINE_NONE);
 		attr->start_index = start_index;
 		attr->end_index = end_index;
 		pango_attr_list_change(attrs, attr);

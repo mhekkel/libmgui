@@ -173,7 +173,8 @@ class MDevice
 		eTextStyleNormal = 0,
 		eTextStyleItalic = 1 << 0,
 		eTextStyleBold = 1 << 1,
-		eTextStyleUnderline = 1 << 2
+		eTextStyleUnderline = 1 << 2,
+		eTextStyleDoubleUnderline = 1 << 3
 	};
 
 	void SetTextStyles(uint32_t inStyleCount, uint32_t inStyles[], uint32_t inOffsets[]);
