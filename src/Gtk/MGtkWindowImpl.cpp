@@ -243,23 +243,9 @@ static const struct xdg_activation_token_v1_listener activation_listener_xdg = {
 	handle_xdg_activation_done
 };
 
-extern "C"
-{
-
-uint32_t _gdk_wayland_seat_get_last_implicit_grab_serial (GdkWaylandSeat     *seat,
-                                                          GdkEventSequence **sequence);
-}
-
 void MGtkWindowImpl::Select()
 {
 	auto win = MGTK_WINDOW(GetWidget());
-
-	if (win->surface == nullptr)
-	{
-		auto native = GTK_NATIVE(win);
-		auto surface = gtk_native_get_surface(native);
-		win->surface = gdk_wayland_surface_get_wl_surface(surface);
-	}
 
 	GdkDisplay *display = gdk_display_get_default();
 
@@ -290,25 +276,14 @@ void MGtkWindowImpl::Select()
 		xdg_activation_token_v1_set_app_id(win->xdg_activation_token, gApp->GetApplicationID().c_str());
 
 		xdg_activation_token_v1_set_serial(win->xdg_activation_token,
-			_gdk_wayland_seat_get_last_implicit_grab_serial(seat, NULL),
+			0/* _gdk_wayland_seat_get_last_implicit_grab_serial(seat, NULL) */,
 			gdk_wayland_seat_get_wl_seat(GDK_SEAT(seat)));
-
-		// /* The serial of the input device requesting activation. */
-		// {
-		// 	uint32_t serial = 0;
-		// 	struct wl_seat *seat = system->wl_seat_active_get_with_input_serial(serial);
-		// 	if (seat)
-		// 	{
-		// 		xdg_activation_token_v1_set_serial(win->xdg_activation_token, serial, seat);
-		// 	}
-		// }
-
 
 		xdg_activation_token_v1_set_surface(win->xdg_activation_token, win->surface);
 		xdg_activation_token_v1_commit(win->xdg_activation_token);
 	}
-	else
-		gtk_window_present_with_time(GTK_WINDOW(GetWidget()), GDK_CURRENT_TIME);
+
+	gtk_window_present_with_time(GTK_WINDOW(GetWidget()), GDK_CURRENT_TIME);
 }
 
 void MGtkWindowImpl::Close()
