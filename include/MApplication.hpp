@@ -82,7 +82,10 @@ class MAsyncHandler : public MAsyncHandlerBase
 class MApplicationImpl
 {
   public:
-	MApplicationImpl() {}
+	MApplicationImpl(const std::string &inApplicationID)
+		: mApplicationID(inApplicationID)
+	{
+	}
 	virtual ~MApplicationImpl() {}
 
 	virtual void Initialise() = 0;
@@ -104,6 +107,7 @@ class MApplicationImpl
 		mCV.notify_one();
 	}
 
+	std::string mApplicationID;
 	std::deque<MAsyncHandlerBase *> mHandlerQueue;
 	std::mutex mMutex;
 	std::condition_variable mCV;
@@ -120,7 +124,7 @@ class MApplication
 	~MApplication();
 	virtual void Initialise();
 
-	virtual int HandleCommandLine(int argc, const char * const argv[])
+	virtual int HandleCommandLine(int argc, const char *const argv[])
 	{
 		return 1;
 	}
@@ -157,6 +161,11 @@ class MApplication
 	}
 
 	MApplicationImpl *GetImpl() const { return mImpl; }
+
+	std::string GetApplicationID() const
+	{
+		return mImpl->mApplicationID;
+	}
 
   protected:
 	MApplication(MApplicationImpl *inImpl);

@@ -96,6 +96,7 @@ void __signal_throw(
 		G_CALLBACK(gtk_window_destroy),
 		dlg);
 
+	// gtk_window_present(GTK_WINDOW(dlg));
 	gtk_window_present_with_time(GTK_WINDOW(dlg), GDK_CURRENT_TIME);
 }
 # endif

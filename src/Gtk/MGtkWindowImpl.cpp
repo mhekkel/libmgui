@@ -24,9 +24,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "MGtkControlsImpl.hpp"
 #include "MGtkWindowImpl.hpp"
 #include "MGtkApplicationImpl.hpp"
+#include "MGtkControlsImpl.hpp"
 
 #include "MApplication.hpp"
 #include "MError.hpp"
@@ -35,6 +35,11 @@
 
 #include "mrsrc.hpp"
 
+#include "xdg-activation-v1-protocol.h"
+
+#include <gdk/wayland/gdkwayland.h>
+
+#include <cstring>
 #include <iostream>
 
 // --------------------------------------------------------------------
@@ -50,6 +55,9 @@ struct _MGtkWindow
 	GtkApplicationWindow parent_instance;
 
 	MGtkWindowImpl *m_impl;
+
+	struct xdg_activation_token_v1 *xdg_activation_token = nullptr;
+	wl_surface *surface = nullptr;
 };
 
 typedef struct _MGtkWindow MGtkWindow;
@@ -116,7 +124,7 @@ void MGtkWindowImpl::CreateWindow(MRect inBounds, const std::string &inTitle)
 
 	GtkWidget *widget = GTK_WIDGET(w);
 	if (widget == nullptr)
-throw std::runtime_error("unexpected nullptr");
+		throw std::runtime_error("unexpected nullptr");
 
 	gtk_window_set_default_size(GTK_WINDOW(widget), inBounds.width, inBounds.height);
 	gtk_window_set_title(GTK_WINDOW(widget), inTitle.c_str());
@@ -173,7 +181,8 @@ void MGtkWindowImpl::OnIsActiveChanged(GParamSpec *inProperty)
 
 void MGtkWindowImpl::Show()
 {
-	gtk_window_present_with_time(GTK_WINDOW(GetWidget()), GDK_CURRENT_TIME);
+	// gtk_window_present(GTK_WINDOW(GetWidget()));
+	// gtk_window_present_with_time(GTK_WINDOW(GetWidget()), GDK_CURRENT_TIME);
 	gtk_widget_show(GetWidget());
 }
 
@@ -182,9 +191,165 @@ void MGtkWindowImpl::Hide()
 	gtk_widget_hide(GetWidget());
 }
 
+// This is probably a no-no but I don't care, for now
+static xdg_activation_v1 *xdg_activation_manager = nullptr;
+
+static void display_handle_global(void *data, struct wl_registry *registry, uint32_t id,
+	const char *interface, uint32_t version)
+{
+	if (strcmp(interface, "xdg_activation_v1") == 0)
+		xdg_activation_manager = static_cast<xdg_activation_v1 *>(wl_registry_bind(registry, id, &xdg_activation_v1_interface, 1));
+}
+
+static void display_remove_global(void *data, struct wl_registry *registry, uint32_t id)
+{
+	if (xdg_activation_manager != nullptr)
+	{
+		xdg_activation_v1_destroy(xdg_activation_manager);
+		xdg_activation_manager = nullptr;
+	}
+}
+
+static const struct wl_registry_listener registry_listener = {
+	display_handle_global,
+	display_remove_global
+};
+
+static void handle_xdg_activation_done(void *data,
+	struct xdg_activation_token_v1 *xdg_activation_token_v1,
+	const char *token)
+{
+	auto *window = MGTK_WINDOW(data);
+	if (xdg_activation_token_v1 == window->xdg_activation_token)
+	{
+		xdg_activation_v1_activate(xdg_activation_manager, token, window->surface);
+		xdg_activation_token_v1_destroy(window->xdg_activation_token);
+		window->xdg_activation_token = nullptr;
+	}
+}
+
+static const struct xdg_activation_token_v1_listener activation_listener_xdg = {
+	handle_xdg_activation_done
+};
+
 void MGtkWindowImpl::Select()
 {
-	gtk_window_present_with_time(GTK_WINDOW(GetWidget()), GDK_CURRENT_TIME);
+	GdkDisplay *display = gdk_display_get_default();
+
+	if (GDK_IS_WAYLAND_DISPLAY(display) and gdk_wayland_display_query_registry(display, "xdg_activation_v1"))
+	{
+		auto wl_display = gdk_wayland_display_get_wl_display(display);
+		auto wl_registry = wl_display_get_registry(wl_display);
+
+		GdkWaylandSeat *seat =
+			GDK_WAYLAND_SEAT(gdk_display_get_default_seat(display));
+
+		if (xdg_activation_manager == nullptr)
+		{
+			wl_registry_add_listener(wl_registry, &registry_listener, nullptr);
+			wl_display_roundtrip(wl_display);
+		}
+
+		auto win = MGTK_WINDOW(GetWidget());
+
+		auto surface = gtk_native_get_surface(gtk_widget_get_native(GetWidget()));
+		win->surface = gdk_wayland_surface_get_wl_surface(surface);
+
+		if (win->xdg_activation_token)
+		{
+			/* We're about to overwrite this with a new request. */
+			xdg_activation_token_v1_destroy(win->xdg_activation_token);
+		}
+
+		win->xdg_activation_token = xdg_activation_v1_get_activation_token(xdg_activation_manager);
+
+		xdg_activation_token_v1_add_listener(win->xdg_activation_token, &activation_listener_xdg, win);
+
+		xdg_activation_token_v1_set_app_id(win->xdg_activation_token, gApp->GetApplicationID().c_str());
+
+		// xdg_activation_token_v1_set_serial(win->xdg_activation_token,
+		// 	_gdk_wayland_seat_get_last_implicit_grab_serial(seat, NULL),
+		// 	gdk_wayland_seat_get_wl_seat(GDK_SEAT(seat)));
+
+		// /* The serial of the input device requesting activation. */
+		// {
+		// 	uint32_t serial = 0;
+		// 	struct wl_seat *seat = system->wl_seat_active_get_with_input_serial(serial);
+		// 	if (seat)
+		// 	{
+		// 		xdg_activation_token_v1_set_serial(win->xdg_activation_token, serial, seat);
+		// 	}
+		// }
+
+		/* The surface of the window requesting activation. */
+		{
+			auto frontWindow = gApp->GetActiveWindow();
+
+			if (frontWindow and frontWindow != GetWindow())
+			{
+				MGtkWindow *frontImpl = MGTK_WINDOW(static_cast<MGtkWindowImpl *>(frontWindow->GetImpl())->GetWidget());
+				if (MGTK_IS_WINDOW(frontImpl))
+					xdg_activation_token_v1_set_surface(win->xdg_activation_token, frontImpl->surface);
+			}
+		}
+
+		xdg_activation_token_v1_commit(win->xdg_activation_token);
+	}
+	else
+		gtk_window_present_with_time(GTK_WINDOW(GetWidget()), GDK_CURRENT_TIME);
+
+	// 	GdkWaylandSurface *impl = GDK_WAYLAND_SURFACE(surface);
+	// 	GdkDisplay *display = gdk_surface_get_display(surface);
+	// 	auto display_wayland = gdk_wayland_display_get_wl_display(display);
+	// 	const gchar *startup_id = gdk_wayland_display_get_startup_notification_id(display);
+
+	// 	GdkWaylandSeat *seat =
+	// 		GDK_WAYLAND_SEAT(gdk_display_get_default_seat(display));
+
+	// 	/* If the focus request does not have a startup ID associated, get a
+	// 	 * new token to activate the window.
+	// 	 */
+	// 	if (!startup_id)
+	// 	{
+	// 		struct xdg_activation_token_v1 *token;
+	// 		struct wl_event_queue *event_queue;
+
+	// 		event_queue = wl_display_create_queue(display_wayland);
+
+	// 		token = xdg_activation_v1_get_activation_token(display_wayland->xdg_activation);
+	// 		wl_proxy_set_queue((struct wl_proxy *)token, event_queue);
+
+	// 		xdg_activation_token_v1_add_listener(token,
+	// 			&token_listener,
+	// 			&startup_id);
+	// 		xdg_activation_token_v1_set_serial(token,
+	// 			_gdk_wayland_seat_get_last_implicit_grab_serial(seat, NULL),
+	// 			gdk_wayland_seat_get_wl_seat(GDK_SEAT(seat)));
+	// 		xdg_activation_token_v1_set_surface(token,
+	// 			gdk_wayland_surface_get_wl_surface(surface));
+	// 		xdg_activation_token_v1_commit(token);
+
+	// 		while (startup_id == NULL)
+	// 			wl_display_dispatch_queue(display_wayland, event_queue);
+
+	// 		xdg_activation_token_v1_destroy(token);
+	// 		wl_event_queue_destroy(event_queue);
+	// 	}
+
+	// 	xdg_activation_v1_activate(display_wayland->xdg_activation,
+	// 		startup_id,
+	// 		impl->display_server.wl_surface);
+	// }
+	// else if (impl->display_server.gtk_surface)
+	// {
+	// 	if (timestamp != GDK_CURRENT_TIME)
+	// 		gtk_surface1_present(impl->display_server.gtk_surface, timestamp);
+	// 	else if (startup_id && display_wayland->gtk_shell_version >= 3)
+	// 		gtk_surface1_request_focus(impl->display_server.gtk_surface,
+	// 			startup_id);
+	// }
+
+	// g_free(startup_id);
 }
 
 void MGtkWindowImpl::Close()
@@ -252,7 +417,6 @@ void MGtkWindowImpl::ConvertToScreen(int32_t &ioX, int32_t &ioY) const
 void MGtkWindowImpl::ConvertFromScreen(int32_t &ioX, int32_t &ioY) const
 {
 }
-
 
 bool MGtkWindowImpl::OnKeyPressed(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers)
 {

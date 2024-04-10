@@ -42,7 +42,8 @@
 MGtkApplicationImpl *MGtkApplicationImpl::sInstance;
 
 MGtkApplicationImpl::MGtkApplicationImpl(const std::string &inApplicationID)
-	: mStartup(this, &MGtkApplicationImpl::Startup)
+	: MApplicationImpl(inApplicationID)
+	, mStartup(this, &MGtkApplicationImpl::Startup)
 	, mActivate(this, &MGtkApplicationImpl::Activate)
 	, mQueryEnd(this, &MGtkApplicationImpl::OnQueryEnd)
 	, mCommandLine(this, &MGtkApplicationImpl::CommandLine)

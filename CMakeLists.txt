@@ -25,7 +25,7 @@
 cmake_minimum_required(VERSION 3.28)
 
 # set the project name
-project(libmgui VERSION 1.0.0 LANGUAGES CXX)
+project(libmgui VERSION 1.0.0 LANGUAGES CXX C)
 
 list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
@@ -147,6 +147,7 @@ list(APPEND sources
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkWidgetMixin.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkApplicationImpl.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkWindowImpl.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/xdg-activation-v1-protocol.c
 
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MAlerts.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MAnimation.cpp
@@ -209,7 +210,9 @@ install(FILES
 
 if(UNIX)
 	pkg_check_modules(GTK4 gtk4 REQUIRED IMPORTED_TARGET)
-	target_link_libraries(mgui PkgConfig::GTK4)
+	pkg_check_modules(WAYLAND wayland-client REQUIRED IMPORTED_TARGET)
+
+	target_link_libraries(mgui PkgConfig::GTK4 PkgConfig::WAYLAND)
 endif()
 
 if(PROJECT_IS_TOP_LEVEL)
