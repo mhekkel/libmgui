@@ -73,7 +73,7 @@ class MGtkCanvasImpl : public MGtkControlImpl<MCanvas>
 
 	void OnCommit(char *inText) override;
 
-	static void Draw(GtkDrawingArea *area, cairo_t *cr, int width, int height, gpointer data);
+	static void DrawCB(GtkDrawingArea *area, cairo_t *cr, int width, int height, gpointer data);
 
 	MSlot<void(int, int)> mResize;
 	void Resize(int width, int height);

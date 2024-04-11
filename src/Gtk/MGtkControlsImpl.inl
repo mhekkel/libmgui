@@ -128,14 +128,14 @@ template <class CONTROL>
 void MGtkControlImpl<CONTROL>::ShowSelf()
 {
 	if (GetWidget() != nullptr)
-		gtk_widget_show(GetWidget());
+		gtk_widget_set_visible(GetWidget(), true);
 }
 
 template <class CONTROL>
 void MGtkControlImpl<CONTROL>::HideSelf()
 {
 	if (GetWidget() != nullptr)
-		gtk_widget_hide(GetWidget());
+		gtk_widget_set_visible(GetWidget(), false);
 }
 
 template <class CONTROL>

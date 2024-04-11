@@ -63,7 +63,7 @@ void MGtkCanvasImpl::CreateWidget()
 
 	gtk_widget_set_focusable(GetWidget(), true);
 	gtk_widget_set_can_focus(GetWidget(), true);
-	gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA(GetWidget()), &MGtkCanvasImpl::Draw, this, nullptr);
+	gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA(GetWidget()), &MGtkCanvasImpl::DrawCB, this, nullptr);
 
 	mResize.Connect(GetWidget(), "resize");
 }
@@ -160,17 +160,19 @@ void MGtkCanvasImpl::Resize(int width, int height)
 
 	if (GTK_IS_VIEWPORT(parent))
 	{
-		double x, y;
-		gtk_widget_translate_coordinates(parent, GetWidget(), 0, 0, &x, &y);
+		graphene_point_t pt{};
 
-		bounds.x = x;
-		bounds.y = y;
+		if (gtk_widget_compute_point(parent, GetWidget(), &pt, &pt))
+		{
+			bounds.x = pt.x;
+			bounds.y = pt.y;
+		}
 	}
 
 	mControl->ResizeFrame(bounds.width - frame.width, bounds.height - frame.height);
 }
 
-void MGtkCanvasImpl::Draw(GtkDrawingArea *area, cairo_t *cr, int width, int height, gpointer data)
+void MGtkCanvasImpl::DrawCB(GtkDrawingArea *area, cairo_t *cr, int width, int height, gpointer data)
 {
 	MGtkCanvasImpl *self = reinterpret_cast<MGtkCanvasImpl *>(data);
 	self->mCurrentCairo = cr;

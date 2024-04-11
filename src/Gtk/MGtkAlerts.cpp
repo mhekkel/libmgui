@@ -176,7 +176,7 @@ void DisplayAlert(MWindow *inParent, const std::string &inResourceName,
 
 		g_signal_connect(GTK_DIALOG(dlg), "response", G_CALLBACK(OnDialogResult), inHandler);
 
-		gtk_window_present_with_time(GTK_WINDOW(dlg), GDK_CURRENT_TIME);
+		gtk_window_present(GTK_WINDOW(dlg));
 	}
 	catch (const std::exception &e)
 	{

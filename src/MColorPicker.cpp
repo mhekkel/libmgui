@@ -35,10 +35,11 @@
 
 MColorSwatch::MColorSwatch(const std::string &inID, MRect inBounds, MColor inColor)
 	: MCanvas(inID, inBounds)
-	, mColor(inColor)
 
 	, ePickedColor(this, &MColorSwatch::OnPickedColor)
 	, ePreviewColor(this, &MColorSwatch::OnPreviewColor)
+
+	, mColor(inColor)
 {
 }
 

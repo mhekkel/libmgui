@@ -173,12 +173,12 @@ void MGtkWindowImpl::OnIsActiveChanged(GParamSpec *inProperty)
 
 void MGtkWindowImpl::Show()
 {
-	gtk_widget_show(GetWidget());
+	gtk_widget_set_visible(GetWidget(), true);
 }
 
 void MGtkWindowImpl::Hide()
 {
-	gtk_widget_hide(GetWidget());
+	gtk_widget_set_visible(GetWidget(), false);
 }
 
 void MGtkWindowImpl::Select()

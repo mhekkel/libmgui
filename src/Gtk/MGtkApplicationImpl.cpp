@@ -92,7 +92,6 @@ int MGtkApplicationImpl::CommandLine(GApplicationCommandLine *inCommandLine)
 {
 	gchar **argv;
 	gint argc;
-	gint i;
 
 	argv = g_application_command_line_get_arguments(inCommandLine, &argc);
 
@@ -100,7 +99,7 @@ int MGtkApplicationImpl::CommandLine(GApplicationCommandLine *inCommandLine)
 
 	g_strfreev(argv);
 
-	return 0;
+	return result;
 }
 
 MGtkApplicationImpl::~MGtkApplicationImpl()
