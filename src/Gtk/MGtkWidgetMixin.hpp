@@ -26,8 +26,8 @@
 
 #pragma once
 
-#include "MGtkLib.hpp"
 #include "MGtkCommandEmitter.hpp"
+#include "MGtkLib.hpp"
 
 #include "MAlerts.hpp"
 #include "MControls.hpp"
@@ -293,7 +293,10 @@ enum class MEventMask
 	SecondaryButtonClick = (1 << 5),
 	MiddleButtonClick = (1 << 6),
 
-	Capture = (1 << 7),
+	AcceptDropFile = (1 << 7),
+	AcceptDropText = (1 << 8),
+
+	Capture = (1 << 10),
 
 	KeyCapture = (Key | Capture),
 
@@ -352,9 +355,8 @@ class MGtkWidgetMixin : public MGtkCommandEmitter
 		{
 			mShortcutController = gtk_shortcut_controller_new();
 			gtk_widget_add_controller(GetWidget(), mShortcutController);
-			
 		}
-		
+
 		gtk_shortcut_controller_add_shortcut(
 			GTK_SHORTCUT_CONTROLLER(mShortcutController), inShortcut);
 	}
@@ -436,6 +438,12 @@ class MGtkWidgetMixin : public MGtkCommandEmitter
 	virtual void OnScrollBegin();
 	virtual void OnScrollEnd();
 
+	virtual bool OnDrop(const GValue *value, double x, double y);
+	virtual bool OnDropAccept(GdkDrop *inDrop);
+	virtual GdkDragAction OnDropEnter(double x, double y);
+	virtual void OnDropLeave();
+	virtual GdkDragAction OnDropMotion(double x, double y);
+
 	MSlot<void()> mFocusEnter;
 	MSlot<void()> mFocusLeave;
 
@@ -458,6 +466,12 @@ class MGtkWidgetMixin : public MGtkCommandEmitter
 	MSlot<bool(double, double)> mScroll;
 	MSlot<void()> mScrollBegin;
 	MSlot<void()> mScrollEnd;
+
+	MSlot<bool(const GValue *, double, double)> mDrop;
+	MSlot<bool(GdkDrop *inDrop)> mDropAccept;
+	MSlot<GdkDragAction(double x, double y)> mDropEnter;
+	MSlot<void()> mDropLeave;
+	MSlot<GdkDragAction(double x, double y)> mDropMotion;
 
   protected:
 	int32_t mRequestedWidth, mRequestedHeight;

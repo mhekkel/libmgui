@@ -74,6 +74,13 @@ MGtkWidgetMixin::MGtkWidgetMixin(MEventMask inEvents)
 	, mScrollBegin(this, &MGtkWidgetMixin::OnScrollBegin)
 	, mScrollEnd(this, &MGtkWidgetMixin::OnScrollEnd)
 
+	, mDrop(this, &MGtkWidgetMixin::OnDrop)
+
+	, mDropAccept(this, &MGtkWidgetMixin::OnDropAccept)
+	, mDropEnter(this, &MGtkWidgetMixin::OnDropEnter)
+	, mDropLeave(this, &MGtkWidgetMixin::OnDropLeave)
+	, mDropMotion(this, &MGtkWidgetMixin::OnDropMotion)
+
 	, mRequestedWidth(-1)
 	, mRequestedHeight(-1)
 	, mAutoRepeat(false)
@@ -126,7 +133,6 @@ void MGtkWidgetMixin::SetWidget(GtkWidget *inWidget)
 			mGestureClickPressed.Connect(G_OBJECT(cntrl), "pressed");
 			mGestureClickReleased.Connect(G_OBJECT(cntrl), "released");
 			mGestureClickStopped.Connect(G_OBJECT(cntrl), "stopped");
-
 		}
 
 		if (mEvents & MEventMask::SecondaryButtonClick)
@@ -180,6 +186,27 @@ void MGtkWidgetMixin::SetWidget(GtkWidget *inWidget)
 			mScroll.Connect(G_OBJECT(cntrl), "scroll");
 			mScrollBegin.Connect(G_OBJECT(cntrl), "scroll-begin");
 			mScrollEnd.Connect(G_OBJECT(cntrl), "scroll-end");
+		}
+
+		if (mEvents & (MEventMask::AcceptDropFile | MEventMask::AcceptDropText))
+		{
+			auto cntrl = gtk_drop_target_new(G_TYPE_INVALID, GDK_ACTION_COPY);
+
+			std::vector<GType> types;
+			if (mEvents & MEventMask::AcceptDropFile)
+				types.emplace_back(G_TYPE_FILE);
+			if (mEvents & MEventMask::AcceptDropText)
+				types.emplace_back(G_TYPE_STRING);
+
+			gtk_drop_target_set_gtypes(cntrl, types.data(), types.size());
+
+			gtk_widget_add_controller(GetWidget(), GTK_EVENT_CONTROLLER(cntrl));
+
+			mDrop.Connect(G_OBJECT(cntrl), "drop");
+			mDropAccept.Connect(G_OBJECT(cntrl), "accept");
+			mDropEnter.Connect(G_OBJECT(cntrl), "enter");
+			mDropLeave.Connect(G_OBJECT(cntrl), "leave");
+			mDropMotion.Connect(G_OBJECT(cntrl), "motion");
 		}
 
 		if (mRequestedWidth >= 0 or mRequestedHeight >= 0)
@@ -348,4 +375,28 @@ void MGtkWidgetMixin::OnScrollBegin()
 
 void MGtkWidgetMixin::OnScrollEnd()
 {
+}
+
+bool MGtkWidgetMixin::OnDrop(const GValue *inValue, double inX, double inY)
+{
+	return false;
+}
+
+bool MGtkWidgetMixin::OnDropAccept(GdkDrop *inDrop)
+{
+	return false;
+}
+
+GdkDragAction MGtkWidgetMixin::OnDropEnter(double x, double y)
+{
+	return GDK_ACTION_COPY;
+}
+
+void MGtkWidgetMixin::OnDropLeave()
+{
+}
+
+GdkDragAction MGtkWidgetMixin::OnDropMotion(double x, double y)
+{
+	return GDK_ACTION_COPY;
 }

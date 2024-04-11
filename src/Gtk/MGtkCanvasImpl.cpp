@@ -41,11 +41,14 @@
 #include "MGtkWindowImpl.hpp"
 
 #include <cassert>
+#include <fstream>
 #include <iostream>
 
-MGtkCanvasImpl::MGtkCanvasImpl(MCanvas *inCanvas, uint32_t inWidth, uint32_t inHeight)
+MGtkCanvasImpl::MGtkCanvasImpl(MCanvas *inCanvas, uint32_t inWidth, uint32_t inHeight,
+	MCanvasDropTypes inDropTypes)
 	: MGtkControlImpl(inCanvas, "canvas")
 	, mResize(this, &MGtkCanvasImpl::Resize)
+	, mDropTypes(inDropTypes)
 {
 	RequestSize(inWidth, inHeight);
 
@@ -58,7 +61,15 @@ MGtkCanvasImpl::~MGtkCanvasImpl()
 
 void MGtkCanvasImpl::CreateWidget()
 {
-	SetEventMask(MEventMask::All);
+	MEventMask eventMask = MEventMask::All;
+
+	if ((mDropTypes & MCanvasDropTypes::Text) == MCanvasDropTypes::Text)
+		eventMask = eventMask | MEventMask::AcceptDropText;
+
+	if ((mDropTypes & MCanvasDropTypes::File) == MCanvasDropTypes::File)
+		eventMask = eventMask | MEventMask::AcceptDropFile;
+
+	SetEventMask(eventMask);
 	SetWidget(gtk_drawing_area_new());
 
 	gtk_widget_set_focusable(GetWidget(), true);
@@ -215,13 +226,14 @@ bool MGtkCanvasImpl::OnScroll(double inX, double inY)
 		GdkDisplay *display = gdk_display_get_default();
 		GdkSeat *seat = gdk_display_get_default_seat(display);
 		GdkDevice *device = gdk_seat_get_pointer(seat);
-	
+
 		double dx = 0, dy = 0;
 		gdk_surface_get_device_position(surface, device, &dx, &dy, nullptr);
 
 		gtk_widget_translate_coordinates(w, GetWidget(), dx, dy, &dx, &dy);
 
-		x = dx; y = dy;
+		x = dx;
+		y = dy;
 	}
 
 	return mControl->Scroll(x, y, inX, inY, modifiers);
@@ -239,7 +251,73 @@ void MGtkCanvasImpl::OnScrollEnd()
 
 // --------------------------------------------------------------------
 
-MCanvasImpl *MCanvasImpl::Create(MCanvas *inCanvas, uint32_t inWidth, uint32_t inHeight)
+bool MGtkCanvasImpl::OnDrop(const GValue *inValue, double x, double y)
 {
-	return new MGtkCanvasImpl(inCanvas, inWidth, inHeight);
+	bool result = false;
+
+	if (G_VALUE_HOLDS(inValue, G_TYPE_FILE))
+	{
+		GFile *file = static_cast<GFile *>(g_value_get_object(inValue));
+		std::filesystem::path p;
+
+		if (G_IS_FILE(file))
+		{
+			auto path = g_file_get_path(file);
+			if (path)
+			{
+				p = path;
+				g_free(path);
+			}
+		}
+
+		if (std::filesystem::exists(p))
+			result = mControl->DragAcceptFile(x, y, p);
+	}
+	else if (G_VALUE_HOLDS(inValue, G_TYPE_STRING))
+	{
+		auto text = g_value_get_string(inValue);
+		result = mControl->DragAcceptData(x, y, { text });
+	}
+
+	return result;
+}
+
+bool MGtkCanvasImpl::OnDropAccept(GdkDrop *inDrop)
+{
+	bool result = true;
+
+	auto types = gdk_drop_get_formats(inDrop);
+
+	if (gdk_content_formats_contain_gtype(types, G_TYPE_FILE))
+		result = mControl->DragAcceptsFile();
+
+	if (not result and gdk_content_formats_contain_mime_type(types, "text/plain"))
+		result = mControl->DragAcceptsMimeType("text/plain");
+
+	return result;
+}
+
+GdkDragAction MGtkCanvasImpl::OnDropEnter(double x, double y)
+{
+	mControl->DragEnter(x, y);
+	return GDK_ACTION_COPY;
+}
+
+void MGtkCanvasImpl::OnDropLeave()
+{
+	mControl->DragLeave();
+}
+
+GdkDragAction MGtkCanvasImpl::OnDropMotion(double x, double y)
+{
+	mControl->DragMotion(x, y);
+	return GDK_ACTION_COPY;
+}
+
+// --------------------------------------------------------------------
+
+MCanvasImpl *MCanvasImpl::Create(MCanvas *inCanvas, uint32_t inWidth, uint32_t inHeight,
+	MCanvasDropTypes inDropTypes)
+{
+	return new MGtkCanvasImpl(inCanvas, inWidth, inHeight, inDropTypes);
 }

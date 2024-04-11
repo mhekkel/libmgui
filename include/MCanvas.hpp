@@ -35,6 +35,24 @@
 
 class MCanvas;
 
+enum class MCanvasDropTypes
+{
+	None = 0,
+	File = (1 << 0),
+	Text = (1 << 1)
+};
+
+constexpr MCanvasDropTypes operator|(MCanvasDropTypes a, MCanvasDropTypes b)
+{
+	return static_cast<MCanvasDropTypes>(int(a) | int(b));
+}
+
+constexpr MCanvasDropTypes operator&(MCanvasDropTypes a, MCanvasDropTypes b)
+{
+	return static_cast<MCanvasDropTypes>(int(a) & int(b));
+}
+
+
 // --------------------------------------------------------------------
 
 class MCanvasImpl : public MControlImpl<MCanvas>
@@ -49,7 +67,8 @@ class MCanvasImpl : public MControlImpl<MCanvas>
 
 	virtual void Invalidate();
 
-	static MCanvasImpl *Create(MCanvas *inCanvas, uint32_t inWidth, uint32_t inHeight);
+	static MCanvasImpl *Create(MCanvas *inCanvas, uint32_t inWidth, uint32_t inHeight,
+		MCanvasDropTypes inDropTypes);
 };
 
 // --------------------------------------------------------------------
@@ -59,7 +78,7 @@ class MCanvas : public MControl<MCanvasImpl>
   public:
 	typedef MCanvasImpl MImpl;
 
-	MCanvas(const std::string &inID, MRect inBounds/* , bool inAcceptDropFiles, bool inAcceptDropText */);
+	MCanvas(const std::string &inID, MRect inBounds, MCanvasDropTypes inDropTypes = MCanvasDropTypes::None);
 	~MCanvas();
 
 	void Invalidate() override;

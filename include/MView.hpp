@@ -34,6 +34,7 @@
 #include "MP2PEvents.hpp"
 #include "MTypes.hpp"
 
+#include <filesystem>
 #include <list>
 #include <vector>
 
@@ -147,6 +148,16 @@ class MView
 	virtual void KeyReleased(uint32_t inKeyValue, uint32_t inModifiers) { }
 	virtual void Modifiers(uint32_t inModifiers) { }
 	virtual void EnterText(const std::string &inText) { }
+
+	// Drag & Drop support
+	/// \brief Return whether we will accept this drop, \a inMimeType is empty for file drops
+	virtual bool DragAcceptsMimeType(const std::string &inMimeType) { return false; }
+	virtual bool DragAcceptsFile() { return false; }
+	virtual void DragEnter(int32_t inX, int32_t inY) { }
+	virtual void DragMotion(int32_t inX, int32_t inY) { }
+	virtual void DragLeave() { }
+	virtual bool DragAcceptData(int32_t inX, int32_t inY, const std::string &inData) { return false; }
+	virtual bool DragAcceptFile(int32_t inX, int32_t inY, const std::filesystem::path &inFile) { return false; }
 
 	virtual void Activate();
 	virtual void Deactivate();

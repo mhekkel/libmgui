@@ -37,8 +37,8 @@ void MCanvasImpl::Invalidate()
 
 // --------------------------------------------------------------------
 
-MCanvas::MCanvas(const std::string &inID, MRect inBounds/* , bool inAcceptDropFiles, bool inAcceptDropText */)
-	: MControl<MCanvasImpl>(inID, inBounds, MCanvasImpl::Create(this, inBounds.width, inBounds.height))
+MCanvas::MCanvas(const std::string &inID, MRect inBounds, MCanvasDropTypes inDropTypes)
+	: MControl<MCanvasImpl>(inID, inBounds, MCanvasImpl::Create(this, inBounds.width, inBounds.height, inDropTypes))
 {
 }
 

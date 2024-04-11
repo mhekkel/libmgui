@@ -36,7 +36,8 @@
 class MGtkCanvasImpl : public MGtkControlImpl<MCanvas>
 {
   public:
-	MGtkCanvasImpl(MCanvas *inCanvas, uint32_t inWidth, uint32_t inHeight);
+	MGtkCanvasImpl(MCanvas *inCanvas, uint32_t inWidth, uint32_t inHeight,
+		MCanvasDropTypes inDropTypes);
 	~MGtkCanvasImpl();
 
 	cairo_t *GetCairo() const
@@ -73,10 +74,17 @@ class MGtkCanvasImpl : public MGtkControlImpl<MCanvas>
 
 	void OnCommit(char *inText) override;
 
+	bool OnDrop(const GValue *value, double x, double y) override;
+	bool OnDropAccept(GdkDrop *inDrop) override;
+	GdkDragAction OnDropEnter(double x, double y) override;
+	void OnDropLeave() override;
+	GdkDragAction OnDropMotion(double x, double y) override;
+
 	static void DrawCB(GtkDrawingArea *area, cairo_t *cr, int width, int height, gpointer data);
 
 	MSlot<void(int, int)> mResize;
 	void Resize(int width, int height);
 
 	cairo_t *mCurrentCairo = nullptr;
+	MCanvasDropTypes mDropTypes;
 };
