@@ -183,7 +183,7 @@ void MGtkWindowImpl::Hide()
 
 void MGtkWindowImpl::Select()
 {
-	gtk_window_present_with_time(GTK_WINDOW(GetWidget()), GDK_CURRENT_TIME);
+	gtk_window_present(GTK_WINDOW(GetWidget()));
 }
 
 void MGtkWindowImpl::Close()
