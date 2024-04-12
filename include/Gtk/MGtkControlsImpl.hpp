@@ -60,7 +60,7 @@ class MGtkControlImpl : public CONTROL::MImpl, public MGtkWidgetMixin
 
 	virtual bool OnDestroy();
 
-	virtual bool OnKeyPressEvent(GdkEventKey *inEvent);
+	virtual bool OnKeyPressEvent(GdkEvent *inEvent);
 	virtual void OnPopupMenu();
 
 	virtual void OnChanged();
@@ -180,8 +180,8 @@ class MGtkStatusbarImpl : public MGtkControlImpl<MStatusbar>
 	std::vector<MStatusBarElement> mParts;
 	std::vector<GtkWidget *> mPanels;
 
-	bool Clicked(GdkEventButton *inEvent);
-	MSlot<bool(GdkEventButton *)> mClicked;
+	bool Clicked(GdkEvent *inEvent);
+	MSlot<bool(GdkEvent *)> mClicked;
 };
 
 class MGtkComboboxImpl : public MGtkControlImpl<MCombobox>
@@ -246,9 +246,10 @@ class MGtkEdittextImpl : public MGtkControlImpl<MEdittext>
 
 	void SetPasswordChar(uint32_t inUnicode) override;
 
-	bool OnKeyPressEvent(GdkEventKey *inEvent) override;
+	bool OnKeyPressEvent(GdkEvent *inEvent) override;
 
   protected:
+	GtkEntryBuffer *mBuffer;
 	uint32_t mFlags;
 };
 

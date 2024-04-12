@@ -180,8 +180,6 @@ std::string GetUserName(bool inShortName = false);
 std::string GetHomeDirectory();
 std::string GetPrefsDirectory();
 
-void GetModifierState(uint32_t &outModifiers, bool inAsync);
-bool IsModifierDown(int inModifierMask);
 void HexDump(const void *inBuffer, uint32_t inLength, std::ostream &outStream);
 void OpenURI(const std::string &inURI);
 std::string GetUserLocaleName();

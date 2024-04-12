@@ -300,11 +300,6 @@ void MWindow::ConvertFromScreen(int32_t &ioX, int32_t &ioY) const
 	mImpl->ConvertFromScreen(ioX, ioY);
 }
 
-uint32_t MWindow::GetModifiers() const
-{
-	return mImpl->GetModifiers();
-}
-
 void MWindow::SetCursor(MCursor inCursor)
 {
 	mImpl->SetCursor(inCursor);

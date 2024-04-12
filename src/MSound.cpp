@@ -1,7 +1,7 @@
 /*-
  * SPDX-License-Identifier: BSD-2-Clause
  *
- * Copyright (c) 2023 Maarten L. Hekkelman
+ * Copyright (c) 2024 Maarten L. Hekkelman
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -24,48 +24,52 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "MError.hpp"
+// #include "MFile.hpp"
+// #include "MPreferences.hpp"
+#include "MSound.hpp"
+// #include "MWindow.hpp"
 
-#include "MGtkControlsImpl.hpp"
+#include "mrsrc.hpp"
 
-#include "MCanvasImpl.hpp"
+#include "ao/ao.h"
 
-#include <cassert>
-
-
-class MGtkCanvasImpl : public MGtkControlImpl<MCanvas>
+void PlaySound(const std::string &inSoundName)
 {
-  public:
-	MGtkCanvasImpl(MCanvas *inCanvas, uint32_t inWidth, uint32_t inHeight);
-	virtual ~MGtkCanvasImpl();
+	ao_initialize();
+	auto default_driver_id = ao_default_driver_id();
 
-	cairo_t *GetCairo() const
+	ao_device *device = nullptr;
+
+	try
 	{
-		assert(mCurrentCairo);
-		return mCurrentCairo;
+		mrsrc::rsrc data("Sounds/" + inSoundName);
+		if (not data)
+			data = mrsrc::rsrc("warning.wav");
+
+		if (data)
+			std::cerr << "yeah\n";
+
+
+		ao_sample_format format
+		{
+			.bits = 16,
+			.rate = 24000,
+			.channels = 2,
+			.byte_format = AO_FMT_LITTLE
+		};
+
+		device = ao_open_live(default_driver_id, &format, nullptr);
+		if (device)
+			ao_play(device, const_cast<char *>(data.data()), data.size());
+	}
+	catch (const std::exception &e)
+	{
+		std::cerr << e.what() << '\n';
 	}
 
-	virtual void CreateWidget();
+	if (device)
+		ao_close(device);
 
-	virtual bool OnMouseDown(int32_t inX, int32_t inY, uint32_t inButtonNr, uint32_t inClickCount, uint32_t inModifiers);
-	virtual bool OnMouseMove(int32_t inX, int32_t inY, uint32_t inModifiers);
-	virtual bool OnMouseUp(int32_t inX, int32_t inY, uint32_t inModifiers);
-	virtual bool OnMouseExit();
-
-	void Invalidate();
-
-	// MCanvasImpl overrides
-	virtual void AcceptDragAndDrop(bool inFiles, bool inText);
-	virtual void StartDrag();
-
-  protected:
-	virtual bool OnDrawEvent(cairo_t *inCairo);
-	virtual bool OnConfigureEvent(GdkEvent *inEvent);
-
-	virtual bool OnKeyPressEvent(GdkEvent *inEvent);
-	virtual bool OnCommit(gchar *inText);
-
-	virtual bool OnScrollEvent(GdkEvent *inEvent);
-
-	cairo_t *mCurrentCairo = nullptr;
-};
+	ao_shutdown();
+}

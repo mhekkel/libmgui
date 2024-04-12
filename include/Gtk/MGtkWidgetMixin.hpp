@@ -300,8 +300,6 @@ class MGtkWidgetMixin
 	virtual void ReleaseFocus();
 	virtual bool IsFocus() const;
 
-	uint32_t GetModifiers() const;
-
 	void CreateIMContext();
 
 	operator GtkWidget *() { return mWidget; }
@@ -316,16 +314,16 @@ class MGtkWidgetMixin
 	virtual bool OnDestroy();
 	virtual bool OnDelete(GdkEvent *inEvent);
 	virtual void OnShow();
-	virtual bool OnFocusInEvent(GdkEventFocus *inEvent);
-	virtual bool OnFocusOutEvent(GdkEventFocus *inEvent);
-	virtual bool OnButtonPressEvent(GdkEventButton *inEvent);
-	virtual bool OnMotionNotifyEvent(GdkEventMotion *inEvent);
-	virtual bool OnLeaveNotifyEvent(GdkEventCrossing *inEvent);
-	virtual bool OnButtonReleaseEvent(GdkEventButton *inEvent);
-	virtual bool OnKeyPressEvent(GdkEventKey *inEvent);
-	virtual bool OnKeyReleaseEvent(GdkEventKey *inEvent);
-	virtual bool OnConfigureEvent(GdkEventConfigure *inEvent);
-	virtual bool OnScrollEvent(GdkEventScroll *inEvent);
+	virtual bool OnFocusInEvent(GdkEvent *inEvent);
+	virtual bool OnFocusOutEvent(GdkEvent *inEvent);
+	virtual bool OnButtonPressEvent(GdkEvent *inEvent);
+	virtual bool OnMotionNotifyEvent(GdkEvent *inEvent);
+	virtual bool OnLeaveNotifyEvent(GdkEvent *inEvent);
+	virtual bool OnButtonReleaseEvent(GdkEvent *inEvent);
+	virtual bool OnKeyPressEvent(GdkEvent *inEvent);
+	virtual bool OnKeyReleaseEvent(GdkEvent *inEvent);
+	virtual bool OnConfigureEvent(GdkEvent *inEvent);
+	virtual bool OnScrollEvent(GdkEvent *inEvent);
 	virtual bool OnRealize();
 	virtual bool OnDrawEvent(cairo_t *inCairo);
 	virtual void OnPopupMenu();
@@ -339,21 +337,21 @@ class MGtkWidgetMixin
 
 	// Drag and Drop support
 
-	void SetupDragAndDrop(const GtkTargetEntry inTargets[], uint32_t inTargetCount);
-	void DragBegin(const GtkTargetEntry inTargets[], uint32_t inTargetCount, GdkEventMotion *inEvent);
-	virtual void DragEnter();
-	virtual bool DragWithin(int32_t inX, int32_t inY);
-	virtual void DragLeave();
-	virtual bool DragAccept(bool inMove, int32_t inX, int32_t inY, const char *inData, uint32_t inLength, uint32_t inType);
-	virtual void DragSendData(std::string &outData);
-	virtual void DragDeleteData();
-	virtual void OnDragDataReceived(GdkDragContext *inDragContext, gint inX, gint inY, GtkSelectionData *inData, guint inInfo, guint inTime);
-	virtual bool OnDragMotion(GdkDragContext *inDragContext, gint inX, gint inY, guint inTime);
-	virtual void OnDragLeave(GdkDragContext *inDragContext, guint inTime);
-	virtual void OnDragDataDelete(GdkDragContext *inDragContext);
-	virtual void OnDragDataGet(GdkDragContext *inDragContext, GtkSelectionData *inData, guint inInfo, guint inTime);
-	bool IsWithinDrag() const { return mDragWithin; }
-	//	virtual void	DrawDragImage(GdkPixmap*& outPixmap, int32_t& outX, int32_t& outY)	{  }
+	// void SetupDragAndDrop(const GtkTargetEntry inTargets[], uint32_t inTargetCount);
+	// void DragBegin(const GtkTargetEntry inTargets[], uint32_t inTargetCount, GdkEventMotion *inEvent);
+	// virtual void DragEnter();
+	// virtual bool DragWithin(int32_t inX, int32_t inY);
+	// virtual void DragLeave();
+	// virtual bool DragAccept(bool inMove, int32_t inX, int32_t inY, const char *inData, uint32_t inLength, uint32_t inType);
+	// virtual void DragSendData(std::string &outData);
+	// virtual void DragDeleteData();
+	// virtual void OnDragDataReceived(GdkDragContext *inDragContext, gint inX, gint inY, GtkSelectionData *inData, guint inInfo, guint inTime);
+	// virtual bool OnDragMotion(GdkDragContext *inDragContext, gint inX, gint inY, guint inTime);
+	// virtual void OnDragLeave(GdkDragContext *inDragContext, guint inTime);
+	// virtual void OnDragDataDelete(GdkDragContext *inDragContext);
+	// virtual void OnDragDataGet(GdkDragContext *inDragContext, GtkSelectionData *inData, guint inInfo, guint inTime);
+	// bool IsWithinDrag() const { return mDragWithin; }
+	// //	virtual void	DrawDragImage(GdkPixmap*& outPixmap, int32_t& outX, int32_t& outY)	{  }
 
 	GtkWidget *mWidget;
 
@@ -361,45 +359,45 @@ class MGtkWidgetMixin
 	MSlot<bool(GdkEvent *)> mOnDelete;
 	MSlot<void()> mOnShow;
 
-	MSlot<bool(GdkEventFocus *)> mFocusInEvent;
-	MSlot<bool(GdkEventFocus *)> mFocusOutEvent;
-	MSlot<bool(GdkEventButton *)> mButtonPressEvent;
-	MSlot<bool(GdkEventMotion *)> mMotionNotifyEvent;
-	MSlot<bool(GdkEventCrossing *)> mLeaveNotifyEvent;
-	MSlot<bool(GdkEventButton *)> mButtonReleaseEvent;
-	MSlot<bool(GdkEventKey *)> mKeyPressEvent;
-	MSlot<bool(GdkEventKey *)> mKeyReleaseEvent;
-	MSlot<bool(GdkEventConfigure *)> mConfigureEvent;
-	MSlot<bool(GdkEventScroll *)> mScrollEvent;
+	MSlot<bool(GdkEvent *)> mFocusInEvent;
+	MSlot<bool(GdkEvent *)> mFocusOutEvent;
+	MSlot<bool(GdkEvent *)> mButtonPressEvent;
+	MSlot<bool(GdkEvent *)> mMotionNotifyEvent;
+	MSlot<bool(GdkEvent *)> mLeaveNotifyEvent;
+	MSlot<bool(GdkEvent *)> mButtonReleaseEvent;
+	MSlot<bool(GdkEvent *)> mKeyPressEvent;
+	MSlot<bool(GdkEvent *)> mKeyReleaseEvent;
+	MSlot<bool(GdkEvent *)> mConfigureEvent;
+	MSlot<bool(GdkEvent *)> mScrollEvent;
 	MSlot<bool()> mRealize;
 	MSlot<bool(cairo_t *)> mDrawEvent;
 	MSlot<void()> mPopupMenu;
 
-	MSlot<void(GdkDragContext *,
-		gint,
-		gint,
-		GtkSelectionData *,
-		guint,
-		guint)>
-		mDragDataReceived;
+	// MSlot<void(GdkDragContext *,
+	// 	gint,
+	// 	gint,
+	// 	GtkSelectionData *,
+	// 	guint,
+	// 	guint)>
+	// 	mDragDataReceived;
 
-	MSlot<bool(GdkDragContext *,
-		gint,
-		gint,
-		guint)>
-		mDragMotion;
+	// MSlot<bool(GdkDragContext *,
+	// 	gint,
+	// 	gint,
+	// 	guint)>
+	// 	mDragMotion;
 
-	MSlot<void(GdkDragContext *,
-		guint)>
-		mDragLeave;
+	// MSlot<void(GdkDragContext *,
+	// 	guint)>
+	// 	mDragLeave;
 
-	MSlot<void(GdkDragContext *)> mDragDataDelete;
+	// MSlot<void(GdkDragContext *)> mDragDataDelete;
 
-	MSlot<void(GdkDragContext *,
-		GtkSelectionData *,
-		guint,
-		guint)>
-		mDragDataGet;
+	// MSlot<void(GdkDragContext *,
+	// 	GtkSelectionData *,
+	// 	guint,
+	// 	guint)>
+	// 	mDragDataGet;
 
 	// IMContext support
 

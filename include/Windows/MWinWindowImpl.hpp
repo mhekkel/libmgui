@@ -42,8 +42,6 @@ class MWinWindowImpl : public MWindowImpl, public MWinProcMixin
 
 	virtual void UpdateNow();
 
-	virtual uint32_t GetModifiers() const;
-
 	virtual void SetCursor(MCursor inCursor);
 	virtual void ObscureCursor();
 

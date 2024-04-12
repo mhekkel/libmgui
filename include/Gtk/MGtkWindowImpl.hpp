@@ -75,8 +75,6 @@ class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin
 	virtual void ConvertToScreen(int32_t &ioX, int32_t &ioY) const;
 	virtual void ConvertFromScreen(int32_t &ioX, int32_t &ioY) const;
 
-	virtual uint32_t GetModifiers() const;
-
 	MWindow *GetWindow() const { return mWindow; }
 
 	virtual MHandler *GetFocus();
@@ -87,13 +85,13 @@ class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin
 	virtual bool OnDestroy();
 	virtual bool OnDelete(GdkEvent *inEvent);
 
-	bool ChildFocus(GdkEventFocus *inEvent);
-	MSlot<bool(GdkEventFocus *)> mChildFocus;
+	bool ChildFocus(GdkEvent *inEvent);
+	MSlot<bool(GdkEvent *)> mChildFocus;
 
 	bool OnMapEvent(GdkEvent *inEvent);
 	MSlot<bool(GdkEvent *)> mMapEvent;
 
-	virtual bool OnConfigureEvent(GdkEventConfigure *inEvent);
+	virtual bool OnConfigureEvent(GdkEvent *inEvent);
 
 	//	void			Changed();
 	//	MSlot<void()>	mChanged;

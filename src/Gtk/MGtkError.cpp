@@ -78,9 +78,11 @@ void __signal_throw(
 		inFile, inLine, inFunction, inCode);
 
 	PlaySound("error");
-	(void)gtk_dialog_run(GTK_DIALOG(dlg));
+#warning FIXME
+	
+	// (void)gtk_dialog_run(GTK_DIALOG(dlg));
 
-	gtk_widget_destroy(dlg);
+	// gtk_widget_destroy(dlg);
 }
 #endif
 
