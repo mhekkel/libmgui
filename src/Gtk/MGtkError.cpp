@@ -89,7 +89,7 @@ void __signal_throw(
 	if (parent)
 		gtk_window_set_transient_for(GTK_WINDOW(dlg), parent);
 
-	PlaySound("error");
+	PlaySound("dialog-error");
 
 	g_signal_connect_swapped(GTK_DIALOG(dlg),
 		"response",

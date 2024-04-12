@@ -208,7 +208,7 @@ install(FILES
 	DESTINATION lib/cmake/mgui)
 
 if(UNIX)
-	pkg_check_modules(GTK4 gtk4 REQUIRED IMPORTED_TARGET)
+	pkg_check_modules(GTK4 REQUIRED IMPORTED_TARGET gtk4 libcanberra)
 	target_link_libraries(mgui PkgConfig::GTK4)
 endif()
 

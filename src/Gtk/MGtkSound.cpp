@@ -25,12 +25,86 @@
  */
 
 #include "MGtkLib.hpp"
-
+#include "MPreferences.hpp"
 #include "MSound.hpp"
 
 #include "mrsrc.hpp"
 
+#include <canberra.h>
+
+// void PlaySound(const std::string &inSoundName)
+// {
+// 	gdk_display_beep(gdk_display_get_default());
+// }
+
+namespace
+{
+
+class MAudioSocket
+{
+  public:
+	static MAudioSocket &
+	Instance();
+
+	void Play(const std::string &inPath);
+
+  private:
+	MAudioSocket();
+	~MAudioSocket();
+
+	static void CAFinishCallback(ca_context *inContext, uint32_t inID, int inErrorCode, void *inUserData);
+
+	ca_context *mCAContext;
+};
+
+MAudioSocket::MAudioSocket()
+	: mCAContext(nullptr)
+{
+	int err = ca_context_create(&mCAContext);
+	if (err == 0)
+		err = ca_context_open(mCAContext);
+}
+
+MAudioSocket::~MAudioSocket()
+{
+	ca_context_destroy(mCAContext);
+	mCAContext = nullptr;
+}
+
+MAudioSocket &MAudioSocket::Instance()
+{
+	static MAudioSocket sInstance;
+	return sInstance;
+}
+
+void MAudioSocket::CAFinishCallback(ca_context *inContext, uint32_t inID, int inErrorCode, void *inUserData)
+{
+	if (inErrorCode != CA_SUCCESS)
+	{
+		gdk_display_beep(gdk_display_get_default());
+		std::cerr << "Error playing sound using canberra: " << ca_strerror(inErrorCode) << std::endl;
+	}
+}
+
+void MAudioSocket::Play(const std::string &inSoundName)
+{
+	if (mCAContext != nullptr)
+	{
+		ca_proplist *pl;
+		ca_proplist_create(&pl);
+		ca_proplist_sets(pl, CA_PROP_EVENT_ID, inSoundName.c_str());
+		int err = ca_context_play_full(mCAContext, 0, pl, &MAudioSocket::CAFinishCallback, this);
+		if (err != CA_SUCCESS)
+			std::cerr << "Error calling ca_context_play_full: " << ca_strerror(err) << std::endl;
+		ca_proplist_destroy(pl);
+	}
+	else
+		gdk_display_beep(gdk_display_get_default());
+}
+
+} // namespace
+
 void PlaySound(const std::string &inSoundName)
 {
-	gdk_display_beep(gdk_display_get_default());
+	MAudioSocket::Instance().Play(inSoundName);
 }
