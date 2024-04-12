@@ -35,17 +35,20 @@
 #include "MUtils.hpp"
 #include "MWindow.hpp"
 
-#include "Gtk/MGtkCanvasImpl.hpp"
-#include "Gtk/MGtkControlsImpl.inl"
-#include "Gtk/MGtkDeviceImpl.hpp"
-#include "Gtk/MGtkWindowImpl.hpp"
-#include "Gtk/MPrimary.hpp"
+#include "MGtkCanvasImpl.hpp"
+#include "MGtkControlsImpl.inl"
+#include "MGtkDeviceImpl.hpp"
+#include "MGtkWindowImpl.hpp"
 
 #include <cassert>
+#include <fstream>
 #include <iostream>
 
-MGtkCanvasImpl::MGtkCanvasImpl(MCanvas *inCanvas, uint32_t inWidth, uint32_t inHeight)
+MGtkCanvasImpl::MGtkCanvasImpl(MCanvas *inCanvas, uint32_t inWidth, uint32_t inHeight,
+	MCanvasDropTypes inDropTypes)
 	: MGtkControlImpl(inCanvas, "canvas")
+	, mResize(this, &MGtkCanvasImpl::Resize)
+	, mDropTypes(inDropTypes)
 {
 	RequestSize(inWidth, inHeight);
 
@@ -58,59 +61,97 @@ MGtkCanvasImpl::~MGtkCanvasImpl()
 
 void MGtkCanvasImpl::CreateWidget()
 {
+	MEventMask eventMask = MEventMask::All;
+
+	if ((mDropTypes & MCanvasDropTypes::Text) == MCanvasDropTypes::Text)
+		eventMask = eventMask | MEventMask::AcceptDropText;
+
+	if ((mDropTypes & MCanvasDropTypes::File) == MCanvasDropTypes::File)
+		eventMask = eventMask | MEventMask::AcceptDropFile;
+
+	SetEventMask(eventMask);
 	SetWidget(gtk_drawing_area_new());
 
+	gtk_widget_set_focusable(GetWidget(), true);
 	gtk_widget_set_can_focus(GetWidget(), true);
+	gtk_drawing_area_set_draw_func(GTK_DRAWING_AREA(GetWidget()), &MGtkCanvasImpl::DrawCB, this, nullptr);
 
-	g_object_set_data(G_OBJECT(GetWidget()), "m-canvas", this);
+	mResize.Connect(GetWidget(), "resize");
 }
 
-bool MGtkCanvasImpl::OnMouseDown(int32_t inX, int32_t inY, uint32_t inButtonNr, uint32_t inClickCount, uint32_t inModifiers)
+void MGtkCanvasImpl::OnGestureClickPressed(double inX, double inY, gint inClickCount)
 {
-	bool result = false;
-
-	// PRIMARY paste?
-	switch (inButtonNr)
+	if (not mControl->GetWindow()->IgnoreSelectClick())
 	{
-		case 1:
-			mControl->MouseDown(inX, inY, inClickCount, inModifiers);
-			result = true;
-			break;
+		auto modifiers = MapModifier(gtk_event_controller_get_current_event_state(
+			GTK_EVENT_CONTROLLER(mGestureClickPressed.GetSourceGObject())));
 
-		case 2:
-			if (MPrimary::Instance().HasText())
-			{
-				std::string text;
-				MPrimary::Instance().GetText(text);
-				result = mControl->PastePrimaryBuffer(text);
-			}
-			break;
-
-		case 3:
-			PRINT(("Show Contextmenu!"));
-			mControl->ShowContextMenu(inX, inY);
-			break;
+		mControl->ClickPressed(inX, inY, inClickCount, modifiers);
 	}
-
-	return result;
 }
 
-bool MGtkCanvasImpl::OnMouseMove(int32_t inX, int32_t inY, uint32_t inModifiers)
+void MGtkCanvasImpl::OnGestureClickReleased(double inX, double inY, gint inClickCount)
 {
-	mControl->MouseMove(inX, inY, inModifiers);
-	return true;
+	auto modifiers = MapModifier(gtk_event_controller_get_current_event_state(
+		GTK_EVENT_CONTROLLER(mGestureClickReleased.GetSourceGObject())));
+
+	mControl->ClickReleased(inX, inY, modifiers);
 }
 
-bool MGtkCanvasImpl::OnMouseUp(int32_t inX, int32_t inY, uint32_t inModifiers)
+void MGtkCanvasImpl::OnGestureClickStopped()
 {
-	mControl->MouseUp(inX, inY, inModifiers);
-	return true;
 }
 
-bool MGtkCanvasImpl::OnMouseExit()
+void MGtkCanvasImpl::OnMiddleButtonClick(double inX, double inY, gint inClickCount)
 {
-	mControl->MouseExit();
-	return true;
+	if (not mControl->GetWindow()->IgnoreSelectClick())
+		mControl->MiddleMouseButtonClick(inX, inY);
+}
+
+void MGtkCanvasImpl::OnSecondaryButtonClick(double inX, double inY, gint inClickCount)
+{
+	if (not mControl->GetWindow()->IgnoreSelectClick())
+		mControl->SecondaryMouseButtonClick(inX, inY);
+}
+
+void MGtkCanvasImpl::OnPointerEnter(double inX, double inY)
+{
+	auto modifiers = MapModifier(gtk_event_controller_get_current_event_state(
+		GTK_EVENT_CONTROLLER(mPointerEnter.GetSourceGObject())));
+
+	mControl->PointerEnter(inX, inY, modifiers);
+}
+
+void MGtkCanvasImpl::OnPointerMotion(double inX, double inY)
+{
+	auto modifiers = MapModifier(gtk_event_controller_get_current_event_state(
+		GTK_EVENT_CONTROLLER(mPointerMotion.GetSourceGObject())));
+
+	mControl->PointerMotion(inX, inY, modifiers);
+}
+
+void MGtkCanvasImpl::OnPointerLeave()
+{
+	mControl->PointerLeave();
+}
+
+bool MGtkCanvasImpl::OnKeyPressed(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers)
+{
+	auto [keycode, modifiers] = MapFromGdkKey(inKeyValue, inModifiers);
+
+	return mControl->KeyPressed(keycode, gdk_keyval_to_unicode(inKeyValue),
+		modifiers, mAutoRepeat);
+}
+
+void MGtkCanvasImpl::OnKeyReleased(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers)
+{
+	auto [keycode, modifiers] = MapFromGdkKey(inKeyValue, inModifiers);
+
+	mControl->KeyReleased(keycode, modifiers);
+}
+
+void MGtkCanvasImpl::OnKeyModifiers(GdkModifierType inModifiers)
+{
 }
 
 void MGtkCanvasImpl::Invalidate()
@@ -119,169 +160,164 @@ void MGtkCanvasImpl::Invalidate()
 		gtk_widget_queue_draw(GetWidget());
 }
 
-bool MGtkCanvasImpl::OnConfigureEvent(GdkEvent *inEvent)
+void MGtkCanvasImpl::Resize(int width, int height)
 {
-	// PRINT(("MGtkCanvasImpl::OnConfigureEvent"));
-
-	MRect frame;
-	mControl->GetFrame(frame);
-
+	MRect frame = mControl->GetFrame();
 	MRect bounds;
+	bounds.width = width;
+	bounds.height = height;
 
 	GtkWidget *parent = gtk_widget_get_parent(GetWidget());
 
 	if (GTK_IS_VIEWPORT(parent))
 	{
-		GtkAllocation allocation;
-		gtk_widget_get_allocation(parent, &allocation);
+		graphene_point_t pt{};
 
-		bounds.width = allocation.width;
-		bounds.height = allocation.height;
-
-		double x, y;
-
-		gtk_widget_translate_coordinates(parent, GetWidget(),
-			bounds.x, bounds.y,
-			&x, &y);
-
-		bounds.x = x;
-		bounds.y = y;
+		if (gtk_widget_compute_point(parent, GetWidget(), &pt, &pt))
+		{
+			bounds.x = pt.x;
+			bounds.y = pt.y;
+		}
 	}
-	else
-	{
-		GtkAllocation allocation;
-		gtk_widget_get_allocation(GetWidget(), &allocation);
-
-		bounds.width = allocation.width;
-		bounds.height = allocation.height;
-	}
-
-	// PRINT(("bounds(%d,%d,%d,%d)", bounds.x, bounds.y, bounds.width, bounds.height));
 
 	mControl->ResizeFrame(bounds.width - frame.width, bounds.height - frame.height);
-
-	return false;
 }
 
-bool MGtkCanvasImpl::OnKeyPressEvent(GdkEvent *inEvent)
+void MGtkCanvasImpl::DrawCB(GtkDrawingArea *area, cairo_t *cr, int width, int height, gpointer data)
 {
-	bool result = MGtkControlImpl<MCanvas>::OnKeyPressEvent(inEvent);
-
-	if (not result)
-	{
-		const uint32_t kValidModifiersMask = gtk_accelerator_get_default_mod_mask();
-
-		// PRINT(("OnKeyPressEvent(keyval=0x%x)", inEvent->keyval));
-
-		uint32_t modifiers = MapModifier(gdk_event_get_modifier_state(inEvent) & kValidModifiersMask);
-		uint32_t keyValue = MapKeyCode(gdk_key_event_get_keyval(inEvent));
-
-		if (keyValue >= 0x60 and keyValue <= 0x7f and modifiers == kControlKey)
-		{
-			char ch = static_cast<char>(keyValue) - 0x60;
-			std::string text(&ch, 1);
-			result = mControl->HandleCharacter(text, mAutoRepeat);
-		}
-		else
-			result = mControl->HandleKeyDown(keyValue, modifiers, mAutoRepeat);
-
-		if (not result and modifiers == 0)
-		{
-			unicode ch = gdk_keyval_to_unicode(keyValue);
-
-			if (ch != 0)
-			{
-				char s[8] = {};
-				char *sp = s;
-				uint32_t length = MEncodingTraits<kEncodingUTF8>::WriteUnicode(sp, ch);
-
-				std::string text(s, length);
-				result = mControl->HandleCharacter(text, mAutoRepeat);
-			}
-		}
-	}
-
-	return result;
-}
-
-// bool MGtkCanvasImpl::OnExposeEvent(GdkEventExpose* inEvent)
-// {
-// 	MRect update(inEvent->area.x, inEvent->area.y, inEvent->area.width, inEvent->area.height);
-
-// 	mControl->Draw(update);
-
-// 	return true;
-// }
-
-bool MGtkCanvasImpl::OnDrawEvent(cairo_t *inCairo)
-{
-	mCurrentCairo = inCairo;
+	MGtkCanvasImpl *self = reinterpret_cast<MGtkCanvasImpl *>(data);
+	self->mCurrentCairo = cr;
 
 	try
 	{
-		mControl->Draw();
+		self->mControl->Draw();
 	}
 	catch (const std::exception &ex)
 	{
 		std::cerr << ex.what() << '\n';
 	}
 
-	mCurrentCairo = nullptr;
-
-	return true;
+	self->mCurrentCairo = nullptr;
 }
 
-bool MGtkCanvasImpl::OnCommit(gchar *inText)
+void MGtkCanvasImpl::OnCommit(char *inText)
 {
-	std::string text(inText);
-	return mControl->HandleCharacter(text, mAutoRepeat);
+	mControl->EnterText({ inText } /* , mAutoRepeat */);
 }
 
-bool MGtkCanvasImpl::OnScrollEvent(GdkEvent *inEvent)
+void MGtkCanvasImpl::OnDecelerate(double inVelX, double inVelY)
 {
-	uint32_t modifiers = MapModifier(gdk_event_get_modifier_state(inEvent));
-	double x, y;
-	gdk_event_get_position(inEvent, &x, &y);
+	mControl->ScrollDecelerate(inVelX, inVelY);
+}
 
-	switch (gdk_scroll_event_get_direction(inEvent))
+bool MGtkCanvasImpl::OnScroll(double inX, double inY)
+{
+	auto modifiers = gtk_event_controller_get_current_event_state(
+		GTK_EVENT_CONTROLLER(mScroll.GetSourceGObject()));
+
+	int32_t x, y;
+
+	auto w = static_cast<MGtkWindowImpl *>(mControl->GetWindow()->GetImpl())->GetWidget();
+
+	auto n = gtk_widget_get_native(w);
+	auto surface = n ? gtk_native_get_surface(n) : nullptr;
+	if (GDK_IS_SURFACE(surface))
 	{
-		case GDK_SCROLL_UP:
-			mControl->MouseWheel(x, y, 0, 1, modifiers);
-			break;
+		GdkDisplay *display = gdk_display_get_default();
+		GdkSeat *seat = gdk_display_get_default_seat(display);
+		GdkDevice *device = gdk_seat_get_pointer(seat);
 
-		case GDK_SCROLL_DOWN:
-			mControl->MouseWheel(x, y, 0, -1, modifiers);
-			break;
+		double dx = 0, dy = 0;
+		gdk_surface_get_device_position(surface, device, &dx, &dy, nullptr);
 
-		case GDK_SCROLL_LEFT:
-			mControl->MouseWheel(x, y, 1, 0, modifiers);
-			break;
+		gtk_widget_translate_coordinates(w, GetWidget(), dx, dy, &dx, &dy);
 
-		case GDK_SCROLL_RIGHT:
-			mControl->MouseWheel(x, y, -1, 0, modifiers);
-			break;
-
-		case GDK_SCROLL_SMOOTH:
-		{
-			double delta_x, delta_y;
-			gdk_scroll_event_get_deltas(inEvent, &delta_x, &delta_y);
-			mControl->MouseWheel(x, y, -delta_x, -delta_y, modifiers);
-			break;
-		}
+		x = dx;
+		y = dy;
 	}
 
-	return true;
+	return mControl->Scroll(x, y, inX, inY, modifiers);
 }
 
-void MGtkCanvasImpl::AcceptDragAndDrop(bool inFiles, bool inText)
+void MGtkCanvasImpl::OnScrollBegin()
 {
+	mControl->ScrollBegin();
 }
 
-void MGtkCanvasImpl::StartDrag()
+void MGtkCanvasImpl::OnScrollEnd()
 {
+	mControl->ScrollEnd();
 }
 
-MCanvasImpl *MCanvasImpl::Create(MCanvas *inCanvas, uint32_t inWidth, uint32_t inHeight)
+// --------------------------------------------------------------------
+
+bool MGtkCanvasImpl::OnDrop(const GValue *inValue, double x, double y)
 {
-	return new MGtkCanvasImpl(inCanvas, inWidth, inHeight);
+	bool result = false;
+
+	if (G_VALUE_HOLDS(inValue, G_TYPE_FILE))
+	{
+		GFile *file = static_cast<GFile *>(g_value_get_object(inValue));
+		std::filesystem::path p;
+
+		if (G_IS_FILE(file))
+		{
+			auto path = g_file_get_path(file);
+			if (path)
+			{
+				p = path;
+				g_free(path);
+			}
+		}
+
+		if (std::filesystem::exists(p))
+			result = mControl->DragAcceptFile(x, y, p);
+	}
+	else if (G_VALUE_HOLDS(inValue, G_TYPE_STRING))
+	{
+		auto text = g_value_get_string(inValue);
+		result = mControl->DragAcceptData(x, y, { text });
+	}
+
+	return result;
+}
+
+bool MGtkCanvasImpl::OnDropAccept(GdkDrop *inDrop)
+{
+	bool result = true;
+
+	auto types = gdk_drop_get_formats(inDrop);
+
+	if (gdk_content_formats_contain_gtype(types, G_TYPE_FILE))
+		result = mControl->DragAcceptsFile();
+
+	if (not result and gdk_content_formats_contain_mime_type(types, "text/plain"))
+		result = mControl->DragAcceptsMimeType("text/plain");
+
+	return result;
+}
+
+GdkDragAction MGtkCanvasImpl::OnDropEnter(double x, double y)
+{
+	mControl->DragEnter(x, y);
+	return GDK_ACTION_COPY;
+}
+
+void MGtkCanvasImpl::OnDropLeave()
+{
+	mControl->DragLeave();
+}
+
+GdkDragAction MGtkCanvasImpl::OnDropMotion(double x, double y)
+{
+	mControl->DragMotion(x, y);
+	return GDK_ACTION_COPY;
+}
+
+// --------------------------------------------------------------------
+
+MCanvasImpl *MCanvasImpl::Create(MCanvas *inCanvas, uint32_t inWidth, uint32_t inHeight,
+	MCanvasDropTypes inDropTypes)
+{
+	return new MGtkCanvasImpl(inCanvas, inWidth, inHeight, inDropTypes);
 }

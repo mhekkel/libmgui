@@ -26,29 +26,42 @@
 
 #pragma once
 
-#include "MApplicationImpl.hpp"
+#include "MApplication.hpp"
+#include "MGtkCommandEmitter.hpp"
+#include "MGtkWidgetMixin.hpp"
 
 #include <filesystem>
 #include <thread>
 
 #include <gtk/gtk.h>
 
-class MGtkApplicationImpl : public MApplicationImpl
+class MGtkApplicationImpl : public MApplicationImpl, public MGtkCommandEmitter
 {
   public:
-	MGtkApplicationImpl();
+	MGtkApplicationImpl(const std::string &inApplicationID);
 	virtual ~MGtkApplicationImpl();
 
-	static MGtkApplicationImpl *
-	GetInstance() { return sInstance; }
+	static MGtkApplicationImpl *GetInstance() { return sInstance; }
 
-	void Initialise();
-	virtual int RunEventLoop();
-	virtual void Quit();
+	void Initialise() override;
+	void SetIconName(const std::string &inIconName) override;
+
+	int RunEventLoop() override;
+	void Quit() override;
+
+	MWindow *GetActiveWindow() override;
+
+	GtkApplication *GetGtkApp() const { return mGtkApplication; }
+
+	GObject *GetActionMapObject() override
+	{
+		return G_OBJECT(mGtkApplication);
+	}
+
+	void InhibitQuit(bool inInhibit, const std::string &inReason, MWindowImpl *inImpl) override;
 
   private:
 	static gboolean Timeout(gpointer inData);
-	static gboolean Idle(gpointer inData);
 	static gboolean HandleAsyncCallback(gpointer inData);
 
 	void ProcessAsyncTasks(GMainContext *context);
@@ -56,8 +69,22 @@ class MGtkApplicationImpl : public MApplicationImpl
 
 	static MGtkApplicationImpl *sInstance;
 
+	MSlot<void()> mStartup;
+	void Startup();
+
+	MSlot<void()> mActivate;
+	void Activate();
+
+	MSlot<void()> mQueryEnd;
+	void OnQueryEnd();
+
+	MSlot<int(GApplicationCommandLine*)> mCommandLine;
+	int CommandLine(GApplicationCommandLine* inCommandLine);
+
 	guint mPulseID = 0;
+	guint mInhibitCookie = 0;
 	std::thread mAsyncTaskThread;
+	GtkApplication *mGtkApplication = nullptr;
 };
 
 extern std::filesystem::path gExecutablePath, gPrefixPath;

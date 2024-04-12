@@ -50,20 +50,24 @@ class MControlImpl : public MControlImplBase
 	}
 	virtual ~MControlImpl() {}
 
+	virtual void RequestSize(int32_t inWidth, int32_t inHeight) = 0;
+
 	virtual bool IsFocus() const { return false; }
 	virtual void SetFocus() {}
 
 	virtual void AddedToWindow() {}
 	virtual void FrameMoved() {}
 	virtual void FrameResized() {}
-	virtual void MarginsChanged() {}
-	// virtual void	Draw(MRect inBounds)						{}
+	virtual void LayoutChanged() {}
 	virtual void Draw() {}
 	virtual void Click(int32_t inX, int32_t inY) {}
 	virtual void EnableSelf() {}
 	virtual void DisableSelf() {}
 	virtual void ShowSelf() {}
 	virtual void HideSelf() {}
+
+	virtual std::string GetText() const { return {}; }
+	virtual void SetText(const std::string &) {}
 
   protected:
 	CONTROL *mControl;
@@ -128,16 +132,6 @@ class MButtonImpl : public MControlImpl<MButton>
 		MButtonFlags inFlags);
 };
 
-// class MImageButtonImpl : public MControlImpl<MImageButton>
-//{
-// public:
-//					MImageButtonImpl(MImageButton* inButton)
-//						: MControlImpl<MImageButton>(inButton)				{}
-//
-//	static MImageButtonImpl*
-//					Create(MImageButton* inButton, const std::string& inImageResource);
-// };
-
 class MExpanderImpl : public MControlImpl<MExpander>
 {
   public:
@@ -176,8 +170,7 @@ class MComboboxImpl : public MControlImpl<MCombobox>
 	}
 
 	virtual void SetText(const std::string &inText) = 0;
-	virtual std::string
-	GetText() const = 0;
+	virtual std::string GetText() const = 0;
 
 	virtual void SetChoices(const std::vector<std::string> &inChoices) = 0;
 
@@ -200,8 +193,7 @@ class MPopupImpl : public MControlImpl<MPopup>
 	virtual int32_t GetValue() const = 0;
 
 	virtual void SetText(const std::string &inText) = 0;
-	virtual std::string
-	GetText() const = 0;
+	virtual std::string GetText() const = 0;
 
 	virtual void SetChoices(const std::vector<std::string> &inChoices) = 0;
 
@@ -218,8 +210,7 @@ class MEdittextImpl : public MControlImpl<MEdittext>
 	}
 
 	virtual void SetText(const std::string &inText) = 0;
-	virtual std::string
-	GetText() const = 0;
+	virtual std::string GetText() const = 0;
 
 	virtual uint32_t GetFlags() const = 0;
 
@@ -281,27 +272,10 @@ class MRadiobuttonImpl : public MControlImpl<MRadiobutton>
 	virtual bool IsChecked() const = 0;
 	virtual void SetChecked(bool inChecked) = 0;
 
-	virtual void SetGroup(const std::list<MRadiobutton *> &inButtons) = 0;
+	virtual void SetGroup(MRadiobuttonImpl *inButton) = 0;
 
 	static MRadiobuttonImpl *
 	Create(MRadiobutton *inRadiobutton, const std::string &inTitle);
-};
-
-class MColorSwatchImpl : public MControlImpl<MColorSwatch>
-{
-  public:
-	MColorSwatchImpl(MColorSwatch *inColorSwatch)
-		: MControlImpl<MColorSwatch>(inColorSwatch)
-	{
-	}
-
-	virtual MColor GetColor() const = 0;
-	virtual void SetColor(MColor inColor) = 0;
-
-	virtual void SetPalette(const std::vector<MColor> &colors) = 0;
-
-	static MColorSwatchImpl *
-	Create(MColorSwatch *inColorSwatch, MColor inColor);
 };
 
 class MListBoxImpl : public MControlImpl<MListBox>
@@ -321,21 +295,8 @@ class MListBoxImpl : public MControlImpl<MListBox>
 	Create(MListBox *inListBox);
 };
 
-// class MListViewImpl : public MControlImpl<MListView>
-// {
-// public:
-// 					MListViewImpl(MListView* inListView)
-// 						: MControlImpl<MListView>(inListView)				{}
-
-// 	virtual void	AddItem(const std::string& inText) = 0;
-
-// 	static MListViewImpl*
-// 					Create(MListView* inListView);
-// };
-
-#ifndef _MSC_VER
 // --------------------------------------------------------------------
-// Gtk specific controls
+// Some container controls
 
 class MBoxControlImpl : public MControlImpl<MBoxControl>
 {
@@ -345,8 +306,21 @@ class MBoxControlImpl : public MControlImpl<MBoxControl>
 	{
 	}
 
-	static MBoxControlImpl *Create(MBoxControl *inControl, bool inHorizontal,
-		bool inHomogeneous, bool inExpand, bool inFill, uint32_t inSpacing, uint32_t inPadding);
+	virtual void AddChild(MControlBase *inChild, MControlBase *inBefore) = 0;
+
+	static MBoxControlImpl *Create(MBoxControl *inControl, bool inHorizontal);
 };
 
-#endif
+class MStackControlImpl : public MControlImpl<MStackControl>
+{
+  public:
+	MStackControlImpl(MStackControl *inControl)
+		: MControlImpl(inControl)
+	{
+	}
+
+	virtual void AddChild(MView *inChild, const std::string &inName) = 0;
+	virtual void Select(const std::string &inName) = 0;
+
+	static MStackControlImpl *Create(MStackControl *inControl);
+};

@@ -26,9 +26,7 @@
 
 #pragma once
 
-#include "Gtk/MGtkWindowImpl.hpp"
-
-#include "MAcceleratorTable.hpp"
+#include "MGtkWindowImpl.hpp"
 
 template <class CONTROL>
 MGtkControlImpl<CONTROL>::MGtkControlImpl(CONTROL *inControl, const std::string &inLabel)
@@ -41,22 +39,18 @@ MGtkControlImpl<CONTROL>::MGtkControlImpl(CONTROL *inControl, const std::string 
 template <class CONTROL>
 MGtkControlImpl<CONTROL>::~MGtkControlImpl()
 {
-	if (GetWidget() != nullptr)
-		g_object_unref(GetWidget());
 }
 
 template <class CONTROL>
-bool MGtkControlImpl<CONTROL>::OnDestroy()
+void MGtkControlImpl<CONTROL>::OnDestroy()
 {
+	SetWidget(nullptr);
+
 	if (this->mControl != nullptr)
 	{
-		SetWidget(nullptr);
 		this->mControl->SetImpl(nullptr);
-
 		delete this;
 	}
-
-	return true;
 }
 
 template <class CONTROL>
@@ -69,7 +63,20 @@ template <class CONTROL>
 void MGtkControlImpl<CONTROL>::SetFocus()
 {
 	if (GetWidget() != nullptr)
-		gtk_widget_grab_focus(GetWidget());
+	{
+		bool b = gtk_widget_grab_focus(GetWidget());
+
+		if (not b)
+		{
+			// try harder
+			MWindow *window = this->mControl->GetWindow();
+			if (window != nullptr)
+			{
+				auto w = static_cast<MGtkWindowImpl *>(window->GetImpl());
+				gtk_window_set_focus(GTK_WINDOW(w->GetWidget()), GetWidget());
+			}
+		}
+	}
 }
 
 template <class CONTROL>
@@ -92,7 +99,7 @@ void MGtkControlImpl<CONTROL>::SetText(const std::string &inText)
 	{
 		GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(wdgt));
 		if (buffer == nullptr)
-			THROW(("Invalid text buffer"));
+			throw std::runtime_error("Invalid text buffer");
 		gtk_text_buffer_set_text(buffer, inText.c_str(), inText.length());
 	}
 	else if (GTK_IS_PROGRESS_BAR(wdgt))
@@ -121,57 +128,14 @@ template <class CONTROL>
 void MGtkControlImpl<CONTROL>::ShowSelf()
 {
 	if (GetWidget() != nullptr)
-		gtk_widget_show(GetWidget());
+		gtk_widget_set_visible(GetWidget(), true);
 }
 
 template <class CONTROL>
 void MGtkControlImpl<CONTROL>::HideSelf()
 {
 	if (GetWidget() != nullptr)
-		gtk_widget_hide(GetWidget());
-}
-
-template <class CONTROL>
-void MGtkControlImpl<CONTROL>::FrameMoved()
-{
-	//	FrameResized();
-}
-
-template <class CONTROL>
-void MGtkControlImpl<CONTROL>::FrameResized()
-{
-	//	if (GetWidget() != nullptr)
-	//	{
-	//		MRect bounds;
-	//		MGtkWidgetMixin* parent;
-	//
-	//		GetParentAndBounds(parent, bounds);
-	//
-	//		::MoveWindow(GetWidget(), bounds.x, bounds.y,
-	//			bounds.width, bounds.height, true);
-	//	}
-}
-
-template <class CONTROL>
-void MGtkControlImpl<CONTROL>::MarginsChanged()
-{
-	auto widget = GetWidget();
-
-	if (widget != nullptr)
-	{
-		int32_t l, t, r, b;
-
-		MView *view = this->mControl;
-		view->GetMargins(l, t, r, b);
-
-		//		MRect bounds;
-		//		MGtkWidgetMixin* parent;
-		//
-		//		GetParentAndBounds(parent, bounds);
-		//
-		//		::MoveWindow(GetWidget(), bounds.x, bounds.y,
-		//			bounds.width, bounds.height, true);
-	}
+		gtk_widget_set_visible(GetWidget(), false);
 }
 
 template <class CONTROL>
@@ -180,7 +144,7 @@ void MGtkControlImpl<CONTROL>::GetParentAndBounds(MGtkWidgetMixin *&outParent, M
 	MView *view = this->mControl;
 	MView *parent = view->GetParent();
 
-	view->GetBounds(outBounds);
+	outBounds = view->GetBounds();
 
 	while (parent != nullptr)
 	{
@@ -228,7 +192,20 @@ void MGtkControlImpl<CONTROL>::AddedToWindow()
 	GetParentAndBounds(parent, bounds);
 
 	MControlBase *control = this->mControl;
-	parent->Append(this, control->GetPacking(), control->GetExpand(), control->GetFill(), control->GetPadding());
+
+	auto layout = control->GetLayout();
+	
+	assert(GTK_IS_WIDGET(mWidget));
+
+	gtk_widget_set_margin_top(mWidget, layout.mMargin.top);
+	gtk_widget_set_margin_bottom(mWidget, layout.mMargin.bottom);
+	gtk_widget_set_margin_start(mWidget, layout.mMargin.left);
+	gtk_widget_set_margin_end(mWidget, layout.mMargin.right);
+
+	gtk_widget_set_hexpand(mWidget, layout.mHExpand);
+	gtk_widget_set_vexpand(mWidget, layout.mVExpand);
+
+	parent->Append(this);
 }
 
 template <class CONTROL>
@@ -236,56 +213,29 @@ void MGtkControlImpl<CONTROL>::OnChanged()
 {
 }
 
-template <class CONTROL>
-bool MGtkControlImpl<CONTROL>::OnKeyPressEvent(GdkEvent *inEvent)
-{
-	// PRINT(("OnKeyPressEvent for %s", this->mControl->GetID().c_str()));
+// template <class CONTROL>
+// void MGtkControlImpl<CONTROL>::OnPopupMenu()
+// {
+// 	// PRINT(("OnPopupMenu for %s", this->mControl->GetID().c_str()));
 
-	bool result = MGtkWidgetMixin::OnKeyPressEvent(inEvent);
+// 	int32_t x = 0, y = 0;
 
-	if (not result)
-	{
-		const uint32_t kValidModifiersMask = gtk_accelerator_get_default_mod_mask();
+// #if GTK_CHECK_VERSION(3, 20, 0)
+// 	auto seat = gdk_display_get_default_seat(gdk_display_get_default());
+// 	auto mouse_device = gdk_seat_get_pointer(seat);
+// #else
+// 	auto devman = gdk_display_get_device_manager(gdk_display_get_default());
+// 	auto mouse_device = gdk_device_manager_get_client_pointer(devman);
+// #endif
 
-		uint32_t modifiers = MapModifier(gdk_event_get_modifier_state(inEvent) & kValidModifiersMask);
-		uint32_t keyValue = MapKeyCode(gdk_key_event_get_keyval(inEvent));
-		uint32_t cmd;
+// #warning "FIXME"
+// 	// auto window = gdk_display_get_default_group(gdk_display_get_default());
 
-		if (MAcceleratorTable::Instance().IsAcceleratorKey(keyValue, modifiers, cmd))
-		{
-			bool enabled = true, checked = false;
-			if (this->mControl->UpdateCommandStatus(cmd, nullptr, 0, enabled, checked) and enabled)
-				result = this->mControl->ProcessCommand(cmd, nullptr, 0, 0);
-		}
-	}
+// 	// if (window == nullptr)
+// 	// 	window = gtk_widget_get_window(GetWidget());
 
-	// PRINT(("OnKeyPressEvent returns %d", result));
-	return result;
-}
+// 	// gdk_window_get_device_position(window, mouse_device, &x, &y, NULL);
+// 	// g_message ("pointer: %i %i", x, y);
 
-template <class CONTROL>
-void MGtkControlImpl<CONTROL>::OnPopupMenu()
-{
-	// PRINT(("OnPopupMenu for %s", this->mControl->GetID().c_str()));
-
-	int32_t x = 0, y = 0;
-
-#if GTK_CHECK_VERSION(3, 20, 0)
-	auto seat = gdk_display_get_default_seat(gdk_display_get_default());
-	auto mouse_device = gdk_seat_get_pointer(seat);
-#else
-	auto devman = gdk_display_get_device_manager(gdk_display_get_default());
-	auto mouse_device = gdk_device_manager_get_client_pointer(devman);
-#endif
-
-#warning "FIXME"
-	// auto window = gdk_display_get_default_group(gdk_display_get_default());
-
-	// if (window == nullptr)
-	// 	window = gtk_widget_get_window(GetWidget());
-
-	// gdk_window_get_device_position(window, mouse_device, &x, &y, NULL);
-	// g_message ("pointer: %i %i", x, y);
-
-	this->mControl->ShowContextMenu(x, y);
-}
+// 	this->mControl->SecondaryMouseButtonClick(x, y);
+// }

@@ -31,6 +31,9 @@
 #include "MTypes.hpp"
 #include "MUtils.hpp"
 
+#include "MGtkApplicationImpl.hpp"
+#include "MGtkWindowImpl.hpp"
+
 #include <cstdarg>
 #include <cstdio>
 #include <cstring>
@@ -38,14 +41,12 @@
 
 #include <gtk/gtk.h>
 
-using namespace std;
-
 #ifndef NDEBUG
 
 const char *__S_FILE;
 int __S_LINE;
 
-#ifndef _MSC_VER
+# ifndef _MSC_VER
 void __debug_printf(const char *inStr, ...)
 {
 	char msg[1024];
@@ -55,7 +56,7 @@ void __debug_printf(const char *inStr, ...)
 	vsnprintf(msg, sizeof(msg), inStr, vl);
 	va_end(vl);
 
-	cerr << msg << '\n';
+	std::cerr << msg << '\n';
 }
 
 void __signal_throw(
@@ -64,26 +65,39 @@ void __signal_throw(
 	const char *inFile,
 	int inLine)
 {
-	cerr << "Throwing in file " << inFile << " line " << inLine
-		 << " \"" << inFunction << "\": \n"
-		 << inCode << '\n';
+	std::cerr << "Throwing in file " << inFile << " line " << inLine
+			  << " \"" << inFunction << "\": \n"
+			  << inCode << '\n';
 
-	if (StOKToThrow::IsOK())
-		return;
+	GtkWindow *parent = nullptr;
 
-	GtkWidget *dlg = gtk_message_dialog_new(nullptr, GTK_DIALOG_MODAL,
+	if (auto w = gApp->GetActiveWindow(); w != nullptr)
+	{
+		w->Select();
+
+		MGtkWindowImpl *impl = static_cast<MGtkWindowImpl *>(w->GetImpl());
+
+		parent = GTK_WINDOW(impl->GetWidget());
+	}
+
+	GtkWidget *dlg = gtk_message_dialog_new(parent, GTK_DIALOG_MODAL,
 		GTK_MESSAGE_ERROR, GTK_BUTTONS_OK,
 		"Exception thrown in file '%s', line %d, function: '%s'\n\n"
 		"code: %s",
 		inFile, inLine, inFunction, inCode);
 
-	PlaySound("error");
-#warning FIXME
-	
-	// (void)gtk_dialog_run(GTK_DIALOG(dlg));
+	if (parent)
+		gtk_window_set_transient_for(GTK_WINDOW(dlg), parent);
 
-	// gtk_widget_destroy(dlg);
+	PlaySound("dialog-error");
+
+	g_signal_connect_swapped(GTK_DIALOG(dlg),
+		"response",
+		G_CALLBACK(gtk_window_destroy),
+		dlg);
+
+	gtk_window_present(GTK_WINDOW(dlg));
 }
-#endif
+# endif
 
 #endif

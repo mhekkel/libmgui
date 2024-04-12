@@ -5,7 +5,7 @@
 
 #include "MWinLib.hpp"
 
-#include <zeep/xml/document.hpp>
+#include <mxml/document.hpp>
 
 #include "MAlerts.hpp"
 #include "mrsrc.hpp"
@@ -17,7 +17,7 @@
 #include "MUtils.hpp"
 
 using namespace std;
-namespace xml = zeep::xml;
+namespace xml = mxml;
 
 string localise(const string& inResourceName, const string& inText)
 {
@@ -38,7 +38,7 @@ int32_t DisplayAlert(
 	xml::element* root = doc.find_first("/alert");
 	
 	if (root->name() != "alert")
-		THROW(("Invalid resource for alert %s, first tag should be <alert>", inResourceName));
+		throw std::runtime_error("Invalid resource for alert %s, first tag should be <alert>", inResourceName);
 
 	// OK, setup a standard Task dialog
 
@@ -94,7 +94,7 @@ int32_t DisplayAlert(
 	
 			for (string a: inArguments)
 			{
-				zeep::replace_all(text, s, a);
+				ReplaceAll(text, s, a);
 				++s[1];
 			}
 

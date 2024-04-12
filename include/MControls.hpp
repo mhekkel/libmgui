@@ -27,22 +27,16 @@
 #pragma once
 
 #include "MColor.hpp"
-#include "MHandler.hpp"
 #include "MP2PEvents.hpp"
 #include "MView.hpp"
 
 struct MControlImplBase;
 
-class MControlBase : public MView, public MHandler
+class MControlBase : public MView
 {
   public:
 	MControlBase(const std::string &inID, MRect inBounds)
 		: MView(inID, inBounds)
-		, MHandler(nullptr)
-		, mPacking(ePackStart)
-		, mPadding(0)
-		, mExpand(false)
-		, mFill(false)
 	{
 	}
 
@@ -50,74 +44,58 @@ class MControlBase : public MView, public MHandler
 
 	virtual bool IsFocus() const = 0;
 	virtual void SetFocus() = 0;
-	virtual MHandler *FindFocus() { return IsFocus() ? this : MView::FindFocus(); }
-
-	// for auto layout of controls
-	MControlPacking GetPacking() const { return mPacking; }
-	void SetPacking(MControlPacking inPacking)
-	{
-		mPacking = inPacking;
-	}
-
-	uint32_t GetPadding() const { return mPadding; }
-	void SetPadding(uint32_t inPadding) { mPadding = inPadding; }
-
-	bool GetExpand() const { return mExpand; }
-	void SetExpand(bool inExpand) { mExpand = inExpand; }
-
-	bool GetFill() const { return mFill; }
-	void SetFill(bool inFill) { mFill = inFill; }
-
-	void SetLayout(MControlPacking inPacking, bool inExpand, bool inFill, uint32_t inPadding)
-	{
-		mPacking = inPacking;
-		mExpand = inExpand;
-		mFill = inFill;
-		mPadding = inPadding;
-	}
-
-  protected:
-	MControlPacking mPacking;
-	uint32_t mPadding;
-	bool mExpand, mFill;
 };
 
 template <class I>
 class MControl : public MControlBase
 {
   public:
-	virtual ~MControl();
+	~MControl() override;
 
-	virtual void MoveFrame(int32_t inXDelta, int32_t inYDelta);
+	void MoveFrame(int32_t inXDelta, int32_t inYDelta) override;
 
-	virtual void ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta);
-	virtual void SetMargins(int32_t inLeftMargin, int32_t inTopMargin, int32_t inRightMargin, int32_t inBottomMargin);
+	void ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta) override;
 
-	// virtual void	Draw(MRect inUpdate);
+	using MControlBase::SetLayout;
+	void SetLayout(MViewLayout inLayout) override;
+	void RequestSize(int32_t inWidth, int32_t inHeight) override;
+
 	virtual void Draw();
 
-	virtual bool IsFocus() const;
-	virtual void SetFocus();
+	virtual void ClickPressed(int32_t inX, int32_t inY, int32_t inClickCount, uint32_t inModifiers) {}
+	virtual void ClickReleased(int32_t inX, int32_t inY, uint32_t inModifiers) {}
+
+	virtual void PointerEnter(int32_t inX, int32_t inY, uint32_t inModifiers) {}
+	virtual void PointerMotion(int32_t inX, int32_t inY, uint32_t inModifiers) {}
+	virtual void PointerLeave() {}
+
+	virtual void ScrollDecelerate(double inVelX, double inVelY) {}
+	virtual bool Scroll(int32_t inX, int32_t inY, int32_t inDeltaX, int32_t inDeltaY, uint32_t inModifiers) { return false; }
+	virtual void ScrollBegin() {}
+	virtual void ScrollEnd() {}
+
+	bool IsFocus() const override;
+	void SetFocus() override;
 
 	I *GetImpl() const { return mImpl; }
 	void SetImpl(I *inImpl) { mImpl = inImpl; }
 
-	virtual MControlImplBase *GetControlImplBase();
+	MControlImplBase *GetControlImplBase() override;
 
   protected:
 	MControl(const std::string &inID, MRect inBounds, I *inImpl);
 
-	virtual void EnableSelf();
-	virtual void DisableSelf();
+	void EnableSelf() override;
+	void DisableSelf() override;
 
-	virtual void ShowSelf();
-	virtual void HideSelf();
+	void ShowSelf() override;
+	void HideSelf() override;
 
-	virtual void AddedToWindow();
+	void AddedToWindow() override;
 
   protected:
-	MControl(const MControl &);
-	MControl &operator=(const MControl &);
+	MControl(const MControl &) = delete;
+	MControl &operator=(const MControl &) = delete;
 
 	I *mImpl;
 };
@@ -155,26 +133,11 @@ class MButton : public MControl<MButtonImpl>
 	void SimulateClick();
 	void MakeDefault(bool inDefault = true);
 
-	virtual void SetText(const std::string &inText);
+	void SetText(const std::string &inText);
 
-	MEventOut<void(const std::string &)>
-		eClicked;
-	MEventOut<void(const std::string &, int32_t, int32_t)>
-		eDropDown;
+	MEventOut<void(const std::string &)> eClicked;
+	MEventOut<void(const std::string &, int32_t, int32_t)> eDropDown;
 };
-
-//// --------------------------------------------------------------------
-//
-// class MImageButton : public MControl<MImageButtonImpl>
-//{
-//  public:
-//	typedef MImageButtonImpl MImpl;
-//
-//					MImageButtonImpl(const std::string& inID, MRect inBounds,
-//						const std::string& inImageResource);
-//
-//	MEventOut<void(const std::string&)> eClicked;
-//};
 
 // --------------------------------------------------------------------
 
@@ -190,8 +153,7 @@ class MExpander : public MControl<MExpanderImpl>
 	void SetOpen(bool inOpen);
 	bool IsOpen() const;
 
-	MEventOut<void(const std::string &)>
-		eClicked;
+	MEventOut<void(const std::string &)> eClicked;
 };
 
 // --------------------------------------------------------------------
@@ -206,14 +168,14 @@ class MScrollbar : public MControl<MScrollbarImpl>
 
 	MScrollbar(const std::string &inID, MRect inBounds);
 
-	virtual int32_t GetValue() const;
-	virtual void SetValue(int32_t inValue);
+	int32_t GetValue() const;
+	void SetValue(int32_t inValue);
 
-	virtual int32_t GetTrackValue() const;
-	virtual int32_t GetMinValue() const;
-	virtual int32_t GetMaxValue() const;
+	int32_t GetTrackValue() const;
+	int32_t GetMinValue() const;
+	int32_t GetMaxValue() const;
 
-	virtual void SetAdjustmentValues(int32_t inMinValue, int32_t inMaxValue,
+	void SetAdjustmentValues(int32_t inMinValue, int32_t inMaxValue,
 		int32_t inScrollUnit, int32_t inPageSize, int32_t inValue);
 
 	MEventOut<void(MScrollMessage)> eScroll;
@@ -226,9 +188,7 @@ class MStatusbarImpl;
 struct MStatusBarElement
 {
 	uint32_t width;
-	MControlPacking packing;
-	uint32_t padding;
-	bool fill;
+	MMargins margins;
 	bool expand;
 };
 
@@ -240,7 +200,7 @@ class MStatusbar : public MControl<MStatusbarImpl>
 	MStatusbar(const std::string &inID, MRect inBounds,
 		uint32_t inPartCount, MStatusBarElement inParts[]);
 
-	virtual void SetStatusText(uint32_t inPartNr, const std::string &inText, bool inBorder);
+	void SetStatusText(uint32_t inPartNr, const std::string &inText, bool inBorder);
 
 	MEventOut<void(uint32_t, MRect)> ePartClicked;
 };
@@ -256,14 +216,12 @@ class MCombobox : public MControl<MComboboxImpl>
 
 	MCombobox(const std::string &inID, MRect inBounds);
 
-	MEventOut<void(const std::string &, int)>
-		eValueChanged;
+	MEventOut<void(const std::string &, int)> eValueChanged;
 
-	virtual void SetText(const std::string &inText);
-	virtual std::string
-	GetText() const;
+	void SetText(const std::string &inText);
+	std::string GetText() const;
 
-	virtual void SetChoices(const std::vector<std::string> &inChoices);
+	void SetChoices(const std::vector<std::string> &inChoices);
 
 	int GetActive();
 	void SetActive(int inActive);
@@ -280,17 +238,15 @@ class MPopup : public MControl<MPopupImpl>
 
 	MPopup(const std::string &inID, MRect inBounds);
 
-	MEventOut<void(const std::string &, int32_t)>
-		eValueChanged;
+	MEventOut<void(const std::string &, int32_t)> eValueChanged;
 
-	virtual void SetValue(int32_t inValue);
-	virtual int32_t GetValue() const;
+	void SetValue(int32_t inValue);
+	int32_t GetValue() const;
 
-	virtual void SetText(const std::string &inText);
-	virtual std::string
-	GetText() const;
+	void SetText(const std::string &inText);
+	std::string GetText() const;
 
-	virtual void SetChoices(const std::vector<std::string> &inChoices);
+	void SetChoices(const std::vector<std::string> &inChoices);
 };
 
 // --------------------------------------------------------------------
@@ -305,7 +261,7 @@ class MCaption : public MControl<MCaptionImpl>
 	MCaption(const std::string &inID, MRect inBounds,
 		const std::string &inText);
 
-	virtual void SetText(const std::string &inText);
+	void SetText(const std::string &inText);
 };
 
 // --------------------------------------------------------------------
@@ -332,13 +288,12 @@ class MEdittext : public MControl<MEdittextImpl>
 	MEventOut<void(const std::string &, const std::string &)> eValueChanged;
 	MEventOut<void(uint32_t inKeyCode, uint32_t inModifiers)> eKeyDown;
 
-	virtual void SetText(const std::string &inText);
-	virtual std::string
-	GetText() const;
+	void SetText(const std::string &inText);
+	std::string GetText() const;
 
 	uint32_t GetFlags() const;
 
-	virtual void SetPasswordChar(uint32_t inUnicode = 0x2022);
+	void SetPasswordChar(uint32_t inUnicode = 0x2022);
 };
 
 // --------------------------------------------------------------------
@@ -368,8 +323,7 @@ class MCheckbox : public MControl<MCheckboxImpl>
 	bool IsChecked() const;
 	void SetChecked(bool inChecked);
 
-	MEventOut<void(const std::string &, bool)>
-		eValueChanged;
+	MEventOut<void(const std::string &, bool)> eValueChanged;
 };
 
 // --------------------------------------------------------------------
@@ -387,31 +341,9 @@ class MRadiobutton : public MControl<MRadiobuttonImpl>
 	bool IsChecked() const;
 	void SetChecked(bool inChecked);
 
-	void SetGroup(const std::list<MRadiobutton *> &inButtons);
+	void SetGroup(MRadiobutton *inButton);
 
-	MEventOut<void(const std::string &, bool)>
-		eValueChanged;
-};
-
-// --------------------------------------------------------------------
-
-class MColorSwatchImpl;
-
-class MColorSwatch : public MControl<MColorSwatchImpl>
-{
-  public:
-	typedef MColorSwatchImpl MImpl;
-
-	MColorSwatch(const std::string &inID, MRect inBounds,
-		MColor inColor);
-
-	virtual MColor GetColor() const;
-	virtual void SetColor(MColor inColor);
-
-	void SetPalette(const std::vector<MColor> &colors);
-
-	MEventOut<void(const std::string &, MColor)> eColorChanged;
-	MEventOut<void(const std::string &, MColor)> eColorPreview;
+	MEventOut<void(const std::string &, bool)> eValueChanged;
 };
 
 // --------------------------------------------------------------------
@@ -427,30 +359,14 @@ class MListBox : public MControl<MListBoxImpl>
 
 	void AddItem(const std::string &inLabel);
 
-	virtual int32_t GetValue() const;
-	virtual void SetValue(int32_t inValue);
+	int32_t GetValue() const;
+	void SetValue(int32_t inValue);
 
 	MEventOut<void(const std::string &, int32_t)> eValueChanged;
 };
 
-// // --------------------------------------------------------------------
-
-// class MListViewImpl;
-
-// class MListView : public MControl<MListViewImpl>
-// {
-//   public:
-// 	typedef MListViewImpl MImpl;
-
-// 	MListView(const std::string &inID, MRect inBounds);
-
-// 	void AddItem(const std::string &inLabel);
-
-// 	MEventOut<void(const std::string &, int32_t)> eValueChanged;
-// };
-
 // --------------------------------------------------------------------
-// Gtk specific controls
+// Box control, a container
 
 class MBoxControlImpl;
 
@@ -459,7 +375,26 @@ class MBoxControl : public MControl<MBoxControlImpl>
   public:
 	typedef MBoxControlImpl MImpl;
 
-	MBoxControl(const std::string &inID, MRect inBounds, bool inHorizontal,
-		bool inHomogeneous = false, bool inExpand = false, bool inFill = false,
-		uint32_t inSpacing = 0, uint32_t inPadding = 0);
+	MBoxControl(const std::string &inID, MRect inBounds, bool inHorizontal);
+
+	using MView::AddChild;
+	void AddChild(MControlBase *inControl, MControlBase *inBefore);
+};
+
+// --------------------------------------------------------------------
+// Stack, another container
+
+class MStackControlImpl;
+
+class MStackControl : public MControl<MStackControlImpl>
+{
+  public:
+	typedef MStackControlImpl MImpl;
+
+	MStackControl(const std::string &inID, MRect inBounds);
+
+	using MView::AddChild;
+	void AddChild(MView *inControl, const std::string &inName);
+
+	void Select(const std::string &inName);
 };

@@ -1,0 +1,31 @@
+<?xml version="1.0" standalone="yes"?>
+<menubar>
+	<menu id='file' label="File">
+		<item label="New" cmd="app.new"/>
+		<item label="Close" cmd="win.close"/>
+		
+		<separator />
+
+		<item label="Quit" cmd="app.quit"/>
+	</menu>
+	<menu id='edit' label="Edit">
+		<item label="Cut" cmd="win.cut"/>
+		<item label="Copy" cmd="win.copy"/>
+		<item label="Paste" cmd="win.paste"/>
+
+		<separator />
+
+		<item label="Select All" cmd="win.select-all"/>
+	</menu>
+	<menu id='window' label="Window">
+		<item label="Next Window" cmd="app.next-window"/>
+		<item label="Previous Window" cmd="app.previous-window"/>
+
+		<separator />
+
+		<item label="first" cmd="app.select-window" />
+	</menu>
+	<menu id='help' label="Help">
+		<item label="About…" cmd="app.about"/>
+	</menu>
+</menubar>

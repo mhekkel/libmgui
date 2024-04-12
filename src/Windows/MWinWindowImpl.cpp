@@ -12,7 +12,6 @@
 
 #pragma comment(lib, "dwmapi")
 
-#include "zeep/xml/document.hpp"
 #include "MWinWindowImpl.hpp"
 #include "MWindow.hpp"
 #include "MError.hpp"
@@ -23,9 +22,6 @@
 #include "MWinUtils.hpp"
 #include "MWinMenuImpl.hpp"
 #include "MAcceleratorTable.hpp"
-
-using namespace std;
-using namespace zeep;
 
 const int BIT_COUNT = 32;
 
@@ -293,30 +289,6 @@ void MWinWindowImpl::Create(MRect inBounds, const wstring& inTitle)
 
 	if (mMenubar != nullptr)
 		mMenubar->SetTarget(mWindow);
-}
-
-void MWinWindowImpl::SetTransparency(float inAlpha)
-{
-	LONG style = ::GetWindowLong(GetHandle(), GWL_EXSTYLE);
-	
-	if (inAlpha == 1.0f)
-		::SetWindowLong(GetHandle(), GWL_EXSTYLE, style & ~WS_EX_LAYERED);
-	else
-	{
-		::SetWindowLong(GetHandle(), GWL_EXSTYLE, style | WS_EX_LAYERED);
-		::SetLayeredWindowAttributes(GetHandle(), 0, static_cast<uint8_t>(inAlpha * 255), LWA_ALPHA);
-	}
-
-	//DWM_BLURBEHIND bb = {0};
-
- //   // Specify blur-behind and blur region.
- //   bb.dwFlags = DWM_BB_ENABLE;
- //   bb.fEnable = true;
- //   bb.hRgnBlur = NULL;
-
- //   // Enable blur-behind.
- //   HRESULT hr = DwmEnableBlurBehindWindow(GetHandle(), &bb);
-
 }
 
 bool MWinWindowImpl::IsDialogMessage(MSG& inMessage)
@@ -1026,7 +998,7 @@ bool MWinWindowImpl::WMContextMenu(HWND /*inHWnd*/, UINT /*inUMsg*/, WPARAM /*in
 		if (view != nullptr)
 		{
 			view->ConvertFromWindow(x, y);
-			view->ShowContextMenu(x, y);
+			view->SecondaryMouseButtonClick(x, y);
 		}
 	}
 	catch (...)

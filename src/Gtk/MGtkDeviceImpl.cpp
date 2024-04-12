@@ -24,8 +24,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Gtk/MGtkDeviceImpl.hpp"
-#include "Gtk/MGtkCanvasImpl.hpp"
+#include "MGtkDeviceImpl.hpp"
+#include "MGtkCanvasImpl.hpp"
 
 #include "MError.hpp"
 #include "MUnicode.hpp"
@@ -352,7 +352,9 @@ void MGtkDeviceImpl::SetTextStyles(uint32_t inStyleCount, uint32_t inStyles[], u
 		attr->end_index = end_index;
 		pango_attr_list_change(attrs, attr);
 
-		attr = pango_attr_underline_new(inStyles[ix] & MDevice::eTextStyleUnderline ? PANGO_UNDERLINE_SINGLE : PANGO_UNDERLINE_NONE);
+		attr = pango_attr_underline_new(
+			inStyles[ix] & MDevice::eTextStyleDoubleUnderline ? PANGO_UNDERLINE_DOUBLE :
+				inStyles[ix] & MDevice::eTextStyleUnderline ? PANGO_UNDERLINE_SINGLE : PANGO_UNDERLINE_NONE);
 		attr->start_index = start_index;
 		attr->end_index = end_index;
 		pango_attr_list_change(attrs, attr);
@@ -550,9 +552,6 @@ MCairoDeviceImp::MCairoDeviceImp(MView *inView)
 	MCanvas *canvas = dynamic_cast<MCanvas *>(inView);
 	MGtkCanvasImpl *target = static_cast<MGtkCanvasImpl *>(canvas->GetImpl());
 	mContext = target->GetCairo();
-
-	// cairo_rectangle(mContext, mRect.x, mRect.y, mRect.width, mRect.height);
-	// cairo_clip(mContext);
 }
 
 MCairoDeviceImp::~MCairoDeviceImp()
@@ -578,7 +577,7 @@ void MCairoDeviceImp::SetForeColor(MColor inColor)
 {
 	mForeColor = inColor;
 
-	cairo_set_source_rgb(mContext, 	mForeColor.red / 255.0, 	mForeColor.green / 255.0, 	mForeColor.blue / 255.0);
+	cairo_set_source_rgb(mContext, mForeColor.red / 255.0, mForeColor.green / 255.0, mForeColor.blue / 255.0);
 }
 
 MColor MCairoDeviceImp::GetForeColor() const
@@ -616,7 +615,7 @@ void MCairoDeviceImp::EraseRect(MRect inRect)
 
 	cairo_rectangle(mContext, inRect.x, inRect.y, inRect.width, inRect.height);
 
-	cairo_set_source_rgb(mContext, 	mBackColor.red / 255.0, 	mBackColor.green / 255.0, 	mBackColor.blue / 255.0);
+	cairo_set_source_rgb(mContext, mBackColor.red / 255.0, mBackColor.green / 255.0, mBackColor.blue / 255.0);
 
 	//	if (mOffscreenPixmap != nullptr)
 	//		cairo_set_operator(mContext, CAIRO_OPERATOR_CLEAR);
@@ -680,7 +679,7 @@ void MCairoDeviceImp::DrawImage(cairo_surface_t *inImage, float inX, float inY, 
 
 void MCairoDeviceImp::DrawBitmap(const MBitmap &inBitmap, float inX, float inY)
 {
-	cairo_surface_t *surface = cairo_image_surface_create_for_data(	(uint8_t *)inBitmap.Data(), CAIRO_FORMAT_ARGB32, inBitmap.Width(), inBitmap.Height(), inBitmap.Stride());
+	cairo_surface_t *surface = cairo_image_surface_create_for_data((uint8_t *)inBitmap.Data(), CAIRO_FORMAT_ARGB32, inBitmap.Width(), inBitmap.Height(), inBitmap.Stride());
 
 	if (surface != nullptr)
 	{
@@ -711,7 +710,7 @@ void MCairoDeviceImp::CreateAndUsePattern(MColor inColor1, MColor inColor2)
 			mPatternData[y][x] = c2;
 	}
 
-	cairo_surface_t *s = cairo_image_surface_create_for_data(	reinterpret_cast<uint8_t *>(mPatternData), CAIRO_FORMAT_RGB24, 8, 8, 32);
+	cairo_surface_t *s = cairo_image_surface_create_for_data(reinterpret_cast<uint8_t *>(mPatternData), CAIRO_FORMAT_RGB24, 8, 8, 32);
 
 	if (s != nullptr)
 	{
@@ -778,7 +777,7 @@ void MCairoDeviceImp::DrawWhiteSpace(float inX, float inY)
 	int baseLine = pango_layout_get_baseline(mPangoLayout);
 	PangoLayoutLine *line = pango_layout_get_line(mPangoLayout, 0);
 
-	cairo_set_source_rgb(mContext, 	mWhiteSpaceColor.red / 255.0, 	mWhiteSpaceColor.green / 255.0, 	mWhiteSpaceColor.blue / 255.0);
+	cairo_set_source_rgb(mContext, mWhiteSpaceColor.red / 255.0, mWhiteSpaceColor.green / 255.0, mWhiteSpaceColor.blue / 255.0);
 
 	// we're using one font anyway
 	PangoFontMap *fontMap = pango_cairo_font_map_get_default();

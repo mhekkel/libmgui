@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<interface>
+	<menu id='file'>
+		<attribute name="label">File</attribute>
+		<section>
+			<item>
+				<attribute name="label">New</attribute>
+				<attribute name="action">app.new</attribute>
+			</item>
+			<item>
+				<attribute name="label">Close</attribute>
+				<attribute name="action">win.close</attribute>
+			</item>
+		</section>
+		<section>
+			<item>
+				<attribute name="label">Quit</attribute>
+				<attribute name="action">app.quit</attribute>
+			</item>
+		</section>
+	</menu>
+	<menu id="windows">
+		<section>
+			<item>
+				<attribute name="label">Next Window</attribute>
+				<attribute name="action">app.next-window</attribute>
+			</item>
+			<item>
+				<attribute name="label">Previous Window</attribute>
+				<attribute name="action">app.prev-window</attribute>
+			</item>
+		</section>
+		<section>
+			
+		</section>
+	</menu>
+	<menu id="help">
+		<section>
+			<item>
+				<attribute name="label">About…</attribute>
+				<attribute name="action">app.about</attribute>
+			</item>
+		</section>
+	</menu>
+</interface>

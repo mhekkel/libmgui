@@ -1,17 +1,17 @@
 /*-
  * SPDX-License-Identifier: BSD-2-Clause
- *
+ * 
  * Copyright (c) 2023 Maarten L. Hekkelman
- *
+ * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * 
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,46 +26,17 @@
 
 #pragma once
 
-#include "MGtkControlsImpl.hpp"
+#include <gtk/gtk.h>
 
-#include "MCanvasImpl.hpp"
+#include "MLib.hpp"
 
-#include <cassert>
+#include "MTypes.hpp"
 
+// gtk utils
 
-class MGtkCanvasImpl : public MGtkControlImpl<MCanvas>
-{
-  public:
-	MGtkCanvasImpl(MCanvas *inCanvas, uint32_t inWidth, uint32_t inHeight);
-	virtual ~MGtkCanvasImpl();
+uint32_t MapModifier(uint32_t inModifier);
+uint32_t MapToKeyCode(uint32_t inKeyValue);
 
-	cairo_t *GetCairo() const
-	{
-		assert(mCurrentCairo);
-		return mCurrentCairo;
-	}
+std::pair<uint32_t,uint32_t> MapFromGdkKey(uint32_t inKeyValue, uint32_t inModifier);
+std::pair<uint32_t,GdkModifierType> MapToGdkKey(uint32_t inKeyValue, uint32_t inModifier);
 
-	virtual void CreateWidget();
-
-	virtual bool OnMouseDown(int32_t inX, int32_t inY, uint32_t inButtonNr, uint32_t inClickCount, uint32_t inModifiers);
-	virtual bool OnMouseMove(int32_t inX, int32_t inY, uint32_t inModifiers);
-	virtual bool OnMouseUp(int32_t inX, int32_t inY, uint32_t inModifiers);
-	virtual bool OnMouseExit();
-
-	void Invalidate();
-
-	// MCanvasImpl overrides
-	virtual void AcceptDragAndDrop(bool inFiles, bool inText);
-	virtual void StartDrag();
-
-  protected:
-	virtual bool OnDrawEvent(cairo_t *inCairo);
-	virtual bool OnConfigureEvent(GdkEvent *inEvent);
-
-	virtual bool OnKeyPressEvent(GdkEvent *inEvent);
-	virtual bool OnCommit(gchar *inText);
-
-	virtual bool OnScrollEvent(GdkEvent *inEvent);
-
-	cairo_t *mCurrentCairo = nullptr;
-};

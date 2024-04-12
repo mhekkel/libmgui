@@ -26,7 +26,45 @@
 
 #pragma once
 
+#include "MCanvas.hpp"
 #include "MDialog.hpp"
+
+// --------------------------------------------------------------------
+
+class MColorSwatch : public MCanvas
+{
+  public:
+	MColorSwatch(const std::string &inID, MRect inBounds, MColor inColor);
+
+	MColor GetColor() const;
+	void SetColor(MColor inColor);
+
+	void SetPalette(const std::vector<MColor> &inPaletteColors);
+
+	MEventOut<void(const std::string &, MColor)> eColorChanged;
+	MEventOut<void(const std::string &, MColor)> eColorPreview;
+
+  private:
+	void Draw() override;
+
+	void ClickPressed(int32_t inX, int32_t inY, int32_t inClickCount, uint32_t inModifiers) override;
+	void ClickReleased(int32_t inX, int32_t inY, uint32_t inModifiers) override;
+
+	// void PointerEnter(int32_t inX, int32_t inY, uint32_t inModifiers) override;
+	void PointerMotion(int32_t inX, int32_t inY, uint32_t inModifiers) override;
+	// void PointerLeave() override;
+
+	MEventIn<void(MColor)> ePickedColor;
+	MEventIn<void(MColor)> ePreviewColor;
+
+	void OnPickedColor(MColor inColor);
+	void OnPreviewColor(MColor inColor);
+
+	MColor mColor;
+	std::vector<MColor> mPalette;
+};
+
+// --------------------------------------------------------------------
 
 enum MPickerMode
 {
@@ -41,7 +79,8 @@ enum MPickerMode
 class MColorPicker : public MDialog
 {
   public:
-	MColorPicker(MWindow *inWindow, MColor inColor = kBlack);
+	MColorPicker(MWindow *inWindow, MColor inColor = kBlack,
+		std::vector<MColor> inPalette = {});
 
 	virtual bool OKClicked();
 	virtual bool CancelClicked();

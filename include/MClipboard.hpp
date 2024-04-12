@@ -33,40 +33,136 @@
 
 #include "MTypes.hpp"
 
+#include <memory>
 #include <string>
 
-const uint32_t
-	kClipboardRingSize = 7;
+// --------------------------------------------------------------------
+
+class MClipboard;
+
+struct MClipboardGetDataHandlerbase
+{
+	virtual ~MClipboardGetDataHandlerbase() = default;
+	virtual void HandleData(const std::string &data) = 0;
+};
+
+// --------------------------------------------------------------------
+
+class MClipboardImpl
+{
+  public:
+	MClipboardImpl(MClipboard *inClipboard)
+		: mClipboard(inClipboard)
+	{
+	}
+
+	virtual ~MClipboardImpl() = default;
+
+	virtual bool HasData() = 0;
+	virtual void GetData(MClipboardGetDataHandlerbase *inHandler) = 0;
+	virtual void SetData(const std::string &inData) = 0;
+
+	static MClipboardImpl *Create(MClipboard *inClipboard, bool inPrimary);
+
+  protected:
+	MClipboard *mClipboard;
+};
+
+// --------------------------------------------------------------------
 
 class MClipboard
 {
   public:
-	static MClipboard &Instance();
 
-	bool HasData();
-	bool IsBlock();
-	void NextInRing();
-	void PreviousInRing();
-	void GetData(std::string &outText, bool &outIsBlock);
-	void SetData(const std::string &inText, bool inBlock);
-	void AddData(const std::string &inText);
-
-	struct Data
+	virtual ~MClipboard()
 	{
-		Data(const std::string &inText, bool inBlock);
-		void SetData(const std::string &inText, bool inBlock);
-		void AddData(const std::string &inText);
+		delete mImpl;
+	}
 
-		std::string mText;
-		bool mBlock;
+	static void Init(MClipboardImpl *inImpl = nullptr)
+	{
+		if (inImpl)
+			Init(new MClipboard(inImpl));
+		else
+			Init(new MClipboard(false));
+	}
+
+	static void Init(MClipboard *inClipboard)
+	{
+		return sInstance.reset(inClipboard);
+	}
+
+	static void InitPrimary(MClipboardImpl *inPrimaryImpl = nullptr)
+	{
+		if (inPrimaryImpl)
+			InitPrimary(new MClipboard(inPrimaryImpl));
+		else
+			InitPrimary(new MClipboard(true));
+	}
+
+	static void InitPrimary(MClipboard *inPrimary)
+	{
+		return sPrimary.reset(inPrimary);
+	}
+
+	static MClipboard &Instance()
+	{
+		if (not sInstance)
+			Init();
+
+		return *sInstance.get();
+	}
+
+	static MClipboard &PrimaryInstance()
+	{
+		return sPrimary ? *sPrimary.get() : Instance();
+	}
+
+	bool HasData()
+	{
+		return mImpl->HasData();
+	}
+
+	template <typename Handler>
+	struct MGetDataHandler : public MClipboardGetDataHandlerbase
+	{
+		MGetDataHandler(Handler &&handler)
+			: mHandler(std::move(handler))
+		{
+		}
+
+		void HandleData(const std::string &inData)
+		{
+			mHandler(inData);
+		}
+
+		Handler mHandler;
 	};
 
+	template <typename Handler>
+	void GetData(Handler &&handler)
+	{
+		mImpl->GetData(new MGetDataHandler(std::move(handler)));
+	}
+
+	void SetData(const std::string &inText)
+	{
+		mImpl->SetData(inText);
+	}
+
+  protected:
+	
+	MClipboard(MClipboardImpl *inImpl)
+		: mImpl(inImpl)
+	{
+	}
+
   private:
-	MClipboard();
-	virtual ~MClipboard();
+	MClipboard(bool inPrimary)
+		: MClipboard(MClipboardImpl::Create(this, inPrimary))
+	{
+	}
 
 	class MClipboardImpl *mImpl;
-
-	Data *mRing[kClipboardRingSize];
-	uint32_t mCount;
+	static std::unique_ptr<MClipboard> sInstance, sPrimary;
 };

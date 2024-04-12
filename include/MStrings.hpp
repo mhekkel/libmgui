@@ -65,7 +65,5 @@ inline void PushArgument(std::vector<std::string> &inArgs, const std::string &in
 template <class ...T>
 std::string FormatString(const char *inString, const T & ... inArg)
 {
-	std::vector<std::string> args;
-	(PushArgument(args, inArg), ...);
-	return GetFormattedLocalisedStringWithArguments(inString, args);
+	return GetFormattedLocalisedStringWithArguments(inString, { inArg... });
 }

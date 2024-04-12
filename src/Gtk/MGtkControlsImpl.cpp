@@ -24,10 +24,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Gtk/MGtkControlsImpl.hpp"
-#include "Gtk/MGtkCanvasImpl.hpp"
-#include "Gtk/MGtkControlsImpl.inl"
-#include "Gtk/MGtkWindowImpl.hpp"
+#include "MGtkControlsImpl.hpp"
+#include "MGtkCanvasImpl.hpp"
+#include "MGtkControlsImpl.inl"
+#include "MGtkWindowImpl.hpp"
 
 #include "MColorPicker.hpp"
 #include "MUtils.hpp"
@@ -44,6 +44,12 @@ MGtkSimpleControlImpl::MGtkSimpleControlImpl(MSimpleControl *inControl)
 void MGtkSimpleControlImpl::CreateWidget()
 {
 	SetWidget(gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0));
+}
+
+void MGtkSimpleControlImpl::Append(MGtkWidgetMixin *inChild)
+{
+	assert(GTK_IS_BOX(GetWidget()));
+	gtk_box_append(GTK_BOX(GetWidget()), inChild->GetWidget());
 }
 
 MSimpleControlImpl *MSimpleControlImpl::Create(MSimpleControl *inControl)
@@ -74,54 +80,22 @@ void MGtkButtonImpl::Clicked()
 
 void MGtkButtonImpl::SimulateClick()
 {
-	//	::SendMessage(GetWidget(), BM_SETSTATE, 1, 0);
-	//	::UpdateWindow(GetWidget());
-	//	::delay(12.0 / 60.0);
-	//	::SendMessage(GetWidget(), BM_SETSTATE, 0, 0);
-	//	::UpdateWindow(GetWidget());
-	//
-	//	mControl->eClicked(mControl->GetID());
+	g_signal_emit_by_name(G_OBJECT(GetWidget()), "activate");
 }
 
 void MGtkButtonImpl::MakeDefault(bool inDefault)
 {
 	mDefault = inDefault;
-
-	// if (GetWidget() != nullptr)
-	// 	gtk_widget_grab_default(GetWidget());
 }
 
 void MGtkButtonImpl::SetText(const std::string &inText)
 {
 	mLabel = inText;
 	gtk_button_set_label(GTK_BUTTON(GetWidget()), mLabel.c_str());
-	//	wstring text(c2w(inText));
-	//	::SendMessage(GetWidget(), WM_SETTEXT, 0, (LPARAM)text.c_str());
-}
-
-void MGtkButtonImpl::AddedToWindow()
-{
-	MGtkControlImpl::AddedToWindow();
-	//	if (mDefault)
-	//		::SendMessage(GetWidget(), BM_SETSTYLE, (WPARAM)BS_DEFPUSHBUTTON, 0);
-	//	else
-	//		::SendMessage(GetWidget(), BM_SETSTYLE, (WPARAM)BS_PUSHBUTTON, 0);
 }
 
 void MGtkButtonImpl::GetIdealSize(int32_t &outWidth, int32_t &outHeight)
 {
-	//	outWidth = 75;
-	//	outHeight = 23;
-	//
-	//	SIZE size;
-	//	if (GetWidget() != nullptr and Button_GetIdealSize(GetWidget(), &size))
-	//	{
-	//		if (outWidth < size.cx + 20)
-	//			outWidth = size.cx + 20;
-	//
-	//		if (outHeight < size.cy + 2)
-	//			outHeight = size.cy + 2;
-	//	}
 }
 
 MButtonImpl *MButtonImpl::Create(MButton *inButton, const std::string &inLabel,
@@ -138,22 +112,13 @@ MGtkExpanderImpl::MGtkExpanderImpl(MExpander *inExpander, const std::string &inL
 {
 }
 
-MGtkExpanderImpl::~MGtkExpanderImpl()
-{
-	//	if (mDC)
-	//		::ReleaseDC(GetWidget(), mDC);
-}
-
 void MGtkExpanderImpl::CreateWidget()
 {
 	SetWidget(gtk_expander_new(mLabel.c_str()));
 }
 
-void MGtkExpanderImpl::Append(MGtkWidgetMixin *inChild, MControlPacking inPacking,
-	bool inExpand, bool inFill, uint32_t inPadding)
+void MGtkExpanderImpl::Append(MGtkWidgetMixin *inChild)
 {
-	// assert(GTK_IS_CONTAINER(GetWidget()));
-	// gtk_container_add(GTK_CONTAINER(GetWidget()), inChild->GetWidget());
 	gtk_expander_set_child(GTK_EXPANDER(GetWidget()), inChild->GetWidget());
 }
 
@@ -195,8 +160,7 @@ MGtkScrollbarImpl::MGtkScrollbarImpl(MScrollbar *inScrollbar)
 
 void MGtkScrollbarImpl::CreateWidget()
 {
-	MRect bounds;
-	mControl->GetBounds(bounds);
+	MRect bounds = mControl->GetBounds();
 
 	GtkAdjustment *adjustment = GTK_ADJUSTMENT(gtk_adjustment_new(0, 0, 1, 1, 1, 1));
 
@@ -205,22 +169,22 @@ void MGtkScrollbarImpl::CreateWidget()
 	else
 		SetWidget(gtk_scrollbar_new(GTK_ORIENTATION_VERTICAL, adjustment));
 
-	eValueChanged.Connect(GetWidget(), "value-changed");
+	eValueChanged.Connect(G_OBJECT(adjustment), "value-changed");
 }
 
 int32_t MGtkScrollbarImpl::GetValue() const
 {
 	int32_t result = 0;
 
-	if (GetWidget() != nullptr)
-		result = gtk_range_get_value(GTK_RANGE(GetWidget()));
+	if (auto adj = gtk_scrollbar_get_adjustment(GTK_SCROLLBAR(GetWidget())); adj != nullptr)
+		result = gtk_adjustment_get_value(adj);
 
 	return result;
 }
 
 void MGtkScrollbarImpl::SetValue(int32_t inValue)
 {
-	GtkAdjustment *adj = gtk_range_get_adjustment(GTK_RANGE(GetWidget()));
+	GtkAdjustment *adj = gtk_scrollbar_get_adjustment(GTK_SCROLLBAR(GetWidget()));
 
 	if (adj != nullptr)
 	{
@@ -234,7 +198,7 @@ void MGtkScrollbarImpl::SetValue(int32_t inValue)
 			inValue = maxValue;
 	}
 
-	gtk_range_set_value(GTK_RANGE(GetWidget()), inValue);
+	gtk_adjustment_set_value(adj, inValue);
 }
 
 int32_t MGtkScrollbarImpl::GetTrackValue() const
@@ -245,7 +209,7 @@ int32_t MGtkScrollbarImpl::GetTrackValue() const
 void MGtkScrollbarImpl::SetAdjustmentValues(int32_t inMinValue, int32_t inMaxValue,
 	int32_t inScrollUnit, int32_t inPageSize, int32_t inValue)
 {
-	GtkAdjustment *adj = gtk_range_get_adjustment(GTK_RANGE(GetWidget()));
+	GtkAdjustment *adj = gtk_scrollbar_get_adjustment(GTK_SCROLLBAR(GetWidget()));
 
 	if (adj != nullptr)
 	{
@@ -269,13 +233,13 @@ void MGtkScrollbarImpl::SetAdjustmentValues(int32_t inMinValue, int32_t inMaxVal
 
 int32_t MGtkScrollbarImpl::GetMinValue() const
 {
-	GtkAdjustment *adj = gtk_range_get_adjustment(GTK_RANGE(GetWidget()));
+	GtkAdjustment *adj = gtk_scrollbar_get_adjustment(GTK_SCROLLBAR(GetWidget()));
 	return adj == nullptr ? 0 : gtk_adjustment_get_lower(adj);
 }
 
 int32_t MGtkScrollbarImpl::GetMaxValue() const
 {
-	GtkAdjustment *adj = gtk_range_get_adjustment(GTK_RANGE(GetWidget()));
+	GtkAdjustment *adj = gtk_scrollbar_get_adjustment(GTK_SCROLLBAR(GetWidget()));
 
 	int32_t result = 0;
 	if (adj != nullptr)
@@ -303,59 +267,50 @@ MScrollbarImpl *MScrollbarImpl::Create(MScrollbar *inScrollbar)
 MGtkStatusbarImpl::MGtkStatusbarImpl(MStatusbar *inStatusbar, uint32_t inPartCount, MStatusBarElement inParts[])
 	: MGtkControlImpl(inStatusbar, "")
 	, mParts(inParts, inParts + inPartCount)
-	, mClicked(this, &MGtkStatusbarImpl::Clicked)
 {
 }
 
 void MGtkStatusbarImpl::CreateWidget()
 {
+	SetEventMask(MEventMask::GestureClick);
+
 	GtkWidget *statusBar = gtk_statusbar_new();
 
-	// GtkShadowType shadow_type = GTK_SHADOW_NONE;
-	//	gtk_widget_style_get(statusBar, "shadow_type", &shadow_type, nullptr);
+	GtkRequisition minimum, natural;
+	gtk_widget_get_preferred_size(statusBar, &minimum, &natural);
+
+	MRect bounds(0, 0, natural.width, natural.height);
+	g_object_ref_sink(statusBar);
+
+	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+
+	gtk_widget_set_size_request(box, natural.width, natural.height);
 
 	for (auto part : mParts)
 	{
-		GtkWidget *frame = gtk_frame_new(nullptr);
-		// gtk_frame_set_shadow_type(GTK_FRAME(frame), shadow_type);
-
 		GtkWidget *label = gtk_label_new("");
 		gtk_label_set_single_line_mode(GTK_LABEL(label), true);
-		gtk_label_set_selectable(GTK_LABEL(label), true);
+		gtk_label_set_selectable(GTK_LABEL(label), false);
 		gtk_label_set_xalign(GTK_LABEL(label), 0);
 		gtk_label_set_yalign(GTK_LABEL(label), 0.5);
+		gtk_label_set_ellipsize(GTK_LABEL(label), PANGO_ELLIPSIZE_END);
 
-		// gtk_container_add(GTK_CONTAINER(frame), label);
-		gtk_frame_set_child(GTK_FRAME(frame), label);
-
-		// if (part.packing == ePackStart)
-			gtk_box_append(GTK_BOX(statusBar), frame);//, part.expand, part.fill, part.padding);
-		// else
-		// 	gtk_box_pack_end(GTK_BOX(statusBar), frame, part.expand, part.fill, part.padding);
+		gtk_box_append(GTK_BOX(box), label);
 
 		if (part.width > 0)
-			gtk_widget_set_size_request(frame, part.width, -1);
+			gtk_widget_set_size_request(label, part.width, -1);
+		
+		gtk_widget_set_hexpand(label, part.expand);
+		
+		gtk_widget_set_margin_start(label, part.margins.left);
+		gtk_widget_set_margin_top(label, part.margins.top);
+		gtk_widget_set_margin_end(label, part.margins.right);
+		gtk_widget_set_margin_bottom(label, part.margins.bottom);
 
 		mPanels.push_back(label);
-
-		mClicked.Connect(label, "button-press-event");
 	}
 
-	SetWidget(statusBar);
-}
-
-void MGtkStatusbarImpl::AddedToWindow()
-{
-	CreateWidget();
-
-	MGtkWidgetMixin *parent;
-	MRect bounds;
-
-	GetParentAndBounds(parent, bounds);
-
-	MGtkWindowImpl *impl = dynamic_cast<MGtkWindowImpl *>(parent);
-	assert(impl != nullptr);
-	impl->AddStatusbarWidget(this);
+	SetWidget(box);
 }
 
 void MGtkStatusbarImpl::SetStatusText(uint32_t inPartNr, const std::string &inText, bool inBorder)
@@ -364,15 +319,23 @@ void MGtkStatusbarImpl::SetStatusText(uint32_t inPartNr, const std::string &inTe
 		gtk_label_set_text(GTK_LABEL(mPanels[inPartNr]), inText.c_str());
 }
 
-bool MGtkStatusbarImpl::Clicked(GdkEvent *inEvent)
+void MGtkStatusbarImpl::OnGestureClickPressed(double inX, double inY, gint inClickCount)
 {
-	GtkWidget *source = GTK_WIDGET(mClicked.GetSourceGObject());
+	for (std::size_t ix = 0; auto panel : mPanels)
+	{
+		graphene_rect_t r;
+		if (not gtk_widget_compute_bounds(panel, GetWidget(), &r))
+			continue;
 
-	auto panel = find(mPanels.begin(), mPanels.end(), source);
-	if (panel != mPanels.end())
-		mControl->ePartClicked(panel - mPanels.begin(), MRect());
+		if (inX >= r.origin.x and inX <= r.origin.x + r.size.width and
+			inY >= r.origin.y and inY <= r.origin.y + r.size.height)
+		{
+			mControl->ePartClicked(ix, MRect(r.origin.x, r.origin.y, r.size.width, r.size.height));
+			break;
+		}
 
-	return true;
+		++ix;
+	}
 }
 
 MStatusbarImpl *MStatusbarImpl::Create(MStatusbar *inStatusbar, uint32_t inPartCount, MStatusBarElement inParts[])
@@ -390,8 +353,6 @@ MGtkComboboxImpl::MGtkComboboxImpl(MCombobox *inCombobox)
 void MGtkComboboxImpl::CreateWidget()
 {
 	GtkTreeModel *list_store = GTK_TREE_MODEL(gtk_list_store_new(1, G_TYPE_STRING));
-	THROW_IF_NIL(list_store);
-
 	GtkWidget *wdgt = gtk_combo_box_new_with_model_and_entry(list_store);
 	gtk_combo_box_set_entry_text_column(GTK_COMBO_BOX(wdgt), 0);
 
@@ -402,10 +363,11 @@ std::string MGtkComboboxImpl::GetText() const
 {
 	std::string result;
 
-	// //	char* text = gtk_combo_box_get_active_text(GTK_COMBO_BOX(GetWidget()));
-	// const char *text = gtk_combo_box_text_get_active_text(GTK_ENTRY(gtk_combo_box_get_active(GTK_BIN(GetWidget()))));
-	// if (text != nullptr)
-	// 	result = text;
+	auto entry = gtk_combo_box_get_child(GTK_COMBO_BOX(GetWidget()));
+	auto buffer = gtk_entry_get_buffer(GTK_ENTRY(entry));
+	auto text = gtk_entry_buffer_get_text(GTK_ENTRY_BUFFER(buffer));
+	if (text != nullptr)
+		result = text;
 	return result;
 }
 
@@ -423,7 +385,7 @@ void MGtkComboboxImpl::SetText(const std::string &inText)
 	GtkWidget *wdgt = GetWidget();
 
 	if (not GTK_IS_COMBO_BOX(wdgt))
-		THROW(("Item is not a combo box"));
+		throw std::runtime_error("Item is not a combo box");
 
 	auto ix = i - mChoices.begin();
 	if (ix != gtk_combo_box_get_active(GTK_COMBO_BOX(wdgt)))
@@ -441,11 +403,9 @@ void MGtkComboboxImpl::SetChoices(const std::vector<std::string> &inChoices)
 		mChanged.Disconnect(wdgt);
 
 		if (not GTK_IS_COMBO_BOX(wdgt))
-			THROW(("Item is not a combo box"));
+			throw std::runtime_error("Item is not a combo box");
 
 		GtkListStore *model = GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(wdgt)));
-		THROW_IF_NIL(model);
-
 		gtk_list_store_clear(model);
 
 		for (auto s : inChoices)
@@ -552,22 +512,6 @@ std::string MGtkPopupImpl::GetText() const
 	return s ? s : "";
 }
 
-bool MGtkPopupImpl::DispatchKeyDown(uint32_t inKeyCode, uint32_t inModifiers, bool inRepeat)
-{
-	bool result = false;
-
-	if (inKeyCode == kReturnKeyCode or
-		inKeyCode == kEnterKeyCode or
-		inKeyCode == kTabKeyCode or
-		inKeyCode == kEscapeKeyCode or
-		(inModifiers & ~kShiftKey) != 0)
-	{
-		//		result = MGtkControlImpl::DispatchKeyDown(inKeyCode, inModifiers, inRepeat);
-	}
-
-	return result;
-}
-
 MPopupImpl *MPopupImpl::Create(MPopup *inPopup)
 {
 	return new MGtkPopupImpl(inPopup);
@@ -577,6 +521,9 @@ MPopupImpl *MPopupImpl::Create(MPopup *inPopup)
 
 MGtkEdittextImpl::MGtkEdittextImpl(MEdittext *inEdittext, uint32_t inFlags)
 	: MGtkControlImpl(inEdittext, "")
+	, mTextInserted(this, &MGtkEdittextImpl::TextInserted)
+	, mTextDeleted(this, &MGtkEdittextImpl::TextDeleted)
+	, mBuffer(nullptr)
 	, mFlags(inFlags)
 {
 }
@@ -585,19 +532,16 @@ void MGtkEdittextImpl::CreateWidget()
 {
 	mBuffer = gtk_entry_buffer_new(nullptr, 0);
 
+	mTextInserted.Connect(G_OBJECT(mBuffer), "inserted-text");
+	mTextDeleted.Connect(G_OBJECT(mBuffer), "deleted-text");
+
 	auto entry = gtk_entry_new();
 	gtk_entry_set_buffer(GTK_ENTRY(entry), mBuffer);
 
+	SetEventMask(MEventMask::KeyCapture);
 	SetWidget(entry);
 
 	gtk_widget_set_focus_on_click(entry, true);
-}
-
-void MGtkEdittextImpl::SetFocus()
-{
-	MGtkControlImpl::SetFocus();
-	//
-	//	::SendMessage(GetWidget(), EM_SETSEL, 0, -1);
 }
 
 std::string MGtkEdittextImpl::GetText() const
@@ -623,22 +567,24 @@ void MGtkEdittextImpl::SetPasswordChar(uint32_t inUnicode)
 		gtk_entry_set_invisible_char(GTK_ENTRY(wdgt), inUnicode);
 	}
 	else
-		THROW(("item is not an entry"));
+		throw std::runtime_error("item is not an entry");
 }
 
-bool MGtkEdittextImpl::OnKeyPressEvent(GdkEvent *inEvent)
+bool MGtkEdittextImpl::OnKeyPressed(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers)
 {
+	auto [keycode, modifiers] = MapFromGdkKey(inKeyValue, inModifiers);
+	mControl->eKeyDown(keycode, modifiers);
+	return false;
+}
 
-	const uint32_t kValidModifiersMask = gtk_accelerator_get_default_mod_mask();
-	uint32_t modifiers = MapModifier(gdk_event_get_modifier_state(inEvent) & kValidModifiersMask);
-	uint32_t keyValue = MapKeyCode(gdk_key_event_get_keyval(inEvent));
+void MGtkEdittextImpl::TextInserted(guint, gchar*, guint)
+{
+	mControl->eValueChanged(mControl->GetID(), GetText());
+}
 
-	bool result = mControl->HandleKeyDown(keyValue, modifiers, false);
-
-	if (not result)
-		result = MGtkControlImpl::OnKeyPressEvent(inEvent);
-
-	return result;
+void MGtkEdittextImpl::TextDeleted(guint, guint)
+{
+	mControl->eValueChanged(mControl->GetID(), GetText());
 }
 
 MEdittextImpl *MEdittextImpl::Create(MEdittext *inEdittext, uint32_t inFlags)
@@ -695,25 +641,32 @@ MSeparatorImpl *MSeparatorImpl::Create(MSeparator *inSeparator)
 MGtkCheckboxImpl::MGtkCheckboxImpl(MCheckbox *inControl, const std::string &inText)
 	: MGtkControlImpl(inControl, inText)
 	, mChecked(false)
+	, mToggled(this, &MGtkCheckboxImpl::Toggled)
 {
 }
 
 void MGtkCheckboxImpl::CreateWidget()
 {
 	SetWidget(gtk_check_button_new_with_label(mLabel.c_str()));
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(GetWidget()), mChecked);
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(GetWidget()), mChecked);
+	mToggled.Connect(GetWidget(), "toggled");
+}
+
+void MGtkCheckboxImpl::Toggled()
+{
+	mControl->eValueChanged(mControl->GetID(), IsChecked());
 }
 
 bool MGtkCheckboxImpl::IsChecked() const
 {
-	return gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(GetWidget()));
+	return gtk_check_button_get_active(GTK_CHECK_BUTTON(GetWidget()));
 }
 
 void MGtkCheckboxImpl::SetChecked(bool inChecked)
 {
 	mChecked = inChecked;
 	if (GetWidget())
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(GetWidget()), mChecked);
+		gtk_check_button_set_active(GTK_CHECK_BUTTON(GetWidget()), mChecked);
 }
 
 MCheckboxImpl *MCheckboxImpl::Create(MCheckbox *inCheckbox, const std::string &inText)
@@ -725,147 +678,137 @@ MCheckboxImpl *MCheckboxImpl::Create(MCheckbox *inCheckbox, const std::string &i
 
 MGtkRadiobuttonImpl::MGtkRadiobuttonImpl(MRadiobutton *inControl, const std::string &inText)
 	: MGtkControlImpl(inControl, inText)
+	, mChecked(false)
+	, mToggled(this, &MGtkRadiobuttonImpl::Toggled)
 {
 }
 
 void MGtkRadiobuttonImpl::CreateWidget()
 {
-	// if (mGroup.empty() or mGroup.front() == mControl)
-	// 	SetWidget(gtk_radio_button_new_with_label(nullptr, mLabel.c_str()));
-	// else if (not mGroup.empty())
-	// {
-	// 	MGtkRadiobuttonImpl *first = dynamic_cast<MGtkRadiobuttonImpl *>(mGroup.front()->GetImpl());
+	SetWidget(gtk_check_button_new_with_label(mLabel.c_str()));
+	gtk_check_button_set_active(GTK_CHECK_BUTTON(GetWidget()), mChecked);
 
-	// 	SetWidget(gtk_radio_button_new_with_label_from_widget(
-	// 		GTK_RADIO_BUTTON(first->GetWidget()), mLabel.c_str()));
-	// }
+	if (mGroup != nullptr and mGroup != this)
+	{
+		gtk_check_button_set_group(GTK_CHECK_BUTTON(GetWidget()),
+			GTK_CHECK_BUTTON(mGroup->GetWidget()));
+	}
+
+	mToggled.Connect(GetWidget(), "toggled");
+}
+
+void MGtkRadiobuttonImpl::Toggled()
+{
+	mControl->eValueChanged(mControl->GetID(), IsChecked());
 }
 
 bool MGtkRadiobuttonImpl::IsChecked() const
 {
-	return gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(GetWidget()));
+	return gtk_check_button_get_active(GTK_CHECK_BUTTON(GetWidget()));
 }
 
 void MGtkRadiobuttonImpl::SetChecked(bool inChecked)
 {
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(GetWidget()), inChecked);
+	mChecked = inChecked;
+	if (GetWidget())
+		gtk_check_button_set_active(GTK_CHECK_BUTTON(GetWidget()), mChecked);
 }
 
-void MGtkRadiobuttonImpl::SetGroup(const std::list<MRadiobutton *> &inButtons)
-{
-	mGroup = inButtons;
-}
 
-// bool MGtkRadiobuttonImpl::WMCommand(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPARAM inLParam, LRESULT& outResult)
-//{
-//	bool result = false;
-//
-//	if (inUMsg == BN_CLICKED)
-//	{
-//		bool checked = not IsChecked();
-//
-//		SetChecked(checked);
-//		mControl->eValueChanged(mControl->GetID(), checked);
-//
-//		outResult = 1;
-//		result = true;
-//	}
-//
-//	return result;
-// }
-//
 MRadiobuttonImpl *MRadiobuttonImpl::Create(MRadiobutton *inRadiobutton, const std::string &inText)
 {
 	return new MGtkRadiobuttonImpl(inRadiobutton, inText);
 }
 
-// --------------------------------------------------------------------
+// // --------------------------------------------------------------------
 
-MGtkColorSwatchImpl::MGtkColorSwatchImpl(MColorSwatch *inColorSwatch, MColor inColor)
-	: MGtkControlImpl(inColorSwatch, "")
-	, eSelectedColor(this, &MGtkColorSwatchImpl::SelectedColor)
-	, ePreviewColor(this, &MGtkColorSwatchImpl::PreviewColor)
-	, mColorSet(this, &MGtkColorSwatchImpl::OnColorSet)
-	, mColor(inColor)
-{
-}
+// MGtkColorSwatchImpl::MGtkColorSwatchImpl(MColorSwatch *inColorSwatch, MColor inColor)
+// 	: MGtkControlImpl(inColorSwatch, "")
+// 	, eSelectedColor(this, &MGtkColorSwatchImpl::SelectedColor)
+// 	, ePreviewColor(this, &MGtkColorSwatchImpl::PreviewColor)
+// 	, mColorSet(this, &MGtkColorSwatchImpl::OnColorSet)
+// 	, mColor(inColor)
+// {
+// }
 
-void MGtkColorSwatchImpl::CreateWidget()
-{
-	GdkRGBA color = {};
-	color.red = mColor.red / 255.0;
-	color.green = mColor.green / 255.0;
-	color.blue = mColor.blue / 255.0;
-	color.alpha = 1.0;
+// void MGtkColorSwatchImpl::CreateWidget()
+// {
+// 	GdkRGBA color = {};
+// 	color.red = mColor.red / 255.0;
+// 	color.green = mColor.green / 255.0;
+// 	color.blue = mColor.blue / 255.0;
+// 	color.alpha = 1.0;
 
-	SetWidget(gtk_color_button_new_with_rgba(&color));
+// 	SetWidget(gtk_color_button_new_with_rgba(&color));
 
-	mColorSet.Connect(GetWidget(), "color-set");
-}
+// 	mColorSet.Connect(GetWidget(), "color-set");
+// }
 
-void MGtkColorSwatchImpl::OnColorSet()
-{
-	GdkRGBA color = {};
-	gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(GetWidget()), &color);
+// void MGtkColorSwatchImpl::OnColorSet()
+// {
+// 	GdkRGBA color = {};
+// 	gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(GetWidget()), &color);
 
-	mColor.red = static_cast<uint8_t>(255 * color.red);
-	mColor.green = static_cast<uint8_t>(255 * color.green);
-	mColor.blue = static_cast<uint8_t>(255 * color.blue);
-}
+// 	mColor.red = static_cast<uint8_t>(255 * color.red);
+// 	mColor.green = static_cast<uint8_t>(255 * color.green);
+// 	mColor.blue = static_cast<uint8_t>(255 * color.blue);
 
-void MGtkColorSwatchImpl::SelectedColor(MColor inColor)
-{
-	SetColor(inColor);
-	mControl->eColorChanged(mControl->GetID(), mColor);
-}
+// 	mControl->eColorChanged(mControl->GetID(), mColor);
+// }
 
-void MGtkColorSwatchImpl::PreviewColor(MColor inColor)
-{
-	mControl->eColorPreview(mControl->GetID(), inColor);
-}
+// void MGtkColorSwatchImpl::SelectedColor(MColor inColor)
+// {
+// 	SetColor(inColor);
+// 	mControl->eColorChanged(mControl->GetID(), mColor);
+// }
 
-MColor MGtkColorSwatchImpl::GetColor() const
-{
-	return mColor;
-}
+// void MGtkColorSwatchImpl::PreviewColor(MColor inColor)
+// {
+// 	mControl->eColorPreview(mControl->GetID(), inColor);
+// }
 
-void MGtkColorSwatchImpl::SetColor(MColor inColor)
-{
-	mColor = inColor;
+// MColor MGtkColorSwatchImpl::GetColor() const
+// {
+// 	return mColor;
+// }
 
-	GdkRGBA color = {};
-	color.red = mColor.red / 255.0;
-	color.green = mColor.green / 255.0;
-	color.blue = mColor.blue / 255.0;
-	color.alpha = 1.0;
-	if (GTK_IS_COLOR_BUTTON(GetWidget()))
-		gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(GetWidget()), &color);
-}
+// void MGtkColorSwatchImpl::SetColor(MColor inColor)
+// {
+// 	mColor = inColor;
 
-void MGtkColorSwatchImpl::SetPalette(const std::vector<MColor> &colors)
-{
-	mPalette = colors;
+// 	GdkRGBA color = {};
+// 	color.red = mColor.red / 255.0;
+// 	color.green = mColor.green / 255.0;
+// 	color.blue = mColor.blue / 255.0;
+// 	color.alpha = 1.0;
+// 	if (GTK_IS_COLOR_BUTTON(GetWidget()))
+// 		gtk_color_chooser_set_rgba(GTK_COLOR_CHOOSER(GetWidget()), &color);
+// }
 
-	std::vector<GdkRGBA> gtkColors(colors.size());
-	for (std::size_t i = 0; auto c : colors)
-	{
-		GdkRGBA &color = gtkColors[i];
-		color.red = c.red / 255.0;
-		color.green = c.green / 255.0;
-		color.blue = c.blue / 255.0;
-		color.alpha = 1.0;
-		++i;
-	}
+// void MGtkColorSwatchImpl::SetPalette(const std::vector<MColor> &colors)
+// {
+// 	mPalette = colors;
 
-	if (GTK_IS_COLOR_BUTTON(GetWidget()))
-		gtk_color_chooser_add_palette(GTK_COLOR_CHOOSER(GetWidget()), GTK_ORIENTATION_HORIZONTAL,
-			9, gtkColors.size(), gtkColors.data());
-}
+// 	std::vector<GdkRGBA> gtkColors(colors.size());
+// 	for (std::size_t i = 0; auto c : colors)
+// 	{
+// 		GdkRGBA &color = gtkColors[i];
+// 		color.red = c.red / 255.0;
+// 		color.green = c.green / 255.0;
+// 		color.blue = c.blue / 255.0;
+// 		color.alpha = 1.0;
+// 		++i;
+// 	}
 
-MColorSwatchImpl *MColorSwatchImpl::Create(MColorSwatch *inColorSwatch, MColor inColor)
-{
-	return new MGtkColorSwatchImpl(inColorSwatch, inColor);
-}
+// 	if (GTK_IS_COLOR_BUTTON(GetWidget()))
+// 		gtk_color_chooser_add_palette(GTK_COLOR_CHOOSER(GetWidget()), GTK_ORIENTATION_HORIZONTAL,
+// 			9, gtkColors.size(), gtkColors.data());
+// }
+
+// MColorSwatchImpl *MColorSwatchImpl::Create(MColorSwatch *inColorSwatch, MColor inColor)
+// {
+// 	return new MGtkColorSwatchImpl(inColorSwatch, inColor);
+// }
 
 // --------------------------------------------------------------------
 
@@ -964,46 +907,88 @@ MListBoxImpl *MListBoxImpl::Create(MListBox *inListBox)
 
 // --------------------------------------------------------------------
 
-MGtkBoxControlImpl::MGtkBoxControlImpl(MBoxControl *inControl, bool inHorizontal,
-	bool inHomogeneous, bool inExpand, bool inFill, uint32_t inSpacing, uint32_t inPadding)
+MGtkBoxControlImpl::MGtkBoxControlImpl(MBoxControl *inControl, bool inHorizontal)
 	: MGtkControlImpl(inControl, "")
 	, mHorizontal(inHorizontal)
-	, mHomogeneous(inHomogeneous)
-	, mExpand(inExpand)
-	, mFill(inFill)
-	, mSpacing(inSpacing)
-	, mPadding(inPadding)
 {
 }
 
 void MGtkBoxControlImpl::CreateWidget()
 {
-	SetWidget(gtk_box_new(mHorizontal ? GTK_ORIENTATION_HORIZONTAL : GTK_ORIENTATION_VERTICAL, mSpacing));
+	SetWidget(gtk_box_new(mHorizontal ? GTK_ORIENTATION_HORIZONTAL : GTK_ORIENTATION_VERTICAL, 0));
 }
 
-MBoxControlImpl *MBoxControlImpl::Create(MBoxControl *inControl, bool inHorizontal,
-	bool inHomogeneous, bool inExpand, bool inFill, uint32_t inSpacing, uint32_t inPadding)
+MBoxControlImpl *MBoxControlImpl::Create(MBoxControl *inControl, bool inHorizontal)
 {
-	return new MGtkBoxControlImpl(inControl, inHorizontal, inHomogeneous, inExpand, inFill, inSpacing, inPadding);
+	return new MGtkBoxControlImpl(inControl, inHorizontal);
 }
 
-void MGtkBoxControlImpl::Append(MGtkWidgetMixin *inChild, MControlPacking inPacking,
-	bool inExpand, bool inFill, uint32_t inPadding)
+void MGtkBoxControlImpl::Append(MGtkWidgetMixin *inChild)
 {
 	assert(GTK_IS_BOX(GetWidget()));
+	gtk_box_append(GTK_BOX(GetWidget()), inChild->GetWidget());
+}
 
-	auto childWidget = inChild->GetWidget();
-	gtk_widget_set_margin_top(childWidget, inPadding);
-	gtk_widget_set_margin_bottom(childWidget, inPadding);
-	gtk_widget_set_margin_start(childWidget, inPadding);
-	gtk_widget_set_margin_end(childWidget, inPadding);
+void MGtkBoxControlImpl::AddChild(MControlBase *inControl, MControlBase *inBefore)
+{
+	if (auto ci = dynamic_cast<MGtkWidgetMixin *>(inControl->GetControlImplBase()); ci != nullptr)
+	{
+		mControl->MView::AddChild(inControl);
 
-	gtk_box_append(GTK_BOX(GetWidget()), childWidget);
-	
+		if (inBefore)
+		{
+			auto bi = inBefore ? dynamic_cast<MGtkWidgetMixin *>(inBefore->GetControlImplBase()) : nullptr;
 
+			if (bi == nullptr)
+				gtk_box_reorder_child_after(GTK_BOX(GetWidget()), bi->GetWidget(), ci->GetWidget());
+			else
+				gtk_box_reorder_child_after(GTK_BOX(GetWidget()), ci->GetWidget(), nullptr);
+		}
+	}
+}
 
-	// if (inPacking == ePackStart)
-	// 	gtk_box_pack_start(GTK_BOX(GetWidget()), childWidget, inExpand, inFill, 0);
-	// else
-	// 	gtk_box_pack_end(GTK_BOX(GetWidget()), childWidget, inExpand, inFill, 0);
+// --------------------------------------------------------------------
+
+MGtkStackControlImpl::MGtkStackControlImpl(MStackControl *inControl)
+	: MGtkControlImpl(inControl, "")
+{
+}
+
+void MGtkStackControlImpl::CreateWidget()
+{
+	SetWidget(gtk_stack_new());
+}
+
+void MGtkStackControlImpl::AddChild(MView *inChild, const std::string &inName)
+{
+	if (auto cntrl = dynamic_cast<MControlBase *>(inChild); cntrl != nullptr)
+	{
+		auto ci = cntrl->GetControlImplBase();
+		auto wm = dynamic_cast<MGtkWidgetMixin *>(ci);
+		mNames[wm] = inName;
+	}
+	mControl->MView::AddChild(inChild);
+}
+
+void MGtkStackControlImpl::Append(MGtkWidgetMixin *inChild)
+{
+	if (auto cntrl = dynamic_cast<MControlImplBase *>(inChild); cntrl != nullptr)
+	{
+		if (auto ci = dynamic_cast<MGtkWidgetMixin *>(cntrl); ci != nullptr)
+		{
+			auto name = mNames.at(ci);
+			gtk_stack_add_named(GTK_STACK(GetWidget()), ci->GetWidget(), name.c_str());
+		}
+	}
+}
+
+void MGtkStackControlImpl::Select(const std::string &inName)
+{
+	if (GTK_IS_STACK(GetWidget()))
+		gtk_stack_set_visible_child_name(GTK_STACK(GetWidget()), inName.c_str());
+}
+
+MStackControlImpl *MStackControlImpl::Create(MStackControl *inControl)
+{
+	return new MGtkStackControlImpl(inControl);
 }

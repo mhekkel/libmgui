@@ -25,7 +25,6 @@
  */
 
 #include "MApplication.hpp"
-#include "MCommands.hpp"
 #include "MControls.hpp"
 #include "MError.hpp"
 #include "MMenu.hpp"
@@ -64,8 +63,7 @@ void MAsyncHandlerBase::execute()
 // --------------------------------------------------------------------
 
 MApplication::MApplication(MApplicationImpl *inImpl)
-	: MHandler(nullptr)
-	, mImpl(inImpl)
+	: mImpl(inImpl)
 	, mQuit(false)
 	, mQuitPending(false)
 {
@@ -83,9 +81,14 @@ void MApplication::Initialise()
 	mImpl->Initialise();
 }
 
+void MApplication::SetIconName(const std::string &inIconName)
+{
+	mImpl->SetIconName(inIconName);
+}
+
 void MApplication::SaveGlobals()
 {
-	Preferences::SaveIfDirty();
+	MPrefs::SaveIfDirty();
 }
 
 void MApplication::DoNew()
@@ -96,112 +99,15 @@ void MApplication::DoOpen()
 {
 }
 
-// void MApplication::Open(const string &inURI)
-// {
-// }
 
 void MApplication::Execute(const std::string &inCommand,
 		const std::vector<std::string> &inArguments)
 {
 }
 
-bool MApplication::ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers)
-{
-	bool result = true;
-
-	switch (inCommand)
-	{
-		case cmd_New:
-			DoNew();
-			break;
-
-		case cmd_Open:
-			DoOpen();
-			break;
-
-		case cmd_SelectWindowFromMenu:
-			DoSelectWindowFromWindowMenu(inItemIndex - 2);
-			break;
-
-		case cmd_Quit:
-			if (AllowQuit(false))
-				DoQuit();
-			break;
-
-		default:
-			result = false;
-			break;
-	}
-
-	return result;
-}
-
-bool MApplication::UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked)
-{
-	bool result = true;
-
-	switch (inCommand)
-	{
-		case cmd_New:
-		case cmd_Open:
-		case cmd_SelectWindowFromMenu:
-		case cmd_Quit:
-			outEnabled = true;
-			break;
-
-		default:
-			result = false;
-			break;
-	}
-
-	return result;
-}
-
-void MApplication::UpdateSpecialMenu(const std::string &inName, MMenu *inMenu)
-{
-	if (inName == "window")
-		UpdateWindowMenu(inMenu);
-	else
-		PRINT(("Unknown special menu %s", inName.c_str()));
-}
-
-void MApplication::UpdateWindowMenu(MMenu *inMenu)
-{
-}
-
-void MApplication::DoSelectWindowFromWindowMenu(uint32_t inIndex)
-{
-}
-
-int MApplication::RunEventLoop()
-{
-	return mImpl->RunEventLoop();
-}
-
 bool MApplication::AllowQuit(bool inLogOff)
 {
-	bool result = mQuitPending;
-
-	if (result == false)
-	{
-		result = true;
-
-		MWindow *window = MWindow::GetFirstWindow();
-		while (window != nullptr)
-		{
-			if (not window->AllowClose(true))
-			{
-				result = false;
-				break;
-			}
-
-			window = window->GetNextWindow();
-		}
-
-		mQuitPending = result;
-	}
-
-	return result;
+	return true;
 }
 
 void MApplication::DoQuit()
@@ -217,5 +123,5 @@ void MApplication::DoQuit()
 void MApplication::Pulse()
 {
 	eIdle();
-	Preferences::SaveIfDirty();
+	MPrefs::SaveIfDirty();
 }

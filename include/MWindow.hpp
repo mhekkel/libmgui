@@ -26,17 +26,20 @@
 
 #pragma once
 
-#include <list>
-
 #include "MColor.hpp"
-#include "MHandler.hpp"
+#include "MP2PEvents.hpp"
 #include "MView.hpp"
 
-#include "MP2PEvents.hpp"
+#include <chrono>
+#include <list>
 
-#undef GetNextWindow
+// --------------------------------------------------------------------
 
-class MWindowImpl;
+class MButton;
+class MMenuBar;
+class MControlBase;
+
+// --------------------------------------------------------------------
 
 enum MWindowFlags
 {
@@ -48,64 +51,126 @@ enum MWindowFlags
 	kMNoSizeBox = (1 << 5),
 	kMAcceptDragAndDrop = (1 << 6),
 	kMCustomNonClient = (1 << 7),
+	kMShowMenubar = (1 << 8),
+	kMDoNotHandleF10 = (1 << 9)
 };
 
-class MWindow : public MView, public MHandler
+// clean way to work with bitfields
+inline MWindowFlags operator|(MWindowFlags f1, MWindowFlags f2)
+{
+	return MWindowFlags(uint32_t(f1) | uint32_t(f2));
+}
+
+// --------------------------------------------------------------------
+
+class MWindowImpl
+{
+  public:
+	static MWindowImpl *Create(const std::string &inTitle, MRect inBounds,
+		MWindowFlags inFlags, MWindow *inWindow);
+
+	static MWindowImpl *CreateDialogImpl(MWindow *inWindow);
+
+	virtual ~MWindowImpl() = default;
+
+	MWindowFlags GetFlags() const { return mFlags; }
+
+	virtual void CreateWindow(MRect inBounds, const std::string &inTitle) = 0;
+	virtual void Finish() {}
+
+	virtual void SetTitle(std::string inTitle) = 0;
+	// virtual std::string	GetTitle() const = 0;
+
+	virtual void SetIconName(const std::string &inIconName) = 0;
+
+	virtual void Show() = 0;
+	virtual void Hide() = 0;
+
+	virtual void SetDefaultButton(MButton *inButton) {}
+	virtual void SetParentWindow(MWindow *inWindow) {}
+
+	virtual void Select() = 0;
+	virtual void Close() = 0;
+
+	virtual void ResizeWindow(int32_t inWidthDelta, int32_t inHeightDelta) = 0;
+
+	virtual void SetWindowPosition(MRect inBounds, bool inTransition) = 0;
+	virtual void GetWindowPosition(MRect &outBounds) const = 0;
+
+	virtual void UpdateNow() = 0;
+
+	virtual void SetCursor(MCursor inCursor) = 0;
+	virtual void ObscureCursor() = 0;
+
+	virtual void ConvertToScreen(int32_t &ioX, int32_t &ioY) const = 0;
+	virtual void ConvertFromScreen(int32_t &ioX, int32_t &ioY) const = 0;
+
+  protected:
+	MWindowImpl(MWindowFlags inFlags, MWindow *inWindow)
+		: mWindow(inWindow)
+		, mFlags(inFlags)
+	{
+	}
+
+	MWindow *mWindow;
+	MWindowFlags mFlags;
+};
+
+// --------------------------------------------------------------------
+
+class MWindow : public MView
 {
   public:
 	MWindow(const std::string &inTitle,
-		const MRect &inBounds, MWindowFlags inFlags,
-		const std::string &inMenu);
+		const MRect &inBounds, MWindowFlags inFlags);
 
 	virtual ~MWindow();
 
-	virtual MWindow *GetWindow() const;
+	MWindow *GetWindow() const override;
 	MWindowFlags GetFlags() const;
 
-	virtual void Mapped();
-	virtual void Unmapped();
+	void Activate() override;
 
-	virtual void Show();
+	void Show() override;
+	void UpdateNow() override;
+
 	virtual void Select();
-	virtual void UpdateNow();
+	virtual bool IgnoreSelectClick();
 
 	virtual bool AllowClose(bool inQuit);
 	virtual void Close();
 
-	void Beep();
+	void SetLatentFocus(MControlBase *inControl)
+	{
+		mLatentFocus = inControl;
+	}
 
-	static MWindow *GetFirstWindow();
-	MWindow *GetNextWindow() const;
-	static void RemoveWindowFromWindowList(MWindow *window);
-	static bool WindowExists(MWindow *window);
+	// void Beep();
+
+	// --------------------------------------------------------------------
 
 	virtual void SetTitle(const std::string &inTitle);
 	virtual std::string GetTitle() const;
+	virtual void SetIconName(const std::string &inIconName);
 
 	void SetModifiedMarkInTitle(bool inModified);
 
-	// 0.0 is fully transparent, 1.0 is fully opaque
-	void SetTransparency(float inAlpha);
-
-	virtual bool UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked);
-
-	virtual bool ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers);
-
-	virtual void ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta);
-
-	virtual void ResizeWindow(int32_t inWidthDelta, int32_t inHeightDelta);
+	void ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta) override;
+	void ResizeWindow(int32_t inWidthDelta, int32_t inHeightDelta);
 
 	void GetWindowPosition(MRect &outPosition);
 	void SetWindowPosition(const MRect &outPosition, bool inTransition = false);
 
 	MWindowImpl *GetImpl() const { return mImpl; }
 
+	// --------------------------------------------------------------------
 	// coordinate manipulations
-	virtual void ConvertToScreen(int32_t &ioX, int32_t &ioY) const;
-	virtual void ConvertFromScreen(int32_t &ioX, int32_t &ioY) const;
+	void ConvertToScreen(int32_t &ioX, int32_t &ioY) const override;
+	void ConvertFromScreen(int32_t &ioX, int32_t &ioY) const override;
 
-	virtual void SetCursor(MCursor inCursor);
-	virtual void ObscureCursor();
+	// --------------------------------------------------------------------
+	void SetCursor(MCursor inCursor) override;
+	void ObscureCursor() override;
 
 	static void GetMainScreenBounds(MRect &outRect);
 
@@ -115,18 +180,14 @@ class MWindow : public MView, public MHandler
 	void SetImpl(MWindowImpl *inImpl);
 
   private:
-	virtual void ShowSelf();
-	virtual void HideSelf();
+	void ShowSelf() override;
+	void HideSelf() override;
+
+	using time_point = std::chrono::time_point<std::chrono::steady_clock>;
 
 	MWindowImpl *mImpl;
 	std::string mTitle;
 	bool mModified;
-
-	static std::list<MWindow *> sWindowList;
+	time_point mLastActivate;
+	MControlBase *mLatentFocus = nullptr;
 };
-
-// clean way to work with bitfields
-inline MWindowFlags operator|(MWindowFlags f1, MWindowFlags f2)
-{
-	return MWindowFlags(uint32_t(f1) | uint32_t(f2));
-}

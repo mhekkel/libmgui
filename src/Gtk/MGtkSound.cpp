@@ -24,148 +24,87 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Gtk/MGtkLib.hpp"
-
-#include "MError.hpp"
-#include "MFile.hpp"
+#include "MGtkLib.hpp"
 #include "MPreferences.hpp"
 #include "MSound.hpp"
-#include "MWindow.hpp"
+
+#include "mrsrc.hpp"
 
 #include <canberra.h>
-#include <dlfcn.h>
-#include <iostream>
-#include <map>
 
-using namespace std;
-namespace fs = std::filesystem;
-
-// namespace
+// void PlaySound(const std::string &inSoundName)
 // {
-
-// class MAudioSocket
-// {
-//   public:
-// 	static MAudioSocket &Instance();
-
-// 	void Play(const string &inPath);
-
-//   private:
-// 	MAudioSocket();
-// 	~MAudioSocket();
-
-// 	static void CAFinishCallback(ca_context *inContext, uint32_t inID, int inErrorCode, void *inUserData);
-
-// 	ca_context *mCAContext;
-// };
-
-// MAudioSocket::MAudioSocket()
-// 	: mCAContext(nullptr)
-// {
-// 	int err = ca_context_create(&mCAContext);
-// 	if (err == 0)
-// 		err = ca_context_open(mCAContext);
+// 	gdk_display_beep(gdk_display_get_default());
 // }
 
-// MAudioSocket::~MAudioSocket()
-// {
-// 	ca_context_destroy(mCAContext);
-// 	mCAContext = nullptr;
-// }
-
-// MAudioSocket &MAudioSocket::Instance()
-// {
-// 	static MAudioSocket sInstance;
-// 	return sInstance;
-// }
-
-// void MAudioSocket::CAFinishCallback(ca_context *inContext, uint32_t inID, int inErrorCode, void *inUserData)
-// {
-// 	if (inErrorCode != CA_SUCCESS)
-// 		cerr << "Error playing sound using canberra: " << ca_strerror(inErrorCode) << '\n';
-// }
-
-// void MAudioSocket::Play(const string &inFile)
-// {
-// 	if (mCAContext != nullptr)
-// 	{
-// 		ca_proplist *pl;
-
-// 		ca_proplist_create(&pl);
-// 		ca_proplist_sets(pl, CA_PROP_MEDIA_FILENAME, inFile.c_str());
-
-// 		int pan = 2;
-// 		//        gc = gconf_client_get_default();
-// 		//        value = gconf_client_get(gc, ALARM_GCONF_PATH, NULL);
-// 		//
-// 		//        if (value && value->type == GCONF_VALUE_INT)
-// 		//                pan = gconf_value_get_int(value);
-// 		//        else
-// 		//                pan = 2;
-// 		float volume = (1.0f - float(pan) / 2.0f) * -6.0f;
-// 		ca_proplist_setf(pl, CA_PROP_CANBERRA_VOLUME, "%f", volume);
-
-// 		int err = ca_context_play_full(mCAContext, 0, pl, &MAudioSocket::CAFinishCallback, this);
-// 		if (err != CA_SUCCESS)
-// 			cerr << "Error calling ca_context_play_full: " << ca_strerror(err) << '\n';
-
-// 		ca_proplist_destroy(pl);
-// 	}
-// 	//	else if (MWindow::GetFirstWindow() != nullptr)
-// 	//		MWindow::GetFirstWindow()->Beep();
-// 	else
-// 		gdk_display_beep(gdk_display_get_default());
-// }
-
-// } // namespace
-
-void PlaySound(const string &inSoundName)
+namespace
 {
-	// //	if (not gPlaySounds)
-	// //		return;
 
-	// try
-	// {
-	// 	StOKToThrow ok;
-	// 	string filename;
+class MAudioSocket
+{
+  public:
+	static MAudioSocket &
+	Instance();
 
-	// 	if (inSoundName == "success")
-	// 		filename = Preferences::GetString("success sound", "info.wav");
-	// 	else if (inSoundName == "failure" or inSoundName == "error")
-	// 		filename = Preferences::GetString("failure sound", "error.wav");
-	// 	else if (inSoundName == "warning")
-	// 		filename = Preferences::GetString("warning sound", "warning.wav");
-	// 	else if (inSoundName == "question")
-	// 		filename = Preferences::GetString("question sound", "question.wav");
-	// 	else
-	// 	{
-	// 		filename = "warning.wav";
-	// 		cerr << "Unknown sound name " << inSoundName << '\n';
-	// 	}
+	void Play(const std::string &inPath);
 
-	// 	fs::path path = filename;
+  private:
+	MAudioSocket();
+	~MAudioSocket();
 
-	// 	const char *const *config_dirs = g_get_system_data_dirs();
-	// 	for (const char *const *dir = config_dirs; *dir != nullptr; ++dir)
-	// 	{
-	// 		path = fs::path(*dir) / "sounds" / filename;
-	// 		if (fs::exists(path))
-	// 			break;
-	// 	}
+	static void CAFinishCallback(ca_context *inContext, uint32_t inID, int inErrorCode, void *inUserData);
 
-	// 	if (fs::exists(path))
-	// 		MAudioSocket::Instance().Play(path.string());
-	// 	else
-	// 	{
-	// 		cerr << "Sound does not exist: " << path.string() << '\n';
-	// 		//			if (MWindow::GetFirstWindow() != nullptr)
-	// 		//				MWindow::GetFirstWindow()->Beep();
-	// 		//			else
-	// 		gdk_display_beep(gdk_display_get_default());
-	// 	}
-	// }
-	// catch (...)
-	// {
-	// 	gdk_display_beep(gdk_display_get_default());
-	// }
+	ca_context *mCAContext;
+};
+
+MAudioSocket::MAudioSocket()
+	: mCAContext(nullptr)
+{
+	int err = ca_context_create(&mCAContext);
+	if (err == 0)
+		err = ca_context_open(mCAContext);
+}
+
+MAudioSocket::~MAudioSocket()
+{
+	ca_context_destroy(mCAContext);
+	mCAContext = nullptr;
+}
+
+MAudioSocket &MAudioSocket::Instance()
+{
+	static MAudioSocket sInstance;
+	return sInstance;
+}
+
+void MAudioSocket::CAFinishCallback(ca_context *inContext, uint32_t inID, int inErrorCode, void *inUserData)
+{
+	if (inErrorCode != CA_SUCCESS)
+	{
+		gdk_display_beep(gdk_display_get_default());
+		std::cerr << "Error playing sound using canberra: " << ca_strerror(inErrorCode) << std::endl;
+	}
+}
+
+void MAudioSocket::Play(const std::string &inSoundName)
+{
+	if (mCAContext != nullptr)
+	{
+		ca_proplist *pl;
+		ca_proplist_create(&pl);
+		ca_proplist_sets(pl, CA_PROP_EVENT_ID, inSoundName.c_str());
+		int err = ca_context_play_full(mCAContext, 0, pl, &MAudioSocket::CAFinishCallback, this);
+		if (err != CA_SUCCESS)
+			std::cerr << "Error calling ca_context_play_full: " << ca_strerror(err) << std::endl;
+		ca_proplist_destroy(pl);
+	}
+	else
+		gdk_display_beep(gdk_display_get_default());
+}
+
+} // namespace
+
+void PlaySound(const std::string &inSoundName)
+{
+	MAudioSocket::Instance().Play(inSoundName);
 }

@@ -36,9 +36,8 @@
 #include "MTypes.hpp"
 #include "MUtils.hpp"
 
-#include <zeep/xml/document.hpp>
-#include <zeep/xml/node.hpp>
-#include <zeep/xml/serialize.hpp>
+#include <mxml/document.hpp>
+#include <mxml/serialize.hpp>
 
 #include <cerrno>
 #include <cstring>
@@ -46,13 +45,13 @@
 #include <map>
 #include <sstream>
 
-namespace xml = zeep::xml;
+namespace xml = mxml;
 namespace fs = std::filesystem;
 
 fs::path gPrefsDir;
 std::string gPrefsFileName = std::string(kAppName) + ".cfg";
 
-namespace Preferences
+namespace MPrefs
 {
 
 struct preference
@@ -63,7 +62,7 @@ struct preference
 	template <class Archive>
 	void serialize(Archive &ar, const unsigned int version)
 	{
-		ar &zeep::make_nvp("name", name) & zeep::make_nvp("value", value);
+		ar &mxml::make_element_nvp("name", name) & mxml::make_element_nvp("value", value);
 	}
 };
 
@@ -74,7 +73,7 @@ struct preferences
 	template <class Archive>
 	void serialize(Archive &ar, const unsigned int version)
 	{
-		ar &zeep::xml::make_element_nvp("pref", pref);
+		ar &mxml::make_element_nvp("pref", pref);
 	}
 };
 
@@ -135,7 +134,7 @@ IniFile::IniFile()
 				xml::document doc(data);
 
 				preferences prefs;
-				doc.deserialize("preferences", prefs);
+				from_xml(doc, "preferences", prefs);
 
 				for (const preference &p : prefs.pref)
 					mPrefs[p.name] = p.value;
@@ -188,7 +187,7 @@ void IniFile::Save()
 				});
 
 			xml::document doc;
-			doc.serialize("preferences", prefs);;
+			to_xml(doc, "preferences", prefs);;
 
 			doc.set_write_xml_decl(true);
 			data << std::setw(2) << doc;
@@ -359,4 +358,4 @@ void SaveIfDirty()
 		instance.Save();
 }
 
-} // namespace Preferences
+} // namespace MPrefs

@@ -8,7 +8,6 @@
 #include <map>
 
 #include "MWinProcMixin.hpp"
-#include "MWindowImpl.hpp"
 
 class MWinWindowImpl : public MWindowImpl, public MWinProcMixin
 {
@@ -18,8 +17,6 @@ class MWinWindowImpl : public MWindowImpl, public MWinProcMixin
 	virtual ~MWinWindowImpl();
 
 	virtual void Create(MRect inBounds, const std::wstring &inTitle);
-
-	virtual void SetTransparency(float inAlpha);
 
 	virtual void SetTitle(std::string inTitle);
 

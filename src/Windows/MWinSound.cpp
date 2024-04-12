@@ -19,7 +19,7 @@ using namespace std;
 void PlaySound(
 	const string&		inSoundName)
 {
-	if (Preferences::GetBoolean("play sounds", true) == false)
+	if (MPrefs::GetBoolean("play sounds", true) == false)
 		return;
 
 	if (inSoundName == "success")

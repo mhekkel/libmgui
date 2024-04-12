@@ -26,14 +26,13 @@
 
 #pragma once
 
-#include "MCommands.hpp"
 #include "MP2PEvents.hpp"
 
-#include <zeep/xml/node.hpp>
+#include <mxml/node.hpp>
 
 #include <list>
+#include <memory>
 
-class MHandler;
 class MWindow;
 class MWindowImpl;
 class MFile;
@@ -43,50 +42,113 @@ class MMenuBar;
 class MMenu
 {
   public:
-	MMenu(const std::string &inLabel, bool inPopup);
-	virtual ~MMenu();
+	class MMenuImpl
+	{
+	  public:
+		MMenuImpl(MMenu *inMenu)
+			: mMenu(inMenu)
+		{
+		}
+
+		virtual ~MMenuImpl() = default;
+
+		virtual void AppendItem(uint32_t inSection, const std::string &inLabel, const std::string &inAction, bool inStateful) = 0;
+		virtual void AppendRadioItems(uint32_t inSection, const std::vector<std::string> &inLabels, const std::string &inAction) = 0;
+		virtual void AppendSubmenu(uint32_t inSection, MMenu *inMenu) = 0;
+
+		virtual void ReplaceItemsInSection(uint32_t inSection, const std::string &inAction,
+			const std::vector<std::tuple<std::string,uint32_t>> &inItems) = 0;
+
+		virtual MMenu *FindMenuByID(const std::string &inMenuID) = 0;
+
+		virtual void Popup(MWindow *inHandler, int32_t inX, int32_t inY, bool inBottomMenu) = 0;
+		virtual void AddToWindow(MWindowImpl *inWindow) {}
+
+		static MMenuImpl *Create(MMenu *inMenu, bool inPopup);
+		static MMenuImpl *CreateBar(MMenu *inMenu);
+
+	  protected:
+		MMenu *mMenu;
+	};
+
+	MMenu(const std::string &inID, const std::string &inLabel, bool inPopup)
+		: mImpl(MMenuImpl::Create(this, inPopup))
+		, mID(inID)
+		, mLabel(inLabel)
+	{
+	}
+
+	virtual ~MMenu() = default;
 
 	static MMenu *CreateFromResource(const char *inResourceName, bool inPopup);
+	static MMenu *Create(const mxml::element &inXMLNode, bool inPopup);
 
-	void AppendItem(const std::string &inLabel, uint32_t inCommand);
-	void AppendRadioItem(const std::string &inLabel, uint32_t inCommand);
-	void AppendCheckItem(const std::string &inLabel, uint32_t inCommand);
-	void AppendSeparator();
-	virtual void AppendMenu(MMenu *inMenu);
-	uint32_t CountItems();
-	void RemoveItems(uint32_t inFromIndex, uint32_t inCount);
+	void AppendItem(uint32_t inSection, const std::string &inLabel, const std::string &inAction, bool inStateful = false)
+	{
+		mImpl->AppendItem(inSection, inLabel, inAction, inStateful);
+	}
 
-	std::string GetItemLabel(uint32_t inIndex) const;
+	void AppendRadioItems(uint32_t inSection, const std::vector<std::string> &inLabels, const std::string &inAction)
+	{
+		mImpl->AppendRadioItems(inSection, inLabels, inAction);
+	}
 
-	void SetItemCommand(uint32_t inIndex, uint32_t inCommand);
-	uint32_t GetItemCommand(uint32_t inIndex) const;
+	void AppendSubmenu(uint32_t inSection, MMenu *inMenu)
+	{
+		mImpl->AppendSubmenu(inSection, inMenu);
+	}
 
-	void SetTarget(MHandler *inHandler);
+	void ReplaceItemsInSection(uint32_t inSection, const std::string &inAction,
+		const std::vector<std::tuple<std::string,uint32_t>> &inItems)
+	{
+		mImpl->ReplaceItemsInSection(inSection, inAction, inItems);
+	}
 
-	void UpdateCommandStatus();
-
-	std::string GetLabel() { return mLabel; }
-	MHandler *GetTarget() { return mTarget; }
+	virtual MMenu *FindMenuByID(const std::string &inMenuID)
+	{
+		if (mID == inMenuID)
+			return this;
+		else
+			return mImpl->FindMenuByID(inMenuID);
+	}
 
 	void Popup(MWindow *inTarget, int32_t inX, int32_t inY, bool inBottomMenu);
 
-	static MMenu *Create(zeep::xml::element *inXMLNode, bool inPopup);
+	MMenuImpl *impl() const { return mImpl.get(); }
 
-	MMenuImpl *impl() const { return mImpl; }
+	std::string GetLabel() const
+	{
+		return mLabel;
+	}
 
   protected:
-	MMenu(MMenuImpl *inImpl);
+	MMenu(MMenuImpl *inImpl)
+		: mImpl(inImpl)
+	{
+	}
 
-	MMenuImpl *mImpl;
+	std::unique_ptr<MMenuImpl> mImpl;
+	std::string mID;
 	std::string mLabel;
-	std::string mSpecial;
-	MHandler *mTarget;
 };
+
+// --------------------------------------------------------------------
+// Menu bars are global objects, there is now only one for each application
 
 class MMenuBar : public MMenu
 {
   public:
-	MMenuBar();
+	static void Init(const std::string &inMenuResourceName);
+
+	static MMenuBar &Instance()
+	{
+		return *sInstance;
+	}
+
 	void AddToWindow(MWindowImpl *inWindowImpl);
-	static MMenuBar *Create(zeep::xml::element *inXMLNode);
+
+  private:
+	MMenuBar();
+
+	static std::unique_ptr<MMenuBar> sInstance;
 };

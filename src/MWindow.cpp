@@ -26,74 +26,44 @@
 
 #include "MWindow.hpp"
 #include "MApplication.hpp"
-#include "MCommands.hpp"
+#include "MControls.hpp"
 #include "MError.hpp"
 #include "MMenu.hpp"
 #include "MUtils.hpp"
-#include "MWindowImpl.hpp"
 
 #include "mrsrc.hpp"
-
-#include "zeep/xml/document.hpp"
 
 #include <iostream>
 
 #undef GetNextWindow
-
-using namespace std;
-using namespace zeep;
-
-// --------------------------------------------------------------------
-//
-//	MWindowImpl
-//
-
-MMenuBar *MWindowImpl::CreateMenu(const std::string &inMenu)
-{
-	using namespace std::literals;
-
-	mrsrc::istream rsrc("Menus/"s + inMenu + ".xml");
-	xml::document doc(rsrc);
-
-	return MMenuBar::Create(&doc.front());
-}
 
 // --------------------------------------------------------------------
 //
 //	MWindow
 //
 
-list<MWindow *> MWindow::sWindowList;
-
-MWindow::MWindow(const string &inTitle, const MRect &inBounds, MWindowFlags inFlags, const string &inMenu)
+MWindow::MWindow(const std::string &inTitle, const MRect &inBounds, MWindowFlags inFlags)
 	: MView("window", inBounds)
-	, MHandler(gApp)
-	, mImpl(MWindowImpl::Create(inTitle, inBounds, inFlags, inMenu, this))
+	, mImpl(MWindowImpl::Create(inTitle, inBounds, inFlags, this))
 	, mModified(false)
 {
 	mVisible = eTriStateLatent;
 
 	mBounds.x = mBounds.y = 0;
 
-	SetBindings(true, true, true, true);
-
-	sWindowList.push_back(this);
+	SetLayout({ true, 0 });
 }
 
 MWindow::MWindow(MWindowImpl *inImpl)
 	: MView("window", MRect(0, 0, 100, 100))
-	, MHandler(gApp)
 	, mImpl(inImpl)
 {
-	SetBindings(true, true, true, true);
-
-	sWindowList.push_back(this);
+	SetLayout({ true, 0 });
 }
 
 MWindow::~MWindow()
 {
 	delete mImpl;
-	RemoveWindowFromWindowList(this);
 }
 
 void MWindow::SetImpl(MWindowImpl *inImpl)
@@ -103,54 +73,24 @@ void MWindow::SetImpl(MWindowImpl *inImpl)
 	mImpl = inImpl;
 }
 
-void MWindow::Mapped()
+void MWindow::Activate()
 {
-	SuperShow();
-}
+	if (mActive != eTriStateOn and IsVisible())
+	{
+		mActive = eTriStateOn;
+		ActivateSelf();
+		MView::Activate();
 
-void MWindow::Unmapped()
-{
-	SuperHide();
+		mLastActivate = std::chrono::steady_clock::now();
+
+		if (mLatentFocus != nullptr)
+			mLatentFocus->SetFocus();
+	}
 }
 
 MWindowFlags MWindow::GetFlags() const
 {
 	return mImpl->GetFlags();
-}
-
-MWindow *MWindow::GetFirstWindow()
-{
-	MWindow *result = nullptr;
-	if (not sWindowList.empty())
-		result = sWindowList.front();
-	return result;
-}
-
-MWindow *MWindow::GetNextWindow() const
-{
-	MWindow *result = nullptr;
-
-	list<MWindow *>::const_iterator w =
-		find(sWindowList.begin(), sWindowList.end(), this);
-
-	if (w != sWindowList.end())
-	{
-		++w;
-		if (w != sWindowList.end())
-			result = *w;
-	}
-
-	return result;
-}
-
-void MWindow::RemoveWindowFromWindowList(MWindow *window)
-{
-	sWindowList.erase(remove(sWindowList.begin(), sWindowList.end(), window), sWindowList.end());
-}
-
-bool MWindow::WindowExists(MWindow *window)
-{
-	return find(sWindowList.begin(), sWindowList.end(), window) != sWindowList.end();
 }
 
 MWindow *MWindow::GetWindow() const
@@ -178,9 +118,12 @@ void MWindow::HideSelf()
 
 void MWindow::Select()
 {
-	if (not mImpl->Visible())
-		Show();
 	mImpl->Select();
+}
+
+bool MWindow::IgnoreSelectClick()
+{
+	return (std::chrono::steady_clock::now() - mLastActivate) < std::chrono::milliseconds(100);
 }
 
 void MWindow::UpdateNow()
@@ -199,7 +142,7 @@ void MWindow::Close()
 		mImpl->Close();
 }
 
-void MWindow::SetTitle(const string &inTitle)
+void MWindow::SetTitle(const std::string &inTitle)
 {
 	mTitle = inTitle;
 
@@ -209,9 +152,14 @@ void MWindow::SetTitle(const string &inTitle)
 		mImpl->SetTitle(mTitle);
 }
 
-string MWindow::GetTitle() const
+std::string MWindow::GetTitle() const
 {
 	return mTitle;
+}
+
+void MWindow::SetIconName(const std::string &inIconName)
+{
+	mImpl->SetIconName(inIconName);
 }
 
 void MWindow::SetModifiedMarkInTitle(bool inModified)
@@ -223,56 +171,9 @@ void MWindow::SetModifiedMarkInTitle(bool inModified)
 	}
 }
 
-void MWindow::SetTransparency(float inAlpha)
-{
-	mImpl->SetTransparency(inAlpha);
-}
-
-bool MWindow::UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked)
-{
-	bool result = true;
-
-	switch (inCommand)
-	{
-		case cmd_Close:
-			outEnabled = true;
-			break;
-
-		default:
-			result = MHandler::UpdateCommandStatus(inCommand, inMenu, inItemIndex, outEnabled, outChecked);
-	}
-
-	return result;
-}
-
-bool MWindow::ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers)
-{
-	bool result = true;
-
-	switch (inCommand)
-	{
-		case cmd_Close:
-			if (AllowClose(false))
-				Close();
-			break;
-
-		default:
-			result = MHandler::ProcessCommand(inCommand, inMenu, inItemIndex, inModifiers);
-			break;
-	}
-
-	return result;
-}
-
 void MWindow::ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta)
 {
 	ResizeWindow(inWidthDelta, inHeightDelta);
-	// MView::ResizeFrame(0, 0);
-
-	// MRect frame;
-	// CalculateFrame(frame);
-	// if (frame != mFrame)
-	// mImpl->ResizeWindow(frame.width - mFrame.width, frame.height - mFrame.height);
 }
 
 void MWindow::ResizeWindow(int32_t inWidthDelta, int32_t inHeightDelta)

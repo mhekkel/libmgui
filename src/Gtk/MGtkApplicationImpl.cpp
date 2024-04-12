@@ -24,60 +24,82 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "MAcceleratorTable.hpp"
 #include "MAlerts.hpp"
 #include "MApplication.hpp"
+#include "MClipboard.hpp"
 #include "MDialog.hpp"
 #include "MError.hpp"
+#include "MStrings.hpp"
 #include "MUtils.hpp"
 
-#include "Gtk/MGtkApplicationImpl.hpp"
-#include "Gtk/MGtkWindowImpl.hpp"
+#include "MGtkApplicationImpl.hpp"
+#include "MGtkWindowImpl.hpp"
 
 #include "mrsrc.hpp"
 
 #include <cstring>
 
-MGtkApplicationImpl::MGtkApplicationImpl()
+MGtkApplicationImpl *MGtkApplicationImpl::sInstance;
+
+MGtkApplicationImpl::MGtkApplicationImpl(const std::string &inApplicationID)
+	: mStartup(this, &MGtkApplicationImpl::Startup)
+	, mActivate(this, &MGtkApplicationImpl::Activate)
+	, mQueryEnd(this, &MGtkApplicationImpl::OnQueryEnd)
+	, mCommandLine(this, &MGtkApplicationImpl::CommandLine)
+	, mGtkApplication(gtk_application_new(inApplicationID.c_str(), G_APPLICATION_HANDLES_COMMAND_LINE))
 {
 	sInstance = this;
+
+	mStartup.Connect(G_OBJECT(mGtkApplication), "startup");
+	mActivate.Connect(G_OBJECT(mGtkApplication), "activate");
+	mCommandLine.Connect(G_OBJECT(mGtkApplication), "command-line");
+	mQueryEnd.Connect(G_OBJECT(mGtkApplication), "query-end");
+
+	GValue gv{ G_TYPE_BOOLEAN };
+	g_value_set_boolean(&gv, true);
+	g_object_set_property(G_OBJECT(mGtkApplication), "register-session", &gv);
+	g_value_unset(&gv);
+}
+
+void MGtkApplicationImpl::Startup()
+{
+	mPulseID = g_timeout_add(100, &MGtkApplicationImpl::Timeout, nullptr);
+
+	// Start processing async tasks
+	mAsyncTaskThread = std::thread([this, context = g_main_context_get_thread_default()]()
+		{ ProcessAsyncTasks(context); });
+
+	MClipboard::InitPrimary();
+
+	gApp->Initialise();
+}
+
+void MGtkApplicationImpl::Activate()
+{
+	gApp->DoNew();
 }
 
 void MGtkApplicationImpl::Initialise()
 {
-	GList *iconList = nullptr;
+}
 
-	mrsrc::rsrc appIconResource("Icons/appicon.png");
-	GInputStream *s = g_memory_input_stream_new_from_data(appIconResource.data(), appIconResource.size(), nullptr);
-	THROW_IF_NIL(s);
+void MGtkApplicationImpl::SetIconName(const std::string &inIconName)
+{
+	gtk_window_set_default_icon_name(inIconName.c_str());
+}
 
-	GError *error = nullptr;
-	GdkPixbuf *icon = gdk_pixbuf_new_from_stream(s, nullptr, &error);
-	if (icon)
-		iconList = g_list_append(iconList, icon);
+int MGtkApplicationImpl::CommandLine(GApplicationCommandLine *inCommandLine)
+{
+	gchar **argv;
+	gint argc;
 
-	if (error)
-		g_free(error);
+	argv = g_application_command_line_get_arguments(inCommandLine, &argc);
 
-	mrsrc::rsrc smallAppIconResource("Icons/appicon.png");
-	s = g_memory_input_stream_new_from_data(smallAppIconResource.data(), smallAppIconResource.size(), nullptr);
-	THROW_IF_NIL(s);
+	int result = gApp->HandleCommandLine(argc, argv);
 
-	icon = gdk_pixbuf_new_from_stream(s, nullptr, &error);
-	if (icon)
-		iconList = g_list_append(iconList, icon);
+	g_strfreev(argv);
 
-	if (error)
-		g_free(error);
-
-#warning FIXME
-	// if (iconList)
-	// 	gtk_window_set_default_icon_list(iconList);
-
-	// now start up the normal executable
-	gtk_window_set_default_icon_name("salt-terminal");
-
-	// gdk_notify_startup_complete();
+	return result;
 }
 
 MGtkApplicationImpl::~MGtkApplicationImpl()
@@ -86,21 +108,39 @@ MGtkApplicationImpl::~MGtkApplicationImpl()
 	mCV.notify_one();
 	if (mAsyncTaskThread.joinable())
 		mAsyncTaskThread.join();
+
+	g_object_unref(mGtkApplication);
 }
 
 int MGtkApplicationImpl::RunEventLoop()
 {
-	mPulseID = g_timeout_add(100, &MGtkApplicationImpl::Timeout, nullptr);
+	return g_application_run(G_APPLICATION(mGtkApplication), 0, nullptr);
+}
 
-	// Start processing async tasks
+void MGtkApplicationImpl::OnQueryEnd()
+{
+	if (not gApp->AllowQuit(true))
+		InhibitQuit(true, _("There are open windows"), nullptr);
+}
 
-	mAsyncTaskThread = std::thread([this, context = g_main_context_get_thread_default()]()
-		{ ProcessAsyncTasks(context); });
+void MGtkApplicationImpl::InhibitQuit(bool inInhibit, const std::string &inReason, MWindowImpl *inImpl)
+{
+	if (inInhibit)
+	{
+		if (not mInhibitCookie)
+		{
+			if (auto w = gApp->GetActiveWindow(); inImpl == nullptr and w != nullptr)
+				inImpl = w->GetImpl();
 
-#warning FIXME
-	// gtk_main();
-
-	return 0;
+			GtkWindow *gw = inImpl ? GTK_WINDOW(static_cast<MGtkWindowImpl *>(inImpl)->GetWidget()) : nullptr;
+			mInhibitCookie = gtk_application_inhibit(mGtkApplication, gw, GTK_APPLICATION_INHIBIT_LOGOUT, inReason.c_str());
+		}
+	}
+	else
+	{
+		if (mInhibitCookie)
+			gtk_application_uninhibit(mGtkApplication, mInhibitCookie);
+	}
 }
 
 void MGtkApplicationImpl::Quit()
@@ -108,12 +148,23 @@ void MGtkApplicationImpl::Quit()
 	if (mPulseID)
 		g_source_remove(mPulseID);
 
-#warning FIXME
-	// gtk_main_quit();
+	g_application_quit(G_APPLICATION(mGtkApplication));
 
 	std::unique_lock lock(mMutex);
 	mHandlerQueue.push_front(nullptr);
 	mCV.notify_one();
+}
+
+MWindow *MGtkApplicationImpl::GetActiveWindow()
+{
+	MWindow *result = nullptr;
+	if (auto w = gtk_application_get_active_window(mGtkApplication); w != nullptr)
+	{
+		if (auto impl = MGtkWindowImpl::GetWindowImpl(w); impl != nullptr)
+			result = impl->GetWindow();
+	}
+	
+	return result;
 }
 
 void MGtkApplicationImpl::ProcessAsyncTasks(GMainContext *context)
@@ -164,8 +215,6 @@ gboolean MGtkApplicationImpl::Timeout(gpointer inData)
 {
 	try
 	{
-		MGtkWindowImpl::RecycleWindows();
-
 		gApp->Pulse();
 	}
 	catch (const std::exception &e)
@@ -174,4 +223,45 @@ gboolean MGtkApplicationImpl::Timeout(gpointer inData)
 	}
 
 	return true;
+}
+
+// --------------------------------------------------------------------
+
+int MApplication::Main(const std::string &inApplicationID, const std::vector<std::string> &argv)
+{
+	try
+	{
+		// First find out who we are. Uses proc filesystem to find out.
+		char exePath[PATH_MAX + 1];
+
+		int r = readlink("/proc/self/exe", exePath, PATH_MAX);
+		if (r > 0)
+		{
+			exePath[r] = 0;
+			gExecutablePath = std::filesystem::canonical(exePath);
+			gPrefixPath = gExecutablePath.parent_path();
+		}
+
+		assert(g_application_id_is_valid(inApplicationID.c_str()));
+
+		MApplication *app = MApplication::Create(new MGtkApplicationImpl(inApplicationID));
+		GApplication *g_app = G_APPLICATION(static_cast<MGtkApplicationImpl *>(app->GetImpl())->GetGtkApp());
+
+		std::vector<char *> args;
+		for (auto &a : argv)
+			args.emplace_back(const_cast<char *>(a.c_str()));
+		args.emplace_back(nullptr);
+
+		return g_application_run(g_app, argv.size(), args.data());
+	}
+	catch (const std::exception &e)
+	{
+		std::cerr << e.what() << '\n';
+	}
+	catch (...)
+	{
+		std::cerr << "Exception caught\n";
+	}
+
+	return 0;
 }

@@ -1,17 +1,17 @@
 /*-
  * SPDX-License-Identifier: BSD-2-Clause
- * 
+ *
  * Copyright (c) 2023 Maarten L. Hekkelman
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,36 +25,96 @@
  */
 
 /*	$Id: MUnicode.cpp 151 2007-05-21 15:59:05Z maarten $
-	Copyright Maarten L. Hekkelman
-	Created Monday July 12 2004 21:45:58
+    Copyright Maarten L. Hekkelman
+    Created Monday July 12 2004 21:45:58
 */
 
 #include "MUnicode.hpp"
 #include "MError.hpp"
 #include "MTypes.hpp"
 
-#include <sstream>
 #include <cassert>
 #include <iterator>
+#include <sstream>
 
-const bool kCharBreakTable[10][10] = {
-	//	CR	LF	Cnt	Ext	L	V	T	LV	LVT	Oth
-	{	1,	0,	1,	1,	1,	1,	1,	1,	1,	1	 },		// CR
-	{	1,	1,	1,	1,	1,	1,	1,	1,	1,	1	 },		// LF
-	{	1,	1,	1,	1,	1,	1,	1,	1,	1,	1	 },		// Control
-	{	1,	1,	1,	0,	1,	1,	1,	1,	1,	1	 },		// Extend
-	{	1,	1,	1,	0,	0,	0,	1,	0,	0,	1	 },		// L
-	{	1,	1,	1,	0,	1,	0,	0,	1,	1,	1	 },		// V
-	{	1,	1,	1,	0,	1,	1,	0,	1,	1,	1	 },		// T
-	{	1,	1,	1,	0,	1,	0,	0,	1,	1,	1	 },		// LV
-	{	1,	1,	1,	0,	1,	1,	0,	1,	1,	1	 },		// LVT
-	{	1,	1,	1,	0,	1,	1,	1,	1,	1,	1	 },		// Other
+enum WordBreakClass
+{
+	eWB_CR,
+	eWB_LF,
+	eWB_Sep,
+	eWB_Tab,
+	eWB_Let,
+	eWB_Com,
+	eWB_Hira,
+	eWB_Kata,
+	eWB_Han,
+	eWB_Other,
+	eWB_None
 };
+
+enum CharBreakClass
+{
+	kCBC_CR,
+	kCBC_LF,
+	kCBC_Control,
+	kCBC_Extend,
+	kCBC_L,
+	kCBC_V,
+	kCBC_T,
+	kCBC_LV,
+	kCBC_LVT,
+	kCBC_Other,
+
+	kCBC_Prepend,
+	kCBC_SpacingMark
+};
+
+enum LineBreakClass
+{
+	kLBC_OpenPunctuation,
+	kLBC_ClosePunctuation,
+	kLBC_CloseParenthesis,
+	kLBC_Quotation,
+	kLBC_NonBreaking,
+	kLBC_Nonstarter,
+	kLBC_Exlamation,
+	kLBC_SymbolAllowingBreakAfter,
+	kLBC_InfixNumericSeparator,
+	kLBC_PrefixNumeric,
+	kLBC_PostfixNumeric,
+	kLBC_Numeric,
+	kLBC_Alphabetic,
+	kLBC_Ideographic,
+	kLBC_Inseperable,
+	kLBC_Hyphen,
+	kLBC_BreakAfter,
+	kLBC_BreakBefor,
+	kLBC_BreakOpportunityBeforeAndAfter,
+	kLBC_ZeroWidthSpace,
+	kLBC_CombiningMark,
+	kLBC_WordJoiner,
+	kLBC_HangulLVSyllable,
+	kLBC_HangulLVTSyllable,
+	kLBC_HangulLJamo,
+	kLBC_HangulVJamo,
+	kLBC_HangulTJamo,
+
+	kLBC_MandatoryBreak,
+	kLBC_CarriageReturn,
+	kLBC_LineFeed,
+	kLBC_NextLine,
+	kLBC_Surrogate,
+	kLBC_Space,
+	kLBC_ContigentBreakOpportunity,
+	kLBC_Ambiguous,
+	kLBC_ComplexContext,
+	kLBC_Unknown
+};
+
 
 #include "MUnicodeTables.hpp"
 
-using namespace std;
-
+// clang-format off
 const unicode kMacOSRomanChars[] = {
 	0x0000,  0x0001,  0x0002,  0x0003,  0x0004,  0x0005,  0x0006,  0x0007,  
 	0x0008,  0x0009,  0x000A,  0x000B,  0x000C,  0x000D,  0x000E,  0x000F,  
@@ -89,7 +149,7 @@ const unicode kMacOSRomanChars[] = {
 	0xF8FF,  0x00D2,  0x00DA,  0x00DB,  0x00D9,  0x0131,  0x02C6,  0x02DC,  
 	0x00AF,  0x02D8,  0x02D9,  0x02DA,  0x00B8,  0x02DD,  0x02DB,  0x02C7,  
 };
-
+// clang-format on
 
 namespace MUnicodeMapping
 {
@@ -98,16 +158,16 @@ unicode GetUnicode(MEncoding inEncoding, char inByte)
 {
 	switch (inEncoding)
 	{
-		case kEncodingMacOSRoman:	return kMacOSRomanChars[static_cast<uint8_t>(inByte)];
-		case kEncodingISO88591:		return static_cast<uint8_t>(inByte);	// iso-8859-1 maps exactly on unicode
-		default:					THROW(("Invalid encoding for GetUnicode"));
+		case kEncodingMacOSRoman: return kMacOSRomanChars[static_cast<uint8_t>(inByte)];
+		case kEncodingISO88591: return static_cast<uint8_t>(inByte); // iso-8859-1 maps exactly on unicode
+		default: throw std::runtime_error("Invalid encoding for GetUnicode");
 	}
 }
 
 char GetChar(MEncoding inEncoding, unicode inChar)
 {
 	char result = 0;
-	
+
 	for (int i = 0; i < 256; ++i)
 	{
 		if (inChar == kMacOSRomanChars[i])
@@ -116,592 +176,114 @@ char GetChar(MEncoding inEncoding, unicode inChar)
 			break;
 		}
 	}
-	
+
 	if (inChar != 0 and result == 0)
 	{
 		result = '?';
 	}
-	
+
 	return result;
 }
 
-}
+} // namespace MUnicodeMapping
 
 UnicodeProperty GetProperty(unicode inUnicode)
 {
 	uint8_t result = 0;
-	
+
 	if (inUnicode < 0x110000)
 	{
 		uint32_t ix = inUnicode >> 8;
 		uint32_t p_ix = inUnicode & 0x00FF;
-		
+
 		ix = kUnicodeInfo.page_index[ix];
 		result = kUnicodeInfo.data[ix][p_ix].prop;
 	}
-	
+
 	return UnicodeProperty(result);
 }
 
-WordBreakClass GetWordBreakClass(unicode inUnicode)
-{
-	WordBreakClass result = eWB_Other;
-	
-	switch (inUnicode)
-	{
-		case '\r':
-			result = eWB_CR;
-			break;
-
-		case '\n':
-			result = eWB_LF;
-			break;
-
-		case '\t':
-			result = eWB_Tab;
-			break;
-		
-		default:
-		{
-			uint8_t prop = GetProperty(inUnicode);
-			if (prop == kLETTER or prop == kNUMBER)
-			{
-				if (inUnicode >= 0x003040 and inUnicode <= 0x00309f)
-					result = eWB_Hira;
-				else if (inUnicode >= 0x0030a0 and inUnicode <= 0x0030ff)
-					result = eWB_Kata;
-				else if (inUnicode >= 0x004e00 and inUnicode <= 0x009fff)
-					result = eWB_Han;
-				else if (inUnicode >= 0x003400 and inUnicode <= 0x004DFF)
-					result = eWB_Han;
-				else if (inUnicode >= 0x00F900 and inUnicode <= 0x00FAFF)
-					result = eWB_Han;
-				else
-					result = eWB_Let;
-			}
-			else if (prop == kCOMBININGMARK)
-				result = eWB_Com;
-			else if (prop == kSEPARATOR)
-				result = eWB_Sep;
-		}
-	}
-	
-	return result;
-}
-
-CharBreakClass GetCharBreakClass(
-	unicode		inUnicode)
-{
-	CharBreakClass result = kCBC_Other;
-	
-	if (inUnicode < 0x110000)
-	{
-		uint32_t ix = inUnicode >> 8;
-		uint32_t p_ix = inUnicode & 0x00FF;
-		
-		ix = kUnicodeInfo.page_index[ix];
-		result = kUnicodeInfo.data[ix][p_ix].cbc;
-	}
-	
-	return result;
-}
-
-LineBreakClass GetLineBreakClass(
-	unicode		inUnicode)
-{
-	LineBreakClass result = kLBC_Unknown;
-	
-	if (inUnicode < 0x110000)
-	{
-		uint32_t ix = inUnicode >> 8;
-		uint32_t p_ix = inUnicode & 0x00FF;
-		
-		ix = kUnicodeInfo.page_index[ix];
-		result = kUnicodeInfo.data[ix][p_ix].lbc;
-	}
-	
-	return result;
-}
-
-unicode ToLower(
-	unicode		inUnicode)
+unicode ToLower(unicode inUnicode)
 {
 	unicode result = inUnicode;
-	
+
 	if (inUnicode < 0x110000)
 	{
 		uint32_t ix = inUnicode >> 8;
 		uint32_t p_ix = inUnicode & 0x00FF;
-		
+
 		ix = kUnicodeInfo.page_index[ix];
 		if (kUnicodeInfo.data[ix][p_ix].lower != 0)
 			result = kUnicodeInfo.data[ix][p_ix].lower;
 	}
-	
+
 	return result;
 }
 
-unicode ToUpper(
-	unicode		inUnicode)
+unicode ToUpper(unicode inUnicode)
 {
 	unicode result = inUnicode;
-	
+
 	if (inUnicode < 0x110000)
 	{
 		uint32_t ix = inUnicode >> 8;
 		uint32_t p_ix = inUnicode & 0x00FF;
-		
+
 		ix = kUnicodeInfo.page_index[ix];
 		if (kUnicodeInfo.data[ix][p_ix].upper != 0)
 			result = kUnicodeInfo.data[ix][p_ix].upper;
 	}
-	
-	return result;
-}
-
-bool IsSpace(
-	unicode		inUnicode)
-{
-	return
-		(inUnicode >= 0x0009 and inUnicode <= 0x000D) or
-		inUnicode == 0x0020 or
-		inUnicode == 0x0085 or
-		inUnicode == 0x00A0 or
-		inUnicode == 0x1680 or
-		inUnicode == 0x180E or
-		(inUnicode >= 0x2000 and inUnicode <= 0x200A) or
-		inUnicode == 0x2028 or
-		inUnicode == 0x2029 or
-		inUnicode == 0x202f or
-		inUnicode == 0x205f or
-		inUnicode == 0x3000;
-}
-
-bool IsAlpha(
-	unicode		inUnicode)
-{
-	return GetProperty(inUnicode) == kLETTER;
-}
-
-bool IsNum(
-	unicode		inUnicode)
-{
-	return GetProperty(inUnicode) == kNUMBER;
-}
-
-bool IsAlnum(unicode inUnicode)
-{
-	uint8_t prop = GetProperty(inUnicode);
-	
-	return prop == kLETTER or prop == kNUMBER;
-}
-
-bool IsCombining(unicode inUnicode)
-{
-	return GetProperty(inUnicode) == kCOMBININGMARK;
-}
-
-template<MEncoding ENCODING>
-class MEncoderImpl : public MEncoder
-{
-	typedef MEncodingTraits<ENCODING>	traits;
-  public:
-	
-	virtual void	WriteUnicode(unicode inUnicode)
-					{
-						back_insert_iterator<vector<char> > iter(mBuffer);
-						traits::WriteUnicode(iter, inUnicode);
-					}
-};
-
-void MEncoder::SetText(const string& inText)
-{
-	MDecoder* decoder = MDecoder::GetDecoder(kEncodingUTF8,
-		inText.c_str(), inText.length());
-	
-	unicode uc;
-	while (decoder->ReadUnicode(uc))
-		WriteUnicode(uc);
-}
-
-void MEncoder::SetText(const wstring& inText)
-{
-	for (wstring::const_iterator ch = inText.begin(); ch != inText.end(); ++ch)
-		WriteUnicode(*ch);
-}
-
-MEncoder* MEncoder::GetEncoder(MEncoding inEncoding)
-{
-	MEncoder* encoder;
-	switch (inEncoding)
-	{
-		case kEncodingUTF8:
-			encoder = new MEncoderImpl<kEncodingUTF8>();
-			break;
-		
-		case kEncodingUTF16BE:
-			encoder = new MEncoderImpl<kEncodingUTF16BE>();
-			break;
-		
-		case kEncodingUTF16LE:
-			encoder = new MEncoderImpl<kEncodingUTF16LE>();
-			break;
-		
-		case kEncodingUCS2:
-			encoder = new MEncoderImpl<kEncodingUCS2>();
-			break;
-		
-		case kEncodingMacOSRoman:
-			encoder = new MEncoderImpl<kEncodingMacOSRoman>();
-			break;
-		
-		case kEncodingISO88591:
-			encoder = new MEncoderImpl<kEncodingISO88591>();
-			break;
-		
-		default:
-			assert(false);
-			THROW(("Unknown encoding"));
-			break;
-	}
-	
-	return encoder;
-}
-
-
-template<MEncoding ENCODING>
-class MDecoderImpl : public MDecoder
-{
-	typedef MEncodingTraits<ENCODING>	traits;
-  public:
-
-					MDecoderImpl(const void* inBuffer, uint32_t inLength)
-						: MDecoder(inBuffer, inLength)
-					{
-					}
-	
-	virtual bool	ReadUnicode(unicode& outUnicode)
-					{
-						bool result = false;
-						if (mLength > 0)
-						{
-							uint32_t l;
-							traits::ReadUnicode(mBuffer, l, outUnicode);
-							
-							if (l > 0 and l <= mLength)
-							{
-								mBuffer += l;
-								mLength -= l;
-								result = true;
-							}
-						}
-						
-						return result;
-					}
-};
-
-MDecoder* MDecoder::GetDecoder(MEncoding inEncoding, const void* inBuffer, uint32_t inLength)
-{
-	MDecoder* decoder;
-	switch (inEncoding)
-	{
-		case kEncodingUTF8:
-			decoder = new MDecoderImpl<kEncodingUTF8>(inBuffer, inLength);
-			break;
-		
-		case kEncodingUTF16BE:
-			decoder = new MDecoderImpl<kEncodingUTF16BE>(inBuffer, inLength);
-			break;
-		
-		case kEncodingUTF16LE:
-			decoder = new MDecoderImpl<kEncodingUTF16LE>(inBuffer, inLength);
-			break;
-		
-		case kEncodingUCS2:
-			decoder = new MDecoderImpl<kEncodingUCS2>(inBuffer, inLength);
-			break;
-		
-		case kEncodingMacOSRoman:
-			decoder = new MDecoderImpl<kEncodingMacOSRoman>(inBuffer, inLength);
-			break;
-		
-		case kEncodingISO88591:
-			decoder = new MDecoderImpl<kEncodingISO88591>(inBuffer, inLength);
-			break;
-		
-		default:
-			assert(false);
-			THROW(("Unknown encoding"));
-			break;
-	}
-	
-	return decoder;
-}
-
-void MDecoder::GetText(string& outText)
-{
-	unicode uc;
-	
-	vector<char> b;
-	back_insert_iterator<vector<char> > i(b);
-	
-	while (ReadUnicode(uc))
-		MEncodingTraits<kEncodingUTF8>::WriteUnicode(i, uc);
-	
-	outText.assign(b.begin(), b.end());
-}
-
-void MDecoder::GetText(wstring& outText)
-{
-	unicode uc;
-	
-	outText.clear();
-	
-	while (ReadUnicode(uc))
-		outText += uc;
-}
-
-string::iterator next_cursor_position(
-	string::iterator	inStart,
-	string::iterator	inEnd)
-{
-	string::iterator result = inEnd;
-
-	uint32_t length;
-	unicode ch;
-	
-	MEncodingTraits<kEncodingUTF8>::ReadUnicode(inStart, length, ch);
-	CharBreakClass c1 = GetCharBreakClass(ch);
-
-	while (inEnd - inStart >= static_cast<int>(length))
-    {
-		inStart += length;
-		result = inStart;
-
-		MEncodingTraits<kEncodingUTF8>::ReadUnicode(inStart, length, ch);
-
-		CharBreakClass c2 = GetCharBreakClass(ch);
-
-		if (c1 != kCBC_Prepend and c2 != kCBC_SpacingMark and kCharBreakTable[c1][c2])
-			break;
-		
-		c1 = c2;
-	}
-	
-	return result;
-}
-
-ustring::iterator next_cursor_position(ustring::iterator inStart, ustring::iterator inEnd)
-{
-	ustring::iterator result = inEnd;
-
-	CharBreakClass c1 = GetCharBreakClass(*inStart);
-
-	while (inStart != inEnd)
-	{
-		++inStart;
-		result = inStart;
-		
-		CharBreakClass c2 = GetCharBreakClass(*inStart);
-		
-		if (c1 != kCBC_Prepend and c2 != kCBC_SpacingMark and kCharBreakTable[c1][c2])
-			break;
-		
-		c1 = c2;
-	}
 
 	return result;
 }
 
-//enum MLineBreakClass
-//{
-//	kOP, kCL, kQU, kGL, kNS, kEX, kSY, kIS, kPR, kPO, kNU, kAL, kID, kIN, kHY, kBA,
-//	kBB, kB2, kZW, kCM, kWJ, kH2, kH3, kJL, kJV, kJT,
-//
-//	kBK, kCR, kLF, kSG, kCB, kSP, kSA, kAI, kXX, kNL,
-//};
-//
-//MLineBreakClass kLineBreakClassMapping[] =
-//{
-//	// G_UNICODE_BREAK_MANDATORY
-//	kBK,
-//	// G_UNICODE_BREAK_CARRIAGE_RETURN
-//	kCR,
-//	// G_UNICODE_BREAK_LINE_FEED
-//	kLF,
-//	// G_UNICODE_BREAK_COMBINING_MARK
-//	kCM,
-//	// G_UNICODE_BREAK_SURROGATE
-//	kSG,
-//	// G_UNICODE_BREAK_ZERO_WIDTH_SPACE
-//	kZW,
-//	// G_UNICODE_BREAK_INSEPARABLE
-//	kIN,
-//	// G_UNICODE_BREAK_NON_BREAKING_GLUE
-//	kGL,
-//	// G_UNICODE_BREAK_CONTINGENT
-//	kCB,
-//	// G_UNICODE_BREAK_SPACE
-//	kSP,
-//	// G_UNICODE_BREAK_AFTER
-//	kBA,
-//	// G_UNICODE_BREAK_BEFORE
-//	kBB,
-//	// G_UNICODE_BREAK_BEFORE_AND_AFTER
-//	kB2,
-//	// G_UNICODE_BREAK_HYPHEN
-//	kHY,
-//	// G_UNICODE_BREAK_NON_STARTER
-//	kNS,
-//	// G_UNICODE_BREAK_OPEN_PUNCTUATION
-//	kOP,
-//	// G_UNICODE_BREAK_CLOSE_PUNCTUATION
-//	kCL,
-//	// G_UNICODE_BREAK_QUOTATION
-//	kQU,
-//	// G_UNICODE_BREAK_EXCLAMATION
-//	kEX,
-//	// G_UNICODE_BREAK_IDEOGRAPHIC
-//	kID,
-//	// G_UNICODE_BREAK_NUMERIC
-//	kNU,
-//	// G_UNICODE_BREAK_INFIX_SEPARATOR
-//	kIS,
-//	// G_UNICODE_BREAK_SYMBOL
-//	kSY,
-//	// G_UNICODE_BREAK_ALPHABETIC
-//	kAL,
-//	// G_UNICODE_BREAK_PREFIX
-//	kPR,
-//	// G_UNICODE_BREAK_POSTFIX
-//	kPO,
-//	// G_UNICODE_BREAK_COMPLEX_CONTEXT
-//	kSA,
-//	// G_UNICODE_BREAK_AMBIGUOUS
-//	kAI,
-//	// G_UNICODE_BREAK_UNKNOWN
-//	kXX,
-//	// G_UNICODE_BREAK_NEXT_LINE
-//	kNL,
-//	// G_UNICODE_BREAK_WORD_JOINER
-//	kWJ,
-//	// G_UNICODE_BREAK_HANGUL_L_JAMO
-//	kJL,
-//	// G_UNICODE_BREAK_HANGUL_V_JAMO
-//	kJV,
-//	// G_UNICODE_BREAK_HANGUL_T_JAMO
-//	kJT,
-//	// G_UNICODE_BREAK_HANGUL_LV_SYLLABLE
-//	kH2,
-//	// G_UNICODE_BREAK_HANGUL_LVT_SYLLABLE
-//	kH3,	
-//};
-//
-//LineBreakClass GetLineBreakClass(
-//	unicode				inUnicode)
-//{
-//	MLineBreakClass result = kLineBreakClassMapping[g_unichar_break_type(inUnicode)];
-//	
-//	if (result > kBK and result != kSP)	// duh...
-//		result = kAL;
-//	
-//	return result;
-//}
+// --------------------------------------------------------------------
 
-string::iterator next_line_break(
-	string::iterator	text,
-	string::iterator	end)
+bool IEquals(std::string_view a, std::string_view b)
 {
-	if (text == end)
-		return text;
-	
-	enum break_action
-	{ 
-		DBK = 0, // direct break 	(blank in table)
-		IBK, 	// indirect break	(% in table)
-		PBK,	// prohibited break (^ in table)
-		CIB,	// combining indirect break
-		CPB		// combining prohibited break
-	};
+	if (a.size() != b.size())
+		return false;
 
-	const break_action brkTable[27][27] = {
-	//   	OP  	CL  	CP  	QU  	GL  	NS  	EX  	SY  	IS  	PR  	PO  	NU  	AL  	ID  	IN  	HY  	BA  	BB  	B2  	ZW  	CM  	WJ  	H2  	H3  	JL  	JV  	JT
-/* OP */ { 	PBK, 	PBK, 	PBK, 	PBK, 	PBK, 	PBK, 	PBK, 	PBK, 	PBK, 	PBK, 	PBK, 	PBK, 	PBK, 	PBK, 	PBK, 	PBK, 	PBK, 	PBK, 	PBK, 	PBK, 	CPB, 	PBK, 	PBK, 	PBK, 	PBK, 	PBK, 	PBK },
-/* CL */ { 	DBK, 	PBK, 	PBK, 	IBK, 	IBK, 	PBK, 	PBK, 	PBK, 	PBK, 	IBK, 	IBK, 	DBK, 	DBK, 	DBK, 	DBK, 	IBK, 	IBK, 	DBK, 	DBK, 	PBK, 	CIB, 	PBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK },
-/* CP */ { 	DBK, 	PBK, 	PBK, 	IBK, 	IBK, 	PBK, 	PBK, 	PBK, 	PBK, 	IBK, 	IBK, 	IBK, 	IBK, 	DBK, 	DBK, 	IBK, 	IBK, 	DBK, 	DBK, 	PBK, 	CIB, 	PBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK },
-/* QU */ { 	PBK, 	PBK, 	PBK, 	IBK, 	IBK, 	IBK, 	PBK, 	PBK, 	PBK, 	IBK, 	IBK, 	IBK, 	IBK, 	IBK, 	IBK, 	IBK, 	IBK, 	IBK, 	IBK, 	PBK, 	CIB, 	PBK, 	IBK, 	IBK, 	IBK, 	IBK, 	IBK },
-/* GL */ { 	IBK, 	PBK, 	PBK, 	IBK, 	IBK, 	IBK, 	PBK, 	PBK, 	PBK, 	IBK, 	IBK, 	IBK, 	IBK, 	IBK, 	IBK, 	IBK, 	IBK, 	IBK, 	IBK, 	PBK, 	CIB, 	PBK, 	IBK, 	IBK, 	IBK, 	IBK, 	IBK },
-/* NS */ { 	DBK, 	PBK, 	PBK, 	IBK, 	IBK, 	IBK, 	PBK, 	PBK, 	PBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK, 	IBK, 	IBK, 	DBK, 	DBK, 	PBK, 	CIB, 	PBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK },
-/* EX */ { 	DBK, 	PBK, 	PBK, 	IBK, 	IBK, 	IBK, 	PBK, 	PBK, 	PBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK, 	IBK, 	IBK, 	DBK, 	DBK, 	PBK, 	CIB, 	PBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK },
-/* SY */ { 	DBK, 	PBK, 	PBK, 	IBK, 	IBK, 	IBK, 	PBK, 	PBK, 	PBK, 	DBK, 	DBK, 	IBK, 	DBK, 	DBK, 	DBK, 	IBK, 	IBK, 	DBK, 	DBK, 	PBK, 	CIB, 	PBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK },
-/* IS */ { 	DBK, 	PBK, 	PBK, 	IBK, 	IBK, 	IBK, 	PBK, 	PBK, 	PBK, 	DBK, 	DBK, 	IBK, 	IBK, 	DBK, 	DBK, 	IBK, 	IBK, 	DBK, 	DBK, 	PBK, 	CIB, 	PBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK },
-/* PR */ { 	IBK, 	PBK, 	PBK, 	IBK, 	IBK, 	IBK, 	PBK, 	PBK, 	PBK, 	DBK, 	DBK, 	IBK, 	IBK, 	IBK, 	DBK, 	IBK, 	IBK, 	DBK, 	DBK, 	PBK, 	CIB, 	PBK, 	IBK, 	IBK, 	IBK, 	IBK, 	IBK },
-/* PO */ { 	IBK, 	PBK, 	PBK, 	IBK, 	IBK, 	IBK, 	PBK, 	PBK, 	PBK, 	DBK, 	DBK, 	IBK, 	IBK, 	DBK, 	DBK, 	IBK, 	IBK, 	DBK, 	DBK, 	PBK, 	CIB, 	PBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK },
-/* NU */ { 	DBK, 	PBK, 	PBK, 	IBK, 	IBK, 	IBK, 	PBK, 	PBK, 	PBK, 	IBK, 	IBK, 	IBK, 	IBK, 	DBK, 	IBK, 	IBK, 	IBK, 	DBK, 	DBK, 	PBK, 	CIB, 	PBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK },
-/* AL */ { 	DBK, 	PBK, 	PBK, 	IBK, 	IBK, 	IBK, 	PBK, 	PBK, 	PBK, 	DBK, 	DBK, 	IBK, 	IBK, 	DBK, 	IBK, 	IBK, 	IBK, 	DBK, 	DBK, 	PBK, 	CIB, 	PBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK },
-/* ID */ { 	DBK, 	PBK, 	PBK, 	IBK, 	IBK, 	IBK, 	PBK, 	PBK, 	PBK, 	DBK, 	IBK, 	DBK, 	DBK, 	DBK, 	IBK, 	IBK, 	IBK, 	DBK, 	DBK, 	PBK, 	CIB, 	PBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK },
-/* IN */ { 	DBK, 	PBK, 	PBK, 	IBK, 	IBK, 	IBK, 	PBK, 	PBK, 	PBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK, 	IBK, 	IBK, 	IBK, 	DBK, 	DBK, 	PBK, 	CIB, 	PBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK },
-/* HY */ { 	DBK, 	PBK, 	PBK, 	IBK, 	DBK, 	IBK, 	PBK, 	PBK, 	PBK, 	DBK, 	DBK, 	IBK, 	DBK, 	DBK, 	DBK, 	IBK, 	IBK, 	DBK, 	DBK, 	PBK, 	CIB, 	PBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK },
-/* BA */ { 	DBK, 	PBK, 	PBK, 	IBK, 	DBK, 	IBK, 	PBK, 	PBK, 	PBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK, 	IBK, 	IBK, 	DBK, 	DBK, 	PBK, 	CIB, 	PBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK },
-/* BB */ { 	IBK, 	PBK, 	PBK, 	IBK, 	IBK, 	IBK, 	PBK, 	PBK, 	PBK, 	IBK, 	IBK, 	IBK, 	IBK, 	IBK, 	IBK, 	IBK, 	IBK, 	IBK, 	IBK, 	PBK, 	CIB, 	PBK, 	IBK, 	IBK, 	IBK, 	IBK, 	IBK },
-/* B2 */ { 	DBK, 	PBK, 	PBK, 	IBK, 	IBK, 	IBK, 	PBK, 	PBK, 	PBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK, 	IBK, 	IBK, 	DBK, 	PBK, 	PBK, 	CIB, 	PBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK },
-/* ZW */ { 	DBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK, 	PBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK },
-/* CM */ { 	DBK, 	PBK, 	PBK, 	IBK, 	IBK, 	IBK, 	PBK, 	PBK, 	PBK, 	DBK, 	DBK, 	IBK, 	IBK, 	DBK, 	IBK, 	IBK, 	IBK, 	DBK, 	DBK, 	PBK, 	CIB, 	PBK, 	DBK, 	DBK, 	DBK, 	DBK, 	DBK },
-/* WJ */ { 	IBK, 	PBK, 	PBK, 	IBK, 	IBK, 	IBK, 	PBK, 	PBK, 	PBK, 	IBK, 	IBK, 	IBK, 	IBK, 	IBK, 	IBK, 	IBK, 	IBK, 	IBK, 	IBK, 	PBK, 	CIB, 	PBK, 	IBK, 	IBK, 	IBK, 	IBK, 	IBK },
-/* H2 */ { 	DBK, 	PBK, 	PBK, 	IBK, 	IBK, 	IBK, 	PBK, 	PBK, 	PBK, 	DBK, 	IBK, 	DBK, 	DBK, 	DBK, 	IBK, 	IBK, 	IBK, 	DBK, 	DBK, 	PBK, 	CIB, 	PBK, 	DBK, 	DBK, 	DBK, 	IBK, 	IBK },
-/* H3 */ { 	DBK, 	PBK, 	PBK, 	IBK, 	IBK, 	IBK, 	PBK, 	PBK, 	PBK, 	DBK, 	IBK, 	DBK, 	DBK, 	DBK, 	IBK, 	IBK, 	IBK, 	DBK, 	DBK, 	PBK, 	CIB, 	PBK, 	DBK, 	DBK, 	DBK, 	DBK, 	IBK },
-/* JL */ { 	DBK, 	PBK, 	PBK, 	IBK, 	IBK, 	IBK, 	PBK, 	PBK, 	PBK, 	DBK, 	IBK, 	DBK, 	DBK, 	DBK, 	IBK, 	IBK, 	IBK, 	DBK, 	DBK, 	PBK, 	CIB, 	PBK, 	IBK, 	IBK, 	IBK, 	IBK, 	DBK },
-/* JV */ { 	DBK, 	PBK, 	PBK, 	IBK, 	IBK, 	IBK, 	PBK, 	PBK, 	PBK, 	DBK, 	IBK, 	DBK, 	DBK, 	DBK, 	IBK, 	IBK, 	IBK, 	DBK, 	DBK, 	PBK, 	CIB, 	PBK, 	DBK, 	DBK, 	DBK, 	IBK, 	IBK },
-/* JT */ { 	DBK, 	PBK, 	PBK, 	IBK, 	IBK, 	IBK, 	PBK, 	PBK, 	PBK, 	DBK, 	IBK, 	DBK, 	DBK, 	DBK, 	IBK, 	IBK, 	IBK, 	DBK, 	DBK, 	PBK, 	CIB, 	PBK, 	DBK, 	DBK, 	DBK, 	DBK, 	IBK },
-		};
+	auto ai = a.begin();
+	auto bi = b.begin();
 
-	unicode uc;
-	uint32_t cl;
-	
-	typedef MEncodingTraits<kEncodingUTF8> enc;
+	using traits = MEncodingTraits<kEncodingUTF8>;
 
-	enc::ReadUnicode(text, cl, uc);
-
-	LineBreakClass cls, ncls, lcls;
-	
-	if (uc == '\n' or uc == 0x2029)
-		cls = kLBC_MandatoryBreak;
-	else
+	while (ai != a.end() and bi != b.end())
 	{
-		cls = GetLineBreakClass(uc);
-		if (cls > kLBC_MandatoryBreak and cls != kLBC_Space)	// duh...
-			cls = kLBC_Alphabetic;
+		uint32_t la, lb;
+		char32_t ua, ub;
+
+		traits::ReadUnicode(ai, la, ua);
+		traits::ReadUnicode(bi, lb, ub);
+
+		if (ua != ub)
+			return false;
+
+		ai += la;
+		bi += lb;
 	}
 
-	if (cls == kLBC_Space)
-		cls = kLBC_WordJoiner;
+	return true;
+}
 
-	ncls = cls;
+void Trim(std::string &ioString)
+{
+	auto s = ioString.begin();
+	auto e = ioString.end();
 
-	while ((text += cl) != end and cls != kLBC_MandatoryBreak)
+	while (s != e and std::isspace(*s))
+		++s;
+
+	if (s > ioString.begin())
 	{
-		enc::ReadUnicode(text, cl, uc);
-		
-		lcls = ncls;
-		
-		if (uc == '\n' or uc == 0x2029 or uc == 0x2028)
-		{
-			text += cl;
-			break;
-		}
-
-		ncls = GetLineBreakClass(uc);
-	
-		if (ncls == kLBC_Space)
-			continue;
-		
-		break_action brk = brkTable[cls][ncls];
-		
-		if (brk == DBK or (brk == IBK and lcls == kLBC_Space))
-			break;
-		
-		cls = ncls;
+		ioString.erase(ioString.begin(), s);
+		e = ioString.end();
 	}
 
-	return text;
+	while (e != s and std::isspace(e[-1]))
+		--e;
+
+	if (e < ioString.end())
+		ioString.erase(e, ioString.end());
 }

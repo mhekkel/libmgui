@@ -39,8 +39,6 @@ class MWinCanvasImpl : public MCanvasImpl, public MWinProcMixin
 	virtual void ReleaseFocus();
 	virtual bool IsFocus() const;
 
-	virtual void TrackMouse(bool inTrackMove, bool inTrackExit);
-
 	virtual MWinProcMixin *GetWinProcMixin() { return this; }
 
   protected:

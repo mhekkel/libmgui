@@ -36,7 +36,7 @@
 extern std::filesystem::path gPrefsDir;
 extern std::string gPrefsFileName;
 
-namespace Preferences
+namespace MPrefs
 {
 
 bool GetBoolean(const char *inName, bool inDefaultValue);
@@ -62,4 +62,4 @@ std::filesystem::file_time_type GetPrefsFileCreationTime();
 void Save();
 void SaveIfDirty();
 
-} // namespace Preferences
+} // namespace MPrefs

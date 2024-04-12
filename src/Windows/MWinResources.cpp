@@ -5,16 +5,10 @@
 
 #include "MWinLib.hpp"
 
-#include "zeep/xml/document.hpp"
-
 #include <map>
 #include "mrsrc.hpp"
 #include "MError.hpp"
 #include "MUtils.hpp"
-
-// using namespace std;
-// using namespace zeep;
-// namespace io = boost::iostreams;
 
 // namespace mrsrc
 // {
@@ -57,12 +51,14 @@
 // 		throw rsrc_not_found_exception();
 	
 // 	impl->hmem = ::LoadResource(nullptr, impl->rsrc);
-// 	THROW_IF_NIL(impl->hmem);
+// 	if (impl->hmem == nullptr)
+throw std::runtime_error("unexpected nullptr");
 
 // 	impl->size = ::SizeofResource(nullptr, impl->rsrc);
 
 // 	impl->data = reinterpret_cast<char*>(::LockResource(impl->hmem));
-// 	THROW_IF_NIL(impl->data);
+// 	if (impl->data == nullptr)
+throw std::runtime_error("unexpected nullptr");
 
 // 	io::stream<io::array_source> data(impl->data, impl->size);
 // 	xml::document doc(data);
@@ -79,7 +75,8 @@
 // 			throw rsrc_not_found_exception();
 	
 // 		impl.hmem = ::LoadResource(nullptr, impl.rsrc);
-// 		THROW_IF_NIL(impl.hmem);
+// 		if (impl.hmem == nullptr)
+throw std::runtime_error("unexpected nullptr");
 // 		impl.size = ::SizeofResource(nullptr, impl.rsrc);
 // 		impl.data = reinterpret_cast<char*>(::LockResource(impl.hmem));
 // 	}

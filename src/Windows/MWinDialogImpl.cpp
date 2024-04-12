@@ -7,8 +7,6 @@
 
 #include <filesystem>
 
-#include "zeep/xml/document.hpp"
-
 #include "MAcceleratorTable.hpp"
 #include "MControls.hpp"
 #include "MDevice.hpp"
@@ -25,7 +23,6 @@
 #include "mrsrc.hpp"
 
 using namespace std;
-using namespace zeep;
 
 class MWinDialogImpl : public MWinWindowImpl
 {
@@ -181,7 +178,7 @@ void MWinDialogImpl::Finish()
 
 	xml::element *dialog = doc.find_first("/dialog");
 	if (dialog == nullptr)
-		THROW(("Invalid dialog resource"));
+		throw std::runtime_error("Invalid dialog resource");
 
 	wstring title = c2w(l(dialog->get_attribute("title")));
 
@@ -240,7 +237,7 @@ void MWinDialogImpl::Finish()
 	content->SetBindings(true, true, true, true);
 
 	for (MRadiobutton *radiobutton : mRadioGroup)
-		radiobutton->SetGroup(mRadioGroup);
+		radiobutton->SetGroup(mRadioGroup.front());
 
 	RECT cr;
 	::GetClientRect(GetHandle(), &cr);

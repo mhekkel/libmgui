@@ -22,10 +22,12 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.28)
 
 # set the project name
 project(libmgui VERSION 1.0.0 LANGUAGES CXX)
+
+list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 include(GNUInstallDirs)
 include(CheckFunctionExists)
@@ -33,6 +35,8 @@ include(CheckIncludeFiles)
 include(CheckLibraryExists)
 include(CMakePackageConfigHelpers)
 include(GenerateExportHeader)
+include(FindPkgConfig)
+include(VersionString)
 
 if(WIN32)
 	if(${CMAKE_SYSTEM_VERSION} GREATER_EQUAL 10) # Windows 10
@@ -77,44 +81,33 @@ set(CMAKE_THREAD_PREFER_PTHREAD)
 set(THREADS_PREFER_PTHREAD_FLAG)
 find_package(Threads REQUIRED)
 
-if(NOT TARGET zeep AND NOT zeep_FOUND)
-	find_package(zeep 5.1.6 REQUIRED)
+if(NOT TARGET mxml AND NOT mxml_FOUND)
+	find_package(mxml 1.0.2 REQUIRED)
 endif()
+
+# Version info
+write_version_header("${CMAKE_CURRENT_SOURCE_DIR}/src" LIB_NAME "libmgui")
 
 # The salt executable
 list(APPEND headers
-	include/Gtk/MGtkCanvasImpl.hpp
-	include/Gtk/MGtkControlsImpl.hpp
-	include/Gtk/MGtkDeviceImpl.hpp
-	include/Gtk/MGtkLib.hpp
-	include/Gtk/MGtkWidgetMixin.hpp
-	include/Gtk/MGtkWindowImpl.hpp
-	include/Gtk/MPrimary.hpp
-	include/Gtk/MGtkApplicationImpl.hpp
-
-	include/MAcceleratorTable.hpp
 	include/MAlerts.hpp
 	include/MAnimation.hpp
 	include/MApplication.hpp
-	include/MApplicationImpl.hpp
 	include/MCanvas.hpp
-	include/MCanvasImpl.hpp
 	include/MClipboard.hpp
-	include/MClipboardImpl.hpp
 	include/MColor.hpp
 	include/MColorPicker.hpp
-	include/MCommands.hpp
+	include/MCommand.hpp
 	include/MControls.hpp
 	include/MControlsImpl.hpp
+	include/MControls.inl
 	include/MDevice.hpp
 	include/MDeviceImpl.hpp
 	include/MDialog.hpp
 	include/MError.hpp
 	include/MFile.hpp
-	include/MHandler.hpp
 	include/MLib.hpp
 	include/MMenu.hpp
-	include/MMenuImpl.hpp
 	include/MP2PEvents.hpp
 	include/MPreferences.hpp
 	include/mrsrc.hpp
@@ -122,11 +115,21 @@ list(APPEND headers
 	include/MStrings.hpp
 	include/MTypes.hpp
 	include/MUnicode.hpp
+	include/MUnicode.inl
 	include/MUnicodeTables.hpp
 	include/MUtils.hpp
 	include/MView.hpp
-	include/MWindow.hpp
-	include/MWindowImpl.hpp
+	include/MWindow.hpp)
+
+list(APPEND private_headers
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkCanvasImpl.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkControlsImpl.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkDeviceImpl.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkLib.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkWidgetMixin.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkWindowImpl.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkApplicationImpl.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/revision.hpp
 )
 
 list(APPEND sources
@@ -137,17 +140,14 @@ list(APPEND sources
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkMenu.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkSound.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkUtils.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MPrimary.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkCanvasImpl.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkControlsImpl.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkDeviceImpl.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkDialogImpl.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkWidgetMixin.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkApplicationImpl.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkMain.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Gtk/MGtkWindowImpl.cpp
 
-	${CMAKE_CURRENT_SOURCE_DIR}/src/MAcceleratorTable.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MAlerts.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MAnimation.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MApplication.cpp
@@ -158,12 +158,10 @@ list(APPEND sources
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MControls.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MDevice.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MDialog.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/MError.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/MHandler.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MLib.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MMenu.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MPreferences.cpp
-		${CMAKE_CURRENT_SOURCE_DIR}/src/MStrings.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MStrings.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MTypes.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MUnicode.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MUtils.cpp
@@ -173,28 +171,47 @@ list(APPEND sources
 
 add_library(mgui STATIC)
 add_library(mgui::mgui ALIAS mgui)
+target_compile_features(mgui PUBLIC cxx_std_20)
 
 target_sources(mgui
 	PRIVATE ${sources}
-	PUBLIC
-	FILE_SET headers TYPE HEADERS
+	PRIVATE FILE_SET private_headers TYPE HEADERS
+	PUBLIC FILE_SET public_headers TYPE HEADERS
 	BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include
 	FILES ${headers}
 )
 
-target_include_directories(mgui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(mgui Threads::Threads mxml::mxml)
 
-target_link_libraries(mgui libmcfp::libmcfp Threads::Threads zeep::zeep)
+install(TARGETS mgui
+	EXPORT mgui
+	FILE_SET public_headers DESTINATION include)
+
+install(EXPORT mgui
+	NAMESPACE mgui::
+	DESTINATION lib/cmake/mgui
+	FILE mgui-targets.cmake)
+
+configure_package_config_file(
+	${PROJECT_SOURCE_DIR}/cmake/mgui-config.cmake.in
+	${CMAKE_CURRENT_BINARY_DIR}/mgui-config.cmake
+	INSTALL_DESTINATION lib/cmake/mgui)
+
+write_basic_package_version_file(
+	"${CMAKE_CURRENT_BINARY_DIR}/mgui-config-version.cmake"
+	COMPATIBILITY AnyNewerVersion
+)
+
+install(FILES
+	${CMAKE_CURRENT_BINARY_DIR}/mgui-config.cmake
+	${CMAKE_CURRENT_BINARY_DIR}/mgui-config-version.cmake
+	DESTINATION lib/cmake/mgui)
 
 if(UNIX)
-	pkg_check_modules(GTK4 gtk4 REQUIRED IMPORTED_TARGET)
-
-	# The salt executable
-	add_compile_definitions(GDK_DISABLE_DEPRECATED GTK_DISABLE_DEPRECATED)
-
+	pkg_check_modules(GTK4 REQUIRED IMPORTED_TARGET gtk4 libcanberra)
 	target_link_libraries(mgui PkgConfig::GTK4)
 endif()
 
-# install(TARGETS salt
-# RUNTIME DESTINATION ${BIN_INSTALL_DIR}
-# )
+if(PROJECT_IS_TOP_LEVEL)
+	add_subdirectory(examples)
+endif()

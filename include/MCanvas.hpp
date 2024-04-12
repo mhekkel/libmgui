@@ -27,37 +27,59 @@
 #pragma once
 
 #include "MControls.hpp"
-#include "MHandler.hpp"
+#include "MControlsImpl.hpp"
 
 #include <filesystem>
 
-class MCanvasImpl;
+// --------------------------------------------------------------------
+
+class MCanvas;
+
+enum class MCanvasDropTypes
+{
+	None = 0,
+	File = (1 << 0),
+	Text = (1 << 1)
+};
+
+constexpr MCanvasDropTypes operator|(MCanvasDropTypes a, MCanvasDropTypes b)
+{
+	return static_cast<MCanvasDropTypes>(int(a) | int(b));
+}
+
+constexpr MCanvasDropTypes operator&(MCanvasDropTypes a, MCanvasDropTypes b)
+{
+	return static_cast<MCanvasDropTypes>(int(a) & int(b));
+}
+
+
+// --------------------------------------------------------------------
+
+class MCanvasImpl : public MControlImpl<MCanvas>
+{
+  public:
+	MCanvasImpl(MCanvas *inCanvas)
+		: MControlImpl(inCanvas)
+	{
+	}
+
+	virtual ~MCanvasImpl() = default;
+
+	virtual void Invalidate();
+
+	static MCanvasImpl *Create(MCanvas *inCanvas, uint32_t inWidth, uint32_t inHeight,
+		MCanvasDropTypes inDropTypes);
+};
+
+// --------------------------------------------------------------------
 
 class MCanvas : public MControl<MCanvasImpl>
 {
   public:
 	typedef MCanvasImpl MImpl;
 
-	MCanvas(const std::string &inID, MRect inBounds, bool inAcceptDropFiles, bool inAcceptDropText);
-	virtual ~MCanvas();
+	MCanvas(const std::string &inID, MRect inBounds, MCanvasDropTypes inDropTypes = MCanvasDropTypes::None);
+	~MCanvas();
 
-	virtual void AddedToWindow();
-
-	virtual void Invalidate();
-
-	virtual void DragEnter();
-	virtual bool DragWithin(int32_t inX, int32_t inY);
-	virtual void DragLeave();
-	virtual bool Drop(bool inMove, int32_t inX, int32_t inY,
-		const std::string &inText);
-	virtual bool Drop(int32_t inX, int32_t inY,
-		const std::filesystem::path &inFile);
-
-	virtual void StartDrag();
-	virtual void DragSendData(std::string &outData);
-	virtual void DragDeleteData();
-
-  protected:
-	bool mAcceptDropFiles;
-	bool mAcceptDropText;
+	void Invalidate() override;
 };

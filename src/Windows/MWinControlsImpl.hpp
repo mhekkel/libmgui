@@ -27,8 +27,7 @@ class MWinControlImpl : public CONTROL::MImpl, public MWinProcMixin
 	virtual void DisableSelf();
 	virtual void ShowSelf();
 	virtual void HideSelf();
-	virtual std::string
-	GetText() const;
+	virtual std::string GetText() const;
 	virtual void SetText(const std::string &inText);
 
 	virtual MWinProcMixin *
@@ -233,8 +232,7 @@ class MWinEdittextImpl : public MWinControlImpl<MEdittext>
 
 	virtual void SetFocus();
 
-	virtual std::string
-	GetText() const;
+	virtual std::string GetText() const;
 	virtual void SetText(const std::string &inText);
 
 	virtual uint32_t GetFlags() const { return mFlags; }
@@ -297,7 +295,7 @@ class MWinRadiobuttonImpl : public MWinControlImpl<MRadiobutton>
 	virtual bool IsChecked() const;
 	virtual void SetChecked(bool inChecked);
 
-	virtual void SetGroup(const std::list<MRadiobutton *> &inButtons);
+	virtual void SetGroup(MRadiobutton *inButton);
 
 	virtual void CreateParams(DWORD &outStyle, DWORD &outExStyle,
 		std::wstring &outClassName, HMENU &outMenu);

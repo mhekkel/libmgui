@@ -30,8 +30,6 @@
 #include <cassert>
 #include <vector>
 
-using namespace std;
-
 void MRect::InsetBy(int32_t inDeltaX, int32_t inDeltaY)
 {
 	if (inDeltaX < 0 or 2 * inDeltaX <= width)
@@ -152,7 +150,7 @@ bool MRect::empty() const
 	return width <= 0 or height <= 0;
 }
 
-struct MRegionImpl : public vector<MRect>
+struct MRegionImpl : public std::vector<MRect>
 {
 };
 

@@ -7,16 +7,11 @@
 
 #include <fstream>
 
-#include "zeep/xml/document.hpp"
-
 #include "MWinMenuImpl.hpp"
 #include "MWinWindowImpl.hpp"
 #include "MError.hpp"
 #include "MWinUtils.hpp"
 #include "MAcceleratorTable.hpp"
-
-using namespace std;
-using namespace zeep;
 
 MWinMenuImpl::MWinMenuImpl(MMenu* inMenu, bool inPopup)
 	: MMenuImpl(inMenu)
@@ -351,7 +346,7 @@ MMenuImpl* MMenuImpl::CreateBar(MMenu* inMenu)
 //	//mrsrc::rsrc rsrc(string("Menus/") + inResourceName + ".xml");
 //	//
 //	//if (not rsrc)
-//	//	THROW(("Menu resource not found: %s", inResourceName));
+//	//	throw std::runtime_error("Menu resource not found: %s", inResourceName);
 //
 //	//io::stream<io::array_source> data(rsrc.data(), rsrc.size());
 //	ifstream data("C:\\Users\\maarten\\projects\\japi\\Resources\\Menus\\" + string(inMenuResource) + ".xml");

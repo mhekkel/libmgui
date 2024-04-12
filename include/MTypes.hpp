@@ -26,9 +26,10 @@
 
 #pragma once
 
+#include <iostream>
 #include <cstdint>
 
-typedef uint32_t unicode;
+typedef char32_t unicode;
 
 struct MRect
 {
@@ -87,6 +88,12 @@ struct MRect
 	{
 		return x != inRect.x or y != inRect.y or
 		       width != inRect.width or height != inRect.height;
+	}
+
+	friend std::ostream &operator<<(std::ostream &os, const MRect &r)
+	{
+		os << '[' << r.x << ',' << r.y << ',' << r.width << ',' << r.height << ']';
+		return os;
 	}
 };
 

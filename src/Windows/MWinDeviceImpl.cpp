@@ -670,7 +670,7 @@ void MWinDeviceImpl::SetFont(
 	}
 
 	if (e == inFont.end() or e == inFont.begin() or *e != ' ')
-		THROW(("Error in specified font"));
+		throw std::runtime_error("Error in specified font");
 
 	mFontFamily = c2w(inFont.substr(0, e - inFont.begin()));
 	mFontSize = (size * 96.f) / (72.f * mDpiScaleY);
@@ -760,7 +760,7 @@ void MWinDeviceImpl::CreateTextFormat()
 float MWinDeviceImpl::GetAscent()
 {
 	if (not mFont)
-		SetFont(Preferences::GetString("font", "Consolas 10"));
+		SetFont(MPrefs::GetString("font", "Consolas 10"));
 
 	DWRITE_FONT_METRICS metrics;
 	mFont->GetMetrics(&metrics);
@@ -770,7 +770,7 @@ float MWinDeviceImpl::GetAscent()
 float MWinDeviceImpl::GetDescent()
 {
 	if (not mFont)
-		SetFont(Preferences::GetString("font", "Consolas 10"));
+		SetFont(MPrefs::GetString("font", "Consolas 10"));
 
 	DWRITE_FONT_METRICS metrics;
 	mFont->GetMetrics(&metrics);
@@ -780,7 +780,7 @@ float MWinDeviceImpl::GetDescent()
 int32_t MWinDeviceImpl::GetLineHeight()
 {
 	if (not mFont)
-		SetFont(Preferences::GetString("font", "Consolas 10"));
+		SetFont(MPrefs::GetString("font", "Consolas 10"));
 
 	DWRITE_FONT_METRICS metrics;
 	mFont->GetMetrics(&metrics);
@@ -791,7 +791,7 @@ int32_t MWinDeviceImpl::GetLineHeight()
 float MWinDeviceImpl::GetXWidth()
 {
 	if (not mFont)
-		SetFont(Preferences::GetString("font", "Consolas 10"));
+		SetFont(MPrefs::GetString("font", "Consolas 10"));
 
 	CreateTextFormat();
 
@@ -976,7 +976,7 @@ void MWinDeviceImpl::SetTabStops(
 {
 	assert(mTextLayout);
 	//	if (not mTextLayout)
-	//		THROW(("SetText must be called first!"));
+	//		throw std::runtime_error("SetText must be called first!");
 	mTextLayout->SetIncrementalTabStop(inTabWidth /** 96.f / 72.f*/);
 }
 
@@ -1640,7 +1640,7 @@ MWinGeometryImpl::~MWinGeometryImpl()
 void MWinGeometryImpl::Begin(float inX, float inY, MGeometryBegin inBegin)
 {
 	if (not mSink)
-		THROW(("no sink"));
+		throw std::runtime_error("no sink");
 
 	if (inBegin == eGeometryBeginFilled)
 		mSink->BeginFigure(D2D1::Point2F(inX, inY), D2D1_FIGURE_BEGIN_FILLED);
@@ -1651,14 +1651,14 @@ void MWinGeometryImpl::Begin(float inX, float inY, MGeometryBegin inBegin)
 void MWinGeometryImpl::LineTo(float inX, float inY)
 {
 	if (not mSink)
-		THROW(("no sink"));
+		throw std::runtime_error("no sink");
 	mSink->AddLine(D2D1::Point2F(inX, inY));
 }
 
 void MWinGeometryImpl::CurveTo(float inX1, float inY1, float inX2, float inY2, float inX3, float inY3)
 {
 	if (not mSink)
-		THROW(("No sink"));
+		throw std::runtime_error("No sink");
 
 	mSink->AddBezier(
 		D2D1::BezierSegment(

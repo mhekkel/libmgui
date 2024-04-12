@@ -26,21 +26,20 @@
 
 #pragma once
 
+#include "MGtkCommandEmitter.hpp"
 #include "MGtkLib.hpp"
 
 #include "MAlerts.hpp"
+#include "MControls.hpp"
 #include "MError.hpp"
 #include "MView.hpp"
 
 #include <chrono>
 #include <map>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
-
-class MHandler;
-
-typedef std::vector<std::pair<GObject *, std::string>> MSignalHandlerArray;
 
 template <class CallbackIn, typename Function>
 struct MGtkCallbackOutHandler
@@ -243,7 +242,6 @@ class MSlot : public MakeGtkCallbackHandler<Function>::type
 
 	void Connect(GObject *inObject, const char *inSignalName)
 	{
-		THROW_IF_NIL(inObject);
 		mID = g_signal_connect(inObject, inSignalName,
 			G_CALLBACK(&base_class::GCallback), this);
 	}
@@ -262,14 +260,12 @@ class MSlot : public MakeGtkCallbackHandler<Function>::type
 
 	void Block(GtkWidget *inObject, const char *inSignalName)
 	{
-		THROW_IF_NIL(inObject);
 		g_signal_handlers_block_by_func(G_OBJECT(inObject),
 			(void *)G_CALLBACK(&base_class::GCallback), this);
 	}
 
 	void Unblock(GtkWidget *inObject, const char *inSignalName)
 	{
-		THROW_IF_NIL(inObject);
 		g_signal_handlers_unblock_by_func(G_OBJECT(inObject),
 			(void *)G_CALLBACK(&base_class::GCallback), this);
 	}
@@ -283,19 +279,58 @@ class MSlot : public MakeGtkCallbackHandler<Function>::type
 	ulong mID = 0;
 };
 
-class MGtkWidgetMixin
+// --------------------------------------------------------------------
+
+enum class MEventMask
+{
+	None = 0,
+	Focus = (1 << 0),
+	GestureClick = (1 << 1),
+	Key = (1 << 2),
+	Pointer = (1 << 3),
+	Scroll = (1 << 4),
+
+	SecondaryButtonClick = (1 << 5),
+	MiddleButtonClick = (1 << 6),
+
+	AcceptDropFile = (1 << 7),
+	AcceptDropText = (1 << 8),
+
+	Capture = (1 << 10),
+
+	KeyCapture = (Key | Capture),
+
+	All = (Focus | GestureClick | Key | Pointer | Scroll | SecondaryButtonClick | MiddleButtonClick)
+};
+
+constexpr MEventMask operator|(MEventMask a, MEventMask b)
+{
+	return static_cast<MEventMask>(int(a) | int(b));
+}
+
+constexpr bool operator&(MEventMask a, MEventMask b)
+{
+	return (int(a) & int(b)) != 0;
+}
+
+// --------------------------------------------------------------------
+
+class MGtkWidgetMixin : public MGtkCommandEmitter
 {
   public:
 	MGtkWidgetMixin(const MGtkWidgetMixin &) = delete;
 	MGtkWidgetMixin &operator=(const MGtkWidgetMixin &) = delete;
 
-	MGtkWidgetMixin();
-	//	MGtkWidgetMixin(GtkWidget* inWidget);
+	MGtkWidgetMixin(MEventMask inEvents = MEventMask::None);
 	virtual ~MGtkWidgetMixin();
+
+	void SetEventMask(MEventMask inEvents)
+	{
+		mEvents = inEvents;
+	}
 
 	void RequestSize(int32_t inWidth, int32_t inHeight);
 
-	bool IsActive() const;
 	virtual void SetFocus();
 	virtual void ReleaseFocus();
 	virtual bool IsFocus() const;
@@ -307,123 +342,147 @@ class MGtkWidgetMixin
 	GtkWidget *GetWidget() const { return mWidget; }
 	void SetWidget(GtkWidget *inWidget);
 
-	virtual void Append(MGtkWidgetMixin *inChild, MControlPacking inPacking,
-		bool inExpand, bool inFill, uint32_t inPadding);
+	virtual void Append(MGtkWidgetMixin *inChild);
+
+	GObject *GetActionMapObject() override
+	{
+		return G_OBJECT(GetWidget());
+	}
+
+	void AddShortcut(GtkShortcut *inShortcut)
+	{
+		if (mShortcutController == nullptr)
+		{
+			mShortcutController = gtk_shortcut_controller_new();
+			gtk_widget_add_controller(GetWidget(), mShortcutController);
+		}
+
+		gtk_shortcut_controller_add_shortcut(
+			GTK_SHORTCUT_CONTROLLER(mShortcutController), inShortcut);
+	}
 
   protected:
-	virtual bool OnDestroy();
-	virtual bool OnDelete(GdkEvent *inEvent);
-	virtual void OnShow();
-	virtual bool OnFocusInEvent(GdkEvent *inEvent);
-	virtual bool OnFocusOutEvent(GdkEvent *inEvent);
-	virtual bool OnButtonPressEvent(GdkEvent *inEvent);
-	virtual bool OnMotionNotifyEvent(GdkEvent *inEvent);
-	virtual bool OnLeaveNotifyEvent(GdkEvent *inEvent);
-	virtual bool OnButtonReleaseEvent(GdkEvent *inEvent);
-	virtual bool OnKeyPressEvent(GdkEvent *inEvent);
-	virtual bool OnKeyReleaseEvent(GdkEvent *inEvent);
-	virtual bool OnConfigureEvent(GdkEvent *inEvent);
-	virtual bool OnScrollEvent(GdkEvent *inEvent);
-	virtual bool OnRealize();
-	virtual bool OnDrawEvent(cairo_t *inCairo);
-	virtual void OnPopupMenu();
-
-	// Mouse support
-
-	virtual bool OnMouseDown(int32_t inX, int32_t inY, uint32_t inButtonNr, uint32_t inClickCount, uint32_t inModifiers);
-	virtual bool OnMouseMove(int32_t inX, int32_t inY, uint32_t inModifiers);
-	virtual bool OnMouseUp(int32_t inX, int32_t inY, uint32_t inModifiers);
-	virtual bool OnMouseExit();
-
-	// Drag and Drop support
-
-	// void SetupDragAndDrop(const GtkTargetEntry inTargets[], uint32_t inTargetCount);
-	// void DragBegin(const GtkTargetEntry inTargets[], uint32_t inTargetCount, GdkEventMotion *inEvent);
-	// virtual void DragEnter();
-	// virtual bool DragWithin(int32_t inX, int32_t inY);
-	// virtual void DragLeave();
-	// virtual bool DragAccept(bool inMove, int32_t inX, int32_t inY, const char *inData, uint32_t inLength, uint32_t inType);
-	// virtual void DragSendData(std::string &outData);
-	// virtual void DragDeleteData();
-	// virtual void OnDragDataReceived(GdkDragContext *inDragContext, gint inX, gint inY, GtkSelectionData *inData, guint inInfo, guint inTime);
-	// virtual bool OnDragMotion(GdkDragContext *inDragContext, gint inX, gint inY, guint inTime);
-	// virtual void OnDragLeave(GdkDragContext *inDragContext, guint inTime);
-	// virtual void OnDragDataDelete(GdkDragContext *inDragContext);
-	// virtual void OnDragDataGet(GdkDragContext *inDragContext, GtkSelectionData *inData, guint inInfo, guint inTime);
-	// bool IsWithinDrag() const { return mDragWithin; }
-	// //	virtual void	DrawDragImage(GdkPixmap*& outPixmap, int32_t& outX, int32_t& outY)	{  }
-
 	GtkWidget *mWidget;
 
-	MSlot<bool()> mOnDestroy;
-	MSlot<bool(GdkEvent *)> mOnDelete;
-	MSlot<void()> mOnShow;
+	// --------------------------------------------------------------------
+	// GtkWidget signals
 
-	MSlot<bool(GdkEvent *)> mFocusInEvent;
-	MSlot<bool(GdkEvent *)> mFocusOutEvent;
-	MSlot<bool(GdkEvent *)> mButtonPressEvent;
-	MSlot<bool(GdkEvent *)> mMotionNotifyEvent;
-	MSlot<bool(GdkEvent *)> mLeaveNotifyEvent;
-	MSlot<bool(GdkEvent *)> mButtonReleaseEvent;
-	MSlot<bool(GdkEvent *)> mKeyPressEvent;
-	MSlot<bool(GdkEvent *)> mKeyReleaseEvent;
-	MSlot<bool(GdkEvent *)> mConfigureEvent;
-	MSlot<bool(GdkEvent *)> mScrollEvent;
-	MSlot<bool()> mRealize;
-	MSlot<bool(cairo_t *)> mDrawEvent;
-	MSlot<void()> mPopupMenu;
+	virtual void OnDestroy();
+	virtual void OnDirectionChanged(GtkTextDirection previous_direction);
+	virtual void OnHide();
+	virtual bool OnKeynavFailed(GtkDirectionType direction);
+	virtual void OnMap();
+	virtual bool OnMnemonicActivate(gboolean group_cycling);
+	virtual void OnMoveFocus(GtkDirectionType direction);
+	virtual bool OnQueryTooltip(gint x, gint y, gboolean keyboard_mode, GtkTooltip *tooltip);
+	virtual void OnRealize();
+	virtual void OnShow();
+	virtual void OnStateFlagsChanged(GtkStateFlags flags);
+	virtual void OnUnmap();
+	virtual void OnUnrealize();
 
-	// MSlot<void(GdkDragContext *,
-	// 	gint,
-	// 	gint,
-	// 	GtkSelectionData *,
-	// 	guint,
-	// 	guint)>
-	// 	mDragDataReceived;
+	MSlot<void()> mDestroy;
+	MSlot<void(GtkTextDirection)> mDirectionChanged;
+	MSlot<void()> mHide;
+	MSlot<bool(GtkDirectionType)> mKeynavFailed;
+	MSlot<void()> mMap;
+	MSlot<bool(gboolean)> mMnemonicActivate;
+	MSlot<void(GtkDirectionType)> mMoveFocus;
+	MSlot<bool(gint, gint, gboolean, GtkTooltip *)> mQueryTooltip;
+	MSlot<void()> mRealize;
+	MSlot<void()> mShow;
+	MSlot<void(GtkStateFlags)> mStateFlagsChanged;
+	MSlot<void()> mUnmap;
+	MSlot<void()> mUnrealize;
 
-	// MSlot<bool(GdkDragContext *,
-	// 	gint,
-	// 	gint,
-	// 	guint)>
-	// 	mDragMotion;
+	// --------------------------------------------------------------------
+	// GtkIMContext signals
 
-	// MSlot<void(GdkDragContext *,
-	// 	guint)>
-	// 	mDragLeave;
-
-	// MSlot<void(GdkDragContext *)> mDragDataDelete;
-
-	// MSlot<void(GdkDragContext *,
-	// 	GtkSelectionData *,
-	// 	guint,
-	// 	guint)>
-	// 	mDragDataGet;
-
-	// IMContext support
-
-	virtual bool OnCommit(gchar *inText);
-	virtual bool OnDeleteSurrounding(gint inStart, gint inLength);
-	virtual bool OnPreeditChanged();
-	virtual bool OnPreeditEnd();
-	virtual bool OnPreeditStart();
+	virtual void OnCommit(char *text);
+	virtual bool OnDeleteSurrounding(int offset, int n_chars);
+	virtual void OnPreeditChanged();
+	virtual void OnPreeditEnd();
+	virtual void OnPreeditStart();
 	virtual bool OnRetrieveSurrounding();
-	virtual bool OnGrabBroken(GdkEvent *);
 
-	MSlot<bool(gchar *)> mOnCommit;
-	MSlot<bool(gint, gint)> mOnDeleteSurrounding;
-	MSlot<bool()> mOnPreeditChanged;
-	MSlot<bool()> mOnPreeditStart;
-	MSlot<bool()> mOnPreeditEnd;
-	MSlot<bool()> mOnRetrieveSurrounding;
-	MSlot<bool(GdkEvent *)> mOnGrabBroken;
+	MSlot<void(char *)> mCommit;
+	MSlot<bool(int, int)> mDeleteSurrounding;
+	MSlot<void()> mPreeditChanged;
+	MSlot<void()> mPreeditEnd;
+	MSlot<void()> mPreeditStart;
+	MSlot<bool()> mRetrieveSurrounding;
+
+	// --------------------------------------------------------------------
+	// Event handling
+
+	virtual void OnFocusEnter() {}
+	virtual void OnFocusLeave() {}
+
+	virtual void OnGestureClickPressed(double inX, double inY, gint inClickCount) {}
+	virtual void OnGestureClickReleased(double inX, double inY, gint inClickCount) {}
+	virtual void OnGestureClickStopped() {}
+
+	virtual void OnMiddleButtonClick(double inX, double inY, gint inClickCount) {}
+	virtual void OnSecondaryButtonClick(double inX, double inY, gint inClickCount) {}
+
+	virtual void OnPointerEnter(double inX, double inY) {}
+	virtual void OnPointerMotion(double inX, double inY) {}
+	virtual void OnPointerLeave() {}
+
+	virtual bool OnKeyPressed(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers) { return false; }
+	virtual void OnKeyReleased(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers) {}
+	virtual void OnKeyModifiers(GdkModifierType inModifiers) {}
+
+	virtual void OnDecelerate(double inVelX, double inVelY);
+	virtual bool OnScroll(double inX, double inY);
+	virtual void OnScrollBegin();
+	virtual void OnScrollEnd();
+
+	virtual bool OnDrop(const GValue *value, double x, double y);
+	virtual bool OnDropAccept(GdkDrop *inDrop);
+	virtual GdkDragAction OnDropEnter(double x, double y);
+	virtual void OnDropLeave();
+	virtual GdkDragAction OnDropMotion(double x, double y);
+
+	MSlot<void()> mFocusEnter;
+	MSlot<void()> mFocusLeave;
+
+	MSlot<void(double, double, gint)> mGestureClickPressed;
+	MSlot<void(double, double, gint)> mGestureClickReleased;
+	MSlot<void()> mGestureClickStopped;
+
+	MSlot<void(double, double, gint)> mMiddleButtonClick;
+	MSlot<void(double, double, gint)> mSecondaryButtonClick;
+
+	MSlot<void(double, double)> mPointerEnter;
+	MSlot<void(double, double)> mPointerMotion;
+	MSlot<void()> mPointerLeave;
+
+	MSlot<bool(guint, guint, GdkModifierType)> mKeyPressed;
+	MSlot<void(guint, guint, GdkModifierType)> mKeyReleased;
+	MSlot<void(GdkModifierType)> mKeyModifiers;
+
+	MSlot<void(double, double)> mDecelerate;
+	MSlot<bool(double, double)> mScroll;
+	MSlot<void()> mScrollBegin;
+	MSlot<void()> mScrollEnd;
+
+	MSlot<bool(const GValue *, double, double)> mDrop;
+	MSlot<bool(GdkDrop *inDrop)> mDropAccept;
+	MSlot<GdkDragAction(double x, double y)> mDropEnter;
+	MSlot<void()> mDropLeave;
+	MSlot<GdkDragAction(double x, double y)> mDropMotion;
 
   protected:
 	int32_t mRequestedWidth, mRequestedHeight;
 	bool mAutoRepeat;
 
   private:
-	bool mDragWithin;
 	GtkIMContext *mIMContext;
 	bool mNextKeyPressIsAutoRepeat;
-	std::chrono::time_point<std::chrono::steady_clock> mGainedFocusAt;
+	MEventMask mEvents;
+
+	std::optional<std::chrono::time_point<std::chrono::steady_clock>> mGainedFocusAt;
+
+	GtkEventController *mShortcutController = nullptr;
 };

@@ -25,29 +25,32 @@
  */
 
 #include "MStrings.hpp"
+#include "MUnicode.hpp"
 #include "MUtils.hpp"
 
-#include <zeep/xml/document.hpp>
-#include <zeep/xml/node.hpp>
-#include <zeep/xml/serialize.hpp>
+#include <mxml/document.hpp>
+#include <mxml/serialize.hpp>
 
 #include "mrsrc.hpp"
 
 #include <map>
 
-using namespace std;
-namespace xml = zeep::xml;
+namespace xml = mxml;
 
 struct ls
 {
-	string context;
-	string key;
-	string value;
+	std::string context;
+	std::string key;
+	std::string value;
 
 	template <class Archive>
 	void serialize(Archive &ar, const unsigned int version)
 	{
-		ar &zeep::make_nvp("key", key) & zeep::make_nvp("value", value) & zeep::xml::make_attribute_nvp("context", context);
+		// clang-format off
+		ar & mxml::make_element_nvp("key", key)
+		   & mxml::make_element_nvp("value", value)
+		   & mxml::make_attribute_nvp("context", context);
+		// clang-format on
 	}
 };
 
@@ -56,21 +59,23 @@ class MLocalisedStringTable
   public:
 	static MLocalisedStringTable &Instance();
 
-	string Map(const string &inString);
-	string Map(const string &inContext, const string &inString);
+	std::string Map(const std::string &inString);
+	std::string Map(const std::string &inContext, const std::string &inString);
 	const char *Map(const char *inString);
 
 	template <class Archive>
 	void serialize(Archive &ar, unsigned long v)
 	{
-		ar &zeep::xml::make_element_nvp("localstring", mLocalStrings);
+		// clang-format off
+		ar & mxml::make_element_nvp("localstring", mLocalStrings);
+		// clang-format on
 	}
 
 	MLocalisedStringTable() {}
 	MLocalisedStringTable(int);
 
-	map<string, string> mMappedStrings;
-	vector<ls> mLocalStrings;
+	std::map<std::string, std::string> mMappedStrings;
+	std::vector<ls> mLocalStrings;
 };
 
 MLocalisedStringTable::MLocalisedStringTable(int)
@@ -87,17 +92,17 @@ MLocalisedStringTable::MLocalisedStringTable(int)
 		{
 			// parse the XML data
 			xml::document doc(rsrc);
-			doc.deserialize("strings", *this);
+			from_xml(doc, "strings", *this);
 
 			for (auto &s : mLocalStrings)
 			{
-				zeep::replace_all(s.key, "\\r", "\r");
-				zeep::replace_all(s.key, "\\n", "\n");
-				zeep::replace_all(s.key, "\\t", "\t");
+				ReplaceAll(s.key, "\\r", "\r");
+				ReplaceAll(s.key, "\\n", "\n");
+				ReplaceAll(s.key, "\\t", "\t");
 
-				zeep::replace_all(s.value, "\\r", "\r");
-				zeep::replace_all(s.value, "\\n", "\n");
-				zeep::replace_all(s.value, "\\t", "\t");
+				ReplaceAll(s.value, "\\r", "\r");
+				ReplaceAll(s.value, "\\n", "\n");
+				ReplaceAll(s.value, "\\t", "\t");
 
 				mMappedStrings[s.key] = s.value;
 			}
@@ -108,18 +113,18 @@ MLocalisedStringTable::MLocalisedStringTable(int)
 	}
 }
 
-string MLocalisedStringTable::Map(const string &inString)
+std::string MLocalisedStringTable::Map(const std::string &inString)
 {
-	string result = inString;
-	map<string, string>::iterator m = mMappedStrings.find(inString);
+	std::string result = inString;
+	std::map<std::string, std::string>::iterator m = mMappedStrings.find(inString);
 	if (m != mMappedStrings.end())
 		result = m->second;
 	return result;
 }
 
-string MLocalisedStringTable::Map(const string &inContext, const string &inString)
+std::string MLocalisedStringTable::Map(const std::string &inContext, const std::string &inString)
 {
-	string result;
+	std::string result;
 	bool found = false;
 
 	for (ls &s : mLocalStrings)
@@ -141,7 +146,7 @@ string MLocalisedStringTable::Map(const string &inContext, const string &inStrin
 const char *MLocalisedStringTable::Map(const char *inString)
 {
 	const char *result = inString;
-	map<string, string>::iterator m = mMappedStrings.find(inString);
+	std::map<std::string, std::string>::iterator m = mMappedStrings.find(inString);
 	if (m != mMappedStrings.end())
 		result = m->second.c_str();
 	return result;
@@ -158,28 +163,28 @@ const char *GetLocalisedString(const char *inString)
 	return MLocalisedStringTable::Instance().Map(inString);
 }
 
-string GetLocalisedString(const string &inString)
+std::string GetLocalisedString(const std::string &inString)
 {
 	return MLocalisedStringTable::Instance().Map(inString);
 }
 
-string GetLocalisedStringForContext(const string &inContext, const string &inString)
+std::string GetLocalisedStringForContext(const std::string &inContext, const std::string &inString)
 {
 	return MLocalisedStringTable::Instance().Map(inContext, inString);
 }
 
-string GetFormattedLocalisedStringWithArguments(
-	const string &inString,
-	const vector<string> &inArgs)
+std::string GetFormattedLocalisedStringWithArguments(
+	const std::string &inString,
+	const std::vector<std::string> &inArgs)
 {
-	string result = GetLocalisedString(inString.c_str());
+	std::string result = GetLocalisedString(inString.c_str());
 
 	char s[] = "^0";
 
-	for (vector<string>::const_iterator a = inArgs.begin(); a != inArgs.end(); ++a)
+	for (std::vector<std::string>::const_iterator a = inArgs.begin(); a != inArgs.end(); ++a)
 	{
-		string::size_type p = result.find(s);
-		if (p != string::npos)
+		std::string::size_type p = result.find(s);
+		if (p != std::string::npos)
 			result.replace(p, 2, *a);
 		++s[1];
 	}

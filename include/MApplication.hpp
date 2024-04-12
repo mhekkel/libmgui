@@ -26,44 +26,109 @@
 
 #pragma once
 
-#include "MApplicationImpl.hpp"
-#include "MHandler.hpp"
+#include "MMenu.hpp"
 #include "MP2PEvents.hpp"
 #include "MTypes.hpp"
+#include "MWindow.hpp"
 
 #include <chrono>
+#include <condition_variable>
+#include <deque>
 #include <filesystem>
 #include <list>
+#include <mutex>
 #include <vector>
+
+// --------------------------------------------------------------------
 
 extern const char kAppName[], kVersionString[];
 
 extern std::filesystem::path gExecutablePath;
 
-class MWindow;
+// --------------------------------------------------------------------
+
+class MAsyncHandlerBase
+{
+  public:
+	MAsyncHandlerBase() {}
+	MAsyncHandlerBase(const MAsyncHandlerBase &) = delete;
+	MAsyncHandlerBase &operator=(const MAsyncHandlerBase &) = delete;
+
+	virtual ~MAsyncHandlerBase() {}
+
+	void execute();
+
+  protected:
+	virtual void execute_self() = 0;
+};
+
+template <typename Handler>
+class MAsyncHandler : public MAsyncHandlerBase
+{
+  public:
+	MAsyncHandler(Handler &&handler)
+		: mHandler(std::move(handler))
+	{
+	}
+
+	virtual void execute_self() override
+	{
+		mHandler();
+	}
+
+	Handler mHandler;
+};
+
+class MApplicationImpl
+{
+  public:
+	MApplicationImpl() {}
+	virtual ~MApplicationImpl() {}
+
+	virtual void Initialise() = 0;
+	virtual void SetIconName(const std::string &inIconName) = 0;
+	virtual int RunEventLoop() = 0;
+	virtual void Quit() = 0;
+
+	virtual void InhibitQuit(bool inInhibit, const std::string &inReason, MWindowImpl *inImpl) = 0;
+
+	virtual MWindow *GetActiveWindow() = 0;
+
+	template <typename Handler>
+	void execute(Handler &&h)
+	{
+		std::unique_lock lock(mMutex);
+
+		mHandlerQueue.push_back(new MAsyncHandler{ std::move(h) });
+
+		mCV.notify_one();
+	}
+
+	std::deque<MAsyncHandlerBase *> mHandlerQueue;
+	std::mutex mMutex;
+	std::condition_variable mCV;
+};
 
 // ===========================================================================
 
-class MApplication : public MHandler
+class MApplication
 {
   public:
 	static MApplication *Create(MApplicationImpl *inImpl);
-	static void Install(const std::string &inPrefix);
+	static int Main(const std::string &inApplicationID, const std::vector<std::string> &argv);
 
 	~MApplication();
 	virtual void Initialise();
 
+	virtual int HandleCommandLine(int argc, const char * const argv[])
+	{
+		return 1;
+	}
+
 	virtual void DoNew();
 	virtual void DoOpen();
 	// virtual void Open(const std::string &inURL);
-	virtual void Execute(const std::string &inCommand,
-		const std::vector<std::string> &inArguments);
-
-	virtual bool UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked);
-	virtual bool ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers);
-
-	virtual void UpdateSpecialMenu(const std::string &inMenuKind, MMenu *inMenu);
-	virtual void UpdateWindowMenu(MMenu *inMenu);
+	virtual void Execute(const std::string &inCommand, const std::vector<std::string> &inArguments);
 
 	MEventOut<void()> eIdle;
 
@@ -73,7 +138,6 @@ class MApplication : public MHandler
 		mImpl->execute(std::move(handler));
 	}
 
-	virtual int RunEventLoop();
 	virtual void Pulse();
 
 	virtual bool AllowQuit(bool inLogOff);
@@ -82,15 +146,22 @@ class MApplication : public MHandler
 	bool IsQuitting() const { return mQuitPending; }
 	void CancelQuit() { mQuitPending = false; }
 
-	static int Main(const std::string &command,
-		const std::vector<std::string> &argv);
+	void InhibitQuit(bool inInhibit, const std::string &inReason, MWindow *inWindow = nullptr)
+	{
+		mImpl->InhibitQuit(inInhibit, inReason, inWindow ? inWindow->GetImpl() : nullptr);
+	}
+
+	MWindow *GetActiveWindow()
+	{
+		return mImpl->GetActiveWindow();
+	}
+
+	MApplicationImpl *GetImpl() const { return mImpl; }
 
   protected:
 	MApplication(MApplicationImpl *inImpl);
 
-	typedef std::list<MWindow *> MWindowList;
-
-	virtual void DoSelectWindowFromWindowMenu(uint32_t inIndex);
+	void SetIconName(const std::string &inIconName);
 
 	virtual void SaveGlobals();
 

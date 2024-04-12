@@ -34,17 +34,52 @@
 #include "MP2PEvents.hpp"
 #include "MTypes.hpp"
 
+#include <filesystem>
 #include <list>
 #include <vector>
+
+// --------------------------------------------------------------------
 
 class MWindow;
 class MDevice;
 class MView;
-// class MViewScroller;
-class MScrollbar;
-class MHandler;
+
+// --------------------------------------------------------------------
 
 typedef std::list<MView *> MViewList;
+
+struct MMargins
+{
+	uint32_t left, top, right, bottom;
+};
+
+struct MViewLayout
+{
+	MViewLayout()
+		: mHExpand(false)
+		, mVExpand(false)
+		, mMargin{ 0, 0, 0, 0 }
+	{
+	}
+
+	MViewLayout(bool inExpand, uint32_t inMargin)
+		: mHExpand(inExpand)
+		, mVExpand(inExpand)
+		, mMargin{ inMargin, inMargin, inMargin, inMargin }
+	{
+	}
+
+	MViewLayout(bool inHExpand, bool inVExpand,
+		uint32_t inMarginLeft, uint32_t inMarginTop, uint32_t inMarginRight, uint32_t inMarginBottom)
+		: mHExpand(inHExpand)
+		, mVExpand(inVExpand)
+		, mMargin{ inMarginLeft, inMarginTop, inMarginRight, inMarginBottom }
+	{
+	}
+
+	bool mHExpand, mVExpand;
+	MMargins mMargin;
+};
 
 enum MCursor
 {
@@ -55,12 +90,6 @@ enum MCursor
 	eBlankCursor,
 
 	eCursorCount
-};
-
-enum MControlPacking
-{
-	ePackStart,
-	ePackEnd
 };
 
 /**
@@ -78,50 +107,61 @@ enum MControlPacking
 class MView
 {
   public:
-	friend class MViewScroller;
-
 	MView(const std::string &inID, MRect inBounds);
 	virtual ~MView();
 
 	std::string GetID() const { return mID; }
 
 	virtual MView *GetParent() const;
-	virtual const MViewList &
-	GetChildren() const { return mChildren; }
+	virtual const MViewList &GetChildren() const { return mChildren; }
 
 	virtual void SetParent(MView *inParent);
 	virtual void AddChild(MView *inChild);
 	virtual void RemoveChild(MView *inChild);
 	virtual void AddedToWindow();
 	virtual MWindow *GetWindow() const;
-	// virtual void SetViewScroller(MViewScroller *inScroller);
-	virtual void GetBounds(MRect &outBounds) const;
-	virtual void GetFrame(MRect &outFrame) const;
+
+	virtual MRect GetBounds() const;
+
+	virtual MRect GetFrame() const;
 	virtual void SetFrame(const MRect &inFrame);
+
 	virtual void MoveFrame(int32_t inXDelta, int32_t inYDelta);
 	virtual void ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta);
-	virtual void GetBindings(bool &outFollowLeft, bool &outFollowTop, bool &outFollowRight, bool &outFollowBottom) const;
-	virtual void SetBindings(bool inFollowLeft, bool inFollowTop, bool inFollowRight, bool inFollowBottom);
-	bool WidthResizable() const { return mBindLeft and mBindRight; }
-	bool HeightResizable() const { return mBindTop and mBindBottom; }
 
-	virtual void GetMargins(int32_t &outLeftMargin, int32_t &outTopMargin, int32_t &outRightMargin, int32_t &outBottomMargin) const;
-	virtual void SetMargins(int32_t inLeftMargin, int32_t inTopMargin, int32_t inRightMargin, int32_t inBottomMargin);
+	virtual void RequestSize(int32_t inWidth, int32_t inHeight) {}
+
+	virtual void SetLayout(MViewLayout inLayout);
+	virtual MViewLayout GetLayout() const;
+
+	bool WidthResizable() const { return mLayout.mHExpand; }
+	bool HeightResizable() const { return mLayout.mVExpand; }
 
 	// used in automatic layout
 	virtual void RecalculateLayout();
 	virtual void ChildResized();
-	virtual bool ActivateOnClick(int32_t inX, int32_t inY, uint32_t inModifiers);
-	virtual void TrackMouse(bool inTrackMove, bool inTrackExit);
-	virtual void MouseDown(int32_t inX, int32_t inY, uint32_t inClickCount, uint32_t inModifiers);
-	virtual void MouseMove(int32_t inX, int32_t inY, uint32_t inModifiers);
-	virtual void MouseExit();
-	virtual void MouseUp(int32_t inX, int32_t inY, uint32_t inModifiers);
-	virtual void MouseWheel(int32_t inX, int32_t inY, int32_t inDeltaX, int32_t inDeltaY, uint32_t inModifiers);
-	virtual void ShowContextMenu(int32_t inX, int32_t inY);
-	virtual void RedrawAll(MRect inUpdate);
-	// virtual void	Draw(MRect inUpdate);
-	virtual void Draw();
+
+	virtual void MiddleMouseButtonClick(int32_t inX, int32_t inY);
+	virtual void SecondaryMouseButtonClick(int32_t inX, int32_t inY);
+
+	virtual bool KeyPressed(uint32_t inKeyCode, char32_t inUnicode, uint32_t inModifiers, bool inAutoRepeat) { return false;}
+	virtual void KeyReleased(uint32_t inKeyValue, uint32_t inModifiers) { }
+	virtual void Modifiers(uint32_t inModifiers) { }
+	virtual void EnterText(const std::string &inText) { }
+
+	// Drag & Drop support
+	/// \brief Return whether we will accept this drop, \a inMimeType is empty for file drops
+	virtual bool DragAcceptsMimeType(const std::string &inMimeType) { return false; }
+	virtual bool DragAcceptsFile() { return false; }
+	virtual void DragEnter(int32_t inX, int32_t inY) { }
+	virtual void DragMotion(int32_t inX, int32_t inY) { }
+	virtual void DragLeave() { }
+	virtual bool DragAcceptData(int32_t inX, int32_t inY, const std::string &inData) { return false; }
+	virtual bool DragAcceptFile(int32_t inX, int32_t inY, const std::filesystem::path &inFile) { return false; }
+
+	virtual void Activate();
+	virtual void Deactivate();
+	bool IsActive() const;
 
 	virtual void Enable();
 	virtual void Disable();
@@ -133,22 +173,13 @@ class MView
 
 	virtual void Invalidate();
 
-	MEventOut<void()> eScrolled;
-
-	// virtual void ScrollBy(int32_t inDeltaX, int32_t inDeltaY);
-	// virtual void ScrollTo(int32_t inX, int32_t inY);
-	// virtual void GetScrollPosition(int32_t &outX, int32_t &outY) const;
 	virtual void UpdateNow();
 	virtual void AdjustCursor(int32_t inX, int32_t inY, uint32_t inModifiers);
 	virtual void SetCursor(MCursor inCursor);
 	virtual void ObscureCursor();
 
-	// called for printing
-	virtual uint32_t CountPages(MDevice &inDevice);
 	MView *FindSubView(int32_t inX, int32_t inY) const;
 	virtual MView *FindSubViewByID(const std::string &inID) const;
-
-	virtual MHandler *FindFocus();
 
 	virtual void ConvertToParent(int32_t &ioX, int32_t &ioY) const;
 	virtual void ConvertFromParent(int32_t &ioX, int32_t &ioY) const;
@@ -157,10 +188,12 @@ class MView
 	virtual void ConvertToScreen(int32_t &ioX, int32_t &ioY) const;
 	virtual void ConvertFromScreen(int32_t &ioX, int32_t &ioY) const;
 
-	// Used in X only
-	virtual bool PastePrimaryBuffer(const std::string &inText);
-
   protected:
+	void SuperActivate();
+	virtual void ActivateSelf();
+	void SuperDeactivate();
+	virtual void DeactivateSelf();
+
 	void SuperEnable();
 	virtual void EnableSelf();
 	void SuperDisable();
@@ -174,127 +207,10 @@ class MView
 	std::string mID;
 	MRect mBounds;
 	MRect mFrame;
-	int32_t mLeftMargin, mTopMargin, mRightMargin, mBottomMargin;
-	bool mBindLeft, mBindTop, mBindRight, mBindBottom;
+	MViewLayout mLayout{};
 	MView *mParent;
 	MViewList mChildren;
-	bool mWillDraw;
+	MTriState mActive;
 	MTriState mVisible;
 	MTriState mEnabled;
-};
-
-// class MHBox : public MView
-// {
-//   public:
-// 	MHBox(const std::string &inID, MRect inBounds, uint32_t inSpacing)
-// 		: MView(inID, inBounds)
-// 		, mSpacing(inSpacing)
-// 	{
-// 	}
-// 	//
-// 	//	virtual void	AddChild(// MView* inChild);
-
-// 	virtual void ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta);
-
-// 	virtual void SetSpacing(int32_t inSpacing) { mSpacing = inSpacing; }
-// 	virtual void SetLeftMargin(int32_t inMargin) { mLeftMargin = inMargin; }
-// 	virtual void SetRightMargin(int32_t inMargin) { mRightMargin = inMargin; }
-
-//   protected:
-// 	virtual void RecalculateLayout();
-
-// 	uint32_t mSpacing;
-// };
-
-// class MVBox : public MView
-// {
-//   public:
-// 	MVBox(const std::string &inID, MRect inBounds, uint32_t inSpacing)
-// 		: MView(inID, inBounds)
-// 		, mSpacing(inSpacing)
-// 	{
-// 	}
-
-// 	//	virtual void	AddChild(// MView* inChild);
-
-// 	virtual void ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta);
-
-// 	virtual void SetSpacing(int32_t inSpacing) { mSpacing = inSpacing; }
-// 	virtual void SetTopMargin(int32_t inMargin) { mTopMargin = inMargin; }
-// 	virtual void SetBottomMargin(int32_t inMargin) { mBottomMargin = inMargin; }
-
-//   protected:
-// 	virtual void RecalculateLayout();
-
-// 	uint32_t mSpacing;
-// };
-
-// class MTable : public MView
-// {
-//   public:
-// 	MTable(const std::string &inID, MRect inBounds,
-// 		MView *inChildren[],
-// 		uint32_t inColumns, uint32_t inRows,
-// 		int32_t inHSpacing, int32_t inVSpacing);
-
-// 	virtual void ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta);
-
-// 	using MView::AddChild;
-// 	virtual void AddChild(MView *inView, uint32_t inColumn, uint32_t inRow, int32_t inColumnSpan = 1, int32_t inRowSpan = 1);
-
-//   private:
-// 	virtual void RecalculateLayout();
-
-// 	uint32_t mColumns, mRows;
-// 	int32_t mHSpacing, mVSpacing;
-// 	std::vector<MView *>
-// 		mGrid;
-// };
-
-// class MViewScroller : public MView
-// {
-//   public:
-// 	MViewScroller(const std::string &inID, MView *inTarget,
-// 		bool inHScrollbar, bool inVScrollbar);
-
-// 	virtual void AdjustScrollbars();
-
-// 	MScrollbar *GetHScrollbar() const { return mHScrollbar; }
-// 	MScrollbar *GetVScrollbar() const { return mVScrollbar; }
-
-// 	virtual void MoveFrame(int32_t inXDelta, int32_t inYDelta);
-
-// 	virtual void ResizeFrame(int32_t inWidthDelta, int32_t inHeightDelta);
-
-// 	void SetTargetScrollUnit(int32_t inScrollUnitX, int32_t inScrollUnitY);
-
-// 	void GetTargetScrollUnit(int32_t &outScrollUnitX, int32_t &outScrollUnitY) const;
-
-// 	void GetTargetMinimalDimensions(int32_t &outMinWidth, int32_t &outMinHeight) const;
-
-// 	virtual void MouseWheel(int32_t inX, int32_t inY, int32_t inDeltaX, int32_t inDeltaY, uint32_t inModifiers);
-
-//   protected:
-// 	MView *mTarget;
-// 	MScrollbar *mHScrollbar;
-// 	MScrollbar *mVScrollbar;
-// 	int32_t mScrollUnitX, mScrollUnitY;
-
-// 	virtual void VScroll(MScrollMessage inScrollMsg);
-// 	virtual void HScroll(MScrollMessage inScrollMsg);
-
-// 	MEventIn<void(MScrollMessage)> eVScroll;
-// 	MEventIn<void(MScrollMessage)> eHScroll;
-// };
-
-// --------------------------------------------------------------------
-
-class MPager : public MView
-{
-  public:
-	MPager(const std::string &inID, MRect inBounds);
-
-	void AddPage(MView *inPage);
-	void SelectPage(uint32_t inPage);
-	virtual void RecalculateLayout();
 };

@@ -1,1 +1,5 @@
+.vscode/
 include/mrsrc.hpp
+build/
+.gdb_history
+src/revision.hpp

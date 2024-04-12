@@ -24,36 +24,45 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Gtk/MGtkWindowImpl.hpp"
+#include "MGtkApplicationImpl.hpp"
+#include "MGtkWindowImpl.hpp"
 
 #include "MAlerts.hpp"
 #include "MError.hpp"
 #include "MStrings.hpp"
+#include "MSound.hpp"
+#include "MUnicode.hpp"
 
 #include "mrsrc.hpp"
 
-#include <zeep/xml/document.hpp>
+#include <mxml/document.hpp>
 
-namespace xml = zeep::xml;
+namespace xml = mxml;
 
-GtkWidget *CreateAlertWithArgs(const char *inResourceName, std::initializer_list<std::string> inArgs)
+static void OnDialogResult(GtkDialog *dialog, gint inReplyButton, AlertReplyHandlerBase *inHandler)
 {
-	using namespace std::literals;
+	if (inHandler != nullptr)
+		inHandler->HandleReply(inReplyButton);
+	
+	gtk_window_destroy(GTK_WINDOW(dialog));
+}
 
+GtkWidget *CreateAlertWithArgs(const std::string &inResourceName, std::initializer_list<std::string> inArgs)
+{
 	GtkWidget *dlg = nullptr;
 
-	mrsrc::istream rsrc("Alerts/"s + inResourceName + ".xml");
+	mrsrc::istream rsrc("Alerts/" + inResourceName + ".xml");
 	if (not rsrc)
-		THROW(("Could not load resource Alerts/%s.xml", inResourceName));
+		throw std::runtime_error("Could not load alert resource" + inResourceName);
 
 	// parse the XML data
 	xml::document doc(rsrc);
 
 	// build an alert
-	xml::element *root = doc.find_first("/alert");
+	auto root = doc.find_first("/alert");
 
 	if (root->name() != "alert")
-		THROW(("Invalid resource for alert %s, first tag should be <alert>", inResourceName));
+		throw std::runtime_error("Invalid resource for alert " + inResourceName + ", first tag should be <alert>");
 
 	std::string instruction, content;
 	std::vector<std::pair<std::string, uint32_t>> btns;
@@ -91,7 +100,7 @@ GtkWidget *CreateAlertWithArgs(const char *inResourceName, std::initializer_list
 
 			for (auto a : inArgs)
 			{
-				zeep::replace_all(text, s, a);
+				ReplaceAll(text, s, a);
 				++s[1];
 			}
 
@@ -118,12 +127,15 @@ GtkWidget *CreateAlertWithArgs(const char *inResourceName, std::initializer_list
 	dlg = gtk_message_dialog_new(nullptr, GTK_DIALOG_MODAL,
 		type, GTK_BUTTONS_NONE, "%s", instruction.c_str());
 
+	assert(dlg);
+
+	if (not content.empty())
+	{
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-security"
-	THROW_IF_NIL(dlg);
-	if (not content.empty())
 		gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dlg), content.c_str());
 #pragma GCC diagnostic pop
+	}
 
 	for (auto b : btns)
 		gtk_dialog_add_button(GTK_DIALOG(dlg), b.first.c_str(), b.second);
@@ -131,13 +143,27 @@ GtkWidget *CreateAlertWithArgs(const char *inResourceName, std::initializer_list
 	if (defaultButton >= 0)
 		gtk_dialog_set_default_response(GTK_DIALOG(dlg), defaultButton);
 
+	switch (type)
+	{
+		case GTK_MESSAGE_WARNING:
+			PlaySound("dialog-warning");
+			break;
+		case GTK_MESSAGE_ERROR:
+			PlaySound("dialog-error");
+			break;
+		
+		case GTK_MESSAGE_INFO:
+		default:
+			PlaySound("dialog-information");
+			break;
+	}
+
 	return dlg;
 }
 
-int32_t DisplayAlert(MWindow *inParent, const std::string &inResourceName, std::initializer_list<std::string> inArgs)
+void DisplayAlert(MWindow *inParent, const std::string &inResourceName,
+	AlertReplyHandlerBase *inHandler, std::initializer_list<std::string> inArgs)
 {
-	int32_t result = -1;
-
 	try
 	{
 		GtkWidget *dlg = CreateAlertWithArgs(inResourceName.c_str(), inArgs);
@@ -153,27 +179,32 @@ int32_t DisplayAlert(MWindow *inParent, const std::string &inResourceName, std::
 				GTK_WINDOW(dlg),
 				GTK_WINDOW(impl->GetWidget()));
 		}
-		else if (MWindow::GetFirstWindow() != nullptr)
+		else if (auto w = gApp->GetActiveWindow(); w != nullptr)
 		{
-			MWindow::GetFirstWindow()->Select();
+			w->Select();
 
-			MGtkWindowImpl *impl =
-				static_cast<MGtkWindowImpl *>(MWindow::GetFirstWindow()->GetImpl());
+			MGtkWindowImpl *impl = static_cast<MGtkWindowImpl *>(w->GetImpl());
 
 			gtk_window_set_transient_for(
 				GTK_WINDOW(dlg),
 				GTK_WINDOW(impl->GetWidget()));
 		}
 
-#warning FIXME
-		// result = gtk_dialog_run(GTK_DIALOG(dlg));
+		g_signal_connect(GTK_DIALOG(dlg), "response", G_CALLBACK(OnDialogResult), inHandler);
 
-		// gtk_widget_destroy(dlg);
+		gtk_window_present(GTK_WINDOW(dlg));
 	}
 	catch (const std::exception &e)
 	{
-		DisplayError(e);
+		try
+		{
+			DisplayError(e);
+		}
+		catch (const std::exception &e2)
+		{
+			std::cerr << e.what() << '\n'
+					  << "Additionally, you seem to have a problem with resources... exiting\n";
+			std::exit(1);
+		}
 	}
-
-	return result;
 }

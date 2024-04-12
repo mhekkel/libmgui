@@ -31,9 +31,14 @@
 
 #pragma once
 
+#include "MControls.hpp"
+#include "MWindow.hpp"
+
+#include <mxml/node.hpp>
+
 #include <vector>
 
-#include "MWindow.hpp"
+// --------------------------------------------------------------------
 
 class MDialog : public MWindow
 {
@@ -41,20 +46,18 @@ class MDialog : public MWindow
 	~MDialog();
 
 	virtual bool OKClicked();
-
 	virtual bool CancelClicked();
 
 	using MWindow::Show;
 	void Show(MWindow *inParent);
-	bool ShowModal(MWindow *inParent);
 
 	void SavePosition(const char *inName);
-
 	void RestorePosition(const char *inName);
+
+	void SetDefaultButton(MButton *inButton);
 
 	MWindow *GetParentWindow() const { return mParentWindow; }
 
-	using MHandler::SetFocus;
 	void SetFocus(const std::string &inID);
 
 	std::string GetText(const std::string &inID) const;
@@ -100,11 +103,51 @@ class MDialog : public MWindow
   protected:
 	MDialog(const std::string &inDialogResource);
 
-	virtual void ChildResized();
-	virtual void RecalculateLayout();
+	virtual void Build();
+
+	MMargins GetMargins(const mxml::element &inTemplate);
+
+	MView *CreateControls(const mxml::element &inTemplate, int32_t inX, int32_t inY);
+
+	MView *CreateButton(const mxml::element &inTemplate, int32_t inX, int32_t inY);
+	MView *CreateColorSwatch(const mxml::element &inTemplate, int32_t inX, int32_t inY);
+	MView *CreateCaption(const mxml::element &inTemplate, int32_t inX, int32_t inY);
+	MView *CreateCheckbox(const mxml::element &inTemplate, int32_t inX, int32_t inY);
+	MView *CreateRadiobutton(const mxml::element &inTemplate, int32_t inX, int32_t inY);
+	MView *CreateExpander(const mxml::element &inTemplate, int32_t inX, int32_t inY);
+	MView *CreateCombobox(const mxml::element &inTemplate, int32_t inX, int32_t inY);
+	MView *CreateEdittext(const mxml::element &inTemplate, int32_t inX, int32_t inY);
+	MView *CreateFiller(const mxml::element &inTemplate, int32_t inX, int32_t inY);
+	MView *CreatePopup(const mxml::element &inTemplate, int32_t inX, int32_t inY);
+	MView *CreateScrollbar(const mxml::element &inTemplate, int32_t inX, int32_t inY);
+	MView *CreateSeparator(const mxml::element &inTemplate, int32_t inX, int32_t inY);
+	MView *CreateBox(const mxml::element &inTemplate, int32_t inX, int32_t inY, bool inHorizontal);
+	// MView *CreateTable(const mxml::element &inTemplate, int32_t inX, int32_t inY);
+	MView *CreatePager(const mxml::element &inTemplate, int32_t inX, int32_t inY);
+	MView *CreateListBox(const mxml::element &inTemplate, int32_t inX, int32_t inY);
+	// MView *CreateListView(const mxml::element &inTemplate, int32_t inX, int32_t inY);
+	MView *CreateCanvas(const mxml::element &inTemplate, int32_t inX, int32_t inY);
+
+	std::string l(const std::string &s);
+
+	bool AllowClose(bool inQuitting) override;
+
+	void ChildResized() override;
+	void RecalculateLayout() override;
+
+	bool KeyPressed(uint32_t inKeyCode, char32_t inUnicode, uint32_t inModifiers, bool inAutoRepeat) override;
+	void KeyReleased(uint32_t inKeyValue, uint32_t inModifiers) override;
+	void Modifiers(uint32_t inModifiers) override;
+	void EnterText(const std::string &inText) override;
+
+	std::string mRsrc;
+	float mDLUX, mDLUY;
+	std::vector<MRadiobutton *> mRadioGroup;
+	MButton *mOKButton = nullptr, *mCancelButton = nullptr;
 
   private:
+
+	std::pair<int, bool> GetAttributeSize(const mxml::element &e, const char *name, float inDLU);
+
 	MWindow *mParentWindow;
-	MDialog *mNext; // for the close all
-	static MDialog *sFirst;
 };
