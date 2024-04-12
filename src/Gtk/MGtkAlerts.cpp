@@ -30,6 +30,7 @@
 #include "MAlerts.hpp"
 #include "MError.hpp"
 #include "MStrings.hpp"
+#include "MSound.hpp"
 #include "MUnicode.hpp"
 
 #include "mrsrc.hpp"
@@ -141,6 +142,21 @@ GtkWidget *CreateAlertWithArgs(const std::string &inResourceName, std::initializ
 
 	if (defaultButton >= 0)
 		gtk_dialog_set_default_response(GTK_DIALOG(dlg), defaultButton);
+
+	switch (type)
+	{
+		case GTK_MESSAGE_WARNING:
+			PlaySound("dialog-warning");
+			break;
+		case GTK_MESSAGE_ERROR:
+			PlaySound("dialog-error");
+			break;
+		
+		case GTK_MESSAGE_INFO:
+		default:
+			PlaySound("dialog-information");
+			break;
+	}
 
 	return dlg;
 }
