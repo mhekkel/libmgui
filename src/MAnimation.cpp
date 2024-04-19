@@ -271,6 +271,8 @@ class MAnimationManagerImpl
 
 	void Idle();
 
+	bool Filter(MScheduledStoryboard &storyboard, std::chrono::system_clock::time_point pt);
+
 	MAnimationManager *mAnimationManager;
 	std::list<MScheduledStoryboard> mStoryboards;
 	std::mutex mMutex;
@@ -279,6 +281,16 @@ class MAnimationManagerImpl
 	bool mDone;
 	std::thread mThread;
 };
+
+bool MAnimationManagerImpl::Filter(MScheduledStoryboard &storyboard, std::chrono::system_clock::time_point pt)
+{
+	MStoryboardImpl *storyboardImpl = static_cast<MStoryboardImpl *>(storyboard.mStoryboard->GetImpl());
+
+	bool result = storyboardImpl->Done(pt - storyboard.mStartTime);
+	if (result)
+		storyboardImpl->Finish();
+	return result;
+}
 
 void MAnimationManagerImpl::Run()
 {
@@ -317,11 +329,7 @@ void MAnimationManagerImpl::Run()
 			}
 
 			mStoryboards.erase(std::remove_if(mStoryboards.begin(), mStoryboards.end(),
-								   [now](MScheduledStoryboard &storyboard) -> bool
-								   {
-									   MStoryboardImpl *storyboardImpl = static_cast<MStoryboardImpl *>(storyboard.mStoryboard->GetImpl());
-									   return storyboardImpl->Done(now - storyboard.mStartTime);
-								   }),
+				std::bind(&MAnimationManagerImpl::Filter, this, std::placeholders::_1, now)),
 				mStoryboards.end());
 		}
 		catch (...)
