@@ -90,6 +90,7 @@ void MColorSwatch::OnPickedColor(MColor inColor)
 {
 	mColor = inColor;
 	eColorChanged(mID, mColor);
+	Invalidate();
 }
 
 void MColorSwatch::OnPreviewColor(MColor inColor)
