@@ -186,10 +186,11 @@ void MGtkControlImpl<CONTROL>::AddedToWindow()
 {
 	CreateWidget();
 
-	MGtkWidgetMixin *parent;
+	MGtkWidgetMixin *parent = nullptr;
 	MRect bounds;
 
 	GetParentAndBounds(parent, bounds);
+	assert(parent);
 
 	MControlBase *control = this->mControl;
 

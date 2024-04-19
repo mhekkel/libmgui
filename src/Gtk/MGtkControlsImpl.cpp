@@ -400,7 +400,7 @@ void MGtkComboboxImpl::SetChoices(const std::vector<std::string> &inChoices)
 
 	if (wdgt != nullptr)
 	{
-		mChanged.Disconnect(wdgt);
+		mChanged.Disconnect();
 
 		if (not GTK_IS_COMBO_BOX(wdgt))
 			throw std::runtime_error("Item is not a combo box");

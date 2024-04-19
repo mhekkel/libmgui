@@ -215,7 +215,7 @@ bool MGtkCanvasImpl::OnScroll(double inX, double inY)
 	auto modifiers = gtk_event_controller_get_current_event_state(
 		GTK_EVENT_CONTROLLER(mScroll.GetSourceGObject()));
 
-	int32_t x, y;
+	int32_t x = 0, y = 0;
 
 	auto w = static_cast<MGtkWindowImpl *>(mControl->GetWindow()->GetImpl())->GetWidget();
 

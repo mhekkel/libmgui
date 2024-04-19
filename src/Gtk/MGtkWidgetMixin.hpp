@@ -42,13 +42,13 @@
 #include <vector>
 
 template <class CallbackIn, typename Function>
-struct MGtkCallbackOutHandler
-{
-};
+struct MGtkCallbackOutHandler;
 
 template <class CallbackIn, typename Result, typename... Arguments>
 struct MGtkCallbackOutHandler<CallbackIn, Result(Arguments...)>
 {
+	virtual ~MGtkCallbackOutHandler() = default;
+
 	std::unique_ptr<CallbackIn> mHandler;
 	GObject *mSendingGObject;
 
@@ -79,6 +79,8 @@ struct MGtkCallbackOutHandler<CallbackIn, Result(Arguments...)>
 template <class CallbackIn, typename... Arguments>
 struct MGtkCallbackOutHandler<CallbackIn, bool(Arguments...)>
 {
+	virtual ~MGtkCallbackOutHandler() = default;
+
 	std::unique_ptr<CallbackIn> mHandler;
 	GObject *mSendingGObject;
 
@@ -109,6 +111,8 @@ struct MGtkCallbackOutHandler<CallbackIn, bool(Arguments...)>
 template <class CallbackIn, typename... Arguments>
 struct MGtkCallbackOutHandler<CallbackIn, void(Arguments...)>
 {
+	virtual ~MGtkCallbackOutHandler() = default;
+
 	std::unique_ptr<CallbackIn> mHandler;
 	GObject *mSendingGObject;
 
@@ -240,8 +244,14 @@ class MSlot : public MakeGtkCallbackHandler<Function>::type
 		self->mHandler.reset(new Handler(inOwner, inProc));
 	}
 
+	~MSlot()
+	{
+		Disconnect();
+	}
+
 	void Connect(GObject *inObject, const char *inSignalName)
 	{
+		mObject = inObject;
 		mID = g_signal_connect(inObject, inSignalName,
 			G_CALLBACK(&base_class::GCallback), this);
 	}
@@ -251,22 +261,23 @@ class MSlot : public MakeGtkCallbackHandler<Function>::type
 		Connect(G_OBJECT(inObject), inSignalName);
 	}
 
-	void Disconnect(GtkWidget *inObject)
+	void Disconnect()
 	{
-		if (mID > 0)
-			g_signal_handler_disconnect(G_OBJECT(inObject), mID);
+		if (mID > 0 and g_signal_handler_is_connected(mObject, mID))
+			g_signal_handler_disconnect(mObject, mID);
 		mID = 0;
+		mObject = nullptr;
 	}
 
-	void Block(GtkWidget *inObject, const char *inSignalName)
+	void Block(const char *inSignalName)
 	{
-		g_signal_handlers_block_by_func(G_OBJECT(inObject),
+		g_signal_handlers_block_by_func(mObject,
 			(void *)G_CALLBACK(&base_class::GCallback), this);
 	}
 
-	void Unblock(GtkWidget *inObject, const char *inSignalName)
+	void Unblock(const char *inSignalName)
 	{
-		g_signal_handlers_unblock_by_func(G_OBJECT(inObject),
+		g_signal_handlers_unblock_by_func(mObject,
 			(void *)G_CALLBACK(&base_class::GCallback), this);
 	}
 
@@ -276,6 +287,7 @@ class MSlot : public MakeGtkCallbackHandler<Function>::type
 	}
 
   private:
+	GObject *mObject = nullptr;
 	ulong mID = 0;
 };
 
