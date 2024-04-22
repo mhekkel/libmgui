@@ -57,7 +57,7 @@ void MController::SetDocument(MDocument *inDocument)
 	}
 }
 
-bool MController::TryCloseDocument(MCloseReason inAction)
+bool MController::TryCloseDocument(/* MCloseReason inAction */)
 {
 	bool result = true;
 
@@ -75,14 +75,14 @@ bool MController::TryCloseDocument(MCloseReason inAction)
 			else
 				name = mDocWindow->GetTitle();
 
-			MSaverMixin::TryCloseDocument(inAction, name, mDocWindow);
+			MSaverMixin::TryCloseDocument(/* inAction,  */name, mDocWindow);
 		}
 	}
 
 	return result;
 }
 
-bool MController::TryCloseController(MCloseReason inAction)
+bool MController::TryCloseController(/* MCloseReason inAction */)
 {
 	bool result = true;
 
@@ -92,7 +92,7 @@ bool MController::TryCloseController(MCloseReason inAction)
 			SetDocument(nullptr);
 		else
 		{
-			TryCloseDocument(inAction);
+			TryCloseDocument(/* inAction */);
 			mCloseOnNavTerminate = true;
 			result = false;
 		}

@@ -26,6 +26,7 @@
 
 #pragma once
 
+#include "MCommand.hpp"
 #include "MMenu.hpp"
 #include "MP2PEvents.hpp"
 #include "MTypes.hpp"
@@ -125,8 +126,6 @@ class MApplication
 		return 1;
 	}
 
-	virtual void DoNew();
-	virtual void DoOpen();
 	// virtual void Open(const std::string &inURL);
 	virtual void Execute(const std::string &inCommand, const std::vector<std::string> &inArguments);
 
@@ -166,6 +165,8 @@ class MApplication
 	virtual void SaveGlobals();
 
 	MApplicationImpl *mImpl;
+
+	MCommand<void()> cQuit;
 
 	bool mQuit;
 	bool mQuitPending;

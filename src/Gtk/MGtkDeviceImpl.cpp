@@ -552,6 +552,9 @@ MCairoDeviceImp::MCairoDeviceImp(MView *inView)
 	MCanvas *canvas = dynamic_cast<MCanvas *>(inView);
 	MGtkCanvasImpl *target = static_cast<MGtkCanvasImpl *>(canvas->GetImpl());
 	mContext = target->GetCairo();
+
+	auto bounds = inView->GetBounds();
+	SetOrigin(-bounds.x, -bounds.y);
 }
 
 MCairoDeviceImp::~MCairoDeviceImp()

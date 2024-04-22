@@ -61,25 +61,24 @@ void MDocWindow::Initialize(MDocument *inDocument)
 
 bool MDocWindow::AllowClose(bool inQuit)
 {
-	return mController->TryCloseController(inQuit ? MCloseReason::QuittingApplication : MCloseReason::ClosingDocument);
+	return mController->TryCloseController(/* inQuit ? MCloseReason::QuittingApplication : MCloseReason::ClosingDocument */);
 }
 
 MDocWindow *MDocWindow::FindWindowForDocument(MDocument *inDocument)
 {
-	// MWindow *w = MWindow::GetFirstWindow();
+	MWindow *w = MWindow::GetFirstWindow();
 
-	// while (w != nullptr)
-	// {
-	// 	MDocWindow *d = dynamic_cast<MDocWindow *>(w);
+	while (w != nullptr)
+	{
+		MDocWindow *d = dynamic_cast<MDocWindow *>(w);
 
-	// 	if (d != nullptr and d->GetDocument() == inDocument)
-	// 		break;
+		if (d != nullptr and d->GetDocument() == inDocument)
+			break;
 
-	// 	w = w->GetNextWindow();
-	// }
+		w = w->GetNextWindow();
+	}
 
-	// return static_cast<MDocWindow *>(w);
-	return nullptr;
+	return static_cast<MDocWindow *>(w);
 }
 
 std::string MDocWindow::GetUntitledTitle()

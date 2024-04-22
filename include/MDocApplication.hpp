@@ -1,17 +1,17 @@
 /*-
  * SPDX-License-Identifier: BSD-2-Clause
- *
+ * 
  * Copyright (c) 2024 Maarten L. Hekkelman
- *
+ * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * 
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,53 +26,34 @@
 
 #pragma once
 
-#include <filesystem>
-#include <string>
+#include "MApplication.hpp"
+#include "MSaverMixin.hpp"
 
-class MWindow;
+class MDocument;
+class MDocWindow;
 
-enum class MCloseReason
-{
-	ClosingDocument,
-	ClosingAllDocuments,
-	QuittingApplication
-};
+// --------------------------------------------------------------------
 
-class MSaverMixin
+class MDocApplication : public MApplication
 {
   public:
-	MSaverMixin();
-	virtual ~MSaverMixin();
+	MDocApplication(MApplicationImpl *inImpl);
 
-// 	static bool IsNavDialogVisible();
+	virtual void DoNew();
+	virtual void DoOpen();
+	virtual void DoCloseAll();
 
-	virtual void TryCloseDocument(/* MCloseReason inAction,  */const std::string &inDocument, MWindow *inParentWindow);
-	virtual void TryDiscardChanges(const std::string &inDocument, MWindow *inParentWindow);
-	virtual void SaveDocumentAs(MWindow *inParentWindow, const std::string &inSuggestedName);
+	virtual MDocument *OpenOneDocument(const std::filesystem::path &inFileRef);
+	virtual MDocWindow *DisplayDocument(MDocument *inDocument);
+
+	static MDocApplication &Instance()
+	{
+		return *static_cast<MDocApplication*>(gApp);
+	}
 
   protected:
-	virtual bool SaveDocument() = 0;
-	virtual void RevertDocument() = 0;
-	virtual bool DoSaveAs(const std::filesystem::path &inPath) = 0;
-	virtual void CloseAfterNavigationDialog() = 0;
 
-// 	virtual bool OnClose();
-
-// 	virtual bool OnSaveResponse(
-// 		gint inArg);
-
-// 	virtual bool OnDiscardResponse(
-// 		gint inArg);
-
-// 	MSlot<bool()> slClose;
-// 	MSlot<bool(gint)> slSaveResponse;
-// 	MSlot<bool(gint)> slDiscardResponse;
-
-// 	static MSaverMixin *sFirst;
-// 	MSaverMixin *mNext;
-	bool mCloseOnNavTerminate;
-	bool mClosePending;
-	bool mCloseAllPending;
-	bool mQuitPending;
-// 	GtkWidget *mDialog;
+	MCommand<void()> cNew;
+	MCommand<void()> cOpen;
+	MCommand<void()> cCloseAll;
 };

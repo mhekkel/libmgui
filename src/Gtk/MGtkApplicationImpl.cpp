@@ -25,7 +25,7 @@
  */
 
 #include "MAlerts.hpp"
-#include "MApplication.hpp"
+#include "MDocApplication.hpp"
 #include "MClipboard.hpp"
 #include "MDialog.hpp"
 #include "MError.hpp"
@@ -76,7 +76,7 @@ void MGtkApplicationImpl::Startup()
 
 void MGtkApplicationImpl::Activate()
 {
-	gApp->DoNew();
+	MDocApplication::Instance().DoNew();
 }
 
 void MGtkApplicationImpl::Initialise()

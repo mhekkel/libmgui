@@ -65,8 +65,8 @@ class MController : public MSaverMixin
 
 	void SaveDocumentAs();
 
-	virtual bool TryCloseDocument(MCloseReason inAction);
-	virtual bool TryCloseController(MCloseReason inAction);
+	virtual bool TryCloseDocument(/* MCloseReason inAction */);
+	virtual bool TryCloseController(/* MCloseReason inAction */);
 	void TryDiscardChanges();
 
 	MEventOut<void(MDocument *)> eDocumentChanged;

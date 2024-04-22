@@ -42,10 +42,11 @@
 //	MWindow
 //
 
+MWindow *MWindow::sFirst = nullptr;
+
+
 MWindow::MWindow(const std::string &inTitle, const MRect &inBounds, MWindowFlags inFlags)
-	: MView("window", inBounds)
-	, mImpl(MWindowImpl::Create(inTitle, inBounds, inFlags, this))
-	, mModified(false)
+	: MWindow(MWindowImpl::Create(inTitle, inBounds, inFlags, this))
 {
 	mVisible = eTriStateLatent;
 
@@ -57,13 +58,45 @@ MWindow::MWindow(const std::string &inTitle, const MRect &inBounds, MWindowFlags
 MWindow::MWindow(MWindowImpl *inImpl)
 	: MView("window", MRect(0, 0, 100, 100))
 	, mImpl(inImpl)
+
+	, cClose(this, "win.close", &MWindow::DoClose, 'w', kControlKey)
 {
 	SetLayout({ true, 0 });
+
+	mNext = sFirst;
+	sFirst = this;
 }
 
 MWindow::~MWindow()
 {
+	RemoveFromList(this);
 	delete mImpl;
+}
+
+void MWindow::DoClose()
+{
+	if (AllowClose(false))
+		Close();
+}
+
+void MWindow::RemoveFromList(MWindow *inWindow)
+{
+	if (inWindow == sFirst)
+		sFirst = inWindow->mNext;
+	else if (sFirst != nullptr)
+	{
+		MWindow* w = sFirst;
+		while (w != nullptr)
+		{
+			MWindow* next = w->mNext;
+			if (next == inWindow)
+			{
+				w->mNext = inWindow->mNext;
+				break;
+			}
+			w = next;
+		}
+	}
 }
 
 void MWindow::SetImpl(MWindowImpl *inImpl)

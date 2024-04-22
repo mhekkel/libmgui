@@ -1,7 +1,7 @@
 /*-
  * SPDX-License-Identifier: BSD-2-Clause
  *
- * Copyright (c) 2023 Maarten L. Hekkelman
+ * Copyright (c) 2024 Maarten L. Hekkelman
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -24,98 +24,69 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "MApplication.hpp"
-#include "MControls.hpp"
-#include "MError.hpp"
-#include "MMenu.hpp"
-#include "MPreferences.hpp"
-#include "MStrings.hpp"
-#include "MUtils.hpp"
-#include "MWindow.hpp"
-
-#include <chrono>
-#include <filesystem>
-#include <iostream>
-
-namespace fs = std::filesystem;
-
-#if DEBUG
-int VERBOSE, TRACE;
-#endif
-
-MApplication *gApp;
-fs::path gExecutablePath, gPrefixPath;
+#include "MDocApplication.hpp"
+#include "MAlerts.hpp"
+#include "MController.hpp"
+#include "MDocument.hpp"
+#include "MFile.hpp"
 
 // --------------------------------------------------------------------
 
-void MAsyncHandlerBase::execute()
+MDocApplication::MDocApplication(MApplicationImpl *inImpl)
+	: MApplication(inImpl)
+
+	, cNew(this, "app.new", &MDocApplication::DoNew, 'N', kControlKey)
+	, cOpen(this, "app.open", &MDocApplication::DoOpen, 'O', kControlKey)
+	, cCloseAll(this, "app.close-all", &MDocApplication::DoCloseAll, 'W', kControlKey | kShiftKey)
 {
-	try
+}
+
+void MDocApplication::DoNew()
+{
+}
+
+void MDocApplication::DoOpen()
+{
+	MFileDialogs::ChooseFiles(gApp->GetActiveWindow(), [&](std::vector<std::filesystem::path> files)
+		{
+			try
+			{
+				MDocument *doc = nullptr;
+
+				for (auto &file : files)
+					doc = OpenOneDocument(file);
+
+				if (doc != nullptr)
+					DisplayDocument(doc);
+			}
+			catch (const std::exception &e)
+			{
+				DisplayError(e);
+			} });
+}
+
+void MDocApplication::DoCloseAll(/* MCloseReason inAction */)
+{
+	MDocument *doc = MDocument::GetFirstDocument();
+
+	while (doc != nullptr)
 	{
-		execute_self();
+		auto next = doc->GetNextDocument();
+		auto controller = doc->GetFirstController();
+		if (controller)
+			controller->TryCloseDocument();
+		else
+			assert(controller);
+		doc = next;
 	}
-	catch (const std::exception &ex)
-	{
-		std::cerr << ex.what() << '\n';
-	}
 }
 
-// --------------------------------------------------------------------
-
-MApplication::MApplication(MApplicationImpl *inImpl)
-	: mImpl(inImpl)
-
-	, cQuit(this, "app.quit", &MApplication::DoQuit, 'Q', kControlKey)
-
-	, mQuit(false)
-	, mQuitPending(false)
+MDocument *MDocApplication::OpenOneDocument(const std::filesystem::path &inFileRef)
 {
-	// set the global pointing to us
-	gApp = this;
+	return nullptr;
 }
 
-MApplication::~MApplication()
+MDocWindow *MDocApplication::DisplayDocument(MDocument *inDocument)
 {
-	delete mImpl;
-}
-
-void MApplication::Initialise()
-{
-	mImpl->Initialise();
-}
-
-void MApplication::SetIconName(const std::string &inIconName)
-{
-	mImpl->SetIconName(inIconName);
-}
-
-void MApplication::SaveGlobals()
-{
-	MPrefs::SaveIfDirty();
-}
-
-void MApplication::Execute(const std::string &inCommand,
-		const std::vector<std::string> &inArguments)
-{
-}
-
-bool MApplication::AllowQuit(bool inLogOff)
-{
-	return true;
-}
-
-void MApplication::DoQuit()
-{
-	mQuit = true;
-	mQuitPending = true;
-
-	SaveGlobals();
-
-	mImpl->Quit();
-}
-
-void MApplication::Pulse()
-{
-	eIdle();
-	MPrefs::SaveIfDirty();
+	return nullptr;
 }

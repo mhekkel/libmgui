@@ -98,15 +98,15 @@ MSaverMixin::~MSaverMixin()
 // 	return m != nullptr;
 // }
 
-void MSaverMixin::TryCloseDocument(MCloseReason inAction, const std::string &inDocumentName, MWindow *inParentWindow)
+void MSaverMixin::TryCloseDocument(/* MCloseReason inAction,  */const std::string &inDocumentName, MWindow *inParentWindow)
 {
 	inParentWindow->Select();
 
 	// if (mDialog != nullptr)
 	// 	return;
 
-	mQuitPending = (inAction == MCloseReason::QuittingApplication);
-	mCloseAllPending = (inAction == MCloseReason::ClosingAllDocuments);
+	mQuitPending = false; /* (inAction == MCloseReason::QuittingApplication); */
+	mCloseAllPending = false; /* (inAction == MCloseReason::ClosingAllDocuments); */
 
 	DisplayAlert(inParentWindow, "save-changes-alert", [this](int reply)
 		{

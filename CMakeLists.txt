@@ -160,6 +160,7 @@ list(APPEND sources
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MControls.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MDevice.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MDialog.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MDocApplication.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MDocument.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MDocWindow.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MFile.cpp

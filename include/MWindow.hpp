@@ -27,6 +27,7 @@
 #pragma once
 
 #include "MColor.hpp"
+#include "MCommand.hpp"
 #include "MP2PEvents.hpp"
 #include "MView.hpp"
 
@@ -126,6 +127,8 @@ class MWindow : public MView
 
 	virtual ~MWindow();
 
+	virtual void DoClose();
+
 	MWindow *GetWindow() const override;
 	MWindowFlags GetFlags() const;
 
@@ -174,10 +177,16 @@ class MWindow : public MView
 
 	static void GetMainScreenBounds(MRect &outRect);
 
+	// --------------------------------------------------------------------
+	static MWindow *GetFirstWindow() { return sFirst; }
+	MWindow *GetNextWindow() const { return mNext; }
+
   protected:
 	MWindow(MWindowImpl *inImpl);
 
 	void SetImpl(MWindowImpl *inImpl);
+
+	static void RemoveFromList(MWindow *inWindow);
 
   private:
 	void ShowSelf() override;
@@ -187,7 +196,12 @@ class MWindow : public MView
 
 	MWindowImpl *mImpl;
 	std::string mTitle;
-	bool mModified;
-	time_point mLastActivate;
+	bool mModified = false;
+	time_point mLastActivate{};
 	MControlBase *mLatentFocus = nullptr;
+
+	MCommand<void()> cClose;
+
+	static MWindow *sFirst;
+	MWindow *mNext = nullptr;
 };
