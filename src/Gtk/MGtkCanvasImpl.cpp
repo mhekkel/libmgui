@@ -85,8 +85,9 @@ void MGtkCanvasImpl::OnGestureClickPressed(double inX, double inY, gint inClickC
 	{
 		auto modifiers = MapModifier(gtk_event_controller_get_current_event_state(
 			GTK_EVENT_CONTROLLER(mGestureClickPressed.GetSourceGObject())));
-
-		mControl->ClickPressed(inX, inY, inClickCount, modifiers);
+		
+		MRect bounds = mControl->GetBounds();
+		mControl->ClickPressed(inX + bounds.x, inY + bounds.y, inClickCount, modifiers);
 	}
 }
 
@@ -95,7 +96,8 @@ void MGtkCanvasImpl::OnGestureClickReleased(double inX, double inY, gint inClick
 	auto modifiers = MapModifier(gtk_event_controller_get_current_event_state(
 		GTK_EVENT_CONTROLLER(mGestureClickReleased.GetSourceGObject())));
 
-	mControl->ClickReleased(inX, inY, modifiers);
+	MRect bounds = mControl->GetBounds();
+	mControl->ClickReleased(inX + bounds.x, inY + bounds.y, modifiers);
 }
 
 void MGtkCanvasImpl::OnGestureClickStopped()
@@ -105,13 +107,19 @@ void MGtkCanvasImpl::OnGestureClickStopped()
 void MGtkCanvasImpl::OnMiddleButtonClick(double inX, double inY, gint inClickCount)
 {
 	if (not mControl->GetWindow()->IgnoreSelectClick())
-		mControl->MiddleMouseButtonClick(inX, inY);
+	{
+		MRect bounds = mControl->GetBounds();
+		mControl->MiddleMouseButtonClick(inX + bounds.x, inY + bounds.y);
+	}
 }
 
 void MGtkCanvasImpl::OnSecondaryButtonClick(double inX, double inY, gint inClickCount)
 {
 	if (not mControl->GetWindow()->IgnoreSelectClick())
-		mControl->SecondaryMouseButtonClick(inX, inY);
+	{
+		MRect bounds = mControl->GetBounds();
+		mControl->SecondaryMouseButtonClick(inX + bounds.x, inY + bounds.y);
+	}
 }
 
 void MGtkCanvasImpl::OnPointerEnter(double inX, double inY)
@@ -119,7 +127,8 @@ void MGtkCanvasImpl::OnPointerEnter(double inX, double inY)
 	auto modifiers = MapModifier(gtk_event_controller_get_current_event_state(
 		GTK_EVENT_CONTROLLER(mPointerEnter.GetSourceGObject())));
 
-	mControl->PointerEnter(inX, inY, modifiers);
+	MRect bounds = mControl->GetBounds();
+	mControl->PointerEnter(inX + bounds.x, inY + bounds.y, modifiers);
 }
 
 void MGtkCanvasImpl::OnPointerMotion(double inX, double inY)
@@ -127,7 +136,8 @@ void MGtkCanvasImpl::OnPointerMotion(double inX, double inY)
 	auto modifiers = MapModifier(gtk_event_controller_get_current_event_state(
 		GTK_EVENT_CONTROLLER(mPointerMotion.GetSourceGObject())));
 
-	mControl->PointerMotion(inX, inY, modifiers);
+	MRect bounds = mControl->GetBounds();
+	mControl->PointerMotion(inX + bounds.x, inY + bounds.y, modifiers);
 }
 
 void MGtkCanvasImpl::OnPointerLeave()

@@ -152,7 +152,7 @@ class MDevice
 	void FillGeometry(MGeometry &inGeometry);
 	void DrawBitmap(const MBitmap &inBitmap, float inX, float inY);
 
-	// void		CreateAndUsePattern(MColor inColor1, MColor inColor2, uint32_t inWidth = 4, float inRotation = 45.f);
+	void CreateAndUsePattern(MColor inColor1, MColor inColor2, uint32_t inWidth = 4, float inRotation = 45.f);
 
 	float GetAscent() const;
 	float GetDescent() const;

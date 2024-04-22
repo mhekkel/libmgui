@@ -24,9 +24,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "MGtkControlsImpl.hpp"
 #include "MGtkWindowImpl.hpp"
 #include "MGtkApplicationImpl.hpp"
+#include "MGtkControlsImpl.hpp"
 
 #include "MApplication.hpp"
 #include "MError.hpp"
@@ -116,7 +116,7 @@ void MGtkWindowImpl::CreateWindow(MRect inBounds, const std::string &inTitle)
 
 	GtkWidget *widget = GTK_WIDGET(w);
 	if (widget == nullptr)
-throw std::runtime_error("unexpected nullptr");
+		throw std::runtime_error("unexpected nullptr");
 
 	gtk_window_set_default_size(GTK_WINDOW(widget), inBounds.width, inBounds.height);
 	gtk_window_set_title(GTK_WINDOW(widget), inTitle.c_str());
@@ -238,10 +238,29 @@ void MGtkWindowImpl::UpdateNow()
 
 void MGtkWindowImpl::SetCursor(MCursor inCursor)
 {
+	switch (inCursor)
+	{
+		case eNormalCursor:
+			gtk_widget_set_cursor_from_name(GetWidget(), "default");
+			break;
+
+		case eIBeamCursor:
+			gtk_widget_set_cursor_from_name(GetWidget(), "text");
+			break;
+
+		case eRightCursor:
+			gtk_widget_set_cursor_from_name(GetWidget(), "pointer");
+			break;
+	
+		case eBlankCursor:
+			gtk_widget_set_cursor_from_name(GetWidget(), "none");
+			break;
+	}
 }
 
 void MGtkWindowImpl::ObscureCursor()
 {
+	gtk_widget_set_cursor_from_name(GetWidget(), "none");
 }
 
 void MGtkWindowImpl::ConvertToScreen(int32_t &ioX, int32_t &ioY) const
@@ -251,7 +270,6 @@ void MGtkWindowImpl::ConvertToScreen(int32_t &ioX, int32_t &ioY) const
 void MGtkWindowImpl::ConvertFromScreen(int32_t &ioX, int32_t &ioY) const
 {
 }
-
 
 bool MGtkWindowImpl::OnKeyPressed(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers)
 {

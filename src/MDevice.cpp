@@ -275,14 +275,10 @@ void MDevice::DrawBitmap(const MBitmap &inBitmap, float inX, float inY)
 	mImpl->DrawBitmap(inBitmap, inX, inY);
 }
 
-// void MDevice::CreateAndUsePattern(
-// 	MColor		inColor1,
-// 	MColor		inColor2,
-// 	uint32_t		inWidth,
-// 	float		inRotation)
-// {
-// 	mImpl->CreateAndUsePattern(inColor1, inColor2, inWidth, inRotation);
-// }
+void MDevice::CreateAndUsePattern(MColor inColor1, MColor inColor2, uint32_t inWidth, float inRotation)
+{
+	mImpl->CreateAndUsePattern(inColor1, inColor2, inWidth, inRotation);
+}
 
 float MDevice::GetAscent() const
 {

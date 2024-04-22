@@ -82,7 +82,7 @@ class MDeviceImpl
 	virtual void FillGeometry(MGeometryImpl &inGeometry) {}
 	virtual void DrawBitmap(const MBitmap &inBitmap, float inX, float inY) {}
 
-	// virtual void			CreateAndUsePattern(MColor inColor1, MColor inColor2, uint32_t inWidth, float inRotation)				{}
+	virtual void CreateAndUsePattern(MColor inColor1, MColor inColor2, uint32_t inWidth, float inRotation) {}
 	// PangoFontMetrics*		GetMetrics();
 
 	virtual float GetAscent() { return 10; }
