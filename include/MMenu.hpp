@@ -35,7 +35,6 @@
 
 class MWindow;
 class MWindowImpl;
-class MFile;
 class MMenuImpl;
 class MMenuBar;
 

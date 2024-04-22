@@ -132,13 +132,24 @@ namespace MFileDialogs
 struct FileChooserResponder
 {
   public:
-	FileChooserResponder(GtkFileChooser *dialog, std::function<void(std::filesystem::path)> &&callback)
+	FileChooserResponder(GtkFileChooser *dialog)
 		: mOnResponse(this, &FileChooserResponder::OnResponse)
-		, mCallback(std::move(callback))
 		, mChooser(dialog)
 	{
 		g_object_set_data(G_OBJECT(dialog), "save_as_dialog_responder", this);
 		mOnResponse.Connect(G_OBJECT(dialog), "response");
+	}
+
+	FileChooserResponder(GtkFileChooser *dialog, std::function<void(std::filesystem::path)> &&callback)
+		: FileChooserResponder(dialog)
+	{
+		mCallback = std::move(callback);
+	}
+
+	FileChooserResponder(GtkFileChooser *dialog, std::function<void(std::vector<std::filesystem::path>)> &&callback)
+		: FileChooserResponder(dialog)
+	{
+		mCallback2 = std::move(callback);
 	}
 
   private:
@@ -146,6 +157,7 @@ struct FileChooserResponder
 
 	MSlot<void(int)> mOnResponse;
 	std::function<void(std::filesystem::path)> mCallback;
+	std::function<void(std::vector<std::filesystem::path>)> mCallback2;
 	GtkFileChooser *mChooser;
 };
 
@@ -153,16 +165,40 @@ void FileChooserResponder::OnResponse(int response)
 {
 	if (response == GTK_RESPONSE_ACCEPT)
 	{
-		GFile *file = gtk_file_chooser_get_file(mChooser);
-
-		const char *path = g_file_get_path(file);
-		if (path != nullptr)
+		if (mCallback)
 		{
-			mCallback(path);
-			g_free(gpointer(path));
-		}
+			GFile *file = gtk_file_chooser_get_file(mChooser);
 
-		g_object_unref(file);
+			const char *path = g_file_get_path(file);
+			if (path != nullptr)
+			{
+				mCallback(path);
+				g_free(gpointer(path));
+			}
+
+			g_object_unref(file);
+		}
+		else if (mCallback2)
+		{
+			auto files = gtk_file_chooser_get_files(mChooser);
+
+			std::vector<std::filesystem::path> paths;
+			for (gint i = 0; i < g_list_model_get_n_items(G_LIST_MODEL(files)); ++i)
+			{
+				GFile *file = G_FILE(g_list_model_get_object(G_LIST_MODEL(files), i));
+
+				const char *path = g_file_get_path(file);
+				if (path != nullptr)
+				{
+					paths.emplace_back(path);
+					g_free(gpointer(path));
+				}
+			}
+
+			g_object_unref(files);
+
+			mCallback2(paths);
+		}
 	}
 
 	g_object_unref(mChooser);
@@ -175,7 +211,24 @@ void ChooseOneFile(MWindow *inParent, std::function<void(std::filesystem::path)>
 	GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
 
 	GtkFileChooserNative *native = gtk_file_chooser_native_new(_("Select File"),
-		GTK_WINDOW(static_cast<MGtkWindowImpl *>(inParent->GetImpl())->GetWidget()),
+		inParent ? GTK_WINDOW(static_cast<MGtkWindowImpl *>(inParent->GetImpl())->GetWidget()) : nullptr,
+		action,
+		_("Open"),
+		_("Cancel"));
+
+	GtkFileChooser *chooser = GTK_FILE_CHOOSER(native);
+
+	new FileChooserResponder(chooser, std::move(callback));
+
+	gtk_native_dialog_show(GTK_NATIVE_DIALOG(native));
+}
+
+void ChooseFiles(MWindow *inParent, std::function<void(std::vector<std::filesystem::path>)> &&callback)
+{
+	GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
+
+	GtkFileChooserNative *native = gtk_file_chooser_native_new(_("Select File"),
+		inParent ? GTK_WINDOW(static_cast<MGtkWindowImpl *>(inParent->GetImpl())->GetWidget()) : nullptr,
 		action,
 		_("Open"),
 		_("Cancel"));
@@ -192,7 +245,7 @@ void ChooseDirectory(MWindow *inParent, std::function<void(std::filesystem::path
 	GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER;
 
 	GtkFileChooserNative *native = gtk_file_chooser_native_new(_("Select Folder"),
-		GTK_WINDOW(static_cast<MGtkWindowImpl *>(inParent->GetImpl())->GetWidget()),
+		inParent ? GTK_WINDOW(static_cast<MGtkWindowImpl *>(inParent->GetImpl())->GetWidget()) : nullptr,
 		action,
 		_("Select"),
 		_("Cancel"));
@@ -209,7 +262,7 @@ void SaveFileAs(MWindow *inParent, std::filesystem::path filename, std::function
 	GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_SAVE;
 
 	GtkFileChooserNative *native = gtk_file_chooser_native_new(_("Save File"),
-		GTK_WINDOW(static_cast<MGtkWindowImpl *>(inParent->GetImpl())->GetWidget()),
+		inParent ? GTK_WINDOW(static_cast<MGtkWindowImpl *>(inParent->GetImpl())->GetWidget()) : nullptr,
 		action,
 		_("Save"),
 		_("Cancel"));
