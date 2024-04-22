@@ -31,6 +31,79 @@
 #include <filesystem>
 #include <functional>
 
+class MDocument;
+
+// --------------------------------------------------------------------
+// MFileLoader, used to load the contents of a file.
+
+class MFileLoader
+{
+  public:
+	std::function<void(float, const std::string &)> eProgress;
+	std::function<void(const std::string &)> eError;
+	std::function<void(std::istream &)> eReadFile;
+	std::function<void()> eFileLoaded;
+	std::function<void(MFileLoader *)> eFileLoaderDeleted;
+
+	virtual void DoLoad() = 0;
+
+	virtual void Cancel();
+
+	static MFileLoader *Load(MDocument &inDocument, std::filesystem::path &inFile);
+
+  protected:
+	MFileLoader(MDocument &inDocument, std::filesystem::path &inFile);
+
+	virtual ~MFileLoader();
+
+	std::filesystem::path &mFile;
+
+	void SetFileInfo(bool inReadOnly, std::chrono::system_clock::time_point inModDate);
+
+  private:
+	MFileLoader(const MFileLoader &rhs) = delete;
+	MFileLoader &operator=(const MFileLoader &rhs) = delete;
+
+	MDocument &mDocument;
+};
+
+// --------------------------------------------------------------------
+// MFileSaver, used to save data to a file.
+
+class MFileSaver
+{
+  public:
+	std::function<void(float, const std::string &)> eProgress;
+	std::function<void(const std::string &)> eError;
+	std::function<void(std::ostream &)> eWriteFile;
+	std::function<bool()> eAskOverwriteNewer;
+	std::function<void(void)> eFileWritten;
+	std::function<void(MFileSaver *)> eFileSaverDeleted;
+
+	virtual void DoSave() = 0;
+
+	virtual void Cancel();
+
+	static MFileSaver *Save(MDocument &inDocument, std::filesystem::path &inFile);
+
+  protected:
+	MFileSaver(MDocument &inDocument, std::filesystem::path &inFile);
+
+	virtual ~MFileSaver();
+
+	std::filesystem::path &mFile;
+
+	void SetFileInfo(bool inReadOnly, std::chrono::system_clock::time_point inModDate);
+
+  private:
+	MFileSaver(const MFileSaver &rhs) = delete;
+	MFileSaver &operator=(const MFileSaver &rhs) = delete;
+
+	MDocument &mDocument;
+};
+
+// --------------------------------------------------------------------
+
 namespace MFileDialogs
 {
 

@@ -80,6 +80,7 @@ mrc_write_header(${CMAKE_CURRENT_SOURCE_DIR}/include/mrsrc.hpp)
 set(CMAKE_THREAD_PREFER_PTHREAD)
 set(THREADS_PREFER_PTHREAD_FLAG)
 find_package(Threads REQUIRED)
+find_package(gxrio REQUIRED)
 
 if(NOT TARGET mxml AND NOT mxml_FOUND)
 	find_package(mxml 1.0.2 REQUIRED)
@@ -158,6 +159,7 @@ list(APPEND sources
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MControls.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MDevice.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MDialog.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MFile.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MLib.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MMenu.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MPreferences.cpp
@@ -181,7 +183,7 @@ target_sources(mgui
 	FILES ${headers}
 )
 
-target_link_libraries(mgui Threads::Threads mxml::mxml)
+target_link_libraries(mgui Threads::Threads mxml::mxml gxrio::gxrio)
 
 install(TARGETS mgui
 	EXPORT mgui
