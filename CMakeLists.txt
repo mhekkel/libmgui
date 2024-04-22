@@ -156,13 +156,17 @@ list(APPEND sources
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MClipboard.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MColor.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MColorPicker.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MController.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MControls.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MDevice.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MDialog.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MDocument.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MDocWindow.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MFile.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MLib.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MMenu.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MPreferences.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/MSaverMixin.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MStrings.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MTypes.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MUnicode.cpp
