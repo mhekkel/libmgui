@@ -50,10 +50,4 @@ class MDocApplication : public MApplication
 	{
 		return *static_cast<MDocApplication*>(gApp);
 	}
-
-  protected:
-
-	MCommand<void()> cNew;
-	MCommand<void()> cOpen;
-	MCommand<void()> cCloseAll;
 };

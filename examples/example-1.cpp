@@ -18,11 +18,11 @@ class ExampleWindow : public MDocWindow
   public:
 	ExampleWindow()
 		: MDocWindow("Example", MRect{ 0, 0, 400, 400 }, kMPostionDefault | kMShowMenubar)
-		// , cClose(this, "close", &ExampleWindow::Close, 'w', kControlKey | kShiftKey)
-		, cCut(this, "cut", &ExampleWindow::Cut, 'x', kControlKey | kShiftKey)
-		, cCopy(this, "copy", &ExampleWindow::Copy, 'c', kControlKey | kShiftKey)
-		, cPaste(this, "paste", &ExampleWindow::Paste, 'v', kControlKey | kShiftKey)
-		, cSelectAll(this, "select-all", &ExampleWindow::SelectAll, 'a', kControlKey | kShiftKey)
+		, cClose(this, "close", &ExampleWindow::Close, 'W', kControlKey | kShiftKey)
+		, cCut(this, "cut", &ExampleWindow::Cut, 'X', kControlKey | kShiftKey)
+		, cCopy(this, "copy", &ExampleWindow::Copy, 'C', kControlKey | kShiftKey)
+		, cPaste(this, "paste", &ExampleWindow::Paste, 'V', kControlKey | kShiftKey)
+		, cSelectAll(this, "select-all", &ExampleWindow::SelectAll, 'A', kControlKey | kShiftKey)
 		, eClicked(this, &ExampleWindow::Clicked)
 		, eChanged(this, &ExampleWindow::Changed)
 		, eColour(this, &ExampleWindow::Colour)
@@ -86,7 +86,7 @@ class ExampleWindow : public MDocWindow
 	void Paste() {}
 	void SelectAll() {}
 
-	// MCommand<void()> cClose;
+	MCommand<void()> cClose;
 
 	MCommand<void()> cCut, cCopy, cPaste, cSelectAll;
 
@@ -109,7 +109,9 @@ class ExampleApp : public MDocApplication
   public:
 	ExampleApp(MApplicationImpl *impl)
 		: MDocApplication(impl)
+		, cNew(this, "new", &ExampleApp::DoNew, 'N', kControlKey)
 		, cAbout(this, "about", &ExampleApp::About)
+		, cQuit(this, "quit", &ExampleApp::DoQuit, 'Q', kControlKey)
 	{
 	}
 
@@ -137,7 +139,7 @@ class ExampleApp : public MDocApplication
 		w->Select();
 	}
 
-	void Quit()
+	void DoQuit() override
 	{
 		DisplayAlert(nullptr, "close-all-windows-alert",
 			[this](int inReply)
@@ -152,7 +154,9 @@ class ExampleApp : public MDocApplication
 		DisplayAlert(nullptr, "about-alert", { kVersionNumber, kRevisionGitTag, std::to_string(kBuildNumber), kRevisionDate });
 	}
 
+	MCommand<void()> cNew;
 	MCommand<void()> cAbout;
+	MCommand<void()> cQuit;
 };
 
 MApplication *MApplication::Create(MApplicationImpl *inImpl)

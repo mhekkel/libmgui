@@ -200,8 +200,6 @@ class MWindow : public MView
 	time_point mLastActivate{};
 	MControlBase *mLatentFocus = nullptr;
 
-	MCommand<void()> cClose;
-
 	static MWindow *sFirst;
 	MWindow *mNext = nullptr;
 };

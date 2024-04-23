@@ -166,8 +166,6 @@ class MApplication
 
 	MApplicationImpl *mImpl;
 
-	MCommand<void()> cQuit;
-
 	bool mQuit;
 	bool mQuitPending;
 };
