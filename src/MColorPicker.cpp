@@ -719,7 +719,7 @@ void MColorPicker::UpdateColor()
 	MColor color(mRed, mGreen, mBlue);
 	eChangedColor(color);
 
-	UpdateNow();
+	Invalidate();
 }
 
 void MColorPicker::SetColor(MColor inColor)

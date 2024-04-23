@@ -226,12 +226,6 @@ void MView::Invalidate()
 {
 }
 
-void MView::UpdateNow()
-{
-	if (mParent != nullptr)
-		mParent->UpdateNow();
-}
-
 void MView::SetCursor(MCursor inCursor)
 {
 	if (mParent != nullptr)

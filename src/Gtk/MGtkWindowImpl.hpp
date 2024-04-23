@@ -60,8 +60,6 @@ class MGtkWindowImpl : public MWindowImpl, public MGtkWidgetMixin
 	void SetWindowPosition(MRect inBounds, bool inTransition) override;
 	void GetWindowPosition(MRect &outBounds) const override;
 
-	void UpdateNow() override;
-
 	void SetCursor(MCursor inCursor) override;
 	void ObscureCursor() override;
 

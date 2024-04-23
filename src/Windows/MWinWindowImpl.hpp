@@ -37,8 +37,6 @@ class MWinWindowImpl : public MWindowImpl, public MWinProcMixin
 	virtual void SetWindowPosition(MRect inBounds, bool inTransition);
 	virtual void GetWindowPosition(MRect &outBounds) const;
 
-	virtual void UpdateNow();
-
 	virtual void SetCursor(MCursor inCursor);
 	virtual void ObscureCursor();
 

@@ -431,10 +431,10 @@ void MWinWindowImpl::Validate(MRect inRect)
 	::ValidateRect(GetHandle(), &r);
 }
 
-void MWinWindowImpl::UpdateNow()
-{
-	::UpdateWindow(GetHandle());
-}
+// void MWinWindowImpl::UpdateNow()
+// {
+// 	::UpdateWindow(GetHandle());
+// }
 
 void MWinWindowImpl::SetCursor(MCursor inCursor)
 {

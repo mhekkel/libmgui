@@ -232,10 +232,6 @@ void MGtkWindowImpl::SetWindowPosition(MRect inPosition, bool inTransition)
 {
 }
 
-void MGtkWindowImpl::UpdateNow()
-{
-}
-
 void MGtkWindowImpl::SetCursor(MCursor inCursor)
 {
 	switch (inCursor)

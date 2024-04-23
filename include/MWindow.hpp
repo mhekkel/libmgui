@@ -98,8 +98,6 @@ class MWindowImpl
 	virtual void SetWindowPosition(MRect inBounds, bool inTransition) = 0;
 	virtual void GetWindowPosition(MRect &outBounds) const = 0;
 
-	virtual void UpdateNow() = 0;
-
 	virtual void SetCursor(MCursor inCursor) = 0;
 	virtual void ObscureCursor() = 0;
 
@@ -135,7 +133,6 @@ class MWindow : public MView
 	void Activate() override;
 
 	void Show() override;
-	void UpdateNow() override;
 
 	virtual void Select();
 	virtual bool IgnoreSelectClick();

@@ -98,19 +98,17 @@ MSaverMixin::~MSaverMixin()
 // 	return m != nullptr;
 // }
 
-void MSaverMixin::TryCloseDocument(/* MCloseReason inAction,  */const std::string &inDocumentName, MWindow *inParentWindow)
+void MSaverMixin::TryCloseDocument(/* MCloseReason inAction,  */ const std::string &inDocumentName, MWindow *inParentWindow)
 {
 	inParentWindow->Select();
 
 	// if (mDialog != nullptr)
 	// 	return;
 
-	mQuitPending = false; /* (inAction == MCloseReason::QuittingApplication); */
+	mQuitPending = false;     /* (inAction == MCloseReason::QuittingApplication); */
 	mCloseAllPending = false; /* (inAction == MCloseReason::ClosingAllDocuments); */
 
 	DisplayAlert(inParentWindow, "save-changes-alert", [this](int reply)
-		{
-		switch (reply)
 		{
 			switch (reply)
 			{
@@ -133,7 +131,6 @@ void MSaverMixin::TryCloseDocument(/* MCloseReason inAction,  */const std::strin
 					// else if (mCloseAllPending)
 					// 	gApp->DoCloseAll();
 					break;
-			}			
 		} },
 		{ inDocumentName });
 

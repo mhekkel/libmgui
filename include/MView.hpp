@@ -173,7 +173,6 @@ class MView
 
 	virtual void Invalidate();
 
-	virtual void UpdateNow();
 	virtual void AdjustCursor(int32_t inX, int32_t inY, uint32_t inModifiers);
 	virtual void SetCursor(MCursor inCursor);
 	virtual void ObscureCursor();

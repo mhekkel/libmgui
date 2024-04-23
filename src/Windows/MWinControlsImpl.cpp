@@ -522,7 +522,6 @@ bool MWinExpanderImpl::WMMouseDown(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LP
 	mMouseInside = true;
 	mMouseDown = true;
 	mControl->Invalidate();
-	mControl->UpdateNow();
 
 	return true;
 }
@@ -542,7 +541,6 @@ bool MWinExpanderImpl::WMMouseMove(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LP
 			mMouseTracking = true;
 
 		mControl->Invalidate();
-		mControl->UpdateNow();
 	}
 
 	int32_t x = static_cast<int16_t>(LOWORD(inLParam));
@@ -555,7 +553,6 @@ bool MWinExpanderImpl::WMMouseMove(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LP
 	{
 		mMouseInside = not mMouseInside;
 		mControl->Invalidate();
-		mControl->UpdateNow();
 	}
 
 	return true;
@@ -568,7 +565,6 @@ bool MWinExpanderImpl::WMMouseExit(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LP
 	mLastExit = std::chrono::system_clock::now();
 	
 	mControl->Invalidate();
-	mControl->UpdateNow();
 	
 	return true;
 }
@@ -592,7 +588,6 @@ bool MWinExpanderImpl::WMMouseUp(HWND inHWnd, UINT inUMsg, WPARAM inWParam, LPAR
 	mMouseDown = false;
 
 	mControl->Invalidate();
-	mControl->UpdateNow();
 
 	return true;
 }
@@ -769,7 +764,6 @@ bool MWinScrollbarImpl::WMScroll(HWND inHandle, UINT inUMsg, WPARAM inWParam, LP
 				break;
 			}
 		}
-//		mControl->GetWindow()->UpdateNow();
 	}
 
 	return result;

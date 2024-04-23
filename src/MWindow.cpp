@@ -157,11 +157,6 @@ bool MWindow::IgnoreSelectClick()
 	return (std::chrono::steady_clock::now() - mLastActivate) < std::chrono::milliseconds(100);
 }
 
-void MWindow::UpdateNow()
-{
-	mImpl->UpdateNow();
-}
-
 bool MWindow::AllowClose(bool inQuit)
 {
 	return true;
