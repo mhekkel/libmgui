@@ -274,25 +274,14 @@ void MGtkStatusbarImpl::CreateWidget()
 {
 	SetEventMask(MEventMask::GestureClick);
 
-	// GtkWidget *statusBar = gtk_statusbar_new();
-
-	// GtkRequisition minimum, natural;
-	// gtk_widget_get_preferred_size(statusBar, &minimum, &natural);
-
-	// MRect bounds(0, 0, natural.width, natural.height);
-	// g_object_ref_sink(statusBar);
-
 	GtkWidget *dummy = gtk_label_new("test");
-
 	GtkRequisition minimum, natural;
 	gtk_widget_get_preferred_size(dummy, &minimum, &natural);
-
-	MRect bounds(0, 0, natural.width, natural.height + 2);
 	g_object_ref_sink(dummy);
 
 	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 
-	gtk_widget_set_size_request(box, natural.width, natural.height);
+	gtk_widget_set_size_request(box, natural.width, natural.height + 2);
 
 	for (auto part : mParts)
 	{
