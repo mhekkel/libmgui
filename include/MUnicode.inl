@@ -340,59 +340,59 @@ MEncodingTraits<kEncodingUTF16LE>::WriteUnicode(ByteIterator &inText, unicode in
 
 // unicode
 
-template <>
-template <class ByteIterator>
-uint32_t
-MEncodingTraits<kEncodingUCS2>::GetNextCharLength(ByteIterator inText)
-{
-	return sizeof(unicode);
-}
+// template <>
+// template <class ByteIterator>
+// uint32_t
+// MEncodingTraits<kEncodingUCS2>::GetNextCharLength(ByteIterator inText)
+// {
+// 	return sizeof(unicode);
+// }
 
-template <>
-template <class ByteIterator>
-void MEncodingTraits<kEncodingUCS2>::ReadUnicode(ByteIterator inText, uint32_t &outLength, unicode &outUnicode)
-{
-	std::copy(inText, inText + sizeof(unicode), reinterpret_cast<char *>(&outUnicode));
-	outLength = sizeof(unicode);
-}
+// template <>
+// template <class ByteIterator>
+// void MEncodingTraits<kEncodingUCS2>::ReadUnicode(ByteIterator inText, uint32_t &outLength, unicode &outUnicode)
+// {
+// 	std::copy(inText, inText + sizeof(unicode), reinterpret_cast<char *>(&outUnicode));
+// 	outLength = sizeof(unicode);
+// }
 
-template <>
-template <class ByteIterator>
-uint32_t
-MEncodingTraits<kEncodingUCS2>::WriteUnicode(ByteIterator &inText, unicode inUnicode)
-{
-	char *p = reinterpret_cast<char *>(&inUnicode);
-	std::copy(p, p + sizeof(unicode), inText);
-	return sizeof(unicode);
-}
+// template <>
+// template <class ByteIterator>
+// uint32_t
+// MEncodingTraits<kEncodingUCS2>::WriteUnicode(ByteIterator &inText, unicode inUnicode)
+// {
+// 	char *p = reinterpret_cast<char *>(&inUnicode);
+// 	std::copy(p, p + sizeof(unicode), inText);
+// 	return sizeof(unicode);
+// }
 
-// MacOS Roman
+// // MacOS Roman
 
-template <>
-template <class ByteIterator>
-uint32_t
-MEncodingTraits<kEncodingMacOSRoman>::GetNextCharLength(ByteIterator inText)
-{
-	return 1;
-}
+// template <>
+// template <class ByteIterator>
+// uint32_t
+// MEncodingTraits<kEncodingMacOSRoman>::GetNextCharLength(ByteIterator inText)
+// {
+// 	return 1;
+// }
 
-template <>
-template <class ByteIterator>
-void MEncodingTraits<kEncodingMacOSRoman>::ReadUnicode(ByteIterator inText, uint32_t &outLength, unicode &outUnicode)
-{
-	outUnicode = MUnicodeMapping::GetUnicode(kEncodingMacOSRoman, *inText);
-	outLength = 1;
-}
+// template <>
+// template <class ByteIterator>
+// void MEncodingTraits<kEncodingMacOSRoman>::ReadUnicode(ByteIterator inText, uint32_t &outLength, unicode &outUnicode)
+// {
+// 	outUnicode = MUnicodeMapping::GetUnicode(kEncodingMacOSRoman, *inText);
+// 	outLength = 1;
+// }
 
-template <>
-template <class ByteIterator>
-uint32_t
-MEncodingTraits<kEncodingMacOSRoman>::WriteUnicode(ByteIterator &inText, unicode inUnicode)
-{
-	char ch = MUnicodeMapping::GetChar(kEncodingMacOSRoman, inUnicode);
-	*inText++ = ch;
-	return 1;
-}
+// template <>
+// template <class ByteIterator>
+// uint32_t
+// MEncodingTraits<kEncodingMacOSRoman>::WriteUnicode(ByteIterator &inText, unicode inUnicode)
+// {
+// 	char ch = MUnicodeMapping::GetChar(kEncodingMacOSRoman, inUnicode);
+// 	*inText++ = ch;
+// 	return 1;
+// }
 
 // ISO-8859-1
 // wow, this one is simple...

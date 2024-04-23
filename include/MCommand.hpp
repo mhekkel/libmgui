@@ -95,7 +95,7 @@ class MCommand<R(Args...)>
 		mImpl->SetState(inState);
 	}
 
-	void SetChecked(int inChecked)
+	void SetChecked(bool inChecked)
 	{
 		mImpl->SetChecked(inChecked);
 	}

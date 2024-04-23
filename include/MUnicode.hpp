@@ -42,15 +42,18 @@
 
 enum MEncoding
 {
-	kEncodingUTF8,
-	kEncodingUTF16BE,
-	kEncodingUTF16LE,
-	kEncodingUCS2,
-	kEncodingISO88591,
-	kEncodingMacOSRoman,
+	kEncodingUnknown = 0,
 
-	kEncodingCount, // number of supported encodings
-	kEncodingUnknown = kEncodingCount + 1
+	kEncodingUTF8 = 1,
+	kEncodingUTF16BE = 2,
+	kEncodingUTF16LE = 3,
+	kEncodingISO88591 = 4,
+
+	// kEncodingUCS2,
+	// kEncodingMacOSRoman,
+
+	// kEncodingCount, // number of supported encodings
+	// kEncodingUnknown = kEncodingCount + 1
 };
 
 template <MEncoding encoding>
