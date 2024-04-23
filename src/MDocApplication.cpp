@@ -35,9 +35,9 @@
 MDocApplication::MDocApplication(MApplicationImpl *inImpl)
 	: MApplication(inImpl)
 
-	, cNew(this, "app.new", &MDocApplication::DoNew, 'N', kControlKey)
-	, cOpen(this, "app.open", &MDocApplication::DoOpen, 'O', kControlKey)
-	, cCloseAll(this, "app.close-all", &MDocApplication::DoCloseAll, 'W', kControlKey | kShiftKey)
+	, cNew(this, "new", &MDocApplication::DoNew, 'N', kControlKey)
+	, cOpen(this, "open", &MDocApplication::DoOpen, 'O', kControlKey)
+	, cCloseAll(this, "close-all", &MDocApplication::DoCloseAll, 'W', kControlKey | kShiftKey)
 {
 }
 

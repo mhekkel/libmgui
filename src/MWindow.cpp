@@ -59,7 +59,7 @@ MWindow::MWindow(MWindowImpl *inImpl)
 	: MView("window", MRect(0, 0, 100, 100))
 	, mImpl(inImpl)
 
-	, cClose(this, "win.close", &MWindow::DoClose, 'w', kControlKey)
+	, cClose(this, "close", &MWindow::DoClose, 'w', kControlKey)
 {
 	SetLayout({ true, 0 });
 

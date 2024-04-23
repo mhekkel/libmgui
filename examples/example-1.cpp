@@ -1,10 +1,10 @@
 #include "MAlerts.hpp"
-#include "MApplication.hpp"
+#include "MDocApplication.hpp"
 #include "MColorPicker.hpp"
 #include "MCommand.hpp"
 #include "MControls.hpp"
 #include "MMenu.hpp"
-#include "MWindow.hpp"
+#include "MDocWindow.hpp"
 
 #include "revision.hpp"
 
@@ -13,12 +13,12 @@
 
 const char kAppName[] = "ExampleApp";
 
-class ExampleWindow : public MWindow
+class ExampleWindow : public MDocWindow
 {
   public:
 	ExampleWindow()
-		: MWindow("Example", MRect{ 0, 0, 400, 400 }, kMPostionDefault | kMShowMenubar)
-		, cClose(this, "close", &ExampleWindow::Close, 'w', kControlKey | kShiftKey)
+		: MDocWindow("Example", MRect{ 0, 0, 400, 400 }, kMPostionDefault | kMShowMenubar)
+		// , cClose(this, "close", &ExampleWindow::Close, 'w', kControlKey | kShiftKey)
 		, cCut(this, "cut", &ExampleWindow::Cut, 'x', kControlKey | kShiftKey)
 		, cCopy(this, "copy", &ExampleWindow::Copy, 'c', kControlKey | kShiftKey)
 		, cPaste(this, "paste", &ExampleWindow::Paste, 'v', kControlKey | kShiftKey)
@@ -86,7 +86,7 @@ class ExampleWindow : public MWindow
 	void Paste() {}
 	void SelectAll() {}
 
-	MCommand<void()> cClose;
+	// MCommand<void()> cClose;
 
 	MCommand<void()> cCut, cCopy, cPaste, cSelectAll;
 
@@ -104,13 +104,11 @@ int ExampleWindow::s_nr;
 
 // --------------------------------------------------------------------
 
-class ExampleApp : public MApplication
+class ExampleApp : public MDocApplication
 {
   public:
 	ExampleApp(MApplicationImpl *impl)
-		: MApplication(impl)
-		, cNew(this, "new", &ExampleApp::DoNew, 'n', kControlKey | kShiftKey)
-		, cQuit(this, "quit", &ExampleApp::Quit, 'q', kControlKey | kShiftKey)
+		: MDocApplication(impl)
 		, cAbout(this, "about", &ExampleApp::About)
 	{
 	}
@@ -145,7 +143,7 @@ class ExampleApp : public MApplication
 			[this](int inReply)
 			{
 				if (inReply == 1)
-					MApplication::DoQuit();
+					MDocApplication::DoQuit();
 			});
 	}
 
@@ -154,8 +152,6 @@ class ExampleApp : public MApplication
 		DisplayAlert(nullptr, "about-alert", { kVersionNumber, kRevisionGitTag, std::to_string(kBuildNumber), kRevisionDate });
 	}
 
-	MCommand<void()> cNew;
-	MCommand<void()> cQuit;
 	MCommand<void()> cAbout;
 };
 

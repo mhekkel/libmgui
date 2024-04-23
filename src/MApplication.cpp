@@ -65,7 +65,7 @@ void MAsyncHandlerBase::execute()
 MApplication::MApplication(MApplicationImpl *inImpl)
 	: mImpl(inImpl)
 
-	, cQuit(this, "app.quit", &MApplication::DoQuit, 'Q', kControlKey)
+	, cQuit(this, "quit", &MApplication::DoQuit, 'Q', kControlKey)
 
 	, mQuit(false)
 	, mQuitPending(false)

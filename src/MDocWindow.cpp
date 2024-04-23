@@ -33,8 +33,7 @@
 // ------------------------------------------------------------------
 //
 
-MDocWindow::MDocWindow(const std::string &inTitle,
-		const MRect &inBounds, MWindowFlags inFlags)
+MDocWindow::MDocWindow(const std::string &inTitle, const MRect &inBounds, MWindowFlags inFlags)
 	: MWindow(inTitle, inBounds, inFlags)
 	, eModifiedChanged(this, &MDocWindow::ModifiedChanged)
 	, eFileSpecChanged(this, &MDocWindow::FileSpecChanged)
@@ -61,7 +60,7 @@ void MDocWindow::Initialize(MDocument *inDocument)
 
 bool MDocWindow::AllowClose(bool inQuit)
 {
-	return mController->TryCloseController(/* inQuit ? MCloseReason::QuittingApplication : MCloseReason::ClosingDocument */);
+	return mController ? mController->TryCloseController(/* inQuit ? MCloseReason::QuittingApplication : MCloseReason::ClosingDocument */) : true;
 }
 
 MDocWindow *MDocWindow::FindWindowForDocument(MDocument *inDocument)
