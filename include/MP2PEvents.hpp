@@ -118,6 +118,8 @@ class MEventIn<void(Args...)>
 
 	~MEventIn()
 	{
+		mHandler = {};
+
 		MEventOutList events;
 		std::swap(events, mOutEvents);
 		for (auto event : events)
@@ -137,7 +139,8 @@ class MEventIn<void(Args...)>
 
 	void Handle(Args... args)
 	{
-		mHandler(args...);
+		if (mHandler)
+			mHandler(args...);
 	}
 
   private:
