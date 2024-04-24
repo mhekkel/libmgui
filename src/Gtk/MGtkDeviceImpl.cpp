@@ -456,7 +456,8 @@ void MGtkDeviceImpl::GetWhiteSpaceGlyphs(uint32_t &outSpace, uint32_t &outTab, u
 
 	const char
 		not_sign[] = "\xc2\xac",      // 0x00AC
-		right_chevron[] = "\xc2\xbb", // 0x00BB
+		// right_chevron[] = "\xc2\xbb", // 0x00BB
+		right_chevron[] = "→",	
 		middle_dot[] = "\xc2\xb7";    // 0x00B7
 
 	PangoAttrList *attrs = pango_attr_list_new();
