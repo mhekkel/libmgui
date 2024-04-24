@@ -127,8 +127,8 @@ void MLocalFileLoader::DoLoad()
 		// 	}
 		// }
 
-		// gxrio::ifstream file(mFile, std::ios::binary);
-		std::ifstream file(mFile, std::ios::binary);
+		gxrio::ifstream file(mFile, std::ios_base::in | std::ios::binary);
+		// std::ifstream file(mFile, std::ios::binary);
 
 		if (not file.is_open())
 			throw std::system_error(std::make_error_code(std::errc(errno)), mFile.string());
@@ -221,7 +221,7 @@ void MLocalFileSaver::DoSave()
 		// 	// std::filesystem::last_write_time(mFile) <= mFile.GetModDate() or
 		// 	eAskOverwriteNewer())
 		// {
-			gxrio::ofstream file(mFile, std::ios::trunc | std::ios::binary);
+			gxrio::ofstream file(mFile, std::ios_base::out | std::ios::trunc | std::ios::binary);
 
 			if (not file.is_open())
 				throw std::system_error(std::make_error_code(std::errc(errno)), mFile.string());

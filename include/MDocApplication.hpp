@@ -43,6 +43,8 @@ class MDocApplication : public MApplication
 	virtual void DoOpen();
 	virtual void DoCloseAll();
 
+	bool AllowQuit(bool inLogOff) override;
+
 	virtual MDocument *OpenOneDocument(const std::filesystem::path &inFileRef);
 	virtual MDocWindow *DisplayDocument(MDocument *inDocument);
 

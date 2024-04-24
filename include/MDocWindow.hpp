@@ -33,8 +33,7 @@
 class MDocWindow : public MWindow
 {
   public:
-	MDocWindow(const std::string &inTitle,
-		const MRect &inBounds, MWindowFlags inFlags);
+	MDocWindow(const std::string &inTitle, const MRect &inBounds, MWindowFlags inFlags);
 
 	static MDocWindow *FindWindowForDocument(MDocument *inDocument);
 

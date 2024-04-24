@@ -140,13 +140,13 @@ struct FileChooserResponder
 		mOnResponse.Connect(G_OBJECT(dialog), "response");
 	}
 
-	FileChooserResponder(GtkFileChooser *dialog, std::function<void(std::filesystem::path)> &&callback)
+	FileChooserResponder(GtkFileChooser *dialog, std::function<void(bool, std::filesystem::path)> &&callback)
 		: FileChooserResponder(dialog)
 	{
 		mCallback = std::move(callback);
 	}
 
-	FileChooserResponder(GtkFileChooser *dialog, std::function<void(std::vector<std::filesystem::path>)> &&callback)
+	FileChooserResponder(GtkFileChooser *dialog, std::function<void(bool, std::vector<std::filesystem::path>)> &&callback)
 		: FileChooserResponder(dialog)
 	{
 		mCallback2 = std::move(callback);
@@ -156,15 +156,23 @@ struct FileChooserResponder
 	void OnResponse(int response);
 
 	MSlot<void(int)> mOnResponse;
-	std::function<void(std::filesystem::path)> mCallback;
-	std::function<void(std::vector<std::filesystem::path>)> mCallback2;
+	std::function<void(bool, std::filesystem::path)> mCallback;
+	std::function<void(bool, std::vector<std::filesystem::path>)> mCallback2;
 	GtkFileChooser *mChooser;
 };
 
 void FileChooserResponder::OnResponse(int response)
 {
-	if (response == GTK_RESPONSE_ACCEPT)
+	if (response != GTK_RESPONSE_ACCEPT)
 	{
+		if (mCallback)
+			mCallback(false, {});
+		else if (mCallback2)
+			mCallback2(false, {});
+	}
+	else
+	{
+
 		if (mCallback)
 		{
 			GFile *file = gtk_file_chooser_get_file(mChooser);
@@ -172,7 +180,7 @@ void FileChooserResponder::OnResponse(int response)
 			const char *path = g_file_get_path(file);
 			if (path != nullptr)
 			{
-				mCallback(path);
+				mCallback(true, path);
 				g_free(gpointer(path));
 			}
 
@@ -197,7 +205,7 @@ void FileChooserResponder::OnResponse(int response)
 
 			g_object_unref(files);
 
-			mCallback2(paths);
+			mCallback2(true, paths);
 		}
 	}
 
@@ -206,7 +214,7 @@ void FileChooserResponder::OnResponse(int response)
 	delete this;
 }
 
-void ChooseOneFile(MWindow *inParent, std::function<void(std::filesystem::path)> &&callback)
+void ChooseOneFile(MWindow *inParent, std::function<void(bool, std::filesystem::path)> &&callback)
 {
 	GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
 
@@ -223,7 +231,7 @@ void ChooseOneFile(MWindow *inParent, std::function<void(std::filesystem::path)>
 	gtk_native_dialog_show(GTK_NATIVE_DIALOG(native));
 }
 
-void ChooseFiles(MWindow *inParent, std::function<void(std::vector<std::filesystem::path>)> &&callback)
+void ChooseFiles(MWindow *inParent, std::function<void(bool, std::vector<std::filesystem::path>)> &&callback)
 {
 	GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_OPEN;
 
@@ -240,7 +248,7 @@ void ChooseFiles(MWindow *inParent, std::function<void(std::vector<std::filesyst
 	gtk_native_dialog_show(GTK_NATIVE_DIALOG(native));
 }
 
-void ChooseDirectory(MWindow *inParent, std::function<void(std::filesystem::path)> &&callback)
+void ChooseDirectory(MWindow *inParent, std::function<void(bool, std::filesystem::path)> &&callback)
 {
 	GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER;
 
@@ -257,7 +265,7 @@ void ChooseDirectory(MWindow *inParent, std::function<void(std::filesystem::path
 	gtk_native_dialog_show(GTK_NATIVE_DIALOG(native));
 }
 
-void SaveFileAs(MWindow *inParent, std::filesystem::path filename, std::function<void(std::filesystem::path)> &&callback)
+void SaveFileAs(MWindow *inParent, std::filesystem::path filename, std::function<void(bool, std::filesystem::path)> &&callback)
 {
 	GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_SAVE;
 
@@ -276,7 +284,16 @@ void SaveFileAs(MWindow *inParent, std::filesystem::path filename, std::function
 		g_object_unref(file);
 	}
 	else if (not filename.empty())
+	{
+		if (filename.has_parent_path())
+		{
+			GFile *file = g_file_new_for_path(filename.c_str());
+			gtk_file_chooser_set_current_folder(chooser, file, nullptr);
+			g_object_unref(file);
+		}
+
 		gtk_file_chooser_set_current_name(chooser, filename.filename().c_str());
+	}
 	else
 		gtk_file_chooser_set_current_name(chooser, _("Untitled document"));
 

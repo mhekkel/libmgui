@@ -44,11 +44,11 @@ class MSaverMixin
 	MSaverMixin();
 	virtual ~MSaverMixin();
 
-// 	static bool IsNavDialogVisible();
+	static bool IsNavDialogVisible();
 
 	virtual void TryCloseDocument(/* MCloseReason inAction,  */const std::string &inDocument, MWindow *inParentWindow);
 	virtual void TryDiscardChanges(const std::string &inDocument, MWindow *inParentWindow);
-	virtual void SaveDocumentAs(MWindow *inParentWindow, const std::string &inSuggestedName);
+	virtual void SaveDocumentAs(MWindow *inParentWindow, const std::filesystem::path &inSuggestedName);
 
   protected:
 	virtual bool SaveDocument() = 0;
@@ -56,23 +56,12 @@ class MSaverMixin
 	virtual bool DoSaveAs(const std::filesystem::path &inPath) = 0;
 	virtual void CloseAfterNavigationDialog() = 0;
 
-// 	virtual bool OnClose();
+	static MSaverMixin *sFirst;
 
-// 	virtual bool OnSaveResponse(
-// 		gint inArg);
-
-// 	virtual bool OnDiscardResponse(
-// 		gint inArg);
-
-// 	MSlot<bool()> slClose;
-// 	MSlot<bool(gint)> slSaveResponse;
-// 	MSlot<bool(gint)> slDiscardResponse;
-
-// 	static MSaverMixin *sFirst;
-// 	MSaverMixin *mNext;
-	bool mCloseOnNavTerminate;
-	bool mClosePending;
-	bool mCloseAllPending;
-	bool mQuitPending;
-// 	GtkWidget *mDialog;
+	MSaverMixin *mNext = nullptr;
+	bool mCloseOnNavTerminate = true;
+	bool mClosePending = false;
+	bool mCloseAllPending = false;
+	bool mQuitPending = false;
+	bool mShowingDialog = false;
 };

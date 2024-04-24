@@ -47,69 +47,57 @@ const int32_t
 
 }
 
-// MSaverMixin *MSaverMixin::sFirst = nullptr;
+MSaverMixin *MSaverMixin::sFirst = nullptr;
 
 MSaverMixin::MSaverMixin()
-// : slClose(this, &MSaverMixin::OnClose)
-// , slSaveResponse(this, &MSaverMixin::OnSaveResponse)
-// , slDiscardResponse(this, &MSaverMixin::OnDiscardResponse)
-// , mNext(nullptr)
-// , mCloseOnNavTerminate(true)
-// , mClosePending(false)
-// , mCloseAllPending(false)
-// , mQuitPending(false)
-// , mDialog(nullptr)
 {
-	// mNext = sFirst;
-	// sFirst = this;
+	mNext = sFirst;
+	sFirst = this;
 }
 
 MSaverMixin::~MSaverMixin()
 {
-	// assert(mDialog == nullptr);
-	// assert(sFirst != nullptr);
+	assert(sFirst != nullptr);
 
-	// if (sFirst == this)
-	// 	sFirst = mNext;
-	// else
-	// {
-	// 	MSaverMixin* m = sFirst;
-	// 	while (m != nullptr and m->mNext != this)
-	// 		m = m->mNext;
+	if (sFirst == this)
+		sFirst = mNext;
+	else
+	{
+		MSaverMixin *m = sFirst;
+		while (m != nullptr and m->mNext != this)
+			m = m->mNext;
 
-	// 	assert(m != nullptr);
+		assert(m != nullptr);
 
-	// 	m->mNext = mNext;
-	// }
-
-	// if (mDialog != nullptr)
-	// 	gtk_widget_destroy(mDialog);
-
-	// mDialog = nullptr;
+		m->mNext = mNext;
+	}
 }
 
-// bool MSaverMixin::IsNavDialogVisible()
-// {
-// 	MSaverMixin* m = sFirst;
+bool MSaverMixin::IsNavDialogVisible()
+{
+	MSaverMixin *m = sFirst;
 
-// 	while (m != nullptr and m->mDialog == nullptr)
-// 		m = m->mNext;
+	while (m != nullptr and not m->mShowingDialog)
+		m = m->mNext;
 
-// 	return m != nullptr;
-// }
+	return m != nullptr;
+}
 
 void MSaverMixin::TryCloseDocument(/* MCloseReason inAction,  */ const std::string &inDocumentName, MWindow *inParentWindow)
 {
 	inParentWindow->Select();
 
-	// if (mDialog != nullptr)
-	// 	return;
+	if (mShowingDialog)
+		return;
 
 	mQuitPending = false;     /* (inAction == MCloseReason::QuittingApplication); */
 	mCloseAllPending = false; /* (inAction == MCloseReason::ClosingAllDocuments); */
 
+	mShowingDialog = true;
+
 	DisplayAlert(inParentWindow, "save-changes-alert", [this](int reply)
 		{
+			mShowingDialog = false;
 			switch (reply)
 			{
 				case kAskSaveChanges_Save:
@@ -129,44 +117,48 @@ void MSaverMixin::TryCloseDocument(/* MCloseReason inAction,  */ const std::stri
 					if (mQuitPending)
 						gApp->DoQuit();
 					// else if (mCloseAllPending)
-					// 	gApp->DoCloseAll();
+				    // 	gApp->DoCloseAll();
 					break;
-		} },
+			}
+			//
+		},
 		{ inDocumentName });
-
-	// mDialog = CreateAlert("save-changes-alert", inDocumentName);
-
-	// slClose.Connect(mDialog, "close");
-	// slSaveResponse.Connect(mDialog, "response");
-
-	// gtk_window_set_transient_for(
-	// 	GTK_WINDOW(mDialog),
-	// 	GTK_WINDOW(inParentWindow->GetGtkWidget()));
-
-	// gtk_widget_show_all(mDialog);
 }
 
 void MSaverMixin::TryDiscardChanges(const std::string &inDocumentName, MWindow *inParentWindow)
 {
 	inParentWindow->Select();
 
-	// if (mDialog != nullptr)
-	// 	return;
+	if (mShowingDialog)
+		return;
 
-	// mDialog = CreateAlert("discard-changes-alert", inDocumentName);
-
-	// slClose.Connect(mDialog, "close");
-	// slDiscardResponse.Connect(mDialog, "response");
-
-	// gtk_window_set_transient_for(
-	// 	GTK_WINDOW(mDialog),
-	// 	GTK_WINDOW(inParentWindow->GetGtkWidget()));
-
-	// gtk_widget_show_all(mDialog);
+	mShowingDialog = true;
+	DisplayAlert(inParentWindow, "discard-changes-alert",
+		[&](int inReply)
+		{
+			mShowingDialog = false;
+			if (inReply == kDiscardChanges_Discard)
+				RevertDocument();
+		},
+		{ inDocumentName });
 }
 
-void MSaverMixin::SaveDocumentAs(MWindow *inParentWindow, const std::string &inSuggestedName)
+void MSaverMixin::SaveDocumentAs(MWindow *inParentWindow, const std::filesystem::path &inSuggestedName)
 {
+	inParentWindow->Select();
+
+	if (mShowingDialog)
+		return;
+
+	mShowingDialog = true;
+	MFileDialogs::SaveFileAs(inParentWindow, inSuggestedName,
+		[&](bool ok, std::filesystem::path file)
+		{
+			mShowingDialog = false;
+			if (ok)
+				DoSaveAs(file);
+		});
+
 	// 	GtkWidget *dialog;
 
 	// 	dialog = gtk_file_chooser_dialog_new(_("Save File"),

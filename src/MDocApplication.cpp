@@ -43,22 +43,27 @@ void MDocApplication::DoNew()
 
 void MDocApplication::DoOpen()
 {
-	MFileDialogs::ChooseFiles(gApp->GetActiveWindow(), [&](std::vector<std::filesystem::path> files)
+	MFileDialogs::ChooseFiles(gApp->GetActiveWindow(), [&](bool ok, std::vector<std::filesystem::path> files)
 		{
-			try
+			if (ok)
 			{
-				MDocument *doc = nullptr;
+				try
+				{
+					MDocument *doc = nullptr;
 
-				for (auto &file : files)
-					doc = OpenOneDocument(file);
+					for (auto &file : files)
+						doc = OpenOneDocument(file);
 
-				if (doc != nullptr)
-					DisplayDocument(doc);
+					if (doc != nullptr)
+						DisplayDocument(doc);
+				}
+				catch (const std::exception &e)
+				{
+					DisplayError(e);
+				}
 			}
-			catch (const std::exception &e)
-			{
-				DisplayError(e);
-			} });
+			//
+		});
 }
 
 void MDocApplication::DoCloseAll(/* MCloseReason inAction */)
@@ -75,6 +80,12 @@ void MDocApplication::DoCloseAll(/* MCloseReason inAction */)
 			assert(controller);
 		doc = next;
 	}
+}
+
+bool MDocApplication::AllowQuit(bool inLogOff)
+{
+	DoCloseAll();
+	return MDocument::GetFirstDocument() == nullptr;
 }
 
 MDocument *MDocApplication::OpenOneDocument(const std::filesystem::path &inFileRef)

@@ -62,7 +62,7 @@ class MDocument
 
 	virtual void RevertDocument();
 
-	virtual bool IsSpecified() const { return std::filesystem::exists(mFile); }
+	virtual bool IsSpecified() const { return not mFile.empty(); }
 
 	virtual void SetFile(const std::filesystem::path &inNewFile);
 

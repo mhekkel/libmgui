@@ -178,13 +178,13 @@ void MGtkDeviceImpl::FillEllipse(MRect inRect)
 {
 }
 
-void MGtkDeviceImpl::DrawImage(cairo_surface_t *inImage, float inX, float inY, float inShear)
-{
-}
+// void MGtkDeviceImpl::DrawImage(cairo_surface_t *inImage, float inX, float inY, float inShear)
+// {
+// }
 
-void MGtkDeviceImpl::CreateAndUsePattern(MColor inColor1, MColor inColor2)
-{
-}
+// void MGtkDeviceImpl::CreateAndUsePattern(MColor inColor1, MColor inColor2)
+// {
+// }
 
 PangoFontMetrics *MGtkDeviceImpl::GetMetrics()
 {
@@ -499,33 +499,33 @@ class MCairoDeviceImp : public MGtkDeviceImpl
 	// MCairoDeviceImp(GtkPrintContext *inContext, MRect inRect, int32_t inPage);
 	~MCairoDeviceImp();
 
-	virtual void Save();
-	virtual void Restore();
-	virtual bool IsPrinting(int32_t &outPage) const
+	void Save() override;
+	void Restore() override;
+	bool IsPrinting(int32_t &outPage) const override
 	{
 		outPage = mPage;
 		return outPage >= 0;
 	}
 
-	virtual MRect GetBounds() const { return mRect; }
-	virtual void SetOrigin(int32_t inX, int32_t inY);
-	virtual void SetForeColor(MColor inColor);
-	virtual MColor GetForeColor() const;
-	virtual void SetBackColor(MColor inColor);
-	virtual MColor GetBackColor() const;
-	virtual void ClipRect(MRect inRect);
-	virtual void EraseRect(MRect inRect);
-	virtual void FillRect(MRect inRect);
-	virtual void StrokeRect(MRect inRect, uint32_t inLineWidth = 1);
-	virtual void FillEllipse(MRect inRect);
-	virtual void DrawImage(cairo_surface_t *inImage, float inX, float inY, float inShear);
-	virtual void DrawBitmap(const MBitmap &inBitmap, float inX, float inY);
-	virtual void CreateAndUsePattern(MColor inColor1, MColor inColor2);
-	virtual void DrawString(const std::string &inText, float inX, float inY, uint32_t inTruncateWidth, MAlignment inAlign);
-	virtual void RenderText(float inX, float inY);
-	virtual void DrawCaret(float inX, float inY, uint32_t inOffset);
-	virtual void MakeTransparent(float inOpacity);
-	virtual void SetDrawWhiteSpace(bool inDrawWhiteSpace, MColor inWhiteSpaceColor);
+	MRect GetBounds() const override { return mRect; }
+	void SetOrigin(int32_t inX, int32_t inY) override;
+	void SetForeColor(MColor inColor) override;
+	MColor GetForeColor() const override;
+	void SetBackColor(MColor inColor) override;
+	MColor GetBackColor() const override;
+	void ClipRect(MRect inRect) override;
+	void EraseRect(MRect inRect) override;
+	void FillRect(MRect inRect) override;
+	void StrokeRect(MRect inRect, uint32_t inLineWidth = 1) override;
+	void FillEllipse(MRect inRect) override;
+	void DrawImage(cairo_surface_t *inImage, float inX, float inY, float inShear);
+	void DrawBitmap(const MBitmap &inBitmap, float inX, float inY) override;
+	void CreateAndUsePattern(MColor inColor1, MColor inColor2, uint32_t inWidth, float inRotation) override;
+	void DrawString(const std::string &inText, float inX, float inY, uint32_t inTruncateWidth, MAlignment inAlign) override;
+	void RenderText(float inX, float inY) override;
+	void DrawCaret(float inX, float inY, uint32_t inOffset) override;
+	void MakeTransparent(float inOpacity) override;
+	void SetDrawWhiteSpace(bool inDrawWhiteSpace, MColor inWhiteSpaceColor) override;
 
   protected:
 	void DrawWhiteSpace(float inX, float inY);
@@ -691,7 +691,7 @@ void MCairoDeviceImp::DrawBitmap(const MBitmap &inBitmap, float inX, float inY)
 	}
 }
 
-void MCairoDeviceImp::CreateAndUsePattern(MColor inColor1, MColor inColor2)
+void MCairoDeviceImp::CreateAndUsePattern(MColor inColor1, MColor inColor2, uint32_t inWidth, float inRotation)
 {
 	uint32_t c1 = 0, c2 = 0;
 
@@ -723,7 +723,7 @@ void MCairoDeviceImp::CreateAndUsePattern(MColor inColor1, MColor inColor2)
 		if (p != nullptr)
 		{
 			cairo_matrix_t m;
-			cairo_matrix_init_rotate(&m, 2.356);
+			cairo_matrix_init_rotate(&m, ((180 - inRotation) / 180) * M_PI);
 			cairo_pattern_set_matrix(p, &m);
 
 			cairo_set_source(mContext, p);

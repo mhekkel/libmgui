@@ -45,82 +45,89 @@ class MGtkDeviceImpl : public MDeviceImpl
 
 	MGtkDeviceImpl(PangoLayout *inLayout);
 
-	virtual ~MGtkDeviceImpl();
+	~MGtkDeviceImpl() override;
 
-	virtual void Save();
-	virtual void Restore();
+	void Save() override;
+	void Restore() override;
 
-	virtual void SetOrigin(int32_t inX, int32_t inY);
+	void SetOrigin(int32_t inX, int32_t inY) override;
 
-	virtual void SetFont(const std::string &inFont);
+	void SetFont(const std::string &inFont) override;
 
-	virtual void SetForeColor(MColor inColor);
+	void SetForeColor(MColor inColor) override;
 
-	virtual MColor GetForeColor() const;
+	MColor GetForeColor() const override;
 
-	virtual void SetBackColor(MColor inColor);
+	void SetBackColor(MColor inColor) override;
 
-	virtual MColor GetBackColor() const;
+	MColor GetBackColor() const override;
 
-	virtual void ClipRect(MRect inRect);
+	void ClipRect(MRect inRect) override;
 
-	//	virtual void			ClipRegion(// MRegion inRegion);
+	// virtual void			ClipRegion(MRegion inRegion) override;
 
-	virtual void EraseRect(MRect inRect);
+	void EraseRect(MRect inRect) override;
 
-	virtual void FillRect(MRect inRect);
+	void FillRect(MRect inRect) override;
 
-	virtual void StrokeRect(MRect inRect, uint32_t inLineWidth = 1);
+	void StrokeRect(MRect inRect, uint32_t inLineWidth = 1) override;
 
-	virtual void FillEllipse(MRect inRect);
+	void FillEllipse(MRect inRect) override;
 
-	virtual void DrawImage(cairo_surface_t *inImage, float inX, float inY, float inShear);
+	// void DrawImage(cairo_surface_t *inImage, float inX, float inY, float inShear);
 
-	virtual void CreateAndUsePattern(MColor inColor1, MColor inColor2);
+	// void CreateAndUsePattern(MColor inColor1, MColor inColor2, uint32_t inWidth, float inRotation) override;
 
 	PangoFontMetrics *GetMetrics();
 
-	virtual float GetAscent();
+	float GetAscent() override;
 
-	virtual float GetDescent();
+	float GetDescent() override;
 
-	virtual float GetLeading();
+	float GetLeading() override;
 
-	virtual float GetXWidth();
+	float GetXWidth() override;
 
-	virtual void DrawString(const std::string &inText, float inX, float inY, uint32_t inTruncateWidth = 0, MAlignment inAlign = eAlignNone);
+	void DrawString(const std::string &inText, float inX, float inY, uint32_t inTruncateWidth = 0, MAlignment inAlign = eAlignNone) override;
 
-	virtual uint32_t GetStringWidth(const std::string &inText);
+	uint32_t GetStringWidth(const std::string &inText) override;
 
 	// Text Layout options
 
-	virtual void SetText(const std::string &inText);
+	void SetText(const std::string &inText) override;
 
-	virtual void SetTabStops(float inTabWidth);
+	void SetTabStops(float inTabWidth) override;
 
-	virtual void SetTextColors(uint32_t inColorCount, uint32_t inColorIndices[], uint32_t inOffsets[], MColor inColors[]);
-	virtual void SetTextStyles(uint32_t inStyleCount, uint32_t inStyles[], uint32_t inOffsets[]);
-	virtual void RenderTextBackground(float inX, float inY, uint32_t inStart, uint32_t inLength, MColor inColor);
+	void SetTextColors(uint32_t inColorCount, uint32_t inColorIndices[], uint32_t inOffsets[], MColor inColors[]) override;
+	void SetTextStyles(uint32_t inStyleCount, uint32_t inStyles[], uint32_t inOffsets[]) override;
+	void RenderTextBackground(float inX, float inY, uint32_t inStart, uint32_t inLength, MColor inColor) override;
 
-	virtual void SetTextSelection(uint32_t inStart, uint32_t inLength, MColor inSelectionColor);
+	void SetTextSelection(uint32_t inStart, uint32_t inLength, MColor inSelectionColor) override;
 
-	virtual void IndexToPosition(uint32_t inIndex, bool inTrailing, int32_t &outPosition);
+	void IndexToPosition(uint32_t inIndex, bool inTrailing, int32_t &outPosition) override;
 
-	virtual bool PositionToIndex(int32_t inPosition, uint32_t &outIndex);
+	bool PositionToIndex(int32_t inPosition, uint32_t &outIndex) override;
 
-	virtual float GetTextWidth();
+	float GetTextWidth() override;
 
-	virtual void RenderText(float inX, float inY);
+	void RenderText(float inX, float inY) override;
 
-	virtual void DrawCaret(float inX, float inY, uint32_t inOffset);
+	void DrawCaret(float inX, float inY, uint32_t inOffset) override;
 
-	virtual void BreakLines(uint32_t inWidth, std::vector<uint32_t> &outBreaks);
+	void BreakLines(uint32_t inWidth, std::vector<uint32_t> &outBreaks) override;
 
-	virtual void MakeTransparent(float inOpacity) {}
+	void MakeTransparent(float inOpacity) override
+	{
+	}
 
-	//	virtual GdkPixmap*		GetPixmap() const		{ return nullptr; }
+	// virtual GdkPixmap *GetPixmap() const override
+	// {
+	// 	return nullptr;
+	// }
 
-	virtual void SetDrawWhiteSpace(bool inDrawWhiteSpace, MColor inWhiteSpaceColor) {}
+	void SetDrawWhiteSpace(bool inDrawWhiteSpace, MColor inWhiteSpaceColor) override
+	{
+	}
 
   protected:
 	PangoItem *Itemize(const char *inText, PangoAttrList *inAttrs);

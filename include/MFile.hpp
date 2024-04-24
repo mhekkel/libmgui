@@ -106,10 +106,12 @@ class MFileSaver
 
 namespace MFileDialogs
 {
+// All callbacks have as first parameter a boolean indicating a
+// positive result (selected something) or a cancel.
 
-void ChooseOneFile(MWindow *inParent, std::function<void(std::filesystem::path)> &&inCallback);
-void ChooseFiles(MWindow *inParent, std::function<void(std::vector<std::filesystem::path>)> &&inCallback);
-void ChooseDirectory(MWindow *inParent, std::function<void(std::filesystem::path)> &&inCallback);
-void SaveFileAs(MWindow *inParent, std::filesystem::path inFileName, std::function<void(std::filesystem::path)> &&inCallback);
+void ChooseOneFile(MWindow *inParent, std::function<void(bool, std::filesystem::path)> &&inCallback);
+void ChooseFiles(MWindow *inParent, std::function<void(bool, std::vector<std::filesystem::path>)> &&inCallback);
+void ChooseDirectory(MWindow *inParent, std::function<void(bool, std::filesystem::path)> &&inCallback);
+void SaveFileAs(MWindow *inParent, std::filesystem::path inFileName, std::function<void(bool, std::filesystem::path)> &&inCallback);
 
 } // namespace MFileDialogs
