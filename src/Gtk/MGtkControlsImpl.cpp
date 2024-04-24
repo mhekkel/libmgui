@@ -365,6 +365,8 @@ void MGtkComboboxImpl::CreateWidget()
 	gtk_combo_box_set_entry_text_column(GTK_COMBO_BOX(wdgt), 0);
 
 	SetWidget(wdgt);
+
+	mChanged.Connect(GetWidget(), "changed");
 }
 
 std::string MGtkComboboxImpl::GetText() const
