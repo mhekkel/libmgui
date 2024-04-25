@@ -201,9 +201,7 @@ class MGtkComboboxImpl : public MGtkControlImpl<MCombobox>
 class MGtkPopupImpl : public MGtkControlImpl<MPopup>
 {
   public:
-	MGtkPopupImpl(MPopup *inPopup);
-
-	void SetChoices(const std::vector<std::string> &inChoices) override;
+	MGtkPopupImpl(MPopup *inPopup, const std::vector<std::string> &inChoices);
 
 	int32_t GetValue() const override;
 	void SetValue(int32_t inValue) override;

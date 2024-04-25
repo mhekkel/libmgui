@@ -81,8 +81,7 @@ class MSimpleControlImpl : public MControlImpl<MSimpleControl>
 	{
 	}
 
-	static MSimpleControlImpl *
-	Create(MSimpleControl *inControl);
+	static MSimpleControlImpl *Create(MSimpleControl *inControl);
 };
 
 class MScrollbarImpl : public MControlImpl<MScrollbar>
@@ -108,8 +107,7 @@ class MScrollbarImpl : public MControlImpl<MScrollbar>
 	//
 	//	virtual void	SetViewSize(int32_t inViewSize) = 0;
 
-	static MScrollbarImpl *
-	Create(MScrollbar *inControl);
+	static MScrollbarImpl *Create(MScrollbar *inControl);
 };
 
 class MButtonImpl : public MControlImpl<MButton>
@@ -127,8 +125,7 @@ class MButtonImpl : public MControlImpl<MButton>
 
 	virtual void GetIdealSize(int32_t &outWidth, int32_t &outHeight) = 0;
 
-	static MButtonImpl *
-	Create(MButton *inButton, const std::string &inLabel,
+	static MButtonImpl *Create(MButton *inButton, const std::string &inLabel,
 		MButtonFlags inFlags);
 };
 
@@ -143,8 +140,7 @@ class MExpanderImpl : public MControlImpl<MExpander>
 	virtual void SetOpen(bool inOpen) = 0;
 	virtual bool IsOpen() const = 0;
 
-	static MExpanderImpl *
-	Create(MExpander *inExpander, const std::string &inLabel);
+	static MExpanderImpl *Create(MExpander *inExpander, const std::string &inLabel);
 };
 
 class MStatusbarImpl : public MControlImpl<MStatusbar>
@@ -157,8 +153,7 @@ class MStatusbarImpl : public MControlImpl<MStatusbar>
 
 	virtual void SetStatusText(uint32_t inPartNr, const std::string &inText, bool inBorder) = 0;
 
-	static MStatusbarImpl *
-	Create(MStatusbar *inStatusbar, uint32_t inPartCount, MStatusBarElement inParts[]);
+	static MStatusbarImpl *Create(MStatusbar *inStatusbar, uint32_t inPartCount, MStatusBarElement inParts[]);
 };
 
 class MComboboxImpl : public MControlImpl<MCombobox>
@@ -177,8 +172,7 @@ class MComboboxImpl : public MControlImpl<MCombobox>
 	virtual int GetActive() = 0;
 	virtual void SetActive(int inActive) = 0;
 
-	static MComboboxImpl *
-	Create(MCombobox *inCombobox);
+	static MComboboxImpl *Create(MCombobox *inCombobox);
 };
 
 class MPopupImpl : public MControlImpl<MPopup>
@@ -195,10 +189,7 @@ class MPopupImpl : public MControlImpl<MPopup>
 	virtual void SetText(const std::string &inText) = 0;
 	virtual std::string GetText() const = 0;
 
-	virtual void SetChoices(const std::vector<std::string> &inChoices) = 0;
-
-	static MPopupImpl *
-	Create(MPopup *inPopup);
+	static MPopupImpl *Create(MPopup *inPopup, const std::vector<std::string> &inChoices);
 };
 
 class MEdittextImpl : public MControlImpl<MEdittext>
@@ -216,8 +207,7 @@ class MEdittextImpl : public MControlImpl<MEdittext>
 
 	virtual void SetPasswordChar(uint32_t inUnicode) = 0;
 
-	static MEdittextImpl *
-	Create(MEdittext *inEdittext, uint32_t inFlags);
+	static MEdittextImpl *Create(MEdittext *inEdittext, uint32_t inFlags);
 };
 
 class MCaptionImpl : public MControlImpl<MCaption>
@@ -230,8 +220,7 @@ class MCaptionImpl : public MControlImpl<MCaption>
 
 	virtual void SetText(const std::string &inText) = 0;
 
-	static MCaptionImpl *
-	Create(MCaption *inCaption, const std::string &inText);
+	static MCaptionImpl *Create(MCaption *inCaption, const std::string &inText);
 };
 
 class MSeparatorImpl : public MControlImpl<MSeparator>
@@ -242,8 +231,7 @@ class MSeparatorImpl : public MControlImpl<MSeparator>
 	{
 	}
 
-	static MSeparatorImpl *
-	Create(MSeparator *inSeparator);
+	static MSeparatorImpl *Create(MSeparator *inSeparator);
 };
 
 class MCheckboxImpl : public MControlImpl<MCheckbox>
@@ -257,8 +245,7 @@ class MCheckboxImpl : public MControlImpl<MCheckbox>
 	virtual bool IsChecked() const = 0;
 	virtual void SetChecked(bool inChecked) = 0;
 
-	static MCheckboxImpl *
-	Create(MCheckbox *inCheckbox, const std::string &inTitle);
+	static MCheckboxImpl *Create(MCheckbox *inCheckbox, const std::string &inTitle);
 };
 
 class MRadiobuttonImpl : public MControlImpl<MRadiobutton>
@@ -274,8 +261,7 @@ class MRadiobuttonImpl : public MControlImpl<MRadiobutton>
 
 	virtual void SetGroup(MRadiobuttonImpl *inButton) = 0;
 
-	static MRadiobuttonImpl *
-	Create(MRadiobutton *inRadiobutton, const std::string &inTitle);
+	static MRadiobuttonImpl *Create(MRadiobutton *inRadiobutton, const std::string &inTitle);
 };
 
 class MListBoxImpl : public MControlImpl<MListBox>
@@ -291,8 +277,7 @@ class MListBoxImpl : public MControlImpl<MListBox>
 	virtual int32_t GetValue() const = 0;
 	virtual void SetValue(int32_t inValue) = 0;
 
-	static MListBoxImpl *
-	Create(MListBox *inListBox);
+	static MListBoxImpl *Create(MListBox *inListBox);
 };
 
 // --------------------------------------------------------------------

@@ -177,8 +177,8 @@ void MCombobox::SetActive(int inActive)
 
 // --------------------------------------------------------------------
 
-MPopup::MPopup(const std::string &inID, MRect inBounds)
-	: MControl<MPopupImpl>(inID, inBounds, MPopupImpl::Create(this))
+MPopup::MPopup(const std::string &inID, MRect inBounds, const std::vector<std::string> &inChoices)
+	: MControl<MPopupImpl>(inID, inBounds, MPopupImpl::Create(this, inChoices))
 {
 }
 
@@ -200,11 +200,6 @@ void MPopup::SetText(const std::string &inText)
 std::string MPopup::GetText() const
 {
 	return mImpl->GetText();
-}
-
-void MPopup::SetChoices(const std::vector<std::string> &inChoices)
-{
-	mImpl->SetChoices(inChoices);
 }
 
 // --------------------------------------------------------------------

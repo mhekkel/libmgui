@@ -385,18 +385,13 @@ MView *MDialog::CreatePopup(const mxml::element &inTemplate, int32_t inX, int32_
 	std::vector<std::string> choices;
 	for (auto option : inTemplate.find("./option"))
 	{
-		std::string label = option->get_content();
-		//		int32_t width = GetTextWidth(label, VSCLASS_COMBOBOX, CP_DROPDOWNBUTTON, CBXSL_NORMAL);
-		//		if (bounds.width < width)
-		//			bounds.width = width;
+		std::string label = l(option->get_content());
 		choices.push_back(label);
 	}
 
 	//	bounds.width += static_cast<int32_t>(14 * mDLUX);
 
-	MPopup *popup = new MPopup(id, bounds);
-
-	popup->SetChoices(choices);
+	MPopup *popup = new MPopup(id, bounds, choices);
 	AddRoute(popup->eValueChanged, eValueChanged);
 
 	return popup;
@@ -913,9 +908,7 @@ void MDialog::SetChecked(const std::string &inID, bool inChecked)
 void MDialog::SetChoices(const std::string &inID, const std::vector<std::string> &inChoices)
 {
 	MView *view = FindSubViewByID(inID);
-	if (dynamic_cast<MPopup *>(view) != nullptr)
-		static_cast<MPopup *>(view)->SetChoices(inChoices);
-	else if (dynamic_cast<MCombobox *>(view) != nullptr)
+	if (dynamic_cast<MCombobox *>(view) != nullptr)
 		static_cast<MCombobox *>(view)->SetChoices(inChoices);
 }
 

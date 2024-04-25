@@ -465,48 +465,37 @@ MComboboxImpl *MComboboxImpl::Create(MCombobox *inCombobox)
 
 // --------------------------------------------------------------------
 
-MGtkPopupImpl::MGtkPopupImpl(MPopup *inPopup)
+MGtkPopupImpl::MGtkPopupImpl(MPopup *inPopup, const std::vector<std::string> &inChoices)
 	: MGtkControlImpl(inPopup, "")
+	, mChoices(inChoices)
 {
 }
 
 void MGtkPopupImpl::CreateWidget()
 {
-	SetWidget(gtk_combo_box_text_new());
-}
+	std::vector<const char *> strings;
+	for (auto &choice : mChoices)
+		strings.emplace_back(choice.c_str());
+	strings.emplace_back(nullptr);
 
-void MGtkPopupImpl::SetChoices(const std::vector<std::string> &inChoices)
-{
-	mChoices = inChoices;
+	SetWidget(gtk_drop_down_new_from_strings(strings.data()));
 
-	if (GetWidget() != nullptr)
-	{
-		for (auto s : inChoices)
-			gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(GetWidget()), s.c_str());
-
-		gtk_combo_box_set_active(GTK_COMBO_BOX(GetWidget()), 0);
-
-		// connect signal
-		mChanged.Connect(GetWidget(), "changed");
-	}
+	mChanged.Connect(GetWidget(), "changed");
 }
 
 void MGtkPopupImpl::AddedToWindow()
 {
 	MGtkControlImpl::AddedToWindow();
-
-	if (not mChoices.empty())
-		SetChoices(mChoices);
 }
 
 int32_t MGtkPopupImpl::GetValue() const
 {
-	return gtk_combo_box_get_active(GTK_COMBO_BOX(GetWidget()));
+	return gtk_drop_down_get_selected(GTK_DROP_DOWN(GetWidget()));
 }
 
 void MGtkPopupImpl::SetValue(int32_t inValue)
 {
-	gtk_combo_box_set_active(GTK_COMBO_BOX(GetWidget()), inValue);
+	gtk_drop_down_set_selected(GTK_DROP_DOWN(GetWidget()), inValue);
 }
 
 void MGtkPopupImpl::SetText(const std::string &inText)
@@ -518,13 +507,13 @@ void MGtkPopupImpl::SetText(const std::string &inText)
 
 std::string MGtkPopupImpl::GetText() const
 {
-	const char *s = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(GetWidget()));
-	return s ? s : "";
+	uint32_t v = GetValue();
+	return v < mChoices.size() ? mChoices[v].c_str() : nullptr;
 }
 
-MPopupImpl *MPopupImpl::Create(MPopup *inPopup)
+MPopupImpl *MPopupImpl::Create(MPopup *inPopup, const std::vector<std::string> &inChoices)
 {
-	return new MGtkPopupImpl(inPopup);
+	return new MGtkPopupImpl(inPopup, inChoices);
 }
 
 // --------------------------------------------------------------------

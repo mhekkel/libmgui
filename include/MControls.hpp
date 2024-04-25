@@ -236,7 +236,8 @@ class MPopup : public MControl<MPopupImpl>
   public:
 	typedef MPopupImpl MImpl;
 
-	MPopup(const std::string &inID, MRect inBounds);
+	MPopup(const std::string &inID, MRect inBounds,
+		const std::vector<std::string> &inChoices);
 
 	MEventOut<void(const std::string &, int32_t)> eValueChanged;
 
@@ -245,8 +246,6 @@ class MPopup : public MControl<MPopupImpl>
 
 	void SetText(const std::string &inText);
 	std::string GetText() const;
-
-	void SetChoices(const std::vector<std::string> &inChoices);
 };
 
 // --------------------------------------------------------------------
