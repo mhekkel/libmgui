@@ -56,7 +56,7 @@ class MMenu
 		virtual void AppendSubmenu(uint32_t inSection, MMenu *inMenu) = 0;
 
 		virtual void ReplaceItemsInSection(uint32_t inSection, const std::string &inAction,
-			const std::vector<std::tuple<std::string,uint32_t>> &inItems) = 0;
+			const std::vector<std::tuple<std::string,int>> &inItems) = 0;
 
 		virtual MMenu *FindMenuByID(const std::string &inMenuID) = 0;
 
@@ -98,7 +98,7 @@ class MMenu
 	}
 
 	void ReplaceItemsInSection(uint32_t inSection, const std::string &inAction,
-		const std::vector<std::tuple<std::string,uint32_t>> &inItems)
+		const std::vector<std::tuple<std::string,int>> &inItems)
 	{
 		mImpl->ReplaceItemsInSection(inSection, inAction, inItems);
 	}

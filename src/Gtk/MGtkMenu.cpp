@@ -180,7 +180,7 @@ class MGtkMenuImpl : public MMenu::MMenuImpl
 	void AppendSubmenu(uint32_t inSection, MMenu *inMenu) override;
 
 	void ReplaceItemsInSection(uint32_t inSection, const std::string &inAction,
-		const std::vector<std::tuple<std::string,uint32_t>> &inItems) override;
+		const std::vector<std::tuple<std::string,int>> &inItems) override;
 
 	MMenu *FindMenuByID(const std::string &inMenuID) override;
 
@@ -235,7 +235,7 @@ void MGtkMenuImpl::AppendSubmenu(uint32_t inSection, MMenu *inMenu)
 }
 
 void MGtkMenuImpl::ReplaceItemsInSection(uint32_t inSection, const std::string &inAction,
-	const std::vector<std::tuple<std::string,uint32_t>> &inItems)
+	const std::vector<std::tuple<std::string,int>> &inItems)
 {
 	// throws an error if this section does not exist
 	auto s = mSections.at(inSection);
