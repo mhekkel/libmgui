@@ -33,6 +33,16 @@
 
 class MDocument;
 
+namespace MFile
+{
+
+void WriteAttribute(const std::filesystem::path &inFile, const std::string &inName,
+	const std::string &data);
+
+std::string ReadAttribute(const std::filesystem::path &inFile, const std::string &inName);
+
+}
+
 // --------------------------------------------------------------------
 // MFileLoader, used to load the contents of a file.
 

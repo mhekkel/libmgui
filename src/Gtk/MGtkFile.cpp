@@ -76,56 +76,52 @@ int32_t write_attribute(const fs::path &inPath, const char *inName, const void *
 
 #if defined(__linux__)
 
-// #include <attr/attributes.h>
-
-int32_t read_attribute(const fs::path &inPath, const char *inName, void *outData, std::size_t inDataSize)
-{
-	std::string path = inPath.string();
-
-	int length = inDataSize;
-	// int err = ::attr_get(path.c_str(), inName,
-	// 	reinterpret_cast<char*>(outData), &length, 0);
-
-	// if (err != 0)
-	// 	length = 0;
-
-	return length;
-}
-
-int32_t write_attribute(const fs::path &inPath, const char *inName, const void *inData, std::size_t inDataSize)
-{
-	std::string path = inPath.string();
-
-	// (void)::attr_set(path.c_str(), inName,
-	// 	reinterpret_cast<const char*>(inData), inDataSize, 0);
-
-	return inDataSize;
-}
-
-#endif
-
-// ------------------------------------------------------------------
-//  MacOS X
-
-#if defined(__APPLE__)
-
 # include <sys/xattr.h>
 
-int32_t read_attribute(const fs::path &inPath, const char *inName, void *outData, size_t inDataSize)
+ssize_t read_attribute(const fs::path &inPath, const char *inName, void *outData, std::size_t inDataSize)
 {
-	std::string path = inPath.string();
-
-	return ::getxattr(path.c_str(), inName, outData, inDataSize, 0, 0);
+	return ::getxattr(inPath.c_str(), inName, outData, inDataSize);
 }
 
-int32_t write_attribute(const fs::path &inPath, const char *inName, const void *inData, size_t inDataSize)
+ssize_t write_attribute(const fs::path &inPath, const char *inName, const void *inData, std::size_t inDataSize)
 {
-	std::string path = inPath.string();
-
-	(void)::setxattr(path.c_str(), inName, inData, inDataSize, 0, 0);
+	return ::setxattr(inPath.c_str(), inName, inData, inDataSize, 0);
 }
 
 #endif
+
+// --------------------------------------------------------------------
+
+namespace MFile
+{
+
+void WriteAttribute(const std::filesystem::path &inFile, const std::string &inName, const std::string &inData)
+{
+	auto e = write_attribute(inFile.c_str(), inName.c_str(), inData.data(), inData.size());
+	if (e < 0)
+		PRINT(("Error writing attribute: %s", strerror(errno)));
+}
+
+std::string ReadAttribute(const std::filesystem::path &inFile, const std::string &inName)
+{
+	std::string result;
+
+	auto e = read_attribute(inFile, inName.c_str(), nullptr, 0);
+	if (e > 0)
+	{
+		result.resize(e);
+		e = read_attribute(inFile, inName.c_str(), result.data(), e);
+		if (e < 0)
+			PRINT(("Error reading attribute: %s", strerror(errno)));
+	}
+
+	return result;
+}
+
+}
+
+// --------------------------------------------------------------------
+
 namespace MFileDialogs
 {
 
