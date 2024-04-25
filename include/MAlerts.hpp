@@ -34,9 +34,9 @@
 
 class MWindow;
 
-void DisplayError(const std::exception &inException);
-void DisplayError(const std::string &inError);
-void DisplayError(const std::error_code &inError);
+void DisplayError(const std::exception &inException) noexcept;
+void DisplayError(const std::string &inError) noexcept;
+void DisplayError(const std::error_code &inError) noexcept;
 
 template <typename T>
 concept ReplyHandlerCallbackType = std::is_invocable_v<T, int>;
@@ -66,17 +66,17 @@ struct AlertReplyHandler : public AlertReplyHandlerBase
 };
 
 void DisplayAlert(MWindow *inParent, const std::string &inResourceName,
-	AlertReplyHandlerBase *inHandler, std::initializer_list<std::string> inArguments = {});
+	AlertReplyHandlerBase *inHandler, std::initializer_list<std::string> inArguments = {}) noexcept;
 
 template <ReplyHandlerCallbackType Handler>
 void DisplayAlert(MWindow *inParent, const std::string &inResourceName,
-	Handler &&inHandler, std::initializer_list<std::string> inArguments = {})
+	Handler &&inHandler, std::initializer_list<std::string> inArguments = {}) noexcept
 {
 	DisplayAlert(inParent, inResourceName, new AlertReplyHandler(std::move(inHandler)), inArguments);
 }
 
 inline void DisplayAlert(MWindow *inParent, const std::string &inResourceName,
-	std::initializer_list<std::string> inArguments = {})
+	std::initializer_list<std::string> inArguments = {}) noexcept
 {
 	DisplayAlert(inParent, inResourceName, nullptr, inArguments);
 }

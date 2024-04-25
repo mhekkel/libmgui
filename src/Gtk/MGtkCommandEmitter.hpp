@@ -26,6 +26,7 @@
 
 #pragma once
 
+#include "MAlerts.hpp"
 #include "MCommand.hpp"
 
 #include <gtk/gtk.h>
@@ -97,7 +98,16 @@ class MGtkCommandEmitter
 		auto self = static_cast<MGtkCommandEmitter *>(user_data);
 		auto h = self->mActionHandlers[action];
 		if (h)
-			h->ActionActivated(action, param);
+		{
+			try
+			{
+				h->ActionActivated(action, param);
+			}
+			catch (const std::exception &e)
+			{
+				DisplayError(e);
+			}
+		}
 	}
 
   private:
@@ -188,4 +198,3 @@ inline MCommandImpl *MGtkCommandEmitter::RegisterAction(const std::string &actio
 	mActionHandlers[G_ACTION(act)] = new MActionHandler<void(bool)>(inCommand);
 	return new MGtkCommandImpl(act);
 }
-

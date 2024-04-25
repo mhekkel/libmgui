@@ -26,17 +26,17 @@
 
 #include "MAlerts.hpp"
 
-void DisplayError(const std::exception &inErr)
+void DisplayError(const std::exception &inErr) noexcept
 {
 	DisplayAlert(nullptr, "error-alert", { inErr.what() });
 }
 
-void DisplayError(const std::error_code &ec)
+void DisplayError(const std::error_code &ec) noexcept
 {
 	DisplayAlert(nullptr, "error-alert", { ec.message() });
 }
 
-void DisplayError(const std::string &inErr)
+void DisplayError(const std::string &inErr) noexcept
 {
 	DisplayAlert(nullptr, "error-alert", { inErr });
 }

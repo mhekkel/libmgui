@@ -49,7 +49,7 @@ class MController : public MSaverMixin
 
 	void SetWindow(MDocWindow *inWindow);
 
-	void SetDocument(MDocument *inDocument);
+	virtual void SetDocument(MDocument *inDocument);
 
 	MDocument *GetDocument() const { return mDocument; }
 

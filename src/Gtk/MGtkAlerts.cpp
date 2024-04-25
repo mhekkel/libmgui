@@ -162,7 +162,7 @@ GtkWidget *CreateAlertWithArgs(const std::string &inResourceName, std::initializ
 }
 
 void DisplayAlert(MWindow *inParent, const std::string &inResourceName,
-	AlertReplyHandlerBase *inHandler, std::initializer_list<std::string> inArgs)
+	AlertReplyHandlerBase *inHandler, std::initializer_list<std::string> inArgs) noexcept
 {
 	try
 	{
