@@ -97,7 +97,7 @@ namespace MFile
 
 void WriteAttribute(const std::filesystem::path &inFile, const std::string &inName, const std::string &inData)
 {
-	auto e = write_attribute(inFile.c_str(), inName.c_str(), inData.data(), inData.size());
+	auto e = write_attribute(inFile.c_str(), ("user." + inName).c_str(), inData.data(), inData.size());
 	if (e < 0)
 		PRINT(("Error writing attribute: %s", strerror(errno)));
 }
@@ -106,11 +106,11 @@ std::string ReadAttribute(const std::filesystem::path &inFile, const std::string
 {
 	std::string result;
 
-	auto e = read_attribute(inFile, inName.c_str(), nullptr, 0);
+	auto e = read_attribute(inFile, ("user." + inName).c_str(), nullptr, 0);
 	if (e > 0)
 	{
 		result.resize(e);
-		e = read_attribute(inFile, inName.c_str(), result.data(), e);
+		e = read_attribute(inFile, ("user." + inName).c_str(), result.data(), e);
 		if (e < 0)
 			PRINT(("Error reading attribute: %s", strerror(errno)));
 	}
