@@ -71,7 +71,7 @@ class MDialog : public MWindow
 	void SetChecked(const std::string &inID, bool inChecked);
 
 	// popup
-	void SetChoices(const std::string &inID, std::vector<std::string> &inChoices);
+	void SetChoices(const std::string &inID, const std::vector<std::string> &inChoices);
 
 	// chevron
 	bool IsOpen(const std::string &inID) const;

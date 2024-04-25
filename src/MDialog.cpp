@@ -910,7 +910,7 @@ void MDialog::SetChecked(const std::string &inID, bool inChecked)
 		static_cast<MRadiobutton *>(view)->SetChecked(inChecked);
 }
 
-void MDialog::SetChoices(const std::string &inID, std::vector<std::string> &inChoices)
+void MDialog::SetChoices(const std::string &inID, const std::vector<std::string> &inChoices)
 {
 	MView *view = FindSubViewByID(inID);
 	if (dynamic_cast<MPopup *>(view) != nullptr)
