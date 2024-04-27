@@ -58,8 +58,6 @@ MWindow::MWindow(const std::string &inTitle, const MRect &inBounds, MWindowFlags
 MWindow::MWindow(MWindowImpl *inImpl)
 	: MView("window", MRect(0, 0, 100, 100))
 	, mImpl(inImpl)
-
-	, cClose(this, "close", &MWindow::DoClose, 'w', kControlKey)
 {
 	SetLayout({ true, 0 });
 
