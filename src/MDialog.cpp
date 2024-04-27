@@ -233,9 +233,11 @@ MView *MDialog::CreateButton(const mxml::element &inTemplate, int32_t inX, int32
 	MButton *button = new MButton(id, bounds, title, flags);
 
 	if (inTemplate.get_attribute("default") == "true")
+	{
 		button->MakeDefault(true);
-
-	if (id == "ok" and mOKButton == nullptr)
+		mOKButton = button;
+	}
+	else if (id == "ok" and mOKButton == nullptr)
 		mOKButton = button;
 
 	if (id == "cancel")
