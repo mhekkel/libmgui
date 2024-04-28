@@ -37,81 +37,6 @@
 #include <iterator>
 #include <sstream>
 
-enum WordBreakClass
-{
-	eWB_CR,
-	eWB_LF,
-	eWB_Sep,
-	eWB_Tab,
-	eWB_Let,
-	eWB_Com,
-	eWB_Hira,
-	eWB_Kata,
-	eWB_Han,
-	eWB_Other,
-	eWB_None
-};
-
-enum CharBreakClass
-{
-	kCBC_CR,
-	kCBC_LF,
-	kCBC_Control,
-	kCBC_Extend,
-	kCBC_L,
-	kCBC_V,
-	kCBC_T,
-	kCBC_LV,
-	kCBC_LVT,
-	kCBC_Other,
-
-	kCBC_Prepend,
-	kCBC_SpacingMark
-};
-
-enum LineBreakClass
-{
-	kLBC_OpenPunctuation,
-	kLBC_ClosePunctuation,
-	kLBC_CloseParenthesis,
-	kLBC_Quotation,
-	kLBC_NonBreaking,
-	kLBC_Nonstarter,
-	kLBC_Exlamation,
-	kLBC_SymbolAllowingBreakAfter,
-	kLBC_InfixNumericSeparator,
-	kLBC_PrefixNumeric,
-	kLBC_PostfixNumeric,
-	kLBC_Numeric,
-	kLBC_Alphabetic,
-	kLBC_Ideographic,
-	kLBC_Inseperable,
-	kLBC_Hyphen,
-	kLBC_BreakAfter,
-	kLBC_BreakBefor,
-	kLBC_BreakOpportunityBeforeAndAfter,
-	kLBC_ZeroWidthSpace,
-	kLBC_CombiningMark,
-	kLBC_WordJoiner,
-	kLBC_HangulLVSyllable,
-	kLBC_HangulLVTSyllable,
-	kLBC_HangulLJamo,
-	kLBC_HangulVJamo,
-	kLBC_HangulTJamo,
-
-	kLBC_MandatoryBreak,
-	kLBC_CarriageReturn,
-	kLBC_LineFeed,
-	kLBC_NextLine,
-	kLBC_Surrogate,
-	kLBC_Space,
-	kLBC_ContigentBreakOpportunity,
-	kLBC_Ambiguous,
-	kLBC_ComplexContext,
-	kLBC_Unknown
-};
-
-
 #include "MUnicodeTables.hpp"
 
 // // clang-format off
@@ -202,6 +127,81 @@ UnicodeProperty GetProperty(unicode inUnicode)
 
 	return UnicodeProperty(result);
 }
+
+CharBreakClass GetCharBreakClass(unicode inUnicode)
+{
+	CharBreakClass result = kCBC_Other;
+
+	if (inUnicode < 0x110000)
+	{
+		uint32_t ix = inUnicode >> 8;
+		uint32_t p_ix = inUnicode & 0x00FF;
+
+		ix = kUnicodeInfo.page_index[ix];
+		result = kUnicodeInfo.data[ix][p_ix].cbc;
+	}
+
+	return result;
+}
+
+LineBreakClass GetLineBreakClass(unicode inUnicode)
+{
+	LineBreakClass result = kLBC_Unknown;
+
+	if (inUnicode < 0x110000)
+	{
+		uint32_t ix = inUnicode >> 8;
+		uint32_t p_ix = inUnicode & 0x00FF;
+
+		ix = kUnicodeInfo.page_index[ix];
+		result = kUnicodeInfo.data[ix][p_ix].lbc;
+	}
+
+	return result;
+}
+
+// --------------------------------------------------------------------
+
+
+bool IsSpace(unicode inUnicode)
+{
+	return (inUnicode >= 0x0009 and inUnicode <= 0x000D) or
+	       inUnicode == 0x0020 or
+	       inUnicode == 0x0085 or
+	       inUnicode == 0x00A0 or
+	       inUnicode == 0x1680 or
+	       inUnicode == 0x180E or
+	       (inUnicode >= 0x2000 and inUnicode <= 0x200A) or
+	       inUnicode == 0x2028 or
+	       inUnicode == 0x2029 or
+	       inUnicode == 0x202f or
+	       inUnicode == 0x205f or
+	       inUnicode == 0x3000;
+}
+
+bool IsAlpha(unicode inUnicode)
+{
+	return GetProperty(inUnicode) == kLETTER;
+}
+
+bool IsNum(unicode inUnicode)
+{
+	return GetProperty(inUnicode) == kNUMBER;
+}
+
+bool IsAlnum(unicode inUnicode)
+{
+	uint8_t prop = GetProperty(inUnicode);
+
+	return prop == kLETTER or prop == kNUMBER;
+}
+
+bool IsCombining(unicode inUnicode)
+{
+	return GetProperty(inUnicode) == kCOMBININGMARK;
+}
+
+// --------------------------------------------------------------------
 
 unicode ToLower(unicode inUnicode)
 {
