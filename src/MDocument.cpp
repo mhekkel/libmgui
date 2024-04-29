@@ -310,6 +310,9 @@ void MDocument::SetModified(bool inModified)
 		mDirty = inModified;
 		eModifiedChanged(mDirty);
 	}
+
+	if (inModified)
+		eDocumentModified();
 }
 
 // ---------------------------------------------------------------------------

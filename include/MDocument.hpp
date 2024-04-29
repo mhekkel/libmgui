@@ -108,6 +108,7 @@ class MDocument
 	// virtual bool ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers);
 
 	MEventOut<void(bool)> eModifiedChanged;
+	MEventOut<void()> eDocumentModified;
 	MEventOut<void(MDocument *)> eDocumentClosed;
 	MEventOut<void(MDocument *, const std::filesystem::path &)> eFileSpecChanged;
 	MEventOut<void(const std::filesystem::path &)> eBaseDirChanged;
