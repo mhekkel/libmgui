@@ -101,12 +101,6 @@ class MDocument
 
 	virtual std::string GetWindowTitle() const;
 
-	// note that MDocument is NOT a MHandler, but does
-	// implement the UpdateCommandStatus and ProcessCommand methods
-
-	// virtual bool UpdateCommandStatus(uint32_t inCommand, MMenu *inMenu, uint32_t inItemIndex, bool &outEnabled, bool &outChecked);
-	// virtual bool ProcessCommand(uint32_t inCommand, const MMenu *inMenu, uint32_t inItemIndex, uint32_t inModifiers);
-
 	MEventOut<void(bool)> eModifiedChanged;
 	MEventOut<void()> eDocumentModified;
 	MEventOut<void(MDocument *)> eDocumentClosed;

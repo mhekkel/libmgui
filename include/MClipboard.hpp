@@ -59,6 +59,7 @@ class MClipboardImpl
 	virtual ~MClipboardImpl() = default;
 
 	virtual bool HasData() = 0;
+	virtual bool IsLocal() = 0;
 	virtual void GetData(MClipboardGetDataHandlerbase *inHandler) = 0;
 	virtual void SetData(const std::string &inData) = 0;
 
@@ -121,6 +122,11 @@ class MClipboard
 	bool HasData()
 	{
 		return mImpl->HasData();
+	}
+
+	bool IsLocal()
+	{
+		return mImpl->IsLocal();
 	}
 
 	template <typename Handler>

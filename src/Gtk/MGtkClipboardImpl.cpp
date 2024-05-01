@@ -36,6 +36,7 @@ class MGdkClipboardImpl : public MClipboardImpl
 	MGdkClipboardImpl(MClipboard *inClipboard, bool inPrimary);
 
 	bool HasData() override;
+	bool IsLocal() override;
 	void GetData(MClipboardGetDataHandlerbase *inHandler) override;
 	void SetData(const std::string &inData) override;
 
@@ -56,6 +57,11 @@ MGdkClipboardImpl::MGdkClipboardImpl(MClipboard *inClipboard, bool inPrimary)
 		mGdkClipboard = gdk_display_get_primary_clipboard(display);
 	else
 		mGdkClipboard = gdk_display_get_clipboard(display);
+}
+
+bool MGdkClipboardImpl::IsLocal()
+{
+	return gdk_clipboard_is_local(mGdkClipboard);
 }
 
 bool MGdkClipboardImpl::HasData()
