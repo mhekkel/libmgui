@@ -147,7 +147,7 @@ bool MStoryboardImpl::Update(std::chrono::system_clock::duration inTime)
 			}
 
 			// alleen nog maar lineair
-			assert(t.mTransitionName == "acceleration-decelleration");
+			// assert(t.mTransitionName == "acceleration-decelleration");
 			auto dv = t.mNewValue - v;
 			if (t.mDuration > std::chrono::system_clock::duration{})
 				dv = (dv * time) / t.mDuration;
