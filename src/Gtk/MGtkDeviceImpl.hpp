@@ -80,6 +80,8 @@ class MGtkDeviceImpl : public MDeviceImpl
 
 	PangoFontMetrics *GetMetrics();
 
+	int32_t GetLineHeight() override;
+
 	float GetAscent() override;
 
 	float GetDescent() override;

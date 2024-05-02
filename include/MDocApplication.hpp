@@ -48,6 +48,8 @@ class MDocApplication : public MApplication
 	virtual MDocument *OpenOneDocument(const std::filesystem::path &inFileRef);
 	virtual MDocWindow *DisplayDocument(MDocument *inDocument);
 
+	virtual void AddToRecentMenu(const std::filesystem::path &inPath) {}
+
 	static MDocApplication &Instance()
 	{
 		return *static_cast<MDocApplication*>(gApp);

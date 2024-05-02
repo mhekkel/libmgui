@@ -151,8 +151,6 @@ enum MScrollMessage
 	kScrollLineDown,
 	kScrollPageUp,
 	kScrollPageDown,
-	kScrollForKiss,
-	kScrollReturnAfterKiss,
 	kScrollForDiff,
 	kScrollToPC
 };

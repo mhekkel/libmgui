@@ -210,6 +210,17 @@ PangoFontMetrics *MGtkDeviceImpl::GetMetrics()
 	return mMetrics;
 }
 
+int32_t MGtkDeviceImpl::GetLineHeight()
+{
+	int32_t result = 14;
+
+	PangoFontMetrics *metrics = GetMetrics();
+	if (metrics != nullptr)
+		result = pango_font_metrics_get_height(metrics) / PANGO_SCALE;
+
+	return result;
+}
+
 float MGtkDeviceImpl::GetAscent()
 {
 	float result = 10;

@@ -28,6 +28,7 @@
 
 #include "MAlerts.hpp"
 #include "MController.hpp"
+#include "MDocApplication.hpp"
 #include "MUtils.hpp"
 // #include "MMenu.h"
 // #include "MError.h"
@@ -149,7 +150,7 @@ bool MDocument::DoSave()
 
 	mFileSaver->DoSave();
 
-	// MMenu::AddToRecentMenu(mFile);
+	MDocApplication::Instance().AddToRecentMenu(mFile);
 
 	return true;
 }
