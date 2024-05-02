@@ -130,12 +130,15 @@ MCommandImpl *MCommand<R(Args...)>::RegisterCommand(MControlBase *cntrl, const s
 
 	if (inAcceleratorKeyCode)
 	{
-		std::tie(inAcceleratorKeyCode, inAcceleratorModifiers) = MapToGdkKey(inAcceleratorKeyCode, inAcceleratorModifiers);
+		// std::tie(inAcceleratorKeyCode, inAcceleratorModifiers) = MapToGdkKey(inAcceleratorKeyCode, inAcceleratorModifiers);
 
-		auto action = gtk_named_action_new(("win." + inAction).c_str());
-		auto trigger = gtk_keyval_trigger_new(inAcceleratorKeyCode, GdkModifierType(inAcceleratorModifiers));
-		auto shortcut = gtk_shortcut_new(trigger, action);
-		impl->AddShortcut(shortcut);
+		// auto action = gtk_named_action_new(("win." + inAction).c_str());
+		// auto trigger = gtk_keyval_trigger_new(inAcceleratorKeyCode, GdkModifierType(inAcceleratorModifiers));
+		// auto shortcut = gtk_shortcut_new(trigger, action);
+		// impl->AddShortcut(shortcut);
+
+		MAccel accel(inAcceleratorKeyCode, inAcceleratorModifiers);
+		gtk_application_set_accels_for_action(static_cast<MGtkApplicationImpl*>(gApp->GetImpl())->GetGtkApp(), ("win." + inAction).c_str(), accel.mAccel);
 	}
 
 	return result;
@@ -143,17 +146,17 @@ MCommandImpl *MCommand<R(Args...)>::RegisterCommand(MControlBase *cntrl, const s
 
 template <typename R, typename... Args>
 	requires ImplementedSignature<R(Args...)>
-MCommandImpl *MCommand<R(Args...)>::RegisterCommand(MApplication *app, const std::string &action,
+MCommandImpl *MCommand<R(Args...)>::RegisterCommand(MApplication *app, const std::string &inAction,
 	char32_t inAcceleratorKeyCode, uint32_t inAcceleratorModifiers)
 {
 	auto impl = static_cast<MGtkApplicationImpl *>(app->GetImpl());
 
-	auto result = impl->RegisterAction(action, *this);
+	auto result = impl->RegisterAction(inAction, *this);
 
 	if (inAcceleratorKeyCode != 0)
 	{
 		MAccel accel(inAcceleratorKeyCode, inAcceleratorModifiers);
-		gtk_application_set_accels_for_action(impl->GetGtkApp(), ("app." + action).c_str(), accel.mAccel);
+		gtk_application_set_accels_for_action(impl->GetGtkApp(), ("app." + inAction).c_str(), accel.mAccel);
 	}
 
 	return result;
