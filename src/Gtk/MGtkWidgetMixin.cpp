@@ -102,6 +102,9 @@ void MGtkWidgetMixin::SetWidget(GtkWidget *inWidget)
 
 	if (inWidget != nullptr)
 	{
+		// better be safe than sorry
+		g_object_add_weak_pointer(G_OBJECT(inWidget), (void**)&mWidget);
+
 		mDestroy.Connect(inWidget, "destroy");
 		mDirectionChanged.Connect(inWidget, "direction-changed");
 		mHide.Connect(inWidget, "hide");
