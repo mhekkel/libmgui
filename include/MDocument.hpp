@@ -65,8 +65,10 @@ class MDocument
 	virtual bool IsSpecified() const { return not mFile.empty(); }
 
 	virtual void SetFile(const std::filesystem::path &inNewFile);
-
 	virtual const std::filesystem::path &GetFile() const { return mFile; }
+
+	std::filesystem::file_time_type GetFileSavedTime() const { return mLastSaved; }
+	void SetFileSavedTime(std::filesystem::file_time_type inTime) { mLastSaved = inTime; }
 
 	virtual bool UsesFile(const std::filesystem::path &inFile) const;
 
@@ -102,7 +104,6 @@ class MDocument
 	virtual std::string GetWindowTitle() const;
 
 	MEventOut<void(bool)> eModifiedChanged;
-	MEventOut<void()> eDocumentModified;
 	MEventOut<void(MDocument *)> eDocumentClosed;
 	MEventOut<void(MDocument *, const std::filesystem::path &)> eFileSpecChanged;
 	MEventOut<void(const std::filesystem::path &)> eBaseDirChanged;
@@ -124,7 +125,6 @@ class MDocument
 
 	virtual void IOProgress(float inProgress, const std::string &);
 	virtual void IOError(const std::string &inError);
-	virtual bool IOAskOverwriteNewer();
 
 	virtual void IOFileLoaded();
 	virtual void IOFileWritten();
@@ -137,6 +137,7 @@ class MDocument
 	std::filesystem::path mFile;
 	bool mWarnedReadOnly;
 	bool mDirty;
+	std::filesystem::file_time_type mLastSaved;
 
   private:
 	MFileLoader *mFileLoader;

@@ -29,6 +29,7 @@
 #include "MAlerts.hpp"
 #include "MController.hpp"
 #include "MDocApplication.hpp"
+#include "MDocWindow.hpp"
 #include "MUtils.hpp"
 // #include "MMenu.h"
 // #include "MError.h"
@@ -94,6 +95,7 @@ MDocument::~MDocument()
 void MDocument::SetFile(const std::filesystem::path &inFile)
 {
 	mFile = inFile;
+	mLastSaved = fs::last_write_time(mFile);
 	eFileSpecChanged(this, mFile);
 }
 
@@ -131,11 +133,11 @@ bool MDocument::DoSave()
 {
 	assert(IsSpecified());
 
-	// if (not mFile.IsValid())
-	// 	THROW(("File is not specified"));
+	if (mFile.empty())
+		throw std::runtime_error("File is not specified");
 
-	// if (mFileSaver != nullptr)
-	// 	THROW(("File is already being saved"));
+	if (mFileSaver != nullptr)
+		return false;
 
 	mFileSaver = MFileSaver::Save(*this, mFile);
 
@@ -143,14 +145,30 @@ bool MDocument::DoSave()
 
 	mFileSaver->eProgress = std::bind(&MDocument::IOProgress, this, _1, _2);
 	mFileSaver->eError = std::bind(&MDocument::IOError, this, _1);
-	mFileSaver->eAskOverwriteNewer = std::bind(&MDocument::IOAskOverwriteNewer, this);
 	mFileSaver->eWriteFile = std::bind(&MDocument::WriteFile, this, _1);
 	mFileSaver->eFileWritten = std::bind(&MDocument::IOFileWritten, this);
 	mFileSaver->eFileSaverDeleted = std::bind(&MDocument::FileSaverDeleted, this, _1);
 
-	mFileSaver->DoSave();
-
-	MDocApplication::Instance().AddToRecentMenu(mFile);
+	if (fs::exists(mFile) and fs::last_write_time(mFile) > mLastSaved)
+	{
+		DisplayAlert(GetWindow(), "ask-overwrite-newer",
+			[&](int reply) {
+				if (reply == 2)
+				{
+					mFileSaver->DoSave();
+					MDocApplication::Instance().AddToRecentMenu(mFile);
+				}
+				else
+					mFileSaver->Cancel();
+			},
+			{ mFile.filename().string() });
+		return false;
+	}
+	else
+	{
+		mFileSaver->DoSave();
+		MDocApplication::Instance().AddToRecentMenu(mFile);
+	}
 
 	return true;
 }
@@ -306,14 +324,8 @@ void MDocument::MakeFirstDocument()
 
 void MDocument::SetModified(bool inModified)
 {
-	if (inModified != mDirty)
-	{
-		mDirty = inModified;
-		eModifiedChanged(mDirty);
-	}
-
-	if (inModified)
-		eDocumentModified();
+	mDirty = inModified;
+	eModifiedChanged(mDirty);
 }
 
 // ---------------------------------------------------------------------------
@@ -401,21 +413,12 @@ void MDocument::IOError(const std::string &inError)
 }
 
 // ---------------------------------------------------------------------------
-//	IOAskOverwriteNewer
-
-bool MDocument::IOAskOverwriteNewer()
-{
-	// return DisplayAlert("ask-overwrite-newer", mFile.GetFileName()) == 2;
-	return false;
-}
-
-// ---------------------------------------------------------------------------
 //	IOFileLoaded
 
 void MDocument::IOFileLoaded()
 {
+	mLastSaved = fs::last_write_time(mFile);
 	SetModified(false);
-		// eDocumentLoaded(this);
 }
 
 // ---------------------------------------------------------------------------
@@ -423,5 +426,6 @@ void MDocument::IOFileLoaded()
 
 void MDocument::IOFileWritten()
 {
+	mLastSaved = fs::last_write_time(mFile);
 	SetModified(false);
 }
