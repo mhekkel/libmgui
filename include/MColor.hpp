@@ -29,6 +29,8 @@
 #include <iomanip>
 #include <iostream>
 
+#include <cstdint>
+
 struct MColor
 {
   public:

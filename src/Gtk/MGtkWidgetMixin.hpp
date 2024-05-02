@@ -252,6 +252,7 @@ class MSlot : public MakeGtkCallbackHandler<Function>::type
 	void Connect(GObject *inObject, const char *inSignalName)
 	{
 		mObject = inObject;
+		g_object_add_weak_pointer(mObject, (void**)&mObject);
 		mID = g_signal_connect(inObject, inSignalName,
 			G_CALLBACK(&base_class::GCallback), this);
 	}
@@ -263,7 +264,7 @@ class MSlot : public MakeGtkCallbackHandler<Function>::type
 
 	void Disconnect()
 	{
-		if (mID > 0 and g_signal_handler_is_connected(mObject, mID))
+		if (mID > 0 and mObject != nullptr and g_signal_handler_is_connected(mObject, mID))
 			g_signal_handler_disconnect(mObject, mID);
 		mID = 0;
 		mObject = nullptr;
