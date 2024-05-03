@@ -57,6 +57,9 @@ struct MCommandImpl
 	virtual void SetEnabled(bool inEnabled) = 0;
 	virtual void SetState(int32_t inState) = 0;
 	virtual void SetChecked(bool inChecked) = 0;
+
+	virtual void SetAccelerator(const std::string &inAction,
+		char32_t inAcceleratorKeyCode, uint32_t inAcceleratorModifiers) = 0;
 };
 
 template <typename R, typename... Args>

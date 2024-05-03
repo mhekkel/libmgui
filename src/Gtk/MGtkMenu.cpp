@@ -25,78 +25,27 @@
 
 // --------------------------------------------------------------------
 
-struct MAccel
+void MGtkCommandImpl::SetAccelerator(const std::string &inAction, char32_t inAcceleratorKeyCode, uint32_t inAcceleratorModifiers)
 {
-	MAccel(char32_t inAcceleratorKeyCode, uint32_t inAcceleratorModifiers)
-	{
-		std::ostringstream os;
+	std::tie(inAcceleratorKeyCode, inAcceleratorModifiers) = MapToGdkKey(inAcceleratorKeyCode, inAcceleratorModifiers);
 
-		if (inAcceleratorKeyCode != 0)
-		{
-			if (inAcceleratorModifiers & kControlKey)
-				os << "<Control>";
-			if (inAcceleratorModifiers & kShiftKey)
-				os << "<Shift>";
-			if (inAcceleratorModifiers & kOptionKey)
-				os << "<Alt>";
+	std::ostringstream os;
 
-			switch (inAcceleratorKeyCode)
-			{
-				case kHomeKeyCode: os << "Home"; break;
-				case kCancelKeyCode: os << "Cancel"; break;
-				case kEndKeyCode: os << "End"; break;
-				case kInsertKeyCode: os << "Insert"; break;
-				case kBellKeyCode: os << "Bell"; break;
-				case kBackspaceKeyCode: os << "Backspace"; break;
-				case kTabKeyCode: os << "Tab"; break;
-				case kLineFeedKeyCode: os << "LineFeed"; break;
-				case kPageUpKeyCode: os << "PageUp"; break;
-				case kPageDownKeyCode: os << "PageDown"; break;
-				case kReturnKeyCode: os << "Return"; break;
-				case kPauseKeyCode: os << "Pause"; break;
-				case kEscapeKeyCode: os << "Escape"; break;
-				case kLeftArrowKeyCode: os << "LeftArrow"; break;
-				case kRightArrowKeyCode: os << "RightArrow"; break;
-				case kUpArrowKeyCode: os << "UpArrow"; break;
-				case kDownArrowKeyCode: os << "DownArrow"; break;
-				case kSpaceKeyCode: os << "Space"; break;
-				case kDeleteKeyCode: os << "Delete"; break;
-				case kDivideKeyCode: os << "Divide"; break;
-				case kMultiplyKeyCode: os << "Multiply"; break;
-				case kSubtractKeyCode: os << "Subtract"; break;
-				case kNumlockKeyCode: os << "Numlock"; break;
-				case kF1KeyCode: os << "F1"; break;
-				case kF2KeyCode: os << "F2"; break;
-				case kF3KeyCode: os << "F3"; break;
-				case kF4KeyCode: os << "F4"; break;
-				case kF5KeyCode: os << "F5"; break;
-				case kF6KeyCode: os << "F6"; break;
-				case kF7KeyCode: os << "F7"; break;
-				case kF8KeyCode: os << "F8"; break;
-				case kF9KeyCode: os << "F9"; break;
-				case kF10KeyCode: os << "F10"; break;
-				case kF11KeyCode: os << "F11"; break;
-				case kF12KeyCode: os << "F12"; break;
-				case kF13KeyCode: os << "F13"; break;
-				case kF14KeyCode: os << "F14"; break;
-				case kF15KeyCode: os << "F15"; break;
-				case kF16KeyCode: os << "F16"; break;
-				case kF17KeyCode: os << "F17"; break;
-				case kF18KeyCode: os << "F18"; break;
-				case kF19KeyCode: os << "F19"; break;
-				case kF20KeyCode: os << "F20"; break;
-				case kEnterKeyCode: os << "Enter"; break;
-				default: os << char(inAcceleratorKeyCode); break;
-			}
-		}
+	if (inAcceleratorModifiers & GDK_CONTROL_MASK)
+		os << "<Control>";
+	if (inAcceleratorModifiers & GDK_SHIFT_MASK)
+		os << "<Shift>";
+	if (inAcceleratorModifiers & GDK_ALT_MASK)
+		os << "<Alt>";
+	os << gdk_keyval_name(inAcceleratorKeyCode);
 
-		mStr = os.str();
-		mAccel[0] = mStr.c_str();
-	}
+	auto s = os.str();
+	const char *as[2] = { s.data(), nullptr };
 
-	std::string mStr;
-	const char *mAccel[2]{};
-};
+	gtk_application_set_accels_for_action(static_cast<MGtkApplicationImpl*>(gApp->GetImpl())->GetGtkApp(), inAction.c_str(), as);
+}
+
+// --------------------------------------------------------------------
 
 template <typename R, typename... Args>
 	requires ImplementedSignature<R(Args...)>
@@ -107,15 +56,7 @@ MCommandImpl *MCommand<R(Args...)>::RegisterCommand(MWindow *win, const std::str
 	auto result = impl->RegisterAction(inAction, *this);
 
 	if (inAcceleratorKeyCode)
-	{
-		std::tie(inAcceleratorKeyCode, inAcceleratorModifiers) = MapToGdkKey(inAcceleratorKeyCode, inAcceleratorModifiers);
-
-		auto action = gtk_named_action_new(("win." + inAction).c_str());
-		auto trigger = gtk_keyval_trigger_new(inAcceleratorKeyCode,
-			GdkModifierType(inAcceleratorModifiers));
-		auto shortcut = gtk_shortcut_new(trigger, action);
-		impl->AddShortcut(shortcut);
-	}
+		result->SetAccelerator("win." + inAction, inAcceleratorKeyCode, inAcceleratorModifiers);
 
 	return result;
 }
@@ -129,17 +70,7 @@ MCommandImpl *MCommand<R(Args...)>::RegisterCommand(MControlBase *cntrl, const s
 	auto result = impl->RegisterAction(inAction, *this);
 
 	if (inAcceleratorKeyCode)
-	{
-		// std::tie(inAcceleratorKeyCode, inAcceleratorModifiers) = MapToGdkKey(inAcceleratorKeyCode, inAcceleratorModifiers);
-
-		// auto action = gtk_named_action_new(("win." + inAction).c_str());
-		// auto trigger = gtk_keyval_trigger_new(inAcceleratorKeyCode, GdkModifierType(inAcceleratorModifiers));
-		// auto shortcut = gtk_shortcut_new(trigger, action);
-		// impl->AddShortcut(shortcut);
-
-		MAccel accel(inAcceleratorKeyCode, inAcceleratorModifiers);
-		gtk_application_set_accels_for_action(static_cast<MGtkApplicationImpl*>(gApp->GetImpl())->GetGtkApp(), ("win." + inAction).c_str(), accel.mAccel);
-	}
+		result->SetAccelerator("win." + inAction, inAcceleratorKeyCode, inAcceleratorModifiers);
 
 	return result;
 }
@@ -150,14 +81,10 @@ MCommandImpl *MCommand<R(Args...)>::RegisterCommand(MApplication *app, const std
 	char32_t inAcceleratorKeyCode, uint32_t inAcceleratorModifiers)
 {
 	auto impl = static_cast<MGtkApplicationImpl *>(app->GetImpl());
-
 	auto result = impl->RegisterAction(inAction, *this);
 
-	if (inAcceleratorKeyCode != 0)
-	{
-		MAccel accel(inAcceleratorKeyCode, inAcceleratorModifiers);
-		gtk_application_set_accels_for_action(impl->GetGtkApp(), ("app." + inAction).c_str(), accel.mAccel);
-	}
+	if (inAcceleratorKeyCode)
+		result->SetAccelerator("app." + inAction, inAcceleratorKeyCode, inAcceleratorModifiers);
 
 	return result;
 }

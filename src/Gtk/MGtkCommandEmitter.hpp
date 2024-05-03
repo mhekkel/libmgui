@@ -57,6 +57,8 @@ struct MGtkCommandImpl : public MCommandImpl
 		g_simple_action_set_state(mAction, g_variant_new_boolean(inChecked));
 	}
 
+	void SetAccelerator(const std::string &inAction, char32_t inAcceleratorKeyCode, uint32_t inAcceleratorModifiers) override;
+
 	GSimpleAction *mAction;
 };
 
