@@ -133,7 +133,7 @@ class ExampleApp : public MDocApplication
 		return 0;
 	}
 
-	void DoNew() override
+	void DoNew() 
 	{
 		auto w = new ExampleWindow();
 		w->Select();
