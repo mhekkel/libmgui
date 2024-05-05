@@ -149,6 +149,9 @@ class MView
 	virtual void Modifiers(uint32_t inModifiers) { }
 	virtual void EnterText(const std::string &inText) { }
 
+	// Input Method support
+	virtual void IMSetPreEditString(const std::string &inText, const std::string &inAttributes, int32_t inCursor) {}
+
 	// Drag & Drop support
 	/// \brief Return whether we will accept this drop, \a inMimeType is empty for file drops
 	virtual bool DragAcceptsMimeType(const std::string &inMimeType) { return false; }

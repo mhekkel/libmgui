@@ -73,6 +73,10 @@ class MGtkCanvasImpl : public MGtkControlImpl<MCanvas>
 	void OnScrollEnd() override;
 
 	void OnCommit(char *inText) override;
+	void OnPreeditChanged() override;
+	void OnPreeditEnd() override;
+	void OnPreeditStart() override;
+	bool OnRetrieveSurrounding() override;
 
 	bool OnDrop(const GValue *value, double x, double y) override;
 	bool OnDropAccept(GdkDrop *inDrop) override;

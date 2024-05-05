@@ -85,7 +85,7 @@ void MGtkCanvasImpl::OnGestureClickPressed(double inX, double inY, gint inClickC
 	{
 		auto modifiers = MapModifier(gtk_event_controller_get_current_event_state(
 			GTK_EVENT_CONTROLLER(mGestureClickPressed.GetSourceGObject())));
-		
+
 		MRect bounds = mControl->GetBounds();
 		mControl->ClickPressed(inX + bounds.x, inY + bounds.y, inClickCount, modifiers);
 	}
@@ -147,10 +147,17 @@ void MGtkCanvasImpl::OnPointerLeave()
 
 bool MGtkCanvasImpl::OnKeyPressed(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers)
 {
-	auto [keycode, modifiers] = MapFromGdkKey(inKeyValue, inModifiers);
+	bool result = MGtkWidgetMixin::OnKeyPressed(inKeyValue, inKeyCode, inModifiers);
 
-	return mControl->KeyPressed(keycode, gdk_keyval_to_unicode(inKeyValue),
-		modifiers, mAutoRepeat);
+	if (not result)
+	{
+		auto [keycode, modifiers] = MapFromGdkKey(inKeyValue, inModifiers);
+
+		result = mControl->KeyPressed(keycode, gdk_keyval_to_unicode(inKeyValue),
+			modifiers, mAutoRepeat);
+	}
+
+	return result;
 }
 
 void MGtkCanvasImpl::OnKeyReleased(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers)
@@ -213,6 +220,54 @@ void MGtkCanvasImpl::DrawCB(GtkDrawingArea *area, cairo_t *cr, int width, int he
 void MGtkCanvasImpl::OnCommit(char *inText)
 {
 	mControl->EnterText({ inText } /* , mAutoRepeat */);
+}
+
+void MGtkCanvasImpl::OnPreeditChanged()
+{
+	char *text;
+	PangoAttrList *attrs;
+	int cursor;
+
+	gtk_im_context_get_preedit_string(mIMContext, &text, &attrs, &cursor);
+
+	std::string s;
+	if (text)
+	{
+		s = text;
+		g_free(text);
+	}
+
+	std::string a;
+	if (attrs)
+	{
+		char *sa = pango_attr_list_to_string(attrs);
+		if (sa)
+		{
+			a = sa;
+			g_free(sa);
+		}
+
+		pango_attr_list_unref(attrs);
+	}
+
+	mControl->IMSetPreEditString(s, a, cursor);
+
+	PRINT(("s: %s\na: %s\n, c: %d", s.c_str(), a.c_str(), cursor));
+}
+
+void MGtkCanvasImpl::OnPreeditEnd()
+{
+	mControl->IMSetPreEditString({}, {}, 0);
+}
+
+void MGtkCanvasImpl::OnPreeditStart()
+{
+	OnPreeditChanged();
+}
+
+bool MGtkCanvasImpl::OnRetrieveSurrounding()
+{
+	return MGtkWidgetMixin::OnRetrieveSurrounding();
 }
 
 void MGtkCanvasImpl::OnDecelerate(double inVelX, double inVelY)

@@ -287,6 +287,11 @@ class MSlot : public MakeGtkCallbackHandler<Function>::type
 		return base_class::mSendingGObject;
 	}
 
+	GObject *GetGObject() const
+	{
+		return mObject;
+	}
+
   private:
 	GObject *mObject = nullptr;
 	ulong mID = 0;
@@ -442,7 +447,7 @@ class MGtkWidgetMixin : public MGtkCommandEmitter
 	virtual void OnPointerMotion(double inX, double inY) {}
 	virtual void OnPointerLeave() {}
 
-	virtual bool OnKeyPressed(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers) { return false; }
+	virtual bool OnKeyPressed(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers);
 	virtual void OnKeyReleased(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers) {}
 	virtual void OnKeyModifiers(GdkModifierType inModifiers) {}
 
@@ -490,7 +495,7 @@ class MGtkWidgetMixin : public MGtkCommandEmitter
 	int32_t mRequestedWidth, mRequestedHeight;
 	bool mAutoRepeat;
 
-  private:
+//   private:
 	GtkIMContext *mIMContext;
 	bool mNextKeyPressIsAutoRepeat;
 	MEventMask mEvents;

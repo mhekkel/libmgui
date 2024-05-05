@@ -103,7 +103,7 @@ void MGtkWidgetMixin::SetWidget(GtkWidget *inWidget)
 	if (inWidget != nullptr)
 	{
 		// better be safe than sorry
-		g_object_add_weak_pointer(G_OBJECT(inWidget), (void**)&mWidget);
+		g_object_add_weak_pointer(G_OBJECT(inWidget), (void **)&mWidget);
 
 		mDestroy.Connect(inWidget, "destroy");
 		mDirectionChanged.Connect(inWidget, "direction-changed");
@@ -307,6 +307,11 @@ void MGtkWidgetMixin::OnUnrealize()
 {
 }
 
+bool MGtkWidgetMixin::OnKeyPressed(guint inKeyValue, guint inKeyCode, GdkModifierType inModifiers)
+{
+	return mIMContext == nullptr ? false : gtk_im_context_filter_keypress(mIMContext, gtk_event_controller_get_current_event(GTK_EVENT_CONTROLLER(mKeyPressed.GetGObject())));
+}
+
 void MGtkWidgetMixin::RequestSize(int32_t inWidth, int32_t inHeight)
 {
 	mRequestedWidth = inWidth;
@@ -343,19 +348,24 @@ void MGtkWidgetMixin::OnCommit(char *inText)
 
 bool MGtkWidgetMixin::OnDeleteSurrounding(gint inStart, gint inLength)
 {
+	PRINT(("Delete surrounding start %d, length %d", inStart, inLength));
+
 	return false;
 }
 
 void MGtkWidgetMixin::OnPreeditChanged()
 {
+	PRINT(("Pre-edit changed"));
 }
 
 void MGtkWidgetMixin::OnPreeditEnd()
 {
+	PRINT(("Pre-edit end"));
 }
 
 void MGtkWidgetMixin::OnPreeditStart()
 {
+	PRINT(("Pre-edit start"));
 }
 
 bool MGtkWidgetMixin::OnRetrieveSurrounding()
