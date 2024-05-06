@@ -25,9 +25,11 @@
  */
 
 #include "MAlerts.hpp"
-#include "MDocApplication.hpp"
 #include "MClipboard.hpp"
+#include "MCmdLine.hpp"
 #include "MDialog.hpp"
+#include "MDocApplication.hpp"
+#include "MDocClosedNotifier.hpp"
 #include "MError.hpp"
 #include "MStrings.hpp"
 #include "MUtils.hpp"
@@ -38,6 +40,93 @@
 #include "mrsrc.hpp"
 
 #include <cstring>
+
+// --------------------------------------------------------------------
+
+struct MDocClosedNotifierImpl
+{
+	GApplicationCommandLine *mGCmdLine;
+	int mRefCount = 1;
+
+	~MDocClosedNotifierImpl()
+	{
+		g_object_unref(mGCmdLine);
+	}
+};
+
+MDocClosedNotifier::MDocClosedNotifier(MDocClosedNotifier &&inRHS) noexcept
+	: mImpl(inRHS.mImpl)
+{
+	inRHS.mImpl = nullptr;
+}
+
+
+MDocClosedNotifier::MDocClosedNotifier(MDocClosedNotifierImpl *inImpl)
+	: mImpl(inImpl)
+{
+	if (mImpl)
+		g_object_ref(mImpl->mGCmdLine);
+}
+
+MDocClosedNotifier::MDocClosedNotifier(const MDocClosedNotifier &inRHS)
+	: mImpl(inRHS.mImpl)
+{
+	if (mImpl)
+		++mImpl->mRefCount;
+}
+
+MDocClosedNotifier::~MDocClosedNotifier()
+{
+	if (mImpl and --mImpl->mRefCount == 0)
+		delete mImpl;
+}
+
+// --------------------------------------------------------------------
+
+struct MCmdLineImpl
+{
+	GApplicationCommandLine *mGCmdLine;
+	std::vector<std::string> mArgs;
+};
+
+// --------------------------------------------------------------------
+
+MCmdLine::MCmdLine(MCmdLineImpl *inImpl)
+	: mImpl(inImpl)
+{
+	g_object_ref(mImpl->mGCmdLine);
+}
+
+MCmdLine::~MCmdLine()
+{
+	g_object_unref(mImpl->mGCmdLine);
+	delete mImpl;
+}
+
+MDocClosedNotifier MCmdLine::GetDocClosedNotifier()
+{
+	return MDocClosedNotifier(new MDocClosedNotifierImpl{mImpl->mGCmdLine});
+}
+
+int MCmdLine::GetFD()
+{
+	return -1;
+}
+
+std::vector<std::filesystem::path> MCmdLine::GetFilesToOpen()
+{
+	std::vector<std::filesystem::path> files;
+
+	for (std::size_t i = 1; i < mImpl->mArgs.size(); ++i)
+	{
+		if (std::filesystem::is_regular_file(mImpl->mArgs[i]))
+			files.emplace_back(mImpl->mArgs[i]);
+	}
+
+	return files;
+}
+
+// --------------------------------------------------------------------
 
 MGtkApplicationImpl *MGtkApplicationImpl::sInstance;
 
@@ -95,9 +184,15 @@ int MGtkApplicationImpl::CommandLine(GApplicationCommandLine *inCommandLine)
 
 	argv = g_application_command_line_get_arguments(inCommandLine, &argc);
 
-	int result = gApp->HandleCommandLine(argc, argv);
+	std::vector<std::string> args;
+	for (int i = 0; i < argc; ++i)
+		args.emplace_back(argv[i]);
 
 	g_strfreev(argv);
+
+	MCmdLine cmdLine(new MCmdLineImpl{inCommandLine, std::move(args)});
+
+	int result = gApp->HandleCommandLine(cmdLine);
 
 	return result;
 }
@@ -163,7 +258,7 @@ MWindow *MGtkApplicationImpl::GetActiveWindow()
 		if (auto impl = MGtkWindowImpl::GetWindowImpl(w); impl != nullptr)
 			result = impl->GetWindow();
 	}
-	
+
 	return result;
 }
 

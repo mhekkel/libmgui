@@ -27,6 +27,7 @@
 #pragma once
 
 #include "MCommand.hpp"
+#include "MCmdLine.hpp"
 #include "MMenu.hpp"
 #include "MP2PEvents.hpp"
 #include "MTypes.hpp"
@@ -121,13 +122,10 @@ class MApplication
 	~MApplication();
 	virtual void Initialise();
 
-	virtual int HandleCommandLine(int argc, const char * const argv[])
+	virtual int HandleCommandLine(MCmdLine &inCommandLine)
 	{
 		return 1;
 	}
-
-	// virtual void Open(const std::string &inURL);
-	virtual void Execute(const std::string &inCommand, const std::vector<std::string> &inArguments);
 
 	MEventOut<void()> eIdle;
 

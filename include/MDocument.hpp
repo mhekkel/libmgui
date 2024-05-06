@@ -37,7 +37,7 @@
 
 #include <list>
 
-// class MDocClosedNotifier;
+class MDocClosedNotifier;
 class MController;
 class MDocWindow;
 class MMenu;
@@ -76,7 +76,7 @@ class MDocument
 
 	virtual bool IsReadOnly() const {return false; };// { return std::filesystem::status(mFile).permissions().; }
 
-	// virtual void AddNotifier(MDocClosedNotifier &inNotifier, bool inRead);
+	virtual void AddNotifier(MDocClosedNotifier &&inNotifier, bool inRead);
 
 	// the MVC interface
 
@@ -130,10 +130,10 @@ class MDocument
 	virtual void IOFileWritten();
 
 	typedef std::list<MController *> MControllerList;
-	// typedef std::list<MDocClosedNotifier> MDocClosedNotifierList;
+	typedef std::list<MDocClosedNotifier> MDocClosedNotifierList;
 
 	MControllerList mControllers;
-	// MDocClosedNotifierList mNotifiers;
+	MDocClosedNotifierList mNotifiers;
 	std::filesystem::path mFile;
 	bool mWarnedReadOnly;
 	bool mDirty;

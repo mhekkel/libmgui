@@ -25,16 +25,12 @@
  */
 
 #include "MDocument.hpp"
-
 #include "MAlerts.hpp"
 #include "MController.hpp"
 #include "MDocApplication.hpp"
+#include "MDocClosedNotifier.hpp"
 #include "MDocWindow.hpp"
 #include "MUtils.hpp"
-// #include "MMenu.h"
-// #include "MError.h"
-// #include "MPreferences.h"
-// #include "MDocClosedNotifier.h"
 
 #include <cassert>
 #include <cstring>
@@ -152,7 +148,8 @@ bool MDocument::DoSave()
 	if (fs::exists(mFile) and fs::last_write_time(mFile) > mLastSaved)
 	{
 		DisplayAlert(GetWindow(), "ask-overwrite-newer",
-			[&](int reply) {
+			[&](int reply)
+			{
 				if (reply == 2)
 				{
 					mFileSaver->DoSave();
@@ -242,15 +239,13 @@ MDocument *MDocument::GetDocumentForFile(const std::filesystem::path &inFile)
 	return doc;
 }
 
-// // ---------------------------------------------------------------------------
-// //	AddNotifier
+// ---------------------------------------------------------------------------
+//	AddNotifier
 
-// void MDocument::AddNotifier(
-// 	MDocClosedNotifier&		inNotifier,
-// 	bool					inRead)
-// {
-// 	mNotifiers.push_back(inNotifier);
-// }
+void MDocument::AddNotifier(MDocClosedNotifier &&inNotifier, bool inRead)
+{
+	mNotifiers.push_back(std::move(inNotifier));
+}
 
 // ---------------------------------------------------------------------------
 //	AddController

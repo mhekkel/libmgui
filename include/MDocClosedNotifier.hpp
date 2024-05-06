@@ -1,7 +1,7 @@
 /*-
  * SPDX-License-Identifier: BSD-2-Clause
  *
- * Copyright (c) 2023 Maarten L. Hekkelman
+ * Copyright (c) 2024 Maarten L. Hekkelman
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -24,90 +24,29 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "MApplication.hpp"
-#include "MControls.hpp"
-#include "MError.hpp"
-#include "MMenu.hpp"
-#include "MPreferences.hpp"
-#include "MStrings.hpp"
-#include "MUtils.hpp"
-#include "MWindow.hpp"
+#pragma once
 
-#include <chrono>
-#include <filesystem>
-#include <iostream>
-
-namespace fs = std::filesystem;
-
-#if DEBUG
-int VERBOSE, TRACE;
-#endif
-
-MApplication *gApp;
-fs::path gExecutablePath, gPrefixPath;
-
-// --------------------------------------------------------------------
-
-void MAsyncHandlerBase::execute()
+class MDocClosedNotifier
 {
-	try
+  public:
+	MDocClosedNotifier(struct MDocClosedNotifierImpl *inImpl);
+
+	MDocClosedNotifier(const MDocClosedNotifier &inRHS);
+	MDocClosedNotifier(MDocClosedNotifier &&inRHS) noexcept;
+
+	MDocClosedNotifier &operator=(MDocClosedNotifier inRHS) noexcept
 	{
-		execute_self();
+		swap(*this, inRHS);
+		return *this;
 	}
-	catch (const std::exception &ex)
+
+	friend void swap(MDocClosedNotifier &a, MDocClosedNotifier &b) noexcept
 	{
-		std::cerr << ex.what() << '\n';
+		std::swap(a.mImpl, b.mImpl);
 	}
-}
 
-// --------------------------------------------------------------------
+	~MDocClosedNotifier();
 
-MApplication::MApplication(MApplicationImpl *inImpl)
-	: mImpl(inImpl)
-	, mQuit(false)
-	, mQuitPending(false)
-{
-	// set the global pointing to us
-	gApp = this;
-}
-
-MApplication::~MApplication()
-{
-	delete mImpl;
-}
-
-void MApplication::Initialise()
-{
-	mImpl->Initialise();
-}
-
-void MApplication::SetIconName(const std::string &inIconName)
-{
-	mImpl->SetIconName(inIconName);
-}
-
-void MApplication::SaveGlobals()
-{
-	MPrefs::SaveIfDirty();
-}
-
-bool MApplication::AllowQuit(bool inLogOff)
-{
-	return true;
-}
-
-void MApplication::DoQuit()
-{
-	mQuit = true;
-	mQuitPending = true;
-
-	SaveGlobals();
-
-	mImpl->Quit();
-}
-
-void MApplication::Pulse()
-{
-	eIdle();
-	MPrefs::SaveIfDirty();
-}
+  private:
+	struct MDocClosedNotifierImpl *mImpl;
+};

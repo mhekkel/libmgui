@@ -251,8 +251,6 @@ void MGtkCanvasImpl::OnPreeditChanged()
 	}
 
 	mControl->IMSetPreEditString(s, a, cursor);
-
-	PRINT(("s: %s\na: %s\n, c: %d", s.c_str(), a.c_str(), cursor));
 }
 
 void MGtkCanvasImpl::OnPreeditEnd()

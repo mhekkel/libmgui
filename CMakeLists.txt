@@ -105,6 +105,7 @@ list(APPEND headers
 	include/MDevice.hpp
 	include/MDeviceImpl.hpp
 	include/MDialog.hpp
+	include/MDocClosedNotifier.hpp
 	include/MError.hpp
 	include/MFile.hpp
 	include/MLib.hpp
